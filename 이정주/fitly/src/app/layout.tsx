@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ThemeProvider } from "@/components/shared/theme-provider";
 import { PwaRegister } from "@/components/shared/pwa-register";
 import "./globals.css";
 
@@ -14,7 +15,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d1018" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -25,10 +29,17 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" className="h-full antialiased">
+    <html lang="ko" className="h-full" suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
-        <PwaRegister />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <PwaRegister />
+        </ThemeProvider>
       </body>
     </html>
   );

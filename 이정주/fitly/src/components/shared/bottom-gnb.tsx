@@ -23,9 +23,9 @@ export function BottomGnb() {
   return (
     <nav
       aria-label="주 메뉴"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/65"
     >
-      <ul className="mx-auto flex w-full max-w-md items-stretch">
+      <ul className="mx-auto flex w-full max-w-md items-stretch px-2">
         {items.map(({ href, label, Icon }) => {
           const active = pathname === href || pathname.startsWith(`${href}/`);
           return (
@@ -34,14 +34,24 @@ export function BottomGnb() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-16 flex-col items-center justify-center gap-1 text-xs",
+                  "relative flex h-16 flex-col items-center justify-center gap-1 text-xs transition-colors",
                   active
-                    ? "text-foreground font-semibold"
-                    : "text-muted-foreground"
+                    ? "text-primary font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon className="h-5 w-5" aria-hidden />
+                <span
+                  className={cn(
+                    "grid h-8 w-12 place-items-center rounded-full transition-all",
+                    active && "bg-primary/10"
+                  )}
+                >
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
                 <span>{label}</span>
+                {active && (
+                  <span className="absolute -top-px h-0.5 w-8 rounded-full bg-primary" />
+                )}
               </Link>
             </li>
           );
