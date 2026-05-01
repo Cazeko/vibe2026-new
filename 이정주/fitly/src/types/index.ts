@@ -23,12 +23,18 @@ export type {
 
 export type CardSource = "mistake_upload" | "study_rag" | "vocab_seed";
 
+/**
+ * 헌법 제30조의2 — 정답·해설 3계층 출처 모델 (v1.7)
+ */
+export type AnswerSource = "official" | "ai_estimate" | "crowd_verified";
+
 export type MistakeCard = {
   question: string;
   choices?: string[];
   answer?: string;
   explanation?: string;
   keywords: string[];
+  answerSource?: AnswerSource;
 };
 
 export type SrsState = {

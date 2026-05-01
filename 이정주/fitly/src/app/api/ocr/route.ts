@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
           explanation: s.explanation ?? null,
           keywords: s.keywords ?? [],
           source: "upload",
+          answerSource: "ai_estimate",
         }))
       )
       .returning();

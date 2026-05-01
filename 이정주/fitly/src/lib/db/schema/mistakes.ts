@@ -16,6 +16,9 @@ export const mistakes = pgTable("mistakes", {
   explanation: text("explanation"),
   keywords: jsonb("keywords").$type<string[]>().notNull().default([]),
   source: varchar("source", { length: 24 }).notNull().default("upload"),
+  answerSource: varchar("answer_source", { length: 24 })
+    .notNull()
+    .default("ai_estimate"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
