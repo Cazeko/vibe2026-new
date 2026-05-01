@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Settings } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
+import { Button } from "@/components/ui/button";
 
 export function AppHeader() {
   return (
@@ -15,7 +17,14 @@ export function AppHeader() {
           </span>
           <span>Fitly</span>
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <Link href="/settings" aria-label="설정">
+            <Button variant="ghost" size="icon" type="button">
+              <Settings className="h-5 w-5" aria-hidden />
+            </Button>
+          </Link>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

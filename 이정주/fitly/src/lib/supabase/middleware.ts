@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
-const PROTECTED_PREFIXES = ["/home", "/study", "/mistakes"];
+const PROTECTED_PREFIXES = ["/home", "/study", "/mistakes", "/settings"];
 const AUTH_PREFIXES = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {

@@ -23,7 +23,7 @@ const modes: StudyMode[] = [
     title: "기출 풀이",
     description: "TOP 10 대학 출제 패턴 기반 학습",
     Icon: Layers,
-    badge: "준비 중",
+    badge: "v1",
   },
   {
     href: "/study/review",

@@ -45,7 +45,14 @@ export default function MistakesPage() {
         </p>
       )}
 
-      <MistakeCardList items={items} />
+      <MistakeCardList
+        items={items}
+        onUpdated={(id, updated) =>
+          setItems((prev) =>
+            prev.map((p) => (p.id === id ? { ...p, ...updated } : p))
+          )
+        }
+      />
     </section>
   );
 }
