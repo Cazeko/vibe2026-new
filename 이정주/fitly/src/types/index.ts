@@ -1,14 +1,17 @@
-export type UniversityName =
-  | "한양"
-  | "중앙"
-  | "성균관"
-  | "경희"
-  | "이화"
-  | "서강"
-  | "홍익"
-  | "동국"
-  | "건국"
-  | "숭실";
+export const UNIVERSITY_NAMES = [
+  "한양",
+  "중앙",
+  "성균관",
+  "경희",
+  "이화",
+  "서강",
+  "홍익",
+  "동국",
+  "건국",
+  "숭실",
+] as const;
+
+export type UniversityName = (typeof UNIVERSITY_NAMES)[number];
 
 export type {
   Cutoffs,

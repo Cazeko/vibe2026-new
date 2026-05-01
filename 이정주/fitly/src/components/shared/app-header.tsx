@@ -18,11 +18,11 @@ export function AppHeader() {
           <span>Fitly</span>
         </Link>
         <div className="flex items-center gap-1">
-          <Link href="/settings" aria-label="설정">
-            <Button variant="ghost" size="icon" type="button">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/settings" aria-label="설정">
               <Settings className="h-5 w-5" aria-hidden />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <ThemeToggle />
         </div>
       </div>

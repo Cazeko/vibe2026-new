@@ -3,9 +3,12 @@
 import { useEffect, useState } from "react";
 import { UploadCard } from "@/components/feature/ocr/upload-card";
 import { MistakeCardList } from "@/components/feature/mistake/mistake-card-list";
-import type { MistakeCard } from "@/types";
+import {
+  normalizeSavedMistakes,
+  type SavedMistake,
+} from "@/lib/mistake/normalize";
 
-type SavedMistake = MistakeCard & { id: string; createdAt: string };
+
 
 export default function MistakesPage() {
   const [items, setItems] = useState<SavedMistake[]>([]);
@@ -16,7 +19,7 @@ export default function MistakesPage() {
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "조회 실패");
-        setItems(normalize(data.items ?? []));
+        setItems(normalizeSavedMistakes(data.items ?? []));
       })
       .catch((err) => {
         setLoadError(err instanceof Error ? err.message : "알 수 없는 오류");
@@ -34,8 +37,7 @@ export default function MistakesPage() {
 
       <UploadCard
         onComplete={(r) => {
-          const fresh = normalize(r.saved ?? []);
-          setItems((prev) => [...fresh, ...prev]);
+          setItems((prev) => [...r.saved, ...prev]);
         }}
       />
 
@@ -57,15 +59,3 @@ export default function MistakesPage() {
   );
 }
 
-function normalize(rows: Array<Record<string, unknown>>): SavedMistake[] {
-  return rows.map((r) => ({
-    id: String(r.id ?? ""),
-    createdAt: String(r.createdAt ?? r.created_at ?? ""),
-    question: String(r.question ?? ""),
-    choices: Array.isArray(r.choices) ? (r.choices as string[]) : undefined,
-    answer: typeof r.answer === "string" ? r.answer : undefined,
-    explanation:
-      typeof r.explanation === "string" ? r.explanation : undefined,
-    keywords: Array.isArray(r.keywords) ? (r.keywords as string[]) : [],
-  }));
-}

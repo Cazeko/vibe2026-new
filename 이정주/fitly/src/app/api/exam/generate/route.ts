@@ -2,25 +2,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { generateExamItem, type ExamSection } from "@/lib/exam/generator";
+import { UNIVERSITY_NAMES } from "@/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const UNI = [
-  "한양",
-  "중앙",
-  "성균관",
-  "경희",
-  "이화",
-  "서강",
-  "홍익",
-  "동국",
-  "건국",
-  "숭실",
-] as const;
-
 const schema = z.object({
-  university: z.enum(UNI),
+  university: z.enum(UNIVERSITY_NAMES),
   section: z.enum(["vocab", "grammar", "reading"]),
 });
 

@@ -16,7 +16,7 @@ export const vocabCards = pgTable("vocab_cards", {
   example: text("example"),
   level: varchar("level", { length: 16 }),
   source: varchar("source", { length: 24 }).notNull().default("vocab_seed"),
-  srsState: jsonb("srs_state").$type<unknown>(),
+  srsState: jsonb("srs_state").$type<import("@/types").SrsState | null>(),
   dueAt: timestamp("due_at", { withTimezone: true }).defaultNow().notNull(),
   reviewCount: integer("review_count").notNull().default(0),
   lapseCount: integer("lapse_count").notNull().default(0),

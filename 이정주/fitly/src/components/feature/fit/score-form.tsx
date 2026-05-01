@@ -14,23 +14,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UNIVERSITY_SEEDS } from "@/lib/data/universities";
-import type { UniversityName } from "@/types";
+import { UNIVERSITY_NAMES, type UniversityName } from "@/types";
 
 const score = z.coerce.number().min(0).max(100);
 
 const schema = z.object({
-  university: z.enum([
-    "한양",
-    "중앙",
-    "성균관",
-    "경희",
-    "이화",
-    "서강",
-    "홍익",
-    "동국",
-    "건국",
-    "숭실",
-  ]),
+  university: z.enum(UNIVERSITY_NAMES),
   vocab: score,
   grammar: score,
   reading: score,

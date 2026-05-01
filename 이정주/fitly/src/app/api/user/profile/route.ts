@@ -4,25 +4,13 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { userProfiles } from "@/lib/db/schema/user-profiles";
+import { UNIVERSITY_NAMES } from "@/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const UNI = [
-  "한양",
-  "중앙",
-  "성균관",
-  "경희",
-  "이화",
-  "서강",
-  "홍익",
-  "동국",
-  "건국",
-  "숭실",
-] as const;
-
 const upsertSchema = z.object({
-  targetUniversity: z.enum(UNI).nullable().optional(),
+  targetUniversity: z.enum(UNIVERSITY_NAMES).nullable().optional(),
   examDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD 형식이어야 합니다.")

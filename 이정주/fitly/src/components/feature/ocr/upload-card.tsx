@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { MistakeCard } from "@/types";
-
-type SavedMistake = MistakeCard & { id: string; createdAt: string };
+import {
+  normalizeSavedMistakes,
+  type SavedMistake,
+} from "@/lib/mistake/normalize";
 
 type UploadCardProps = {
   onComplete: (result: {
@@ -37,7 +39,7 @@ export function UploadCard({ onComplete }: UploadCardProps) {
       onComplete({
         text: data.text ?? "",
         mistakeCards: data.mistakeCards ?? [],
-        saved: normalize(data.saved ?? []),
+        saved: normalizeSavedMistakes(data.saved ?? []),
       });
       setFile(null);
       setStatus("idle");
@@ -90,15 +92,3 @@ export function UploadCard({ onComplete }: UploadCardProps) {
   );
 }
 
-function normalize(rows: Array<Record<string, unknown>>): SavedMistake[] {
-  return rows.map((r) => ({
-    id: String(r.id ?? ""),
-    createdAt: String(r.createdAt ?? r.created_at ?? ""),
-    question: String(r.question ?? ""),
-    choices: Array.isArray(r.choices) ? (r.choices as string[]) : undefined,
-    answer: typeof r.answer === "string" ? r.answer : undefined,
-    explanation:
-      typeof r.explanation === "string" ? r.explanation : undefined,
-    keywords: Array.isArray(r.keywords) ? (r.keywords as string[]) : [],
-  }));
-}
