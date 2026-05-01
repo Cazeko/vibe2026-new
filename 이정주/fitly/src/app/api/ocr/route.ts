@@ -7,7 +7,7 @@ import {
   ALLOWED_MIME,
   MAX_UPLOAD_BYTES,
 } from "@/lib/ocr";
-import { extractSitcards } from "@/lib/ocr/sitcards";
+import { extractMistakeCards } from "@/lib/ocr/mistake-cards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,17 +53,17 @@ export async function POST(request: NextRequest) {
 
   try {
     const text = await extractTextFromFile(file);
-    const sitcards = await extractSitcards(text);
+    const mistakeCards = await extractMistakeCards(text);
 
-    if (sitcards.length === 0) {
-      return NextResponse.json({ text, sitcards: [], saved: [] });
+    if (mistakeCards.length === 0) {
+      return NextResponse.json({ text, mistakeCards: [], saved: [] });
     }
 
     const db = getDb();
     const saved = await db
       .insert(mistakes)
       .values(
-        sitcards.map((s) => ({
+        mistakeCards.map((s) => ({
           userId: user.id,
           question: s.question,
           choices: s.choices ?? null,
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       )
       .returning();
 
-    return NextResponse.json({ text, sitcards, saved });
+    return NextResponse.json({ text, mistakeCards, saved });
   } catch (err) {
     const message = err instanceof Error ? err.message : "처리 중 오류 발생";
     return NextResponse.json({ error: message }, { status: 500 });

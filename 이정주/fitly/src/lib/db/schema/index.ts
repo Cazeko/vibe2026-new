@@ -2,3 +2,4 @@
 export * from "./universities";
 export * from "./users";
 export * from "./mistakes";
+export * from "./vocab";

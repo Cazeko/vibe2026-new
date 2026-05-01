@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -54,25 +55,45 @@ export function ScoreForm({ defaultValues, onChange }: ScoreFormProps) {
     },
   });
 
-  const values = watch();
+  useEffect(() => {
+    const sub = watch((v) => {
+      if (
+        v.university &&
+        Number.isFinite(v.vocab) &&
+        Number.isFinite(v.grammar) &&
+        Number.isFinite(v.reading)
+      ) {
+        onChange(v as ScoreFormValues);
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [watch, onChange]);
 
-  if (
-    values.university &&
-    Number.isFinite(values.vocab) &&
-    Number.isFinite(values.grammar) &&
-    Number.isFinite(values.reading)
-  ) {
-    onChange(values);
-  }
+  useEffect(() => {
+    const v = watch();
+    if (
+      v.university &&
+      Number.isFinite(v.vocab) &&
+      Number.isFinite(v.grammar) &&
+      Number.isFinite(v.reading)
+    ) {
+      onChange(v);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const currentUniversity = watch("university");
 
   return (
     <form className="space-y-4">
       <div className="space-y-1.5">
         <Label htmlFor="university">학교</Label>
         <Select
-          value={values.university}
+          value={currentUniversity}
           onValueChange={(v) =>
-            setValue("university", v as UniversityName, { shouldValidate: true })
+            setValue("university", v as UniversityName, {
+              shouldValidate: true,
+            })
           }
         >
           <SelectTrigger id="university" aria-label="학교 선택">

@@ -1,17 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Sitcard } from "@/types";
+import type { MistakeCard } from "@/types";
 
-type Item = Sitcard & { id?: string; createdAt?: string };
+type Item = MistakeCard & { id?: string; createdAt?: string };
 
-type SitcardListProps = {
+type MistakeCardListProps = {
   items: Item[];
 };
 
-export function SitcardList({ items }: SitcardListProps) {
+export function MistakeCardList({ items }: MistakeCardListProps) {
   if (items.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        저장된 시카드가 없습니다. 시험지를 업로드해 주세요.
+        저장된 오답 카드가 없습니다. 시험지를 업로드해 주세요.
       </p>
     );
   }
@@ -54,6 +54,9 @@ export function SitcardList({ items }: SitcardListProps) {
                   ))}
                 </div>
               )}
+              <span className="inline-block rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px]">
+                내가 올린 시험지
+              </span>
             </CardContent>
           </Card>
         </li>

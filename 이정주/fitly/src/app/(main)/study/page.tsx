@@ -16,7 +16,7 @@ const modes: StudyMode[] = [
     title: "영단어 SRS",
     description: "FSRS 간격 반복으로 핵심 어휘 누적",
     Icon: BookOpen,
-    badge: "준비 중",
+    badge: "v1",
   },
   {
     href: "/study/exam",

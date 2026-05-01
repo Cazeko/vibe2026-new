@@ -5,14 +5,14 @@ import { Upload, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Sitcard } from "@/types";
+import type { MistakeCard } from "@/types";
 
-type SavedMistake = Sitcard & { id: string; createdAt: string };
+type SavedMistake = MistakeCard & { id: string; createdAt: string };
 
 type UploadCardProps = {
   onComplete: (result: {
     text: string;
-    sitcards: Sitcard[];
+    mistakeCards: MistakeCard[];
     saved: SavedMistake[];
   }) => void;
 };
@@ -36,7 +36,7 @@ export function UploadCard({ onComplete }: UploadCardProps) {
       if (!res.ok) throw new Error(data.error ?? "업로드 실패");
       onComplete({
         text: data.text ?? "",
-        sitcards: data.sitcards ?? [],
+        mistakeCards: data.mistakeCards ?? [],
         saved: normalize(data.saved ?? []),
       });
       setFile(null);

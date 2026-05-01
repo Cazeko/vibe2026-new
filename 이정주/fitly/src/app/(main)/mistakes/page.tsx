@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { UploadCard } from "@/components/feature/ocr/upload-card";
-import { SitcardList } from "@/components/feature/mistake/sitcard-list";
-import type { Sitcard } from "@/types";
+import { MistakeCardList } from "@/components/feature/mistake/mistake-card-list";
+import type { MistakeCard } from "@/types";
 
-type SavedMistake = Sitcard & { id: string; createdAt: string };
+type SavedMistake = MistakeCard & { id: string; createdAt: string };
 
 export default function MistakesPage() {
   const [items, setItems] = useState<SavedMistake[]>([]);
@@ -24,11 +24,11 @@ export default function MistakesPage() {
   }, []);
 
   return (
-    <section className="mx-auto w-full max-w-md px-4 py-6 space-y-6">
+    <section className="mx-auto w-full max-w-md px-4 py-6 space-y-6 animate-fade-up">
       <header>
-        <h1 className="text-2xl font-bold">내 오답</h1>
+        <h1 className="text-2xl font-bold tracking-tight">내 오답</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          업로드하면 자동으로 시카드가 저장됩니다.
+          업로드하면 자동으로 오답 카드가 저장됩니다.
         </p>
       </header>
 
@@ -41,11 +41,11 @@ export default function MistakesPage() {
 
       {loadError && (
         <p role="alert" className="text-sm text-destructive">
-          기존 시카드를 불러오지 못했습니다: {loadError}
+          기존 오답 카드를 불러오지 못했습니다: {loadError}
         </p>
       )}
 
-      <SitcardList items={items} />
+      <MistakeCardList items={items} />
     </section>
   );
 }

@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  allowedDevOrigins: [
+    "*.trycloudflare.com",
+    "market-orientation-signal-infectious.trycloudflare.com",
+  ],
   images: {
     remotePatterns: [
       {
