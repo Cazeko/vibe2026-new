@@ -1,15 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Sitcard } from "@/types";
 
+type Item = Sitcard & { id?: string; createdAt?: string };
+
 type SitcardListProps = {
-  items: Sitcard[];
+  items: Item[];
 };
 
 export function SitcardList({ items }: SitcardListProps) {
   if (items.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        추출된 시카드가 아직 없습니다. 시험지를 업로드해 주세요.
+        저장된 시카드가 없습니다. 시험지를 업로드해 주세요.
       </p>
     );
   }
@@ -17,7 +19,7 @@ export function SitcardList({ items }: SitcardListProps) {
   return (
     <ul className="space-y-3">
       {items.map((s, i) => (
-        <li key={i}>
+        <li key={s.id ?? i}>
           <Card>
             <CardHeader>
               <CardTitle className="text-sm leading-snug">

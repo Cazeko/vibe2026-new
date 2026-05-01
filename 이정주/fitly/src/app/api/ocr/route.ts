@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getDb } from "@/lib/db";
+import { mistakes } from "@/lib/db/schema/mistakes";
 import {
   extractTextFromFile,
   ALLOWED_MIME,
@@ -52,7 +54,28 @@ export async function POST(request: NextRequest) {
   try {
     const text = await extractTextFromFile(file);
     const sitcards = await extractSitcards(text);
-    return NextResponse.json({ text, sitcards });
+
+    if (sitcards.length === 0) {
+      return NextResponse.json({ text, sitcards: [], saved: [] });
+    }
+
+    const db = getDb();
+    const saved = await db
+      .insert(mistakes)
+      .values(
+        sitcards.map((s) => ({
+          userId: user.id,
+          question: s.question,
+          choices: s.choices ?? null,
+          answer: s.answer ?? null,
+          explanation: s.explanation ?? null,
+          keywords: s.keywords ?? [],
+          source: "upload",
+        }))
+      )
+      .returning();
+
+    return NextResponse.json({ text, sitcards, saved });
   } catch (err) {
     const message = err instanceof Error ? err.message : "처리 중 오류 발생";
     return NextResponse.json({ error: message }, { status: 500 });
