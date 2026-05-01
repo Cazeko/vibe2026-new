@@ -1,0 +1,26 @@
+{
+  "name": "Fitly — 편입영어 학습 적합도 OS",
+  "short_name": "Fitly",
+  "description": "편입은 열심히 하는 게 아니라, 맞게(Fit) 하는 게임입니다.",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
