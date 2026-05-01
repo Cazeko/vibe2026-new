@@ -1,7 +1,7 @@
-import { getAnthropic, ANTHROPIC_MODEL } from "@/lib/ai/anthropic";
+import { getGemini, GEMINI_MODELS } from "@/lib/ai/gemini";
 import type { Sitcard } from "@/types";
 
-const SYSTEM_PROMPT = `당신은 한국 편입 영어 시험지를 시카드(study card)로 변환하는 어시스턴트입니다.
+const SYSTEM_INSTRUCTION = `당신은 한국 편입 영어 시험지를 시카드(study card)로 변환하는 어시스턴트입니다.
 입력 텍스트에서 문제 단위로 분리하여 다음 JSON 배열만 출력합니다. 설명·머리말·코드펜스 금지.
 [
   {
@@ -20,21 +20,22 @@ const SYSTEM_PROMPT = `당신은 한국 편입 영어 시험지를 시카드(stu
 export async function extractSitcards(text: string): Promise<Sitcard[]> {
   if (!text.trim()) return [];
 
-  const client = getAnthropic();
-  const res = await client.messages.create({
-    model: ANTHROPIC_MODEL,
-    max_tokens: 4096,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: text }],
+  const client = getGemini();
+  const res = await client.models.generateContent({
+    model: GEMINI_MODELS.pro,
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
+      responseMimeType: "application/json",
+    },
+    contents: text,
   });
 
-  const block = res.content.find((c) => c.type === "text");
-  const raw = block && block.type === "text" ? block.text : "";
+  const raw = res.text ?? "";
   const match = raw.match(/\[[\s\S]*\]/);
-  if (!match) return [];
+  const source = match ? match[0] : raw;
 
   try {
-    const parsed = JSON.parse(match[0]) as unknown;
+    const parsed = JSON.parse(source) as unknown;
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(isSitcard);
   } catch {

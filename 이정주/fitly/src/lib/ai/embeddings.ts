@@ -1,29 +1,19 @@
-import OpenAI from "openai";
-import { env } from "@/lib/env";
-
-let cached: OpenAI | null = null;
-
-function getClient(): OpenAI {
-  if (!cached) {
-    cached = new OpenAI({ apiKey: env.openai.apiKey });
-  }
-  return cached;
-}
-
-const MODEL = env.openai.embeddingModel;
+import { getGemini, GEMINI_MODELS } from "./gemini";
 
 export async function embed(text: string): Promise<number[]> {
-  const res = await getClient().embeddings.create({
-    model: MODEL,
-    input: text,
+  const client = getGemini();
+  const res = await client.models.embedContent({
+    model: GEMINI_MODELS.embedding,
+    contents: text,
   });
-  return res.data[0].embedding;
+  return res.embeddings?.[0]?.values ?? [];
 }
 
 export async function embedMany(texts: string[]): Promise<number[][]> {
-  const res = await getClient().embeddings.create({
-    model: MODEL,
-    input: texts,
+  const client = getGemini();
+  const res = await client.models.embedContent({
+    model: GEMINI_MODELS.embedding,
+    contents: texts,
   });
-  return res.data.map((d) => d.embedding);
+  return res.embeddings?.map((e) => e.values ?? []) ?? [];
 }

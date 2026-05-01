@@ -25,20 +25,18 @@ export const env = {
       return required("DATABASE_URL");
     },
   },
-  anthropic: {
+  gemini: {
     get apiKey() {
-      return required("ANTHROPIC_API_KEY");
+      return required("GEMINI_API_KEY");
     },
-    get model() {
-      return optional("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929");
+    get modelPro() {
+      return optional("GEMINI_MODEL_PRO", "gemini-2.5-pro");
     },
-  },
-  openai: {
-    get apiKey() {
-      return required("OPENAI_API_KEY");
+    get modelFlash() {
+      return optional("GEMINI_MODEL_FLASH", "gemini-2.5-flash");
     },
     get embeddingModel() {
-      return optional("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small");
+      return optional("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001");
     },
   },
   app: {
