@@ -28,9 +28,9 @@ const modes: StudyMode[] = [
   {
     href: "/study/review",
     title: "시카드 복습",
-    description: "오답에서 추출한 시카드 자동 복습",
+    description: "내 오답 시카드를 SRS로 자동 복습",
     Icon: RefreshCw,
-    badge: "준비 중",
+    badge: "v1",
   },
 ];
 

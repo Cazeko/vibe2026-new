@@ -5,6 +5,7 @@ import {
   jsonb,
   timestamp,
   varchar,
+  integer,
 } from "drizzle-orm/pg-core";
 
 export const mistakes = pgTable("mistakes", {
@@ -19,6 +20,12 @@ export const mistakes = pgTable("mistakes", {
   answerSource: varchar("answer_source", { length: 24 })
     .notNull()
     .default("ai_estimate"),
+  srsState: jsonb("srs_state").$type<unknown>(),
+  dueAt: timestamp("due_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  reviewCount: integer("review_count").notNull().default(0),
+  lapseCount: integer("lapse_count").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
