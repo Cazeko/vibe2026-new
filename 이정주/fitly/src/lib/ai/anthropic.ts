@@ -10,4 +10,10 @@ export function getAnthropic(): Anthropic {
   return cached;
 }
 
-export const ANTHROPIC_MODEL = env.anthropic.model;
+export const ANTHROPIC_MODEL = (() => {
+  try {
+    return env.anthropic.model;
+  } catch {
+    return "claude-sonnet-4-5-20250929";
+  }
+})();

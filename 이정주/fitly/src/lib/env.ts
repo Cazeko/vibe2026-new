@@ -10,22 +10,40 @@ function optional(name: string, fallback = ""): string {
 
 export const env = {
   supabase: {
-    url: required("NEXT_PUBLIC_SUPABASE_URL"),
-    anonKey: required("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    serviceRoleKey: optional("SUPABASE_SERVICE_ROLE_KEY"),
+    get url() {
+      return required("NEXT_PUBLIC_SUPABASE_URL");
+    },
+    get anonKey() {
+      return required("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    },
+    get serviceRoleKey() {
+      return optional("SUPABASE_SERVICE_ROLE_KEY");
+    },
   },
   database: {
-    url: required("DATABASE_URL"),
+    get url() {
+      return required("DATABASE_URL");
+    },
   },
   anthropic: {
-    apiKey: required("ANTHROPIC_API_KEY"),
-    model: optional("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929"),
+    get apiKey() {
+      return required("ANTHROPIC_API_KEY");
+    },
+    get model() {
+      return optional("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929");
+    },
   },
   openai: {
-    apiKey: required("OPENAI_API_KEY"),
-    embeddingModel: optional("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
+    get apiKey() {
+      return required("OPENAI_API_KEY");
+    },
+    get embeddingModel() {
+      return optional("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small");
+    },
   },
   app: {
-    url: optional("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
+    get url() {
+      return optional("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
+    },
   },
-} as const;
+};

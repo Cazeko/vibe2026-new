@@ -16,3 +16,11 @@ export type {
   UserSectionScores,
   SectionKey,
 } from "@/lib/fit/score";
+
+export type Sitcard = {
+  question: string;
+  choices?: string[];
+  answer?: string;
+  explanation?: string;
+  keywords: string[];
+};
