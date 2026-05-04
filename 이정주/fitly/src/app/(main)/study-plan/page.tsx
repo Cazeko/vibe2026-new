@@ -80,7 +80,7 @@ export default async function StudyPlanPage() {
     getLibraryCounts(user.id),
   ]);
 
-  const totalDue = lib.vocabDue + lib.mistakesDue;
+  const totalDue = lib.vocabDue + lib.mistakesDue + lib.studyDue;
 
   return (
     <div className="min-h-screen pb-10">
@@ -101,15 +101,25 @@ export default async function StudyPlanPage() {
                 </span>
               </p>
               <p className="mt-1 text-[12px] text-muted-foreground">
-                어휘 {lib.vocabDue}장 · 오답 {lib.mistakesDue}장
+                내 자료 {lib.studyDue}장 · 어휘 {lib.vocabDue}장 · 오답 {lib.mistakesDue}장
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {lib.vocabDue > 0 && (
+              {lib.studyDue > 0 && (
                 <Button asChild size="sm" className="h-8 rounded-xl">
-                  <Link href="/study/vocab">
-                    어휘 {lib.vocabDue}장 시작 <ArrowRight className="h-3.5 w-3.5" />
+                  <Link href="/study/exam">
+                    내 자료 {lib.studyDue}장 풀기 <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
+                </Button>
+              )}
+              {lib.vocabDue > 0 && (
+                <Button
+                  asChild
+                  size="sm"
+                  variant={lib.studyDue > 0 ? "outline" : "default"}
+                  className="h-8 rounded-xl"
+                >
+                  <Link href="/study/vocab">어휘 {lib.vocabDue}장</Link>
                 </Button>
               )}
               {lib.mistakesDue > 0 && (
@@ -119,7 +129,7 @@ export default async function StudyPlanPage() {
                   variant="outline"
                   className="h-8 rounded-xl"
                 >
-                  <Link href="/study/review">오답 {lib.mistakesDue}장 시작</Link>
+                  <Link href="/study/review">오답 {lib.mistakesDue}장</Link>
                 </Button>
               )}
               {totalDue === 0 && (

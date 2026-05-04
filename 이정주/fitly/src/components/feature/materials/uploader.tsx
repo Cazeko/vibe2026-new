@@ -208,8 +208,8 @@ export function MaterialsUploader() {
           {extractedCount != null && extractedCount > 0 && (
             <>
               {" — "}
-              <strong>{extractedCount}장</strong>의 카드가 자동 추출되어 오답 노트에
-              저장되었습니다.
+              <strong>{extractedCount}장</strong>의 학습 카드가 추출되어 학습 플랜의
+              "기출 풀이"에서 풀 수 있습니다.
             </>
           )}
           {extractedCount === 0 && (

@@ -7,6 +7,7 @@ import { getDb } from "@/lib/db";
 import {
   mistakes,
   vocabCards,
+  studyCards,
   studySessions,
   learningLogs,
   materials,
@@ -224,6 +225,17 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
     .from(vocabCards)
     .where(eq(vocabCards.userId, userId));
 
+  // 학습 카드 듀(자료에서 추출된 StudyCard)
+  const [studyDue] = await db
+    .select({ n: count() })
+    .from(studyCards)
+    .where(and(eq(studyCards.userId, userId), lte(studyCards.dueAt, now)));
+
+  const [studyTotal] = await db
+    .select({ n: count() })
+    .from(studyCards)
+    .where(eq(studyCards.userId, userId));
+
   // 오답 듀카드
   const [mistakeDue] = await db
     .select({ n: count() })
@@ -264,6 +276,12 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
   const examCount = todayExam?.total ?? 0;
   const examProgress = Math.min(100, Math.round((examCount / 20) * 100));
 
+  // 학습 카드 진행도(StudyCard)
+  const studyProgress =
+    studyTotal && studyTotal.n > 0
+      ? Math.round(((studyTotal.n - (studyDue?.n ?? 0)) / studyTotal.n) * 100)
+      : 0;
+
   return [
     {
       id: "plan-vocab",
@@ -275,6 +293,22 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
       progress: vocabProgress,
       state: vocabProgress >= 100 ? "completed" : "in_progress",
       href: "/study/vocab",
+    },
+    {
+      id: "plan-study",
+      title: "기출 풀이 — 내 자료",
+      subtitle:
+        (studyTotal?.n ?? 0) === 0
+          ? "자료를 업로드하면 학습 카드가 자동 생성됩니다"
+          : `복습 대기 ${studyDue?.n ?? 0} / 총 ${studyTotal?.n ?? 0}`,
+      progress: studyProgress,
+      state:
+        (studyTotal?.n ?? 0) === 0
+          ? "locked"
+          : studyProgress >= 100
+            ? "completed"
+            : "in_progress",
+      href: "/study/exam",
     },
     {
       id: "plan-exam",
@@ -289,7 +323,7 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
       title: "리뷰 & 오답 노트",
       subtitle:
         (mistakeTotal?.n ?? 0) === 0
-          ? "자료를 업로드하면 활성화됩니다"
+          ? "내 자료를 풀다가 틀리면 합류됩니다"
           : `복습 대기 ${mistakeDue?.n ?? 0} / 총 ${mistakeTotal?.n ?? 0}`,
       progress: mistakeProgress,
       state:

@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
-import { mistakes, materials } from "@/lib/db/schema";
+import { studyCards, materials } from "@/lib/db/schema";
 import { extractTextFromBuffer } from "@/lib/ocr";
-import { extractMistakeCards } from "@/lib/ocr/mistake-cards";
+import { extractStudyCards } from "@/lib/ocr/study-cards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// 헌법 v1.10 D19 — /materials 업로드된 PDF·이미지 → 자동 시카드 변환.
-// Storage('materials' 버킷)에서 파일을 받아 PDF→텍스트→Gemini 추출 → mistakes 저장.
+// 헌법 v1.11 제13조의2 — /materials 업로드된 PDF·이미지 → StudyCard 자동 변환.
+// Storage('materials' 버킷)에서 파일을 받아 PDF→텍스트→Gemini 추출 → study_cards 저장.
 // 모든 추출 결과는 answerSource='ai_estimate' (제18조의2 — 검증 필요 라벨 의무).
-// source='material' 로 마킹하여 /mistakes 에서 출처 식별 가능.
+// 사용자가 풀고 틀리면 mistakes 로 자동 합류 (제13조의2 1항).
 export async function POST(
   _req: Request,
   context: { params: Promise<{ id: string }> },
@@ -70,8 +70,8 @@ export async function POST(
       });
     }
 
-    // Gemini 카드 추출
-    const cards = await extractMistakeCards(text);
+    // Gemini 학습 카드 추출 (정답 AI 추정 포함, 검증 필요 라벨)
+    const cards = await extractStudyCards(text);
     if (cards.length === 0) {
       await db
         .update(materials)
@@ -85,22 +85,22 @@ export async function POST(
       });
     }
 
-    // mistakes 저장 + materials 상태 갱신
+    // study_cards 저장 + materials 상태 갱신
     const saved = await db
-      .insert(mistakes)
+      .insert(studyCards)
       .values(
         cards.map((c) => ({
           userId: user.id,
+          materialId: id,
           question: c.question,
           choices: c.choices ?? null,
           answer: c.answer ?? null,
           explanation: c.explanation ?? null,
           keywords: c.keywords ?? [],
-          source: "material",
           answerSource: "ai_estimate" as const,
         })),
       )
-      .returning({ id: mistakes.id });
+      .returning({ id: studyCards.id });
 
     await db
       .update(materials)

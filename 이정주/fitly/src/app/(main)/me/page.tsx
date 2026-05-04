@@ -261,8 +261,33 @@ export default async function MePage() {
           ))}
         </section>
 
-        {/* 카드 라이브러리 */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* 카드 라이브러리 (3종) */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold">학습 카드</h2>
+                <Link
+                  href="/study/exam"
+                  className="text-[11px] text-muted-foreground hover:text-foreground"
+                >
+                  풀기 ›
+                </Link>
+              </div>
+              <div className="mt-2 flex items-end justify-between">
+                <p className="text-3xl font-bold tracking-tight">
+                  {lib.study}
+                  <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  복습 대기 <strong>{lib.studyDue}</strong>
+                </p>
+              </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                내 자료 추출 (제13조의2)
+              </p>
+            </CardContent>
+          </Card>
           <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -283,6 +308,9 @@ export default async function MePage() {
                   복습 대기 <strong>{lib.mistakesDue}</strong>
                 </p>
               </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                내가 틀린 문제
+              </p>
             </CardContent>
           </Card>
           <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
@@ -305,6 +333,9 @@ export default async function MePage() {
                   복습 대기 <strong>{lib.vocabDue}</strong>
                 </p>
               </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                편입 빈출 어휘
+              </p>
             </CardContent>
           </Card>
         </section>

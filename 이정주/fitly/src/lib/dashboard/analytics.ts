@@ -2,7 +2,7 @@
 
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { mistakes, studySessions, vocabCards } from "@/lib/db/schema";
+import { mistakes, studySessions, vocabCards, studyCards } from "@/lib/db/schema";
 import type { HeatmapCell } from "@/components/feature/analysis/activity-heatmap";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -82,8 +82,10 @@ export async function getSessionStats(userId: string): Promise<SessionStat> {
 export type LibraryCounts = {
   mistakes: number;
   vocab: number;
+  study: number;
   vocabDue: number;
   mistakesDue: number;
+  studyDue: number;
 };
 
 export async function getLibraryCounts(userId: string): Promise<LibraryCounts> {
@@ -100,6 +102,11 @@ export async function getLibraryCounts(userId: string): Promise<LibraryCounts> {
     .from(vocabCards)
     .where(eq(vocabCards.userId, userId));
 
+  const [s] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(studyCards)
+    .where(eq(studyCards.userId, userId));
+
   const [md] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(mistakes)
@@ -110,11 +117,18 @@ export async function getLibraryCounts(userId: string): Promise<LibraryCounts> {
     .from(vocabCards)
     .where(and(eq(vocabCards.userId, userId), lte(vocabCards.dueAt, now)));
 
+  const [sd] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(studyCards)
+    .where(and(eq(studyCards.userId, userId), lte(studyCards.dueAt, now)));
+
   return {
     mistakes: m?.n ?? 0,
     vocab: v?.n ?? 0,
+    study: s?.n ?? 0,
     mistakesDue: md?.n ?? 0,
     vocabDue: vd?.n ?? 0,
+    studyDue: sd?.n ?? 0,
   };
 }
 

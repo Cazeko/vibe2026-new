@@ -7,3 +7,4 @@ export * from "./user-profiles";
 export * from "./study-sessions";
 export * from "./learning-logs";
 export * from "./materials";
+export * from "./study-cards";

@@ -64,7 +64,7 @@ export function MaterialRow({ item }: { item: MaterialRowItem }) {
       const saved = data.saved ?? 0;
       setExtractedMsg(
         saved > 0
-          ? `${saved}장 추출 완료 — 오답 노트에 저장됨`
+          ? `${saved}장 학습 카드 추출 완료 — 기출 풀이에서 풀 수 있음`
           : "추출 가능한 카드 없음",
       );
       router.refresh();
