@@ -169,7 +169,7 @@ Fit(학교) = (어휘 위치% × W_v) + (문법 위치% × W_g) + (독해 위치
    | 가벼운 분류·요약·태깅 (대량 호출) | **`gemini-3.1-pro-preview`** | 성능 우선 정책에 따라 Flash 미사용. 비용 정책 변경 시 별도 개정으로 Flash 채택 가능 |
    | 임베딩 (RAG 인덱싱·검색) | **`gemini-embedding-2`** | 신세대 임베딩 (3072차원), 회사 키 노출 확인 |
 3. SRS 알고리즘은 **`ts-fsrs`** 라이브러리를 사용하며 자체 구현은 금한다.
-4. PDF 파싱은 **`pdf-parse`** (서버) 및 **Gemini 2.5 Pro Vision** (이미지)을 표준으로 한다.
+4. PDF 파싱은 **`pdf-parse`** (서버) 및 **`gemini-3.1-pro-preview`** (이미지)을 표준으로 한다. 모델 ID는 `GEMINI_MODEL_PRO` 환경 변수로 관리한다 (제18조 5항 정합).
 5. 모델 ID는 환경 변수(`GEMINI_MODEL_PRO`, `GEMINI_MODEL_FLASH`, `GEMINI_EMBEDDING_MODEL`)로 노출하여, Gemini 출시 주기에 따른 업그레이드는 키 교체 없이 수행 가능하게 한다.
 6. 본 매트릭스를 변경하려면 헌법 개정 절차를 거친다.
 
@@ -258,12 +258,16 @@ Fit(학교) = (어휘 위치% × W_v) + (문법 위치% × W_g) + (독해 위치
 
 | 작업 분류 | 우선 스킬 |
 |---|---|
-| 3탭 UI 컴포넌트 작성 / React 패턴 검토 | `senior-frontend`, `react-best-practices`, `ui-design-system` |
+| 사이드바 페이지·데시보드 위젯 작성 / React 패턴 검토 | `senior-frontend`, `react-best-practices`, `ui-design-system` |
 | 화면 와이어프레임 / 디자인 / UX 설계 | `ui-ux-pro-max`, `frontend-design`, `canvas-design` |
+| 디자인 토큰 / 색상 시스템 / 다크 라이트 모드 토글 | `ui-design-system`, `senior-frontend` |
+| 차트·그래프(Recharts) 시각화 작성 | `senior-frontend`, `ui-design-system` |
 | Supabase + RAG + API Routes 설계 | `senior-backend`, `senior-fullstack` |
 | 기출 PDF 파싱 파이프라인 / OCR 처리 | **`pdf-processing-pro`** |
 | Claude API 프롬프트 설계 / 튜닝 | `senior-prompt-engineer` |
 | Fit 공식 / 알고리즘 / 아키텍처 검토 | `code-reviewer`, `senior-architect` |
+| 일반 코드 리뷰 · 리팩터링 · 다듬기 | `code-reviewer`, `senior-architect` |
+| 외부 데모 노출 (Cloudflare Tunnel · 터널 보안) | `senior-security`, `progressive-web-app` |
 | 발표용 docx 출력 / 보고서 변환 | `docx` |
 | 50개 대학 데이터 정제 / 파일 정리 | `file-organizer` |
 | 커밋 메시지 작성 | `git-commit-helper` |
@@ -350,7 +354,7 @@ Fit(학교) = (어휘 위치% × W_v) + (문법 위치% × W_g) + (독해 위치
 
 | 위험 | 백업 |
 |---|---|
-| Claude Vision OCR 실패 | 사용자 직접 텍스트 입력 폴백 |
+| Gemini Vision OCR 실패 | 사용자 직접 텍스트 입력 폴백 |
 | Supabase Free 한도 초과 | Pro($25/월) 즉시 업그레이드 |
 | ts-fsrs 통합 버그 | Leitner 5박스로 폴백 |
 | 합격 컷 데이터 부족 | "합격 평균 단일 기준"으로 단순화 |
@@ -448,7 +452,7 @@ Claude가 개정을 발의할 때는 반드시 아래 5요소를 사용자에게
 1. Supabase 프로젝트 생성 및 `.env.local` 키 주입
 2. `npm run db:push`로 DB 스키마 마이그레이션
 3. `npm run dev`로 개발 서버 기동
-4. D2 작업 — 3탭 라우팅 + 하단 GNB + shadcn 컴포넌트 추가
+4. **현 시점 진행분(2026-05-04 기준): D1~D18 완료(헌법 v1.9 사이드바 7+2 구조 적용). 다음 단계 D19 후보 — ① `/materials` 백엔드 와이어링(Supabase Storage + RLS), ② 한양대 5년 기출 50건 데이터 정제·시드, ③ `/me` 학습 통계 차트, ④ 모바일 반응형 Phase 2(태블릿 가로는 시연 표준 유지, 제13조 단서 정합).**
 
 ---
 
@@ -465,4 +469,5 @@ Claude가 개정을 발의할 때는 반드시 아래 5요소를 사용자에게
 | 2026-05-01 | v1.6 | 제13조의2 신설 — 학습 카드를 MistakeCard / StudyCard / VocabCard 3종으로 분류하고 통합 SRS 큐로 합류시킴. D7 코드의 모호한 "Sitcard" 명명을 본 헌법으로 정정 | 사용자 |
 | 2026-05-01 | v1.7 | 제18조의2 신설 (AI 정답·해설 "검증 필요" 배지 의무) + 제30조의2 신설 (3계층 출처 모델: official / ai_estimate / crowd_verified, 단계적 결합 원칙) | 사용자 |
 | 2026-05-04 | v1.8 | 코드 리뷰(D17) 후속 4건 일괄 개정 — ① 제17조 7항 1호 신설(SW가 `/api/*` 캐시 금지) ② 제28조 1항 단서(Drizzle 직접 연결 시 코드의 `user_id` 강제로 RLS 의무 갈음) ③ 제30조 4항 신설(RAG 미완성 시점 출제는 학교 무관 일반 빈출 문제로 한정, 학교명·경향 추론 노출 금지) ④ 제30조의2 4계층화(`user_self_corrected` 라벨 신설, `crowd_verified` 승격 조건을 "2명 이상 서로 다른 사용자 동일 답 제출"로 명시) | 사용자 |
-| 2026-05-04 | v1.9 | D18 데시보드 피벗 — Gemini 토론 R3 합의(B+ → A+ 전환) 후 4건 일괄 개정. ① 제13조 전면 개정(모바일 3탭 → 태블릿 가로 사이드바 7+2 구조) ② 제5조 단서(시연 디바이스 태블릿 가로) ③ 제16조 단서(사이드바 7개 메뉴는 신규 기능이 아닌 재구성) ④ 제13조의2 매핑 갱신(MistakeCard/StudyCard/VocabCard의 사이드바 노출 위치 명시 + 데시보드 파생 위젯의 비-카드 지위 확인) | 사용자 |
+| 2026-05-04 | v1.9 | D18 데시보드 피벗 — Gemini 토론 R3 합의(B+ → A+ 전환) 후 4건 일괄 개정. ① 제13조 전면 개정(모바일 3탭 → 태블릿 가로 사이드바 7+2 구조) ② 제5조 단서(시연 디바이스 태블릿 가로) ③ 제16조 단서(사이드바 7개 메뉴는 신규 기능이 아닌 재구성) ④ 제13조의2 매핑 갱신(MistakeCard/StudyCard/VocabCard의 사이드바 노출 위치 명시 + 데시보드 파생 위젯의 비-카드 지위 확인) |
+| 2026-05-04 | v1.10 | 정합성·매핑 정정 일괄 — ① 제18조 4항 PDF 파싱 모델명 `gemini-3.1-pro-preview`로 통일(v1.5 후 잔존 모순) ② 제35조 백업 표 "Claude Vision OCR" → "Gemini Vision OCR"(v1.4 후 잔존 모순) ③ 부칙 제3조 4항 D2 옛 명세 → D18 완료/D19 후보 갱신(v1.9 정합) ④ 제25조 스킬 매핑 "3탭 UI" 표현 폐지 + 디자인 토큰·차트·외부 터널·일반 코드 리뷰 4행 신설 | 사용자 |
