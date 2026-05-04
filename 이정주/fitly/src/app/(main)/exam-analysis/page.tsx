@@ -1,12 +1,8 @@
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { Star, BookOpen, GraduationCap } from "lucide-react";
+import { Star, BookOpen, Calendar, ShieldAlert } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  SectionBars,
-  type SectionBarItem,
-} from "@/components/feature/analysis/section-bars";
 import { UNIVERSITY_SEEDS } from "@/lib/data/universities";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
@@ -14,21 +10,8 @@ import { userProfiles } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
 
-const SHORT_NAME: Record<string, string> = {
-  한양: "한양대",
-  중앙: "중앙대",
-  성균관: "성균관대",
-  경희: "경희대",
-  이화: "이화여대",
-  서강: "서강대",
-  홍익: "홍익대",
-  동국: "동국대",
-  건국: "건국대",
-  숭실: "숭실대",
-};
-
-// 헌법 v1.10 — 기출 분석 (TOP 10 대학 가중치/컷 비교 + 본인 목표 강조).
-// 한양대 5년 50건 RAG 시드 완료 전까지는 합격 컷·평균 시드 + 본인 목표 카드를 노출한다.
+// 헌법 v2.0 제3조의2 + 제15조 — 학교별 합격 컷·평균은 비공개이므로 보유 X.
+// 본 페이지는 *공개된 시험 정보*(시험 시기·과목 구성·문항 수)만 노출한다.
 export default async function ExamAnalysisPage() {
   const supabase = await createClient();
   const {
@@ -44,108 +27,122 @@ export default async function ExamAnalysisPage() {
     .limit(1);
 
   const target = profile?.targetUniversity ?? null;
-
-  const weightChartData: SectionBarItem[] = UNIVERSITY_SEEDS.map((u) => ({
-    label: SHORT_NAME[u.name] ?? u.name,
-    vocab: u.weights.vocab,
-    grammar: u.weights.grammar,
-    reading: u.weights.reading,
-  }));
+  const targetSeed = UNIVERSITY_SEEDS.find((u) => u.name === target) ?? null;
 
   return (
     <div className="min-h-screen pb-10">
       <PageHeader
         title="기출 분석"
-        subtitle="TOP 10 대학의 출제 패턴·합격 컷·평균을 데이터로 비교합니다."
+        subtitle="학교별 시험 시기·과목 구성 등 공개된 정보를 한눈에 확인합니다."
       />
 
       <div className="px-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
-        <Card className="xl:col-span-2 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold">학교별 영역 가중치</h2>
-              <span className="text-[11px] text-muted-foreground">
-                Fit 공식 가중치 (제9·11조)
-              </span>
+        {/* 정직 안내 */}
+        <Card className="xl:col-span-3 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-amber-50 to-rose-50 dark:from-amber-500/15 dark:to-rose-500/10">
+          <CardContent className="p-4 flex gap-3">
+            <ShieldAlert className="h-5 w-5 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5" aria-hidden />
+            <div className="text-[12.5px] text-foreground/85 leading-relaxed">
+              <p className="font-semibold text-foreground">합격 컷·평균을 보여드리지 않는 이유</p>
+              <p className="mt-1">
+                대부분의 학교가 편입 영어 합격 점수 컷을 <strong>비공개</strong>합니다. Fitly 는 임의 추정값으로 그것을 *만들어 보여주지 않습니다* (헌법 제3조의2 4항).
+                대신 학교별로 *실제 공개된* 시험 시기·과목 구성·문항 수만 표시하고, 학습의 핵심은 <strong>본인 자료를 자동 카드화 + SRS 복습 + 진척도 추적</strong> 으로 채웁니다.
+              </p>
             </div>
-            <div className="mt-2 h-56">
-              <SectionBars data={weightChartData} />
-            </div>
-            <p className="mt-2 text-[10.5px] text-muted-foreground">
-              ※ 본 가중치는 5년 50건 기출 분석 역산 시드입니다 (제11조 1항). 한양대
-              5년 50건 RAG 시드 완료 시 자동 갱신됩니다.
-            </p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/10">
-          <CardContent className="p-4 h-full flex flex-col">
+        {/* 내 목표 학교 */}
+        <Card className="xl:col-span-2 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-primary" aria-hidden />
               <h2 className="text-sm font-bold">내 목표 학교</h2>
             </div>
-            {target ? (
-              (() => {
-                const seed = UNIVERSITY_SEEDS.find((u) => u.name === target);
-                if (!seed) return null;
-                return (
-                  <div className="mt-3 space-y-2 flex-1">
-                    <p className="text-2xl font-bold tracking-tight">
-                      {SHORT_NAME[seed.name] ?? seed.name}
+            {targetSeed ? (
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="md:col-span-1 rounded-xl border border-border/50 bg-background px-4 py-3">
+                  <p className="text-[11px] text-muted-foreground">학교</p>
+                  <p className="mt-1 text-2xl font-bold tracking-tight">
+                    {targetSeed.shortName}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border/50 bg-background px-4 py-3">
+                  <p className="text-[11px] text-muted-foreground">시험 시기</p>
+                  <p className="mt-1 text-base font-semibold">
+                    {targetSeed.examMonth ?? "공지 미상"}
+                  </p>
+                  <p className="mt-0.5 text-[10.5px] text-muted-foreground">
+                    매년 학교 공지에 따라 변동
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border/50 bg-background px-4 py-3">
+                  <p className="text-[11px] text-muted-foreground">총 문항 수</p>
+                  <p className="mt-1 text-base font-semibold">
+                    {targetSeed.totalQuestions ? `약 ${targetSeed.totalQuestions}문항` : "—"}
+                  </p>
+                  <p className="mt-0.5 text-[10.5px] text-muted-foreground">
+                    공개 자료 기준
+                  </p>
+                </div>
+                {targetSeed.sections && (
+                  <div className="md:col-span-3 rounded-xl border border-border/50 bg-background px-4 py-3">
+                    <p className="text-[11px] text-muted-foreground">
+                      과목 구성 (공개 자료 추정)
                     </p>
-                    <ul className="space-y-1.5 text-[12px] text-foreground/80">
-                      <li className="flex justify-between">
-                        <span>가중치</span>
-                        <span className="font-medium">
-                          어{seed.weights.vocab} · 문{seed.weights.grammar} · 독
-                          {seed.weights.reading}
-                        </span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>어휘 컷·평균</span>
-                        <span className="font-medium">
-                          {seed.cutoffs.vocab_cut} / {seed.cutoffs.vocab_avg}
-                        </span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>문법 컷·평균</span>
-                        <span className="font-medium">
-                          {seed.cutoffs.grammar_cut} / {seed.cutoffs.grammar_avg}
-                        </span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>독해 컷·평균</span>
-                        <span className="font-medium">
-                          {seed.cutoffs.reading_cut} / {seed.cutoffs.reading_avg}
-                        </span>
-                      </li>
+                    <ul className="mt-2 grid grid-cols-3 gap-2">
+                      {targetSeed.sections.map((s) => (
+                        <li
+                          key={s.key}
+                          className="rounded-lg bg-secondary/40 px-3 py-2 text-center"
+                        >
+                          <p className="text-[11px] text-muted-foreground">{s.label}</p>
+                          <p className="mt-0.5 text-sm font-semibold">
+                            {s.approxQuestions ? `≈ ${s.approxQuestions}문항` : "—"}
+                          </p>
+                        </li>
+                      ))}
                     </ul>
                   </div>
-                );
-              })()
+                )}
+              </div>
             ) : (
-              <p className="mt-2 text-[12px] text-muted-foreground flex-1">
-                설정에서 목표 학교를 등록하면 학교별 학습 전략이 활성화됩니다.
+              <p className="mt-2 text-[12px] text-muted-foreground">
+                설정에서 목표 학교를 등록하시면 학교별 시험 정보가 표시됩니다.
               </p>
             )}
           </CardContent>
         </Card>
 
+        {/* 학습 가이드 */}
+        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/10">
+          <CardContent className="p-4 h-full flex flex-col">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-primary" aria-hidden />
+              <h2 className="text-sm font-bold">학교 정보 → 학습 전략</h2>
+            </div>
+            <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-foreground/85 flex-1">
+              <li>• 시험 시기를 알면 <strong>학습 플랜</strong>이 D-day로 자동 역산됩니다.</li>
+              <li>• 과목 구성을 알면 <strong>어휘·문법·독해</strong> 비중을 본인이 조절할 수 있습니다.</li>
+              <li>• 합격 컷은 비공개라서 *목표 점수는 본인이 정합니다*. 우리는 진척도만 정직하게 보여줍니다.</li>
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* 학교별 시험 정보 표 */}
         <Card className="xl:col-span-3 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4 text-primary" aria-hidden />
-              <h2 className="text-sm font-bold">대학별 합격 컷·평균</h2>
+              <Calendar className="h-4 w-4 text-primary" aria-hidden />
+              <h2 className="text-sm font-bold">학교별 시험 정보</h2>
             </div>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-[12px]">
                 <thead className="text-left text-[11px] text-muted-foreground">
                   <tr className="border-b border-border/50">
                     <th className="py-2 font-medium">학교</th>
-                    <th className="py-2 font-medium">가중치 (어/문/독)</th>
-                    <th className="py-2 font-medium">어휘 컷/평균</th>
-                    <th className="py-2 font-medium">문법 컷/평균</th>
-                    <th className="py-2 font-medium">독해 컷/평균</th>
+                    <th className="py-2 font-medium">시험 시기</th>
+                    <th className="py-2 font-medium">총 문항 수</th>
+                    <th className="py-2 font-medium">합격 컷·평균</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
@@ -157,25 +154,19 @@ export default async function ExamAnalysisPage() {
                         className={isTarget ? "bg-primary/5" : ""}
                       >
                         <td className="py-2 font-medium">
-                          {SHORT_NAME[u.name] ?? u.name}
+                          {u.shortName}
                           {isTarget && (
                             <span className="ml-1.5 text-[9.5px] font-semibold text-primary">
                               내 목표
                             </span>
                           )}
                         </td>
+                        <td className="py-2">{u.examMonth ?? "공지 미상"}</td>
                         <td className="py-2 tabular-nums">
-                          {u.weights.vocab} / {u.weights.grammar} /{" "}
-                          {u.weights.reading}
+                          {u.totalQuestions ? `약 ${u.totalQuestions}문항` : "—"}
                         </td>
-                        <td className="py-2 tabular-nums">
-                          {u.cutoffs.vocab_cut} / {u.cutoffs.vocab_avg}
-                        </td>
-                        <td className="py-2 tabular-nums">
-                          {u.cutoffs.grammar_cut} / {u.cutoffs.grammar_avg}
-                        </td>
-                        <td className="py-2 tabular-nums">
-                          {u.cutoffs.reading_cut} / {u.cutoffs.reading_avg}
+                        <td className="py-2 text-muted-foreground italic">
+                          학교 비공개
                         </td>
                       </tr>
                     );
@@ -184,39 +175,8 @@ export default async function ExamAnalysisPage() {
               </table>
             </div>
             <p className="mt-3 text-[10.5px] text-muted-foreground">
-              ※ 본 시드 데이터는 헌법 제11조 2항(공시·합격 수기·인터뷰 3종 교차 검증)
-              완료 시 RAG 인덱싱 결과로 대체됩니다.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="xl:col-span-3 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-primary" aria-hidden />
-              <h2 className="text-sm font-bold">출제 빈도 상위 유형</h2>
-            </div>
-            <ul className="mt-3 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
-              {[
-                { type: "어휘 추론", weight: 22 },
-                { type: "문장 삽입", weight: 18 },
-                { type: "비동사/준동사", weight: 15 },
-                { type: "관계사", weight: 12 },
-                { type: "빈칸 추론", weight: 18 },
-                { type: "독해 일반", weight: 15 },
-              ].map(({ type, weight }) => (
-                <li
-                  key={type}
-                  className="rounded-xl border border-border/50 bg-background px-3 py-2.5"
-                >
-                  <p className="text-[11px] text-muted-foreground">{type}</p>
-                  <p className="mt-1 text-base font-bold">{weight}%</p>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3 text-[10.5px] text-muted-foreground">
-              ※ TOP 10 평균 시드값 (50건 기출 가중 평균). 학교별 세부 분포는 RAG 시드
-              완료 후 노출됩니다.
+              ※ 본 표의 시험 정보는 *시연용 시드* 입니다. 정확한 일자·문항 수는 매년 학교 공지를 따릅니다.
+              합격 점수 컷·평균은 <strong>학교가 비공개</strong>이며, Fitly 는 임의 추정값을 제공하지 않습니다 (헌법 제3조의2).
             </p>
           </CardContent>
         </Card>

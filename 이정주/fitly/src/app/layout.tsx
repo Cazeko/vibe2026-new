@@ -4,7 +4,7 @@ import { PwaRegister } from "@/components/shared/pwa-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fitly — 편입영어 학습 적합도 OS",
+  title: "Fitly — 편입영어 학습 플래너",
   description: "편입은 열심히 하는 게 아니라, 맞게(Fit) 하는 게임입니다.",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -33,8 +33,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}

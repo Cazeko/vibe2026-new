@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Circle,
   Lock,
+  CalendarClock,
   type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
@@ -18,6 +19,57 @@ import { getDashboardSummary } from "@/lib/dashboard/queries";
 import { getLibraryCounts } from "@/lib/dashboard/analytics";
 
 export const dynamic = "force-dynamic";
+
+// 헌법 v2.0 제13조 2번 — 시험일 D-day 기반 일일 목표 자동 역산.
+// 보유 학습 카드를 남은 일수로 1차 분배 + 어휘·오답 권장량 가산.
+function computeDailyTargets(
+  lib: { study: number; vocab: number; mistakes: number },
+  daysToExam: number | null,
+) {
+  // 시험일 미설정 시 디폴트(어휘 30 / 학습 20 / 권장 60분)
+  if (daysToExam == null) {
+    return {
+      vocabDaily: 30,
+      studyDaily: 20,
+      mistakeDaily: 10,
+      minutesDaily: 60,
+      reason: "시험일 미설정 — 권장 기본값",
+      hasExamDate: false,
+    } as const;
+  }
+
+  const safeDays = Math.max(1, daysToExam);
+  // 학습 카드: 보유 / 남은 일수 (각 카드 최소 1회 풀이 가정)
+  const studyDaily = Math.max(5, Math.ceil(lib.study / safeDays));
+  // 어휘: 30/일 베이스 + 시험 임박할수록 가산
+  const vocabDaily = daysToExam > 60 ? 25 : daysToExam > 30 ? 35 : 50;
+  // 오답: 보유 / (남은일수 / 2) — 누적된 오답을 시험일까지 절반 주기로 두 번 본다는 가정
+  const mistakeDaily = Math.max(
+    5,
+    Math.ceil(lib.mistakes / Math.max(1, Math.floor(safeDays / 2))),
+  );
+  const minutesDaily = Math.min(
+    180,
+    20 + Math.round(studyDaily * 1.5 + vocabDaily * 0.5 + mistakeDaily * 1),
+  );
+
+  return {
+    vocabDaily,
+    studyDaily,
+    mistakeDaily,
+    minutesDaily,
+    reason: `D-${daysToExam} 기준 자동 역산 (보유 카드 ÷ 남은 일수)`,
+    hasExamDate: true,
+  } as const;
+}
+
+function fmtMinutes(min: number): string {
+  if (min < 60) return `${min}분`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  if (m === 0) return `${h}시간`;
+  return `${h}시간 ${m}분`;
+}
 
 type StudyMode = {
   href: string;
@@ -81,14 +133,68 @@ export default async function StudyPlanPage() {
   ]);
 
   const totalDue = lib.vocabDue + lib.mistakesDue + lib.studyDue;
+  const targets = computeDailyTargets(
+    { study: lib.study, vocab: lib.vocab, mistakes: lib.mistakes },
+    summary.kpi.daysToExam,
+  );
 
   return (
     <div className="min-h-screen pb-10">
       <PageHeader
         title="학습 플랜"
-        subtitle="오늘 학습할 모드를 선택하세요. SRS 듀 카드는 자동으로 누적됩니다."
+        subtitle="시험일 기준으로 오늘 해야 할 양을 자동 계산해 드립니다."
       />
       <div className="px-6 space-y-3">
+        {/* 시험일 역산 일일 목표 — v2.0 신규 */}
+        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CalendarClock className="h-4 w-4 text-primary" aria-hidden />
+              <h2 className="text-sm font-bold">시험일 역산 — 오늘 목표</h2>
+              {summary.kpi.daysToExam != null && (
+                <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                  D-{summary.kpi.daysToExam}
+                </span>
+              )}
+            </div>
+            <ul className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2">
+              <li className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
+                <p className="text-[11px] text-muted-foreground">어휘</p>
+                <p className="mt-0.5 text-xl font-bold tabular-nums">
+                  {targets.vocabDaily}
+                  <span className="ml-1 text-[11px] font-medium text-muted-foreground">장</span>
+                </p>
+              </li>
+              <li className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
+                <p className="text-[11px] text-muted-foreground">학습 카드</p>
+                <p className="mt-0.5 text-xl font-bold tabular-nums">
+                  {targets.studyDaily}
+                  <span className="ml-1 text-[11px] font-medium text-muted-foreground">장</span>
+                </p>
+              </li>
+              <li className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
+                <p className="text-[11px] text-muted-foreground">오답 복습</p>
+                <p className="mt-0.5 text-xl font-bold tabular-nums">
+                  {targets.mistakeDaily}
+                  <span className="ml-1 text-[11px] font-medium text-muted-foreground">장</span>
+                </p>
+              </li>
+              <li className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
+                <p className="text-[11px] text-muted-foreground">권장 학습 시간</p>
+                <p className="mt-0.5 text-xl font-bold">
+                  {fmtMinutes(targets.minutesDaily)}
+                </p>
+              </li>
+            </ul>
+            <p className="mt-2 text-[10.5px] text-muted-foreground">
+              {targets.reason}.{" "}
+              {targets.hasExamDate
+                ? "시험일이 가까워질수록 어휘 비중이 자동 증가합니다."
+                : "설정 → 시험일을 등록하시면 본인 보유 카드 기준으로 자동 분배됩니다."}
+            </p>
+          </CardContent>
+        </Card>
+
         {/* 듀카드 요약 */}
         <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/10">
           <CardContent className="p-4 flex items-center justify-between flex-wrap gap-3">

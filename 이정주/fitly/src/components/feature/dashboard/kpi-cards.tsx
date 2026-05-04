@@ -11,7 +11,8 @@ function formatHourMin(min: number): string {
   return `${h}시간 ${m}분`;
 }
 
-// 헌법 v1.10 — KPI 4 카드는 실데이터(getDashboardSummary)에서 props로 받는다.
+// 헌법 v2.0 — KPI 4 카드는 실데이터(getDashboardSummary)에서 props로 받는다.
+// "Fit 점수" 폐지 → "학습 진척도(Progress)" 로 재명명.
 export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
   const cards = [
     {
@@ -25,12 +26,9 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
       tone: "text-indigo-600 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-500/15",
     },
     {
-      label: "Fit 점수",
-      value: kpi.fitScore != null ? `${Math.round(kpi.fitScore)}` : "—",
-      sub:
-        kpi.fitScore != null
-          ? `100점 만점 · ${kpi.fitProgressPercent}%`
-          : "학습 시작 후 산출됩니다",
+      label: "학습 진척도",
+      value: `${kpi.progressScore}`,
+      sub: `본인 누적 · 어휘 ${kpi.progressBreakdown.vocabMasteryRate}/오답 ${kpi.progressBreakdown.mistakeConquerRate}/일관 ${kpi.progressBreakdown.studyConsistency}`,
       Icon: TrendingUp,
       tone: "text-emerald-600 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-500/15",
     },

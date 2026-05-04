@@ -22,7 +22,7 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
                 </span>{" "}
                 유형을 집중하면
                 <br />
-                Fit 점수를 더 빠르게 올릴 수 있어요!
+                학습 진척도를 더 빠르게 올릴 수 있어요!
               </>
             ) : (
               <>

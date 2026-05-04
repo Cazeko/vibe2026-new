@@ -14,18 +14,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { TrendPoint } from "@/lib/dashboard/types";
 
 // 헌법 제19조 — 차트는 Recharts.
-// 헌법 v1.10 — 데이터는 props 로만 주입(서버 컴포넌트가 페치).
+// 헌법 v2.0 — 데이터는 props 로만 주입(서버 컴포넌트가 페치). "Fit 점수" → "학습 진척도".
 export function LearningTrend({ data }: { data: TrendPoint[] }) {
   const { resolvedTheme } = useTheme();
   const dark = resolvedTheme === "dark";
   const grid = dark ? "#1e2738" : "#eef0f5";
   const axis = dark ? "#6b7388" : "#9aa0ad";
-  const fitColor = dark ? "#8b9aff" : "#5b6cff";
+  const progressColor = dark ? "#8b9aff" : "#5b6cff";
   const accColor = dark ? "#c4cbff" : "#b1baff";
   const tooltipBg = dark ? "#1a2030" : "#ffffff";
   const tooltipBorder = dark ? "#2a3145" : "#e5e7eb";
 
-  const hasData = data.some((d) => d.fit != null || d.accuracy != null);
+  const hasData = data.some((d) => d.progress != null || d.accuracy != null);
 
   return (
     <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
@@ -33,7 +33,7 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold">학습 성과 추이</h2>
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-            <Legend color={fitColor} label="Fit 점수" />
+            <Legend color={progressColor} label="진척도" />
             <Legend color={accColor} label="정답률(%)" />
           </div>
         </div>
@@ -70,16 +70,16 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
                     padding: "6px 10px",
                   }}
                   formatter={(value: number, name: string) => [
-                    name === "fit" ? `${value}` : `${value}%`,
-                    name === "fit" ? "Fit 점수" : "정답률",
+                    name === "progress" ? `${value}` : `${value}%`,
+                    name === "progress" ? "학습 진척도" : "정답률",
                   ]}
                 />
                 <Line
                   type="monotone"
-                  dataKey="fit"
-                  stroke={fitColor}
+                  dataKey="progress"
+                  stroke={progressColor}
                   strokeWidth={2.25}
-                  dot={{ r: 2.5, fill: fitColor }}
+                  dot={{ r: 2.5, fill: progressColor }}
                   activeDot={{ r: 4 }}
                   connectNulls
                 />

@@ -1,6 +1,6 @@
-// 헌법 v1.10 — 대시보드 실데이터 집계 라이브러리.
+// 헌법 v2.0 — 대시보드 실데이터 집계 라이브러리.
 // 입력은 user_id(auth.uid)뿐이며, 모든 쿼리에 user_id 일치를 강제한다(제28조 1항 단서).
-// learning_logs 가 비어 있으면 mistakes/study_sessions 원천 테이블에서 라이브 계산한다.
+// 외부 합격 컷·평균 의존 0. 본인 데이터로만 Progress 산출 (제3조의2, 제9조).
 
 import { and, count, desc, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
@@ -13,6 +13,7 @@ import {
   materials,
   userProfiles,
 } from "@/lib/db/schema";
+import { computeProgress } from "@/lib/progress/score";
 import type {
   DashboardKpi,
   DashboardSummary,
@@ -72,14 +73,6 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
   const now = Date.now();
   const since7 = new Date(now - 7 * DAY_MS);
   const since14 = new Date(now - 14 * DAY_MS);
-
-  // 최근 학습 로그 (Fit·정답률)
-  const [latestLog] = await db
-    .select()
-    .from(learningLogs)
-    .where(eq(learningLogs.userId, userId))
-    .orderBy(desc(learningLogs.logDate))
-    .limit(1);
 
   // 학습 시간 — 최근 7일/14일
   const [recentMins] = await db
@@ -146,9 +139,63 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
   }
   const streakBest = Math.max(streak, best);
 
-  // Fit 점수
-  const fitScore = latestLog?.fitScore ? Number(latestLog.fitScore) : null;
-  const fitProgressPercent = fitScore != null ? Math.min(100, Math.round((fitScore / 100) * 100)) : 0;
+  // 학습 진척도(Progress) — v2.0 제9조
+  // 1) 어휘 마스터율
+  const [vocabTotalRow] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(vocabCards)
+    .where(eq(vocabCards.userId, userId));
+  const [vocabMasteredRow] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(vocabCards)
+    .where(
+      and(
+        eq(vocabCards.userId, userId),
+        sql`(${vocabCards.srsState}->>'state')::int >= 2`,
+      ),
+    );
+  const vocabTotal = vocabTotalRow?.n ?? 0;
+  const vocabMastered = vocabMasteredRow?.n ?? 0;
+
+  // 2) 오답 정복률 — 최근 14일 mistakes 리뷰 (good/easy / 전체)
+  const [mistakeReviewAgg] = await db
+    .select({
+      reviews: sql<number>`coalesce(sum(${studySessions.totalCount}), 0)::int`,
+      correct: sql<number>`coalesce(sum(${studySessions.correctCount}), 0)::int`,
+    })
+    .from(studySessions)
+    .where(
+      and(
+        eq(studySessions.userId, userId),
+        eq(studySessions.mode, "review"),
+        gte(studySessions.startedAt, since14),
+      ),
+    );
+  const recentMistakeReviews = Number(mistakeReviewAgg?.reviews ?? 0);
+  const recentMistakeCorrect = Number(mistakeReviewAgg?.correct ?? 0);
+
+  // 3) 학습 일관성 — 최근 14일 학습일수
+  const since14Iso = since14.toISOString();
+  const recentDays = await db
+    .select({ day: sql<string>`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')` })
+    .from(studySessions)
+    .where(
+      and(
+        eq(studySessions.userId, userId),
+        gte(studySessions.startedAt, since14),
+      ),
+    )
+    .groupBy(sql`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`);
+  const recentStudyDaysOf14 = Math.min(14, recentDays.length);
+  void since14Iso;
+
+  const breakdown = computeProgress({
+    vocabTotal,
+    vocabMastered,
+    recentMistakeReviews,
+    recentMistakeCorrect,
+    recentStudyDaysOf14,
+  });
 
   // D-day
   const examDate = profileRow?.examDate ? new Date(profileRow.examDate) : null;
@@ -159,8 +206,12 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
   return {
     targetUniversity: targetName ? `${targetName}대학교` : null,
     targetUniversityShort: shortName(targetName),
-    fitScore,
-    fitProgressPercent,
+    progressScore: breakdown.total,
+    progressBreakdown: {
+      vocabMasteryRate: breakdown.vocabMasteryRate,
+      mistakeConquerRate: breakdown.mistakeConquerRate,
+      studyConsistency: breakdown.studyConsistency,
+    },
     studyMinutes,
     studyDeltaMinutes,
     streakDays: streak,
@@ -186,10 +237,12 @@ async function computeTrend(userId: string): Promise<TrendPoint[]> {
     )
     .orderBy(learningLogs.logDate);
 
-  const byDate = new Map<string, { fit: number | null; accuracy: number | null }>();
+  // v2.0 — learning_logs.fitScore 컬럼은 v1 시절 학교 적합도용. 같은 컬럼을
+  // Progress 점수의 일자별 스냅샷으로 재해석하여 추이 그린다.
+  const byDate = new Map<string, { progress: number | null; accuracy: number | null }>();
   for (const log of logs) {
     byDate.set(log.logDate, {
-      fit: log.fitScore ? Number(log.fitScore) : null,
+      progress: log.fitScore ? Number(log.fitScore) : null,
       accuracy: log.accuracy ? Number(log.accuracy) : null,
     });
   }
@@ -201,7 +254,7 @@ async function computeTrend(userId: string): Promise<TrendPoint[]> {
     const v = byDate.get(key);
     points.push({
       date: formatMonthDay(d),
-      fit: v?.fit ?? null,
+      progress: v?.progress ?? null,
       accuracy: v?.accuracy ?? null,
     });
   }
@@ -408,7 +461,7 @@ export async function getDashboardSummary(
   const isEmpty =
     kpi.studyMinutes === 0 &&
     kpi.streakDays === 0 &&
-    trend.every((t) => t.fit == null) &&
+    trend.every((t) => t.progress == null) &&
     weakTypes.length === 0 &&
     recent.length === 0;
 

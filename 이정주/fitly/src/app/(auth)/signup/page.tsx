@@ -9,7 +9,7 @@ export default function SignupPage() {
         </span>
         <h1 className="text-2xl font-bold tracking-tight">회원가입</h1>
         <p className="text-sm text-muted-foreground text-center text-balance">
-          첫 Fit 점수까지 3번의 탭, 무료입니다.
+          내 자료를 AI 카드로 만들기까지 3번의 탭, 무료입니다.
         </p>
       </div>
       <AuthForm mode="signup" />

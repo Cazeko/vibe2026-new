@@ -53,8 +53,8 @@ export default async function DashboardPage() {
 
         <p className="pt-1 text-[10px] text-muted-foreground">
           본 대시보드의 KPI·차트·플랜은 <strong>본인 계정의 실제 학습 기록</strong>{" "}
-          으로 산출됩니다 (헌법 v1.10 · 제13조의2). 합격 컷·평균은 공시·합격 수기·인터뷰
-          교차 검증 시드를 사용합니다 (제11조).
+          만으로 산출됩니다 (헌법 v2.0 제9조). 학교별 합격 컷·평균은 비공개이므로 Fitly 가
+          보유하지 아니합니다 (제3조의2).
         </p>
       </div>
     </div>
@@ -75,7 +75,7 @@ function OnboardingBanner() {
           <div>
             <p className="text-sm font-semibold">Fitly 첫 방문을 환영합니다!</p>
             <p className="mt-0.5 text-[12px] text-muted-foreground">
-              아래 3단계만 완료하면 Fit 점수와 학습 추이가 실시간으로 그려져요.
+              아래 3단계만 완료하면 학습 진척도와 추이가 실시간으로 그려져요.
             </p>
           </div>
         </div>

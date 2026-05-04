@@ -13,12 +13,8 @@ export const UNIVERSITY_NAMES = [
 
 export type UniversityName = (typeof UNIVERSITY_NAMES)[number];
 
-export type {
-  Cutoffs,
-  Weights,
-  UserSectionScores,
-  SectionKey,
-} from "@/lib/fit/score";
+// v2.0 — 학교별 합격 컷·가중치 의존 폐지. `lib/fit/*` 전부 제거됨.
+// 본인 학습 데이터로 산출되는 진척도는 `lib/progress/score.ts` 에 정의되어 있다.
 
 /**
  * 헌법 제13조의2 — 학습 카드 분류 (v1.6)

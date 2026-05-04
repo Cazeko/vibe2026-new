@@ -1,8 +1,8 @@
-// 헌법 v1.10 — 대시보드 실데이터 DTO. 모든 위젯이 본 타입을 공유한다.
+// 헌법 v2.0 — 대시보드 실데이터 DTO. 모든 위젯이 본 타입을 공유한다.
 
 export type TrendPoint = {
   date: string;          // MM/DD
-  fit: number | null;
+  progress: number | null;   // 학습 진척도 0~100 (v2.0 — 종전 fit 폐지)
   accuracy: number | null;
 };
 
@@ -31,8 +31,13 @@ export type RecentMaterial = {
 export type DashboardKpi = {
   targetUniversity: string | null;
   targetUniversityShort: string | null;
-  fitScore: number | null;
-  fitProgressPercent: number;
+  // v2.0 — 학습 진척도(Progress) 점수. 본인 학습 데이터로만 산출 (제9조).
+  progressScore: number;
+  progressBreakdown: {
+    vocabMasteryRate: number;
+    mistakeConquerRate: number;
+    studyConsistency: number;
+  };
   studyMinutes: number;
   studyDeltaMinutes: number;
   streakDays: number;
