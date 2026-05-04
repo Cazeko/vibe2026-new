@@ -6,7 +6,7 @@ import { Upload, Loader2, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
-type Status = "idle" | "uploading" | "saving" | "done" | "error";
+type Status = "idle" | "uploading" | "saving" | "extracting" | "done" | "error";
 
 const ACCEPT = ".pdf,.png,.jpg,.jpeg,.webp";
 const MAX_BYTES = 25 * 1024 * 1024; // 25MB
@@ -18,6 +18,7 @@ export function MaterialsUploader() {
   const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
+  const [extractedCount, setExtractedCount] = useState<number | null>(null);
 
   function pick(file: File | null) {
     setError(null);
@@ -73,12 +74,39 @@ export function MaterialsUploader() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "메타 저장 실패");
 
+      // 헌법 제13조의2 — PDF/이미지 → 자동 시카드 추출 (Gemini).
+      // 추출 결과는 mistakes 테이블에 source='material' 로 누적.
+      const materialId = data.item?.id;
+      if (materialId) {
+        setStatus("extracting");
+        setProgress(85);
+        try {
+          const ex = await fetch(`/api/materials/${materialId}/extract`, {
+            method: "POST",
+          });
+          const exData = await ex.json();
+          if (ex.ok) {
+            setExtractedCount(exData.saved ?? 0);
+          } else {
+            // 추출 실패해도 업로드 자체는 성공 — 추후 재추출 가능.
+            console.warn("자동 추출 실패:", exData.error);
+            setExtractedCount(null);
+          }
+        } catch (extractErr) {
+          console.warn("자동 추출 호출 실패:", extractErr);
+          setExtractedCount(null);
+        }
+      }
+
       setProgress(100);
       setStatus("done");
       setPicked(null);
       if (fileRef.current) fileRef.current.value = "";
       router.refresh();
-      setTimeout(() => setStatus("idle"), 1200);
+      setTimeout(() => {
+        setStatus("idle");
+        setExtractedCount(null);
+      }, 4000);
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "업로드 실패");
@@ -141,12 +169,22 @@ export function MaterialsUploader() {
             size="sm"
             className="h-8 rounded-xl"
             onClick={upload}
-            disabled={status === "uploading" || status === "saving"}
+            disabled={
+              status === "uploading" ||
+              status === "saving" ||
+              status === "extracting"
+            }
           >
-            {status === "uploading" || status === "saving" ? (
+            {status === "uploading" ||
+            status === "saving" ||
+            status === "extracting" ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                {status === "uploading" ? "업로드 중…" : "저장 중…"}
+                {status === "uploading"
+                  ? "업로드 중…"
+                  : status === "saving"
+                    ? "저장 중…"
+                    : "AI 카드 추출 중…"}
               </>
             ) : (
               <>업로드</>
@@ -155,7 +193,7 @@ export function MaterialsUploader() {
         </div>
       )}
 
-      {(status === "uploading" || status === "saving") && (
+      {(status === "uploading" || status === "saving" || status === "extracting") && (
         <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
           <div
             className="h-full bg-primary transition-all"
@@ -166,7 +204,17 @@ export function MaterialsUploader() {
 
       {status === "done" && (
         <p role="status" className="text-[12px] text-emerald-600">
-          업로드가 완료되었습니다.
+          업로드 완료
+          {extractedCount != null && extractedCount > 0 && (
+            <>
+              {" — "}
+              <strong>{extractedCount}장</strong>의 카드가 자동 추출되어 오답 노트에
+              저장되었습니다.
+            </>
+          )}
+          {extractedCount === 0 && (
+            <> — 추출 가능한 카드가 발견되지 않았습니다.</>
+          )}
         </p>
       )}
       {error && (
