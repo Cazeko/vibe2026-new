@@ -20,6 +20,7 @@ export const mistakes = pgTable("mistakes", {
   answerSource: varchar("answer_source", { length: 24 })
     .notNull()
     .default("ai_estimate"),
+  questionType: varchar("question_type", { length: 24 }),
   srsState: jsonb("srs_state").$type<import("@/types").SrsState | null>(),
   dueAt: timestamp("due_at", { withTimezone: true })
     .defaultNow()

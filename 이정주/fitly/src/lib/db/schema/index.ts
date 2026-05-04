@@ -4,3 +4,6 @@ export * from "./universities";
 export * from "./mistakes";
 export * from "./vocab";
 export * from "./user-profiles";
+export * from "./study-sessions";
+export * from "./learning-logs";
+export * from "./materials";
