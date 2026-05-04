@@ -1,6 +1,6 @@
 // 헌법 v1.10 — /study-analysis · /me 전용 보조 집계.
 
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { mistakes, studySessions, vocabCards } from "@/lib/db/schema";
 import type { HeatmapCell } from "@/components/feature/analysis/activity-heatmap";
@@ -103,12 +103,12 @@ export async function getLibraryCounts(userId: string): Promise<LibraryCounts> {
   const [md] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(mistakes)
-    .where(and(eq(mistakes.userId, userId), sql`${mistakes.dueAt} <= ${now}`));
+    .where(and(eq(mistakes.userId, userId), lte(mistakes.dueAt, now)));
 
   const [vd] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(vocabCards)
-    .where(and(eq(vocabCards.userId, userId), sql`${vocabCards.dueAt} <= ${now}`));
+    .where(and(eq(vocabCards.userId, userId), lte(vocabCards.dueAt, now)));
 
   return {
     mistakes: m?.n ?? 0,

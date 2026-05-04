@@ -2,7 +2,7 @@
 // 입력은 user_id(auth.uid)뿐이며, 모든 쿼리에 user_id 일치를 강제한다(제28조 1항 단서).
 // learning_logs 가 비어 있으면 mistakes/study_sessions 원천 테이블에서 라이브 계산한다.
 
-import { and, count, desc, eq, gte, isNotNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import {
   mistakes,
@@ -217,7 +217,7 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
       n: count(),
     })
     .from(vocabCards)
-    .where(and(eq(vocabCards.userId, userId), sql`${vocabCards.dueAt} <= ${now}`));
+    .where(and(eq(vocabCards.userId, userId), lte(vocabCards.dueAt, now)));
 
   const [vocabTotal] = await db
     .select({ n: count() })
@@ -228,7 +228,7 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
   const [mistakeDue] = await db
     .select({ n: count() })
     .from(mistakes)
-    .where(and(eq(mistakes.userId, userId), sql`${mistakes.dueAt} <= ${now}`));
+    .where(and(eq(mistakes.userId, userId), lte(mistakes.dueAt, now)));
 
   const [mistakeTotal] = await db
     .select({ n: count() })
