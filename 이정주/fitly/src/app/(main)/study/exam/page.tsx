@@ -1,20 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, RefreshCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UNIVERSITY_SEEDS } from "@/lib/data/universities";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import type { UniversityName } from "@/types";
 
 type Section = "vocab" | "grammar" | "reading";
 
@@ -32,24 +22,13 @@ const SECTIONS: { key: Section; label: string }[] = [
   { key: "reading", label: "독해" },
 ];
 
+// 헌법 v1.8 제30조 4항 — RAG 시드 미완성 시점 출제는 학교 무관 일반 빈출 한정.
 export default function ExamPage() {
-  const [university, setUniversity] = useState<UniversityName>("한양");
   const [section, setSection] = useState<Section>("vocab");
   const [item, setItem] = useState<ExamItem | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/user/profile")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.profile?.targetUniversity) {
-          setUniversity(d.profile.targetUniversity as UniversityName);
-        }
-      })
-      .catch(() => undefined);
-  }, []);
 
   async function generate() {
     setLoading(true);
@@ -60,7 +39,7 @@ export default function ExamPage() {
       const res = await fetch("/api/exam/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ university, section }),
+        body: JSON.stringify({ section }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "출제 실패");
@@ -88,30 +67,15 @@ export default function ExamPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">기출 풀이</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          학교·영역을 선택하면 출제 경향에 맞춘 문제가 즉시 생성됩니다.
+          영역을 선택하면 일반 빈출 난이도 문제가 즉시 생성됩니다.
+        </p>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          현재 데모는 학교 무관 일반 빈출 문제만 출제합니다 (헌법 v1.8 제30조 4항 — 학교별 RAG 인덱싱 진행 중).
         </p>
       </div>
 
       <Card>
         <CardContent className="space-y-3 p-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="exam-uni">학교</Label>
-            <Select
-              value={university}
-              onValueChange={(v) => setUniversity(v as UniversityName)}
-            >
-              <SelectTrigger id="exam-uni" aria-label="학교 선택">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {UNIVERSITY_SEEDS.map((u) => (
-                  <SelectItem key={u.name} value={u.name}>
-                    {u.name}대
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
           <div className="grid grid-cols-3 gap-2">
             {SECTIONS.map((s) => (
               <button

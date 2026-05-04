@@ -28,11 +28,16 @@ const GRADES: { key: "again" | "hard" | "good" | "easy"; label: string; tone: st
   { key: "easy",  label: "쉬움", tone: "bg-accent/30 hover:bg-accent/50" },
 ];
 
+// 헌법 v1.8 제30조의2 — 4계층 출처 모델.
 const ANSWER_BADGE: Record<AnswerSource, { label: string; className: string }> = {
   official: { label: "공식", className: "bg-secondary text-foreground/80" },
   ai_estimate: {
     label: "검증 필요",
     className: "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200",
+  },
+  user_self_corrected: {
+    label: "내가 정정",
+    className: "bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200",
   },
   crowd_verified: { label: "검증됨", className: "bg-primary/10 text-primary" },
 };

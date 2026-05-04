@@ -54,12 +54,13 @@ export function AuthForm({ mode }: AuthFormProps) {
   async function handleKakao() {
     setStatus("loading");
     setError(null);
+    // 헌법 제17조 5항 — Supabase OAuth (PKCE) 콜백을 통해 토큰 교환을 거친다.
+    const origin =
+      process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
       options: {
-        redirectTo:
-          (process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin) +
-          "/home",
+        redirectTo: `${origin}/auth/callback?next=/home`,
       },
     });
     if (err) {

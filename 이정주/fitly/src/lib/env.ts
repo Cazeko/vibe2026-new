@@ -29,14 +29,15 @@ export const env = {
     get apiKey() {
       return required("GEMINI_API_KEY");
     },
+    // 헌법 제18조 v1.5 — 성능 최우선 정책의 모델 매트릭스 fallback.
     get modelPro() {
-      return optional("GEMINI_MODEL_PRO", "gemini-2.5-pro");
+      return optional("GEMINI_MODEL_PRO", "gemini-3.1-pro-preview");
     },
     get modelFlash() {
-      return optional("GEMINI_MODEL_FLASH", "gemini-2.5-flash");
+      return optional("GEMINI_MODEL_FLASH", "gemini-3.1-pro-preview");
     },
     get embeddingModel() {
-      return optional("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001");
+      return optional("GEMINI_EMBEDDING_MODEL", "gemini-embedding-2");
     },
   },
   app: {

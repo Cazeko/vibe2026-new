@@ -3,6 +3,7 @@ import {
   type CookieOptions,
 } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { env } from "@/lib/env";
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
@@ -10,11 +11,17 @@ const PROTECTED_PREFIXES = ["/home", "/study", "/mistakes", "/settings"];
 const AUTH_PREFIXES = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {
+  // 헌법 제17조 5항 — Supabase OAuth (PKCE) callback 경로는
+  // redirect 로직보다 먼저 통과시켜 토큰 교환을 보장한다 (D17 v1.8 정정).
+  if (request.nextUrl.pathname.startsWith("/auth/")) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    env.supabase.url,
+    env.supabase.anonKey,
     {
       cookies: {
         getAll() {

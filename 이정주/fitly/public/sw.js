@@ -31,6 +31,9 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  // 헌법 제17조 7항 1호 (v1.8) — /api/* 응답은 캐시하지 아니한다 (인증 누설 방지).
+  if (url.pathname.startsWith("/api/")) return;
+
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)

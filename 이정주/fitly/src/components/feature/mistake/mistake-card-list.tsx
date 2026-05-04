@@ -19,6 +19,7 @@ type MistakeCardListProps = {
   onUpdated?: (id: string, updated: Partial<Item>) => void;
 };
 
+// 헌법 v1.8 제30조의2 — 4계층 출처 모델 UI 매핑.
 const ANSWER_BADGE: Record<
   AnswerSource,
   { label: string; className: string }
@@ -31,6 +32,11 @@ const ANSWER_BADGE: Record<
     label: "검증 필요",
     className:
       "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200",
+  },
+  user_self_corrected: {
+    label: "내가 정정",
+    className:
+      "bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200",
   },
   crowd_verified: {
     label: "검증됨",
@@ -94,7 +100,7 @@ function CardItem({
       onUpdated?.(item.id, {
         answer,
         explanation,
-        answerSource: "crowd_verified",
+        answerSource: "user_self_corrected",
       });
       setEditing(false);
     } catch (err) {
@@ -190,7 +196,7 @@ function CardItem({
                 ) : (
                   <>
                     <Save className="h-4 w-4" aria-hidden />
-                    검증으로 저장
+                    내 정정으로 저장
                   </>
                 )}
               </Button>
@@ -213,7 +219,7 @@ function CardItem({
               </p>
             )}
             <p className="text-[10px] text-muted-foreground">
-              저장 시 본 카드는 &ldquo;검증됨&rdquo;으로 승격됩니다 (헌법 제30조의2).
+              저장 시 본 카드는 &ldquo;내가 정정&rdquo;으로 표시됩니다. 2명 이상의 사용자가 동일 답을 제출하면 &ldquo;검증됨&rdquo;으로 승격됩니다 (헌법 v1.8 제30조의2).
             </p>
           </div>
         )}

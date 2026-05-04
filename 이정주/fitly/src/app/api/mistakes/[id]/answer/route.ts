@@ -41,13 +41,15 @@ export async function POST(
     );
   }
 
+  // 헌법 v1.8 제30조의2 — 단일 사용자의 자가 정정은 'user_self_corrected'.
+  // 'crowd_verified'로의 승격은 2명 이상 서로 다른 사용자의 동일 답 누적 시점에 별도 처리.
   const db = getDb();
   const [updated] = await db
     .update(mistakes)
     .set({
       answer: parsed.data.answer,
       explanation: parsed.data.explanation ?? null,
-      answerSource: "crowd_verified",
+      answerSource: "user_self_corrected",
     })
     .where(and(eq(mistakes.id, id), eq(mistakes.userId, user.id)))
     .returning();
