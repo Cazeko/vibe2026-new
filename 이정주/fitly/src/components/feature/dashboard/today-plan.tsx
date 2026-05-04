@@ -1,78 +1,71 @@
 import Link from "next/link";
-import { Check, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { TODAY_PLAN } from "@/lib/data/demo-persona";
+import { CheckCircle2, Circle, Lock } from "lucide-react";
+import type { PlanItem } from "@/lib/dashboard/types";
 
-export function TodayPlan() {
+const STATE_ICON = {
+  in_progress: Circle,
+  completed: CheckCircle2,
+  locked: Lock,
+} as const;
+
+const STATE_TONE: Record<PlanItem["state"], string> = {
+  in_progress: "text-primary",
+  completed: "text-emerald-500",
+  locked: "text-muted-foreground/60",
+};
+
+// 헌법 v1.10 — TodayPlan 은 실데이터(SRS 듀카드 + 오늘 푼 문제 수)로 산출된다.
+export function TodayPlan({ items }: { items: PlanItem[] }) {
   return (
-    <Card className="rounded-2xl border-0 shadow-sm h-full">
-      <CardContent className="p-5 h-full">
+    <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
+      <CardContent className="p-4 h-full">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold">오늘의 학습 플랜</h2>
+          <h2 className="text-sm font-bold">오늘의 학습 플랜</h2>
           <Link
             href="/study-plan"
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="text-[11px] text-muted-foreground hover:text-foreground"
           >
-            더보기 ›
+            전체 ›
           </Link>
         </div>
 
-        <ul className="mt-4 space-y-3">
-          {TODAY_PLAN.map((item) => (
-            <li
-              key={item.id}
-              className="flex items-start gap-3 rounded-xl px-2 py-2"
-            >
-              <span
-                className="mt-0.5 grid h-5 w-5 place-items-center rounded-md border border-border bg-background"
-                aria-hidden
-              >
-                {item.state === "completed" && (
-                  <Check className="h-3.5 w-3.5 text-primary" />
-                )}
-                {item.state === "locked" && (
-                  <Lock className="h-3 w-3 text-muted-foreground" />
-                )}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p
-                  className={
-                    item.state === "completed"
-                      ? "text-sm font-medium text-muted-foreground line-through"
-                      : "text-sm font-medium"
-                  }
+        <ul className="mt-2 space-y-1.5">
+          {items.map((item) => {
+            const Icon = STATE_ICON[item.state];
+            const tone = STATE_TONE[item.state];
+            const isLocked = item.state === "locked";
+            return (
+              <li key={item.id}>
+                <Link
+                  href={isLocked ? "#" : item.href}
+                  aria-disabled={isLocked}
+                  className={`flex items-center gap-2.5 rounded-xl border border-border/50 bg-background px-2.5 py-2 transition-colors ${
+                    isLocked
+                      ? "opacity-60 cursor-not-allowed"
+                      : "hover:bg-secondary/40"
+                  }`}
                 >
-                  {item.title}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {item.subtitle}
-                </p>
-              </div>
-              <ProgressBadge item={item} />
-            </li>
-          ))}
+                  <Icon className={`h-4 w-4 shrink-0 ${tone}`} aria-hidden />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-medium leading-tight truncate">
+                      {item.title}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                  {!isLocked && (
+                    <span className="text-[10px] tabular-nums text-muted-foreground">
+                      {item.progress}%
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </CardContent>
     </Card>
-  );
-}
-
-function ProgressBadge({
-  item,
-}: {
-  item: (typeof TODAY_PLAN)[number];
-}) {
-  if (item.state === "locked") return null;
-  if (item.state === "completed") {
-    return (
-      <span className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-primary">
-        <Check className="h-3.5 w-3.5" aria-hidden />
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex h-7 min-w-[2.75rem] items-center justify-center rounded-full bg-primary/10 px-2 text-[11px] font-semibold text-primary">
-      {item.progress}%
-    </span>
   );
 }

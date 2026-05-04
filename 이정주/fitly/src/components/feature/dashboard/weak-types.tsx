@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { WEAK_TYPES } from "@/lib/data/demo-persona";
+import type { WeakType } from "@/lib/dashboard/types";
 
 type Severity = "weak" | "warn" | "ok" | "good";
 
@@ -25,51 +26,63 @@ const SEVERITY_BAR: Record<Severity, string> = {
 };
 
 const SEVERITY_BADGE: Record<Severity, string> = {
-  weak: "bg-rose-50 text-rose-600",
-  warn: "bg-amber-50 text-amber-600",
-  ok: "bg-sky-50 text-sky-600",
-  good: "bg-emerald-50 text-emerald-600",
+  weak: "bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300",
+  warn: "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300",
+  ok: "bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300",
+  good: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300",
 };
 
-export function WeakTypes() {
+export function WeakTypes({ items }: { items: WeakType[] }) {
   return (
-    <Card className="rounded-2xl border-0 shadow-sm h-full">
-      <CardContent className="p-5 h-full">
-        <h2 className="text-base font-bold">취약 유형 분석</h2>
+    <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
+      <CardContent className="p-4 h-full">
+        <h2 className="text-sm font-bold">취약 유형 분석</h2>
 
-        <ul className="mt-4 space-y-3">
-          {WEAK_TYPES.map((w) => {
-            const sev = severityOf(w.accuracy);
-            return (
-              <li key={w.id} className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />
-                    <span className="font-medium text-foreground">
-                      {w.label}
+        {items.length === 0 ? (
+          <div className="mt-3 grid place-items-center rounded-xl border border-dashed border-border/60 bg-background/50 py-7 text-center text-[11.5px] text-muted-foreground">
+            <span className="font-medium text-foreground">아직 분석할 데이터가 없어요</span>
+            <Link
+              href="/study/exam"
+              className="mt-1 text-[10px] text-primary hover:underline"
+            >
+              기출 풀이로 시작 ›
+            </Link>
+          </div>
+        ) : (
+          <ul className="mt-2 space-y-1.5">
+            {items.map((w) => {
+              const sev = severityOf(w.accuracy);
+              return (
+                <li key={w.id} className="space-y-1">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
+                      <span className="font-medium text-foreground">
+                        {w.label}
+                      </span>
                     </span>
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">
-                      정답률 {w.accuracy}%
-                    </span>
-                    <span
-                      className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${SEVERITY_BADGE[sev]}`}
-                    >
-                      {SEVERITY_LABEL[sev]}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-muted-foreground">
+                        정답률 {w.accuracy}%
+                      </span>
+                      <span
+                        className={`rounded-md px-1.5 py-px text-[9.5px] font-semibold ${SEVERITY_BADGE[sev]}`}
+                      >
+                        {SEVERITY_LABEL[sev]}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className={`h-full ${SEVERITY_BAR[sev]} transition-all`}
-                    style={{ width: `${w.accuracy}%` }}
-                  />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
+                    <div
+                      className={`h-full ${SEVERITY_BAR[sev]} transition-all`}
+                      style={{ width: `${w.accuracy}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );

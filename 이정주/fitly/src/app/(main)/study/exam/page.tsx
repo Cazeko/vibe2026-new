@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, RefreshCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useStudySession } from "@/lib/hooks/use-study-session";
 
 type Section = "vocab" | "grammar" | "reading";
 
@@ -29,6 +30,15 @@ export default function ExamPage() {
   const [picked, setPicked] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const session = useStudySession("exam");
+
+  // picked 가 처음 잡힐 때 정답 여부를 세션 카운터에 기록
+  useEffect(() => {
+    if (picked && item) {
+      session.recordCard(picked === item.answer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picked, item]);
 
   async function generate() {
     setLoading(true);

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2, Sparkles, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useStudySession } from "@/lib/hooks/use-study-session";
 import type { AnswerSource } from "@/types";
 
 type MistakeRow = {
@@ -48,6 +49,7 @@ export default function ReviewPage() {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const session = useStudySession("review");
 
   async function load() {
     setStatus("loading");
@@ -88,7 +90,10 @@ export default function ReviewPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "리뷰 실패");
 
+      session.recordCard(grade === "good" || grade === "easy");
+
       if (index + 1 >= queue.length) {
+        await session.finish();
         setStatus("done");
       } else {
         setIndex(index + 1);

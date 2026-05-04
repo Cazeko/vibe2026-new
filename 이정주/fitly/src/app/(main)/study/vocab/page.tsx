@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2, Sparkles, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useStudySession } from "@/lib/hooks/use-study-session";
 
 type VocabCardRow = {
   id: string;
@@ -32,6 +33,7 @@ export default function VocabStudyPage() {
   const [revealed, setRevealed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
+  const session = useStudySession("vocab");
 
   async function load() {
     setStatus("loading");
@@ -88,7 +90,11 @@ export default function VocabStudyPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "리뷰 실패");
 
+      // 세션 카운터: again/hard 는 오답, good/easy 는 정답으로 간주
+      session.recordCard(grade === "good" || grade === "easy");
+
       if (index + 1 >= queue.length) {
+        await session.finish();
         setStatus("done");
       } else {
         setIndex(index + 1);
