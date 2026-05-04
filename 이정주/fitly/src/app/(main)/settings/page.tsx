@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/shared/page-header";
 import { UNIVERSITY_SEEDS } from "@/lib/data/universities";
 import type { UniversityName } from "@/types";
 
@@ -70,15 +71,13 @@ export default function SettingsPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-md px-4 py-6 space-y-6 animate-fade-up">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">설정</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          목표 학교와 시험일을 설정하면 D-day와 적합도가 활성화됩니다.
-        </p>
-      </header>
-
-      <Card>
+    <div className="min-h-screen pb-10">
+      <PageHeader
+        title="설정"
+        subtitle="목표 학교와 시험일을 설정하면 D-day와 적합도가 활성화됩니다."
+      />
+      <div className="px-8 max-w-2xl">
+        <Card className="rounded-2xl border-0 shadow-sm">
         <CardHeader>
           <CardTitle>목표 설정</CardTitle>
         </CardHeader>
@@ -160,7 +159,8 @@ export default function SettingsPage() {
             </>
           )}
         </CardContent>
-      </Card>
-    </section>
+        </Card>
+      </div>
+    </div>
   );
 }

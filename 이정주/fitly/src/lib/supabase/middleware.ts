@@ -7,7 +7,20 @@ import { env } from "@/lib/env";
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
-const PROTECTED_PREFIXES = ["/home", "/study", "/mistakes", "/settings"];
+// 헌법 v1.9 제13조 — 사이드바 7+2 라우트 보호
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/study-plan",
+  "/materials",
+  "/exam-analysis",
+  "/study-analysis",
+  "/mistakes",
+  "/me",
+  "/settings",
+  // 레거시 호환 (단계적 마이그레이션 완료까지 보호 유지)
+  "/home",
+  "/study",
+];
 const AUTH_PREFIXES = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {
