@@ -3,10 +3,14 @@
 | 항목 | 값 |
 |------|----|
 | 일자 | 2026-05-06 |
-| 헌법 버전 | v3.0 (부칙 제3조 1·2항 정합) |
+| 헌법 버전 | **v3.1** (제18조 모델 매트릭스 기능별 차등 + 부칙 제3조 1·2항 정합) |
 | 선행 문서 | `docs/plans/2026-05-06-fitly-v3-임용-design.md` |
 | 적용 대상 | `fitly/kice_pdfs/` (68개 PDF) → DB 시드 (exam_papers, exam_items, cards) |
 | 추정 일정 | DB 마이그레이션 0.5일 + 파이프라인 구현 2일 + 시드 실행·검토 3~4일 = **약 1주** |
+| **단기 시드 모델** (헌법 제18조 v3.1 B-단기) | **`claude-sonnet-4-6` (1M ctx)** + Anthropic prompt caching |
+| **장기 갱신 모델** (B-장기, 매년) | Gemini 매트릭스 (Pro = 분리·모범답안 / Flash = 태깅·키워드) |
+| 단기 시드 비용 추정 | **약 $50~70** (caching 적용) — 안전 마진 1.7배 시 $85~120 |
+| 장기 매년 갱신 비용 | $1~3/년 (Flash 가성비 활용) |
 
 ---
 
@@ -18,8 +22,16 @@
 |------|------|------|
 | Gemini 클라이언트 | `src/lib/ai/gemini.ts` | `GEMINI_MODELS.pro/flash/embedding` 그대로 |
 | PDF 텍스트 추출 | `src/lib/ocr/pdf.ts` | `unpdf` 기반 — 텍스트 PDF용 |
-| 이미지 OCR | `src/lib/ocr/vision.ts` | Gemini Vision — 스캔/이미지 PDF 폴백 |
-| 환경 변수 | `.env.example` | `GEMINI_API_KEY`, `GEMINI_MODEL_PRO` 등 |
+| 이미지 OCR | `src/lib/ocr/vision.ts` | Gemini Vision — 스캔/이미지 PDF 폴백 (장기) |
+| 환경 변수 | `.env.example` | `GEMINI_API_KEY`, `GEMINI_MODEL_PRO`, `GEMINI_MODEL_FLASH` 등 |
+
+### 1.1A 신설 (헌법 v3.1 제18조 B-단기)
+
+| 자산 | 위치 | 비고 |
+|------|------|------|
+| Anthropic 클라이언트 | `src/lib/ai/anthropic.ts` (신설) | Sonnet 4.6 1M, prompt caching 활용 |
+| Anthropic SDK | `@anthropic-ai/sdk` (npm 추가, D-S1.5에서) | TypeScript SDK |
+| 환경 변수 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL_SONNET` | `.env.example` 갱신 |
 
 ### 1.2 폐기 대상 (v3.0 / v3.0.1 마이그레이션)
 
@@ -167,6 +179,21 @@ INDEX user_card_log_user_card_time_idx ON user_card_log(user_id, card_id, review
 ---
 
 ## 4. Phase 1 — 시드 파이프라인 (`scripts/seed/`)
+
+### 4.0 Step별 모델 매핑 (헌법 v3.1 제18조 B-트랙)
+
+| Step | 단기 (현 시점) | 장기 (매년) | prompt caching |
+|------|---------------|-----------|----------------|
+| 02 PDF → 텍스트 (unpdf) | unpdf | unpdf | — |
+| 02b Vision OCR 폴백 | (보류 — 운영자 수동 입력 우선) | `gemini-3.1-pro-preview` | — |
+| 03 문항 분리 | `claude-sonnet-4-6` (1M) | `gemini-3.1-pro-preview` | ✅ few-shot |
+| 04a 풀이 태깅 + 모범답안 | `claude-sonnet-4-6` | `gemini-3.1-pro-preview` (모범답안) + `gemini-2.5-flash` (태깅) | ✅ |
+| 04b 키워드 태깅 | `claude-sonnet-4-6` | **`gemini-2.5-flash`** | ✅ |
+| 04b dedup 통합 | `claude-sonnet-4-6` | `gemini-3.1-pro-preview` (의미 충돌 해소 추론) | — |
+
+> 단기 본실행은 Anthropic SDK + Sonnet 4.6 1M context로. Anthropic prompt caching (5분 TTL)을 활용하여 few-shot 컨텍스트 재사용 시 입력 비용 50~70% 절감.
+>
+> 장기 매년 갱신은 Gemini 매트릭스로 자동화 — D-S6a 비용·품질 dry-run 통과 후 본실행.
 
 ### 4.1 디렉토리 구조
 
@@ -462,8 +489,9 @@ Day 5+  Step 05 (운영자 검토, 비동기 백로그) — 풀이 트랙 큐는
 | D-S4b | 페이지 렌더링 라이브러리 도입 (`pdfjs-dist` 등) | `npm run build` (의존성 추가) |
 | D-S4c | Vision OCR 폴백 + 1개 스캔 PDF 통합 테스트 | `npm test` |
 | D-S5 | `03-split-items.ts` + 프롬프트 (한글 하위 발문 처리, few-shot) | items.json sanity + 운영자 1차 게이트 |
-| D-S6a | **Pro 모델 비용 dry-run** (5개 PDF 샘플) — 토큰·달러 실측 후 사용자 승인 | log JSON |
-| D-S6b | `04a-tag-quiz.ts` + 모범답안 (verified=false 적재) | tagged.json (서술형만) |
+| D-S6a-단기 | Anthropic SDK 통합 + **Sonnet 4.6 dry-run** (5 PDF 샘플) — 토큰·달러 실측 + prompt caching 효과 측정 | log JSON, 사용자 승인 |
+| D-S6a-장기 | (런칭 후) **Gemini Pro/Flash dry-run** (5 PDF) — 매년 갱신 자동화용 | log JSON, 사용자 승인 |
+| D-S6b | `04a-tag-quiz.ts` (단기 = Sonnet, 장기 = Gemini) + 모범답안 (verified=false 적재) | tagged.json (서술형만) |
 | D-S7 | `04b-tag-keywords.ts` + dedup (의미 중심 통합) | keyword tagged |
 | D-S8 | `06-derive-cards.ts` (DB 적재, **idempotent UPSERT**) | cards 테이블 sanity + 재실행 동일 row count 테스트 |
 | D-S9 | `/admin/seed-review` UI | 화면 동작 + verified=false 배지 정확 노출 검증 |
@@ -502,14 +530,35 @@ Day 5+  Step 05 (운영자 검토, 비동기 백로그) — 풀이 트랙 큐는
 
 ### A.2 부록 보강 (3건)
 
-#### #4 [ADV] Gemini Pro 비용 추정 누락
+#### #4 [ADV] 모델별 비용 추정 (헌법 v3.1 매트릭스 정합)
 
-- **실측 추정**: 600문항 × (Step03 분리 1회 + Step04a 태깅+모범답안 1회 + Step04b 키워드 1회) ≈ **1,800 Pro 호출**
-- 호출당 평균 입력 4K + 출력 1.5K 토큰 가정 시 **$30~80** (현 Gemini Pro 단가, 변동 가능)
-- 스캔 PDF Vision OCR 추가 시 페이지당 1 Pro 호출 × 수십 페이지 × 일부 PDF = **+$20~50**
-- **총 단일 시드 실행 추정: $50~130**
-- **헌법 제35조 "비용 초과" 위험**: dry-run 없이 본실행 시 회사 키 한도 초과 가능
-- **D-S6a 게이트 신설**: 5개 PDF 샘플로 토큰·달러 실측 후 사용자 사전 승인 의무
+**단기 (Sonnet 4.6 1M, prompt caching 적용)**
+
+- 실측 추정: 1,080 + 325 + 60 ≈ **1,465 호출**
+- 호출당 평균 입력 4K + 출력 4K 토큰
+- 단가: 입력 $3 / 1M, 출력 $15 / 1M
+- 입력 5.86M × $3 = $17.6 → caching 70% 절감 → **$5.3**
+- 출력 5.86M × $15 = **$87.9**
+- **단기 합계: $93** + 안전마진 1.7 = **$158**
+- 또는 caching 보수적 (50%) → 입력 $8.8 + 출력 $87.9 = **$96.7** + 1.7 = **$164**
+- **현실 범위: $90~165**
+
+**장기 (Gemini 매트릭스, 매년 갱신)**
+
+- 매년 신규 PDF 3개 (논술 1 + A 22 + B 22 = 45 문항)
+- Step 03 = Pro 3 호출 (~$0.3)
+- Step 04a 모범답안 = Pro ~25 호출 (~$1)
+- Step 04b 키워드 = **Flash** 45 호출 (~$0.05)
+- 태깅 = **Flash** 25 호출 (~$0.05)
+- **장기 매년 합계: ~$1.5** (Pro 단일 사용 시 $5와 비교 70% 절감)
+
+**최초 풀스코프 시드를 장기 매트릭스로 했을 경우 (참고)**
+
+- Pro 분리·모범답안 + Flash 태깅·키워드 = **$15~30** (안전 마진 포함)
+- 즉 비용만 보면 단기보다 5~10배 저렴하나, 한국어 서술 품질 차이로 **단기는 Sonnet 4.6 채택** (헌법 v3.1 결정)
+
+**헌법 제35조 "비용 초과" 위험 차단**: dry-run 없이 본실행 시 회사 키 한도 초과 가능
+**D-S6a-단기 게이트**: 5개 PDF Sonnet 4.6 샘플 실측 + caching 효과 검증 + 사용자 승인
 
 #### #6 [ENG] 스키마 gap — FSRS 위치, 인덱스, RLS, FK 캐스케이드
 
