@@ -3,7 +3,7 @@
 | 항목 | 값 |
 |------|----|
 | 일자 | 2026-05-06 |
-| 헌법 버전 | v3.2 (제13조의2 8항 — 객관식 풀이 출제 X, 개념 정리 노트로 흡수) |
+| 헌법 버전 | **v3.3** (제13조의2 9항 — 본문 100% 정확성 보장, LLM이 본문 생성 X) |
 | 운영 모델 | claude-opus-4-7 (1M context) — Anthropic 채팅 직접 처리 |
 | 처리 트랙 | 헌법 v3.1 제18조 B-단기 |
 | 선행 dry-run | 2026 풀세트 (essay/A/B) — Appendix B |
@@ -71,23 +71,46 @@
 
 > Phase 3·4는 객관식 풀이 카드 생성 X — 개념 추출만.
 
-### 2.3 세션당 산출 표준
+### 2.3 세션당 산출 표준 [v3.3 갱신]
 
-각 세션 시작 시:
-1. 작업할 시험지 PDF를 PNG로 변환:
-   ```bash
-   pdftocairo -png -r 150 /home/jovyan/work/fitly/kice_pdfs/{year}-{session}.pdf /tmp/pdf-pages/{year}-{session}
-   ```
-2. 페이지별 Read 도구로 분석
-3. JSON 작성:
-   ```
-   /home/jovyan/work/.worktrees/v3-seed-pipeline/fitly/scripts/seed/data/papers/{year}-{session}/items.json
-   ```
-4. 모범답안 품질 표준 (§4.5.1) 자가 검증
-5. 세션 종료 commit:
-   ```
-   feat(seed): SXX {year} 풀세트 시드 — {N}문항/{P}점/{T}분
-   ```
+각 시험지마다:
+
+**Step 02a — unpdf 텍스트 추출 (LLM 미사용, 100% 정확)**
+```bash
+node scripts/seed/lib/extract-pdf-pages.mjs /home/jovyan/work/fitly/kice_pdfs/{year}-{session}.pdf > scripts/seed/data/papers/{year}-{session}/raw_text.txt
+```
+
+**Step 02b — pdftocairo 페이지 PNG (LLM 미사용)**
+```bash
+pdftocairo -png -r 150 /home/jovyan/work/fitly/kice_pdfs/{year}-{session}.pdf scripts/seed/data/papers/{year}-{session}/pages/page
+```
+
+**Step 03 — 문항 위치 식별 (LLM, 본문 생성 X)**
+- 페이지 PNG를 Read 도구로 본문 시각 확인 (분석 보조)
+- raw_text.txt에서 각 문항 시작·끝 character offset 식별
+- **stem_text는 raw_text.txt 슬라이스로 강제** (LLM 출력 \"내용\" 부분 무시)
+
+**Step 04 — 분석·답안·해설 (LLM, 본문 생성 X)**
+- domains, bloom, keywords (3~5개)
+- answer_md (학생이 시험에서 쓸 분량 — §4.5.1 표준)
+- explanation_md (학습 보조 해설)
+- **stem 관련 출력은 절대 사용하지 않음**
+
+**Step 05 — JSON 작성**
+```
+/home/jovyan/work/.worktrees/v3-seed-pipeline/fitly/scripts/seed/data/papers/{year}-{session}/items.json
+```
+필수 필드: `stem_text` (unpdf 직접 슬라이스), `stem_image_paths` (PNG 경로 배열), `answer_md`, `explanation_md`, `verified_text=true`, `verified_answer=false`
+
+**Step 06 — 자가 검증**
+- [ ] `stem_text == raw_text[start:end]` (코드/수동 확인)
+- [ ] §4.5.1 답안 분량 표준
+- [ ] §4.5.1 해설 분량 표준
+
+**Step 07 — commit**
+```
+feat(seed): SXX {year} 풀세트 시드 — {N}문항/{P}점/{T}분 (v3.3)
+```
 
 ---
 
@@ -120,25 +143,28 @@
 
 ## 4. 진행 상황 (세션마다 갱신)
 
-| Session | 일자 | 처리 PDF | SHA | 풀이 카드 (서술형) | 키워드 카드 후보 |
-|---------|------|---------|-----|-------------------|-----------------|
-| 01 | 2026-05-06 | 2026-essay/A/B | 68888ac | 21문항 (논술 1 + A 7 + B 8 추정) | 평균 4개/문항 → 84개 |
-| 02 | — | 2025-essay/A/B | — | — | — |
-| ... | | | | | |
+| Session | 일자 | 처리 PDF | SHA | 상태 |
+|---------|------|---------|-----|------|
+| 01 | 2026-05-06 | 2026-essay/A/B | 68888ac | ⚠ **ARCHIVED** — v3.3 본문 정확성 정책 위배, 재시드 필요 |
+| 01-redo | — | 2026-essay/A/B (v3.3 절차) | — | — |
+| 02 | — | 2025-essay/A/B | — | — |
+| ... | | | | |
 
 > 각 세션 운영자(또는 Claude)는 본 표 1행을 추가하며 종료.
 
 ---
 
-## 5. 모범답안 품질 — 핵심 요지 (§4.5.1 요약)
+## 5. 답안·해설 품질 — 핵심 요지 (§4.5.1 v3.3 요약)
 
-### 길이
+### 길이 (답안 vs 해설 분리)
 
-| format | 본문 길이 (한글) |
-|--------|-----------------|
-| 단답형 | 80~200자/소문제 |
-| 서술형 | **400~800자/소문제** |
-| 논술형 | **1,500~2,400자/문항 전체**, 8~12문단 |
+| format | `answer_md` (시험 분량) | `explanation_md` (학습 보조) |
+|--------|------------------------|----------------------------|
+| 단답형 | 10~80자/소문제 | 200~400자 |
+| 서술형 | **80~250자/소문제** (2~4문장) | 300~600자 |
+| 논술형 | **1,500~2,400자/문항** (2매 분량) | 100~300자 |
+
+> 답안은 학생이 70분 안에 실제 쓸 분량. 해설은 자가 채점 후 펼쳐 보는 학습 보조.
 
 ### 구성 5단 (서술/논술형)
 

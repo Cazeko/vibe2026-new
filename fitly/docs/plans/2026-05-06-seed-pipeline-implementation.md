@@ -180,16 +180,18 @@ INDEX user_card_log_user_card_time_idx ON user_card_log(user_id, card_id, review
 
 ## 4. Phase 1 — 시드 파이프라인 (`scripts/seed/`)
 
-### 4.0 Step별 모델 매핑 (헌법 v3.1 제18조 B-트랙)
+### 4.0 Step별 모델 매핑 (헌법 v3.1·v3.3 정합)
 
-| Step | 단기 (현 시점) | 장기 (매년) | prompt caching |
-|------|---------------|-----------|----------------|
-| 02 PDF → 텍스트 (unpdf) | unpdf | unpdf | — |
-| 02b Vision OCR 폴백 | (보류 — 운영자 수동 입력 우선) | `gemini-3.1-pro-preview` | — |
-| 03 문항 분리 | `claude-sonnet-4-6` (1M) | `gemini-3.1-pro-preview` | ✅ few-shot |
-| 04a 풀이 태깅 + 모범답안 | `claude-sonnet-4-6` | `gemini-3.1-pro-preview` (모범답안) + `gemini-2.5-flash` (태깅) | ✅ |
-| 04b 키워드 태깅 | `claude-sonnet-4-6` | **`gemini-2.5-flash`** | ✅ |
-| 04b dedup 통합 | `claude-sonnet-4-6` | `gemini-3.1-pro-preview` (의미 충돌 해소 추론) | — |
+| Step | 단기 (현 시점) | 장기 (매년) | LLM 역할 | prompt caching |
+|------|---------------|-----------|---------|----------------|
+| 02a PDF → 텍스트 (unpdf) | unpdf | unpdf | **본문 직접 추출 (LLM 미사용)** | — |
+| 02b PDF → 페이지 PNG (pdftocairo) | pdftocairo | pdftocairo | **본문 시각 보존 (LLM 미사용)** | — |
+| 03 문항 단위 분리 (위치 인식) | `claude-sonnet-4-6` (1M) | `gemini-3.1-pro-preview` | unpdf 텍스트에서 \"문항 N번이 어느 줄~어느 줄\"을 식별만, 본문 생성 X | ✅ few-shot |
+| 04a 풀이 태깅 + 답안·해설 | `claude-sonnet-4-6` | `gemini-3.1-pro-preview` (답안·해설) + `gemini-2.5-flash` (태깅) | 분석·태깅·답안·해설 생성. **본문 생성 절대 X** (헌법 v3.3 9항) | ✅ |
+| 04b 키워드 태깅 + 개념 정리 노트 | `claude-sonnet-4-6` | **`gemini-2.5-flash`** | 키워드 카드 본문(개념 정리 노트)은 LLM 생성 (헌법 v3.2 8항 예외) | ✅ |
+| 04b dedup 통합 | `claude-sonnet-4-6` | `gemini-3.1-pro-preview` | 의미 충돌 해소 추론 | — |
+
+> **v3.3 핵심 원칙**: Step 02a·02b는 결정론적 (LLM 미사용, 100% 정확). Step 03 이상에서 LLM이 사용되지만, **stem(본문) 자체를 만들지 않고** 위치 식별·분석·답안만 생성. 카드 본문은 02a/02b 산출물을 그대로 사용 → 0% 본문 오류 보장.
 
 > 단기 본실행은 Anthropic SDK + Sonnet 4.6 1M context로. Anthropic prompt caching (5분 TTL)을 활용하여 few-shot 컨텍스트 재사용 시 입력 비용 50~70% 절감.
 >
@@ -259,7 +261,25 @@ src/app/admin/seed-review/      (Step 5 — 검토 UI, Phase 1 끝부분)
 - `year` ∈ [2001, 2026], `session` ∈ {'essay', 'A', 'B', 'combined'}
 - 단위 테스트: `file-name-parser.ts` (단순 패턴 매칭, 4~5개 케이스)
 
-### 4.3 Step 02 — PDF → 텍스트
+### 4.3 Step 02 — PDF → 텍스트 + 페이지 PNG (v3.3 분리)
+
+**Step 02a (unpdf 텍스트)**:
+- 입력: `kice_pdfs/{year}-{session}.pdf`
+- 출력: `scripts/seed/data/papers/{year}-{session}/raw_text.json` — 페이지별 텍스트 배열
+- 라이브러리: `unpdf` (벡터 PDF 텍스트 객체 직접 추출, OCR 없음, 100% 정확)
+- 검증: 각 페이지 텍스트 길이 ≥ 500자 sanity, 빈 페이지 별도 표시
+- LLM 미사용
+
+**Step 02b (pdftocairo PNG)**:
+- 입력: `kice_pdfs/{year}-{session}.pdf`
+- 출력: `scripts/seed/data/papers/{year}-{session}/pages/page-{N}.png`
+- 명령: `pdftocairo -png -r 150 {pdf} {prefix}`
+- 해상도 150 DPI (시각 충실)
+- LLM 미사용
+
+> 이 두 산출물이 **시험 문제 본문(`stem_text` + `stem_image_path`)** 의 단일 진실 원천(SoT)이며, 후속 Step에서 LLM이 본문을 만들거나 변경할 수 없다 (헌법 v3.3 9항).
+
+### 4.3-deprecated Step 02 (legacy)
 
 **입력**: `papers.json`
 **출력**: `scripts/seed/data/papers/{year}-{session}/raw.txt`
@@ -276,7 +296,61 @@ src/app/admin/seed-review/      (Step 5 — 검토 UI, Phase 1 끝부분)
 - 추출 실패 시 `papers.json[i].status = 'extract_failed'` 마킹
 - 단위 테스트는 어렵 (외부 호출) — 실제 PDF 1~2개로 통합 테스트
 
-### 4.4 Step 03 — 문항 분리
+### 4.4 Step 03 — 문항 위치 분리 [v3.3 갱신]
+
+**입력**: `raw_text.json` (Step 02a) + `pages/*.png` (Step 02b)
+**출력**: `items.json`
+
+```json
+[
+  { "item_no": 1,
+    "stem_text": "(unpdf 추출 본문, 그대로 — LLM이 만든 게 아님)",
+    "stem_pages": [1, 2],          // 본문이 걸친 PDF 페이지 번호
+    "stem_image_paths": ["pages/page-1.png", "pages/page-2.png"],
+    "format_hint": "서술형" },
+  ...
+]
+```
+
+**LLM 역할 (위치 식별만)**:
+- LLM에게 unpdf 텍스트를 통째로 입력
+- LLM은 \"문항 N번이 unpdf 텍스트의 어느 character 범위에서 어느 범위까지인가\" 만 식별 (start_offset, end_offset)
+- **stem_text는 LLM 출력이 아니라 unpdf 원본 텍스트의 슬라이스**로 코드 단계에서 강제
+
+```python
+# 의사 코드
+unpdf_text = read_unpdf_output()
+ranges = llm_identify_item_ranges(unpdf_text)  # LLM은 범위만 반환
+for r in ranges:
+    item.stem_text = unpdf_text[r.start:r.end]  # ← 본문은 unpdf에서 직접
+    # LLM이 만든 \"내용\"은 사용하지 않음
+```
+
+**LLM 프롬프트 (위치 식별 전용)**:
+```
+당신은 한국 초등 임용 시험지 분석 전문가입니다.
+다음 unpdf 추출 텍스트에서 각 문항의 시작·끝 character offset만 반환하세요.
+**문항 본문은 절대 다시 적지 마세요. 본문은 다른 단계에서 unpdf 출력을 직접 사용합니다.**
+
+[입력 텍스트]
+${unpdf_text}
+
+출력 형식:
+[
+  { "item_no": 1, "start_offset": 234, "end_offset": 1820, "format_hint": "서술형" },
+  ...
+]
+```
+
+**검증**:
+- 논술: 문항 수 == 1
+- 교육과정 A·B: 문항 수가 시험지 메타와 일치
+- 미스매치 시 운영자 1차 확인 게이트
+- **stem_text 자가 검증**: `assert item.stem_text == unpdf_text[item.start_offset:item.end_offset]` — 코드 강제
+
+> 헌법 v3.3 9항 정합. LLM은 \"본문이 어디 있는지\" 만 식별, 본문 자체는 절대 만들지 않음.
+
+### 4.4-deprecated Step 03 (legacy)
 
 **입력**: `raw.txt` + `papers.json`
 **출력**: `items.json`
@@ -312,7 +386,54 @@ JSON 외 텍스트는 출력하지 마세요.
 - 교육과정 A·B: 문항 수가 시험지 명세와 일치 (대부분 22문항)
 - 미스매치 시 `items.json` 옆에 `validation.json`에 사유 기록 (운영자 검토용)
 
-### 4.5 Step 04a — 풀이 시드 (서술형 태깅 + 모범답안)
+### 4.5 Step 04a — 풀이 시드 (서술형 태깅 + 답안·해설) [v3.3 갱신]
+
+**대상**: items.json 중 `format_hint='서술형'|'논술형'` AND `year >= 2014`
+**입력**: items.json (stem_text는 unpdf 원본, 변경 금지) + 페이지 PNG
+**출력**: tagged.json (풀이용)
+
+```json
+{
+  "item_no": 1,
+  "stem_text": "(unpdf 원본, Step 03 그대로)",
+  "stem_image_paths": [...],
+  "format": "서술형",
+  "domains": ["국어"],
+  "bloom": "분석",
+  "keywords": [...],
+  "answer_md": "(시험 분량 답안)",
+  "explanation_md": "(학습 보조 해설)",
+  "verified_text": true,    // PDF 원본 사용 → 자동 true
+  "verified_answer": false  // LLM 생성 → 운영자 검수 필요
+}
+```
+
+**LLM 역할 (분석·답안만, 본문 생성 X)**:
+
+LLM에 입력으로 unpdf의 stem_text + 페이지 PNG를 같이 넣고, 다음만 반환받는다:
+- domains[], bloom, keywords[]
+- answer_md (학생이 시험에서 쓸 분량)
+- explanation_md (학습 보조 해설)
+
+**LLM이 stem_text를 다시 만들거나 수정한 출력은 코드 단계에서 무시**한다 (헌법 v3.3 9항):
+
+```python
+# 의사 코드
+result = llm_analyze({
+  stem_text: item.stem_text,
+  stem_images: item.stem_image_paths,
+  points: item.points,
+})
+# 사용하는 필드만 추출 — stem 관련 출력은 무시
+item.domains = result.domains
+item.bloom = result.bloom
+item.keywords = result.keywords
+item.answer_md = result.answer_md
+item.explanation_md = result.explanation_md
+# item.stem_text는 절대 덮어쓰지 않음
+```
+
+### 4.5-deprecated Step 04a (legacy)
 
 **대상**: `papers.status='ok'` AND `year >= 2014` AND `session != '객관식 시대'`
 **입력**: `items.json`
@@ -352,15 +473,15 @@ JSON 외 텍스트는 출력하지 마세요.
 - "검증 필요" 라벨이 노출됨을 전제로 작성
 ```
 
-### 4.5.1 모범답안 품질 표준 [v3.2 강화 — 2026 dry-run 결과 반영]
+### 4.5.1 답안·해설 품질 표준 [v3.3 — 답안/해설 분리]
 
-**길이 표준** (소문제별 합산이 아니라 전체 답안 본문 기준):
+답안과 해설을 **서로 다른 필드**(`answer_md`, `explanation_md`)로 분리한다. 답안은 학생이 70분 안에 실제 쓸 분량이고, 해설은 자가 채점 후 펼쳐 보는 학습 보조이다.
 
-| format | 배점 | 본문 길이 (한글) | 구성 단위 |
-|--------|-----|-----------------|----------|
-| 단답형 | 1~2점 | **80~200자/소문제** | 정답 + 1~2문장 근거 |
-| 서술형 | 3~5점 | **400~800자/소문제** | 정의·근거·예시·결론 4단 구성 |
-| 논술형 | 15~20점 | **1,500~2,400자/문항 전체** | 8~12문단, 도입·전개·결론 + 소문제별 명확한 표제 |
+| format | 배점 | **`answer_md`** (시험 분량) | **`explanation_md`** (학습 보조) |
+|--------|-----|----------------------------|--------------------------------|
+| 단답형 | 1~2점 | 10~80자/소문제 (정답 1~2문장) | 200~400자 (왜 그 답인지) |
+| 서술형 | 3~5점 | **80~250자/소문제** (2~4문장) | 300~600자 (본문 근거 + 관련 개념) |
+| 논술형 | 15~20점 | **1,500~2,400자/문항** (2매 분량) | 100~300자 (본문이 풀이라 짧음) |
 
 **구성 단위 (모든 서술/논술형)**:
 1. **표제**: 소문제 번호 + 소제목 (예: "### 1) 단원 설계 목적과 학습 내용 선정·조직 중점 고려 사항")
@@ -662,6 +783,11 @@ Day 5+  Step 05 (운영자 검토, 비동기 백로그) — 풀이 트랙 큐는
 ---
 
 ## Appendix B — 단기 dry-run 실측 결과 (2026-05-06)
+
+> ⚠ **본 dry-run의 산출물은 v3.3 본문 정확성 정책에 따라 폐기 대상**입니다.
+> `scripts/seed/data/papers/2026-{essay,A,B}/items.json` 의 `stem_md` 필드는 LLM 멀티모달 분석으로 생성된 일반화·요약 결과이며, 헌법 v3.3 9항 \"본문 100% 정확성 보장 정책\"에 위배됩니다.
+>
+> **재시드 절차**: Step 02a/02b (unpdf + pdftocairo) → Step 03 (LLM 위치 식별만) → Step 04a (분석·답안만) 순으로 재처리. 본 Appendix는 \"LLM 분석으로 본문을 만들면 95~98% 정확도 한계\"의 실증 사례로 보존.
 
 **대상**: 2026 풀세트 3 PDF (essay, A, B) — 총 21문항 (1+10+10), 100점, 200분.
 **모델**: claude-opus-4-7 (1M context) — Anthropic 채팅 직접 처리 (사용자 키 한도 안, Anthropic SDK API 호출 없음).

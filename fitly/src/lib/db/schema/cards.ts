@@ -5,17 +5,27 @@ import {
   text,
   varchar,
   timestamp,
+  boolean,
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { examItems } from "./exam-items";
 
-// 헌법 v3.0 제13조의2 — 학습 카드 (다형 단일 테이블).
+// 헌법 v3.3 제13조의2 — 학습 카드 (다형 단일 테이블).
 // type='quiz'/'keyword' = 시드에서 자동 파생, user_id NULL (모든 사용자에게 공유).
 // type='mistake' = 사용자별, 풀이의 again/hard 자동 합류.
 //
 // FSRS 상태는 user_card_state 테이블로 분리 (1 row per user × card).
 // 본 테이블의 본문은 사용자별로 변하지 않음.
+//
+// 본문 정확성 정책 (v3.3 9항):
+// - quiz/mistake: frontText (PDF unpdf) + frontImagePath (PDF PNG) — LLM 생성 X
+// - keyword:      frontText에 개념 정리 노트 본문 (LLM 생성), frontImagePath NULL
+// - back: 답안·해설 (LLM 생성) — 모든 type 공통
+//
+// 검증 분리:
+// - verifiedText: PDF 원본 사용 시 자동 true (quiz/mistake), keyword는 LLM이라 false 시작
+// - verifiedAnswer: back 운영자 검수 후 true (기본 false)
 export const cards = pgTable(
   "cards",
   {
@@ -25,8 +35,14 @@ export const cards = pgTable(
       onDelete: "cascade",
     }),
     userId: uuid("user_id"), // NULL for shared seed cards
-    frontMd: text("front_md").notNull(),
+    // 본문 (v3.3 분리)
+    frontText: text("front_text").notNull(), // 본문 텍스트 (quiz/mistake = unpdf, keyword = LLM 개념 노트)
+    frontImagePath: text("front_image_path"), // PDF 페이지 PNG (quiz/mistake만, keyword는 NULL)
+    // 답안·해설 (LLM 생성)
     backMd: text("back_md"),
+    // 검증
+    verifiedText: boolean("verified_text").notNull().default(false),
+    verifiedAnswer: boolean("verified_answer").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
