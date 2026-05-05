@@ -1,0 +1,12 @@
+# Git worktrees (isolated workspaces)
+/.worktrees/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# gstack daemon state
+.gstack/
+
+# Misc
+*.pyc
+__pycache__/
