@@ -21,7 +21,7 @@
 | 이미지 OCR | `src/lib/ocr/vision.ts` | Gemini Vision — 스캔/이미지 PDF 폴백 |
 | 환경 변수 | `.env.example` | `GEMINI_API_KEY`, `GEMINI_MODEL_PRO` 등 |
 
-### 1.2 폐기 대상 (v3.0 마이그레이션)
+### 1.2 폐기 대상 (v3.0 / v3.0.1 마이그레이션)
 
 | 폐기 | 사유 |
 |------|------|
@@ -29,6 +29,9 @@
 | `vocab_cards` 테이블 | 동일 |
 | `vocab-seed.ts` (편입 빈출 어휘) | 컨셉 피벗 — 임용 시드로 대체 |
 | `universities` 테이블 | 헌법 제15조 v3.0 — 학교 → 지역 교육청 라벨 (선택 입력) |
+| `materials` 테이블 | **v3.0.1 — 사용자 PDF 업로드 cut (헌법 제14조 5항)** |
+| `/materials` 라우트, `/api/materials/*` | 동일 |
+| `src/lib/ocr/study-cards.ts`, `src/lib/ocr/mistake-cards.ts` | 동일 |
 
 ### 1.3 신설 (Phase 0 — DB 마이그레이션)
 
