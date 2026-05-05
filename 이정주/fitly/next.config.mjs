@@ -31,6 +31,18 @@ const nextConfig = {
         tls: false,
         dns: false,
         child_process: false,
+        // postgres-js, drizzle 등의 추가 Node 코어 의존
+        perf_hooks: false,
+        os: false,
+        util: false,
+        events: false,
+        buffer: false,
+        querystring: false,
+        async_hooks: false,
+        dgram: false,
+        assert: false,
+        cluster: false,
+        worker_threads: false,
       };
     }
     return config;
