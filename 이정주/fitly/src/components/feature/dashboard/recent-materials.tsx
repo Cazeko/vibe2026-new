@@ -5,10 +5,12 @@ import type { RecentMaterial } from "@/lib/dashboard/types";
 
 export function RecentMaterials({ items }: { items: RecentMaterial[] }) {
   return (
-    <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
-      <CardContent className="p-4 h-full">
+    <Card className="border-rule h-full">
+      <CardContent className="p-5 h-full">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold">최근 학습 자료</h2>
+          <h2 className="font-serif text-lg font-medium tracking-tight">
+            최근 학습 자료
+          </h2>
           <Link
             href="/materials"
             className="text-[11px] text-muted-foreground hover:text-foreground"
@@ -20,7 +22,7 @@ export function RecentMaterials({ items }: { items: RecentMaterial[] }) {
         {items.length === 0 ? (
           <Link
             href="/materials"
-            className="mt-2 grid place-items-center rounded-xl border border-dashed border-border/60 bg-background/50 py-7 text-center text-[12px] text-muted-foreground hover:bg-secondary/30 transition-colors"
+            className="mt-2 grid place-items-center rounded-xl border border-dashed border-rule bg-background/50 py-7 text-center text-[12px] text-muted-foreground hover:bg-secondary/30 transition-colors"
           >
             <span className="flex items-center gap-1.5 font-medium text-foreground">
               <Plus className="h-3.5 w-3.5" aria-hidden />
@@ -33,9 +35,9 @@ export function RecentMaterials({ items }: { items: RecentMaterial[] }) {
             {items.map((f) => (
               <li
                 key={f.id}
-                className="flex items-center gap-2.5 rounded-xl border border-border/50 bg-background px-2.5 py-2"
+                className="flex items-center gap-2.5 rounded-xl border border-rule bg-background px-2.5 py-2"
               >
-                <span className="grid h-7 w-7 place-items-center rounded-lg bg-rose-50 text-rose-500 dark:bg-rose-500/15 dark:text-rose-300">
+                <span className="grid h-7 w-7 place-items-center rounded-lg bg-secondary text-muted-foreground">
                   <FileText className="h-3.5 w-3.5" aria-hidden />
                 </span>
                 <div className="flex-1 min-w-0">

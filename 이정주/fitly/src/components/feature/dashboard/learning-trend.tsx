@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import {
   CartesianGrid,
@@ -14,48 +15,70 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { TrendPoint } from "@/lib/dashboard/types";
 
 // 헌법 제19조 — 차트는 Recharts.
-// 헌법 v2.0 — 데이터는 props 로만 주입(서버 컴포넌트가 페치). "Fit 점수" → "학습 진척도".
+// 헌법 v2.1 제16조의2 — accent(evergreen)는 단일 시리즈만, 보조 시리즈는 명도 단계로 구분.
+function readVar(name: string, fallback: string) {
+  if (typeof window === "undefined") return fallback;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v ? `hsl(${v})` : fallback;
+}
+
 export function LearningTrend({ data }: { data: TrendPoint[] }) {
   const { resolvedTheme } = useTheme();
-  const dark = resolvedTheme === "dark";
-  const grid = dark ? "#1e2738" : "#eef0f5";
-  const axis = dark ? "#6b7388" : "#9aa0ad";
-  const progressColor = dark ? "#8b9aff" : "#5b6cff";
-  const accColor = dark ? "#c4cbff" : "#b1baff";
-  const tooltipBg = dark ? "#1a2030" : "#ffffff";
-  const tooltipBorder = dark ? "#2a3145" : "#e5e7eb";
+  const [colors, setColors] = useState({
+    grid: "transparent",
+    axis: "transparent",
+    progress: "transparent",
+    accuracy: "transparent",
+    tooltipBg: "transparent",
+    tooltipBorder: "transparent",
+  });
+
+  // 다크/라이트 토큰을 클라이언트에서 추출 — Recharts 가 inline color string 만 받기 때문
+  useEffect(() => {
+    setColors({
+      grid: readVar("--color-rule", "#e8e2d5"),
+      axis: readVar("--color-text-muted", "#6b6256"),
+      progress: readVar("--color-accent", "#1f5c4a"),
+      // 보조 시리즈(정답률) — accent 와 같은 hue, 더 밝은 명도
+      accuracy: readVar("--color-accent-strong", "#173f33") + "55", // ~33% alpha
+      tooltipBg: readVar("--color-surface", "#fffaf1"),
+      tooltipBorder: readVar("--color-rule", "#e8e2d5"),
+    });
+  }, [resolvedTheme]);
 
   const hasData = data.some((d) => d.progress != null || d.accuracy != null);
 
   return (
-    <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
-      <CardContent className="p-4 h-full">
+    <Card className="border-rule h-full">
+      <CardContent className="p-5 h-full">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold">학습 성과 추이</h2>
+          <h2 className="font-serif text-lg font-medium tracking-tight">
+            학습 성과 추이
+          </h2>
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-            <Legend color={progressColor} label="진척도" />
-            <Legend color={accColor} label="정답률(%)" />
+            <Legend color={colors.progress} label="진척도" />
+            <Legend color={colors.accuracy} label="정답률(%)" />
           </div>
         </div>
 
-        <div className="mt-2 h-44">
+        <div className="mt-3 h-44">
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={data}
                 margin={{ top: 8, right: 6, left: -22, bottom: 0 }}
               >
-                <CartesianGrid stroke={grid} vertical={false} />
+                <CartesianGrid stroke={colors.grid} strokeDasharray="2 4" vertical={false} />
                 <XAxis
                   dataKey="date"
-                  stroke={axis}
+                  stroke={colors.axis}
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
                 />
                 <YAxis
                   domain={[0, 100]}
-                  stroke={axis}
+                  stroke={colors.axis}
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
@@ -63,9 +86,9 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
                 />
                 <Tooltip
                   contentStyle={{
-                    borderRadius: 12,
-                    border: `1px solid ${tooltipBorder}`,
-                    background: tooltipBg,
+                    borderRadius: 8,
+                    border: `1px solid ${colors.tooltipBorder}`,
+                    background: colors.tooltipBg,
                     fontSize: 11,
                     padding: "6px 10px",
                   }}
@@ -77,18 +100,18 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
                 <Line
                   type="monotone"
                   dataKey="progress"
-                  stroke={progressColor}
+                  stroke={colors.progress}
                   strokeWidth={2.25}
-                  dot={{ r: 2.5, fill: progressColor }}
+                  dot={{ r: 2.5, fill: colors.progress }}
                   activeDot={{ r: 4 }}
                   connectNulls
                 />
                 <Line
                   type="monotone"
                   dataKey="accuracy"
-                  stroke={accColor}
+                  stroke={colors.accuracy}
                   strokeWidth={2}
-                  dot={{ r: 2.5, fill: accColor }}
+                  dot={{ r: 2.5, fill: colors.accuracy }}
                   activeDot={{ r: 4 }}
                   connectNulls
                 />
@@ -96,7 +119,7 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
             </ResponsiveContainer>
           ) : (
             <div className="grid h-full place-items-center text-center text-[12px] text-muted-foreground">
-              학습을 시작하면 매일 Fit·정답률 추이가 그려집니다.
+              학습을 시작하면 매일 진척도·정답률 추이가 그려집니다.
             </div>
           )}
         </div>

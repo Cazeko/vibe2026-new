@@ -72,23 +72,23 @@ export default async function MaterialsPage() {
       />
       <div className="px-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
         <div className="xl:col-span-2 space-y-3">
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <Card className="border-rule">
             <CardContent className="p-4">
-              <h2 className="mb-3 text-sm font-bold">자료 업로드</h2>
+              <h2 className="mb-3 font-serif text-lg font-medium tracking-tight">자료 업로드</h2>
               <MaterialsUploader />
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <Card className="border-rule">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-bold">내 자료</h2>
+                <h2 className="font-serif text-lg font-medium tracking-tight">내 자료</h2>
                 <span className="text-[11px] text-muted-foreground">
                   최근 {Math.min(rows.length, 60)}건
                 </span>
               </div>
               {items.length === 0 ? (
-                <div className="grid place-items-center rounded-xl border border-dashed border-border/60 bg-background/50 py-12 text-center">
+                <div className="grid place-items-center rounded-lg border border-dashed border-rule bg-background/50 py-12 text-center">
                   <FileText
                     className="h-8 w-8 text-muted-foreground/60"
                     aria-hidden
@@ -110,24 +110,24 @@ export default async function MaterialsPage() {
         </div>
 
         <div className="space-y-3">
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <Card className="border-rule">
             <CardContent className="p-4">
-              <h2 className="mb-3 text-sm font-bold">자료 통계</h2>
+              <h2 className="mb-3 font-serif text-lg font-medium tracking-tight">자료 통계</h2>
               <ul className="space-y-2">
                 {stats.map(({ label, value, Icon }) => (
                   <li
                     key={label}
-                    className="flex items-center gap-3 rounded-xl border border-border/50 bg-background px-3 py-2.5"
+                    className="flex items-center gap-3 rounded-lg border border-rule bg-background px-3 py-2.5"
                   >
                     <span
                       aria-hidden
-                      className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary"
+                      className="grid h-8 w-8 place-items-center rounded-md bg-secondary text-muted-foreground"
                     >
                       <Icon className="h-4 w-4" />
                     </span>
                     <div className="flex-1">
                       <p className="text-[11px] text-muted-foreground">{label}</p>
-                      <p className="text-base font-bold leading-tight">{value}</p>
+                      <p className="font-serif text-base font-medium leading-tight num">{value}</p>
                     </div>
                   </li>
                 ))}
@@ -135,9 +135,9 @@ export default async function MaterialsPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-amber-50 to-rose-50 dark:from-amber-500/15 dark:to-rose-500/10">
-            <CardContent className="p-4">
-              <h2 className="text-sm font-bold">업로드 가이드</h2>
+          <Card className="border-warning/40 bg-warning/[0.06]">
+            <CardContent className="p-5">
+              <h2 className="font-serif text-lg font-medium tracking-tight">업로드 가이드</h2>
               <ul className="mt-2 space-y-1.5 text-[12px] text-foreground/80 leading-relaxed">
                 <li>• 학원 자체 교재는 업로드 금지 (헌법 제27조 1항).</li>
                 <li>• 공시·공개 출처의 기출만 인덱싱됩니다 (제27조 2항).</li>

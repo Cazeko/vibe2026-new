@@ -59,31 +59,31 @@ export default function MistakesPage() {
             }}
           />
 
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <CardContent className="p-4 space-y-2">
-              <h2 className="text-sm font-bold">정답 검증 현황</h2>
+          <Card className="border-rule">
+            <CardContent className="p-5 space-y-2">
+              <h2 className="font-serif text-lg font-medium tracking-tight">정답 검증 현황</h2>
               <ul className="space-y-1.5">
                 <Stat
                   Icon={AlertCircle}
-                  tone="text-rose-600 bg-rose-50 dark:text-rose-300 dark:bg-rose-500/15"
+                  tone="bg-error/10 text-error"
                   label="전체 오답"
                   value={`${stats.total}장`}
                 />
                 <Stat
                   Icon={Clock}
-                  tone="text-amber-600 bg-amber-50 dark:text-amber-300 dark:bg-amber-500/15"
+                  tone="bg-warning/10 text-warning"
                   label="검증 필요 (AI 추정)"
                   value={`${stats.aiEstimate}장`}
                 />
                 <Stat
                   Icon={ShieldCheck}
-                  tone="text-emerald-600 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-500/15"
+                  tone="bg-evergreen/10 text-evergreen"
                   label="공식·크라우드 검증"
                   value={`${stats.verified}장`}
                 />
                 <Stat
                   Icon={ShieldCheck}
-                  tone="text-sky-600 bg-sky-50 dark:text-sky-300 dark:bg-sky-500/15"
+                  tone="bg-info/10 text-info"
                   label="내가 정정"
                   value={`${stats.selfCorrected}장`}
                 />
@@ -94,13 +94,13 @@ export default function MistakesPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/10">
-            <CardContent className="p-4">
-              <h2 className="text-sm font-bold">SRS 복습 시작</h2>
+          <Card className="border-evergreen bg-evergreen/[0.06]">
+            <CardContent className="p-5">
+              <h2 className="font-serif text-lg font-medium tracking-tight">SRS 복습 시작</h2>
               <p className="mt-1 text-[12px] text-muted-foreground">
                 FSRS 간격 반복 알고리즘으로 오답 카드를 자동 일정으로 복습합니다.
               </p>
-              <Button asChild size="sm" className="mt-3 h-8 rounded-xl w-full">
+              <Button asChild size="sm" className="mt-3 w-full">
                 <Link href="/study/review">오답 복습 시작</Link>
               </Button>
             </CardContent>
@@ -116,13 +116,13 @@ export default function MistakesPage() {
         {/* 우측: 카드 리스트 */}
         <div className="xl:col-span-2">
           {loaded && items.length === 0 ? (
-            <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
+            <Card className="border-rule h-full">
               <CardContent className="grid place-items-center h-full p-12 text-center">
                 <AlertCircle
                   className="h-10 w-10 text-muted-foreground/60"
                   aria-hidden
                 />
-                <p className="mt-3 text-sm font-semibold">아직 오답 카드가 없어요</p>
+                <p className="mt-3 font-serif text-lg font-medium">아직 오답 카드가 없어요</p>
                 <p className="mt-1 text-[12px] text-muted-foreground">
                   좌측에서 시험지 사진·PDF를 업로드하면
                   <br />
@@ -158,8 +158,8 @@ function Stat({
   value: string;
 }) {
   return (
-    <li className="flex items-center gap-2.5 rounded-xl border border-border/50 bg-background px-2.5 py-2">
-      <span aria-hidden className={`grid h-7 w-7 place-items-center rounded-lg ${tone}`}>
+    <li className="flex items-center gap-2.5 rounded-lg border border-rule bg-background px-2.5 py-2">
+      <span aria-hidden className={`grid h-7 w-7 place-items-center rounded-md ${tone}`}>
         <Icon className="h-3.5 w-3.5" />
       </span>
       <div className="flex-1">

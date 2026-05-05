@@ -39,27 +39,25 @@ export default async function StudyAnalysisPage() {
     getLibraryCounts(user.id),
   ]);
 
+  // 헌법 v2.1 — KPI tone 통일 (회색). 액센트는 진척도 KPI 만.
   const kpiCards = [
     {
       label: "전체 학습 시간",
       value: fmtMinutes(stats.totalMinutes),
       sub: `${stats.sessions}회 세션`,
       Icon: Activity,
-      tone: "text-amber-600 bg-amber-50 dark:text-amber-300 dark:bg-amber-500/15",
     },
     {
       label: "평균 정답률",
       value: `${stats.avgAccuracy}%`,
       sub: "전체 세션 누적",
       Icon: Target,
-      tone: "text-emerald-600 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-500/15",
     },
     {
       label: "학습 카드",
       value: `${stats.totalCards}장`,
       sub: `학습 ${lib.study} · 오답 ${lib.mistakes} · 어휘 ${lib.vocab}`,
       Icon: Layers,
-      tone: "text-indigo-600 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-500/15",
     },
   ];
 
@@ -71,24 +69,23 @@ export default async function StudyAnalysisPage() {
       />
       <div className="px-6 space-y-3">
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {kpiCards.map(({ label, value, sub, Icon, tone }) => (
-            <Card
-              key={label}
-              className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-            >
-              <CardContent className="p-4 flex items-start justify-between gap-3">
+          {kpiCards.map(({ label, value, sub, Icon }) => (
+            <Card key={label} className="border-rule">
+              <CardContent className="p-5 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] text-muted-foreground">{label}</p>
-                  <p className="mt-1 text-2xl font-bold tracking-tight">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {label}
+                  </p>
+                  <p className="mt-2 font-serif text-2xl font-medium leading-none tracking-tight num">
                     {value}
                   </p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
                     {sub}
                   </p>
                 </div>
                 <span
                   aria-hidden
-                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone}`}
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-secondary text-muted-foreground"
                 >
                   <Icon className="h-4 w-4" />
                 </span>
@@ -106,10 +103,10 @@ export default async function StudyAnalysisPage() {
           </div>
         </section>
 
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <CardContent className="p-4">
+        <Card className="border-rule">
+          <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold">활동량 (최근 12주)</h2>
+              <h2 className="font-serif text-lg font-medium tracking-tight">활동량 (최근 12주)</h2>
               <span className="text-[11px] text-muted-foreground">
                 매일 학습 시간(분) 기준
               </span>

@@ -1,73 +1,89 @@
+/* Pretendard (한글 본문) — next/font 미지원으로 CDN @import 유지 */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+/* Noto Serif KR (한글 헤드라인) — next/font/google 이 한글 subset 미지원으로 CDN @import */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================================
+   Fitly Design System v2.1 — 헌법 제16조의2 / DESIGN.md v1 정합
+   ===================================================================== */
 @layer base {
+  /* 라이트 — 공책+세리프+에버그린 앵커 */
   :root {
-    --background: 220 30% 99%;
-    --foreground: 222 32% 12%;
+    /* DESIGN.md v1 직접 토큰 (HSL 표기) */
+    --color-bg: 36 56% 96%;            /* #FAF6EE warm cream */
+    --color-surface: 36 73% 97%;       /* #FFFAF1 */
+    --color-surface-deep: 36 41% 91%;  /* #F3EDE0 */
+    --color-text: 213 21% 13%;         /* #1A2027 deep ink */
+    --color-text-muted: 30 11% 38%;    /* #6B6256 warm gray */
+    --color-rule: 39 31% 87%;          /* #E8E2D5 */
+    --color-rule-strong: 38 25% 73%;   /* #C8BFA8 */
+    --color-accent: 161 50% 24%;       /* #1F5C4A deep evergreen — 5곳 한정 */
+    --color-accent-strong: 161 47% 17%;/* #173F33 */
+    --color-warning: 36 60% 44%;       /* #B5862D desaturated mustard */
+    --color-error: 8 56% 40%;          /* #A03B2D rust */
+    --color-info: 213 39% 30%;         /* #2E4A6B navy */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 32% 12%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 32% 12%;
+    /* shadcn 호환 토큰 — 모두 위 직접 토큰 참조 (단일 소스 오브 트루스) */
+    --background: var(--color-bg);
+    --foreground: var(--color-text);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-text);
+    --popover: var(--color-surface);
+    --popover-foreground: var(--color-text);
 
-    --primary: 243 75% 55%;
-    --primary-foreground: 0 0% 100%;
+    --primary: var(--color-accent);
+    --primary-foreground: var(--color-surface);
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 32% 12%;
+    --secondary: var(--color-surface-deep);
+    --secondary-foreground: var(--color-text);
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: var(--color-surface-deep);
+    --muted-foreground: var(--color-text-muted);
 
-    --accent: 81 78% 56%;
-    --accent-foreground: 222 32% 12%;
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-surface);
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: var(--color-error);
+    --destructive-foreground: var(--color-surface);
 
-    --border: 220 13% 90%;
-    --input: 220 13% 90%;
-    --ring: 243 75% 55%;
+    --border: var(--color-rule);
+    --input: var(--color-rule-strong);
+    --ring: var(--color-accent);
 
-    --radius: 0.875rem;
+    --app-bg: var(--color-bg);
+    --sidebar: var(--color-surface);
+    --sidebar-foreground: var(--color-text);
 
-    --gauge-from: 243 75% 55%;
-    --gauge-to: 81 78% 56%;
+    --gauge-from: var(--color-accent);
+    --gauge-to: var(--color-accent);
+
+    --radius: 0.5rem;       /* DESIGN.md radius-md 8px */
+
+    /* 폰트 변수 — next/font 가 자동 정의하는 것 외에 한글 폰트 직접 지정 */
+    --font-pretendard: "Pretendard Variable", Pretendard;
+    --font-noto-serif-kr: "Noto Serif KR";
   }
 
+  /* 다크 — 깊은 잉크 + 밝게 보정한 에버그린 */
   .dark {
-    --background: 222 28% 7%;
-    --foreground: 220 14% 92%;
+    --color-bg: 213 25% 9%;            /* #11151B */
+    --color-surface: 213 21% 13%;      /* #1A2027 */
+    --color-surface-deep: 213 17% 17%; /* #232A33 */
+    --color-text: 36 36% 93%;          /* #F5EFE3 warm white */
+    --color-text-muted: 36 12% 53%;    /* #948A7A */
+    --color-rule: 213 18% 21%;         /* #2A323E */
+    --color-rule-strong: 215 14% 29%;  /* #3D4654 */
+    --color-accent: 161 51% 36%;       /* #2D8B6F brightened evergreen */
+    --color-accent-strong: 161 41% 47%;/* #46A98A */
+    --color-warning: 36 67% 62%;       /* #E0B458 */
+    --color-error: 8 59% 59%;          /* #D1685A */
+    --color-info: 213 38% 54%;         /* #6088B5 */
 
-    --card: 222 25% 10%;
-    --card-foreground: 220 14% 92%;
-    --popover: 222 25% 10%;
-    --popover-foreground: 220 14% 92%;
-
-    --primary: 243 80% 68%;
-    --primary-foreground: 222 32% 10%;
-
-    --secondary: 222 22% 14%;
-    --secondary-foreground: 220 14% 92%;
-
-    --muted: 222 22% 14%;
-    --muted-foreground: 220 9% 65%;
-
-    --accent: 81 72% 62%;
-    --accent-foreground: 222 32% 10%;
-
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 222 20% 16%;
-    --input: 222 20% 16%;
-    --ring: 243 80% 68%;
-
-    --gauge-from: 243 80% 68%;
-    --gauge-to: 81 72% 62%;
+    /* shadcn 토큰은 var() 참조라 자동 전환됨 — 명시 정의 불필요 */
   }
 
   * {
@@ -80,9 +96,24 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family:
-      "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-      "Segoe UI", Roboto, "Helvetica Neue", "Apple SD Gothic Neo", sans-serif;
+      var(--font-pretendard), var(--font-geist), -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      "Apple SD Gothic Neo", sans-serif;
     font-feature-settings: "ss01", "ss02";
+    /* DESIGN.md §4.5 — 종이 그레인 1% 노이즈 */
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      hsl(var(--color-text) / 0.018) 1px,
+      transparent 0
+    );
+    background-size: 4px 4px;
+  }
+  .dark body {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      hsl(var(--color-text) / 0.012) 1px,
+      transparent 0
+    );
   }
   ::selection {
     @apply bg-primary/20 text-foreground;
@@ -97,22 +128,23 @@
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
+  /* 헌법 v1.9 잔존 호환 — 단일 액센트로 통일 (그라디언트 폐지) */
   .gauge-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--gauge-from)),
-      hsl(var(--gauge-to))
-    );
+    background: hsl(var(--color-accent));
+  }
+  /* DESIGN.md §7.2 — Progress 700ms ease-out 셀러브레이션 */
+  .gauge-fill {
+    transition: width 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* DESIGN.md §6.3 — 노트 메타포 가로 괘선 */
+  .section-rule {
+    @apply h-px bg-border my-8 border-0;
   }
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .skeleton {

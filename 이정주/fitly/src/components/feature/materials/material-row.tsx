@@ -12,18 +12,19 @@ export type MaterialRowItem = {
   status: string;
 };
 
+// DESIGN.md §4.4 — semantic 색은 desaturated 토큰으로.
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
   uploaded: {
     label: "추출 대기",
-    tone: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+    tone: "bg-warning/10 text-warning",
   },
   parsed: {
     label: "추출 완료",
-    tone: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+    tone: "bg-evergreen/10 text-evergreen",
   },
   failed: {
     label: "추출 실패",
-    tone: "bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
+    tone: "bg-error/10 text-error",
   },
 };
 
@@ -78,8 +79,8 @@ export function MaterialRow({ item }: { item: MaterialRowItem }) {
   const statusInfo = STATUS_LABEL[item.status] ?? null;
 
   return (
-    <li className="flex items-center gap-3 rounded-2xl border-0 bg-card px-4 py-3 shadow-sm">
-      <span className="grid h-9 w-9 place-items-center rounded-lg bg-rose-50 text-rose-500 dark:bg-rose-500/15 dark:text-rose-300">
+    <li className="flex items-center gap-3 rounded-lg border border-rule bg-card px-4 py-3">
+      <span className="grid h-9 w-9 place-items-center rounded-lg bg-secondary text-muted-foreground">
         <FileText className="h-4 w-4" aria-hidden />
       </span>
       <div className="flex-1 min-w-0">
@@ -95,7 +96,7 @@ export function MaterialRow({ item }: { item: MaterialRowItem }) {
           )}
         </div>
         {extractedMsg && (
-          <p role="status" className="mt-0.5 text-[10.5px] text-emerald-600">
+          <p role="status" className="mt-0.5 text-[10.5px] text-evergreen">
             {extractedMsg}
           </p>
         )}
@@ -108,7 +109,7 @@ export function MaterialRow({ item }: { item: MaterialRowItem }) {
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 text-muted-foreground hover:text-primary"
+        className="h-8 w-8 text-muted-foreground hover:text-evergreen"
         onClick={reExtract}
         disabled={extracting || pending}
         aria-label={item.status === "parsed" ? "다시 추출" : "AI 카드 추출"}

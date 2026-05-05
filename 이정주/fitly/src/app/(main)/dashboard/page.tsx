@@ -63,30 +63,30 @@ export default async function DashboardPage() {
 
 function OnboardingBanner() {
   return (
-    <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/10">
-      <CardContent className="p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <Card className="border-evergreen bg-evergreen/[0.06]">
+      <CardContent className="p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
           <span
             aria-hidden
-            className="grid h-10 w-10 place-items-center rounded-xl bg-white/70 text-indigo-500 shadow-sm dark:bg-white/10 dark:text-indigo-300"
+            className="grid h-10 w-10 place-items-center rounded-full bg-evergreen text-primary-foreground"
           >
             <Sparkles className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-semibold">Fitly 첫 방문을 환영합니다!</p>
+            <p className="font-serif text-base font-medium">Fitly 첫 방문을 환영합니다.</p>
             <p className="mt-0.5 text-[12px] text-muted-foreground">
-              아래 3단계만 완료하면 학습 진척도와 추이가 실시간으로 그려져요.
+              아래 3단계만 완료하시면 학습 진척도와 추이가 실시간으로 그려집니다.
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild size="sm" variant="outline" className="h-8 rounded-xl">
+          <Button asChild size="sm" variant="outline">
             <Link href="/settings">1) 학교 선택</Link>
           </Button>
-          <Button asChild size="sm" variant="outline" className="h-8 rounded-xl">
+          <Button asChild size="sm" variant="outline">
             <Link href="/materials">2) 자료 업로드</Link>
           </Button>
-          <Button asChild size="sm" className="h-8 rounded-xl">
+          <Button asChild size="sm">
             <Link href="/study/exam">
               3) 학습 시작 <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>

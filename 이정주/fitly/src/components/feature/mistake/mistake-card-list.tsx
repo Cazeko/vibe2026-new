@@ -20,6 +20,7 @@ type MistakeCardListProps = {
 };
 
 // 헌법 v1.8 제30조의2 — 4계층 출처 모델 UI 매핑.
+// DESIGN.md §4.4 — semantic 색은 desaturated 토큰으로 (warning/info/evergreen).
 const ANSWER_BADGE: Record<
   AnswerSource,
   { label: string; className: string }
@@ -30,17 +31,15 @@ const ANSWER_BADGE: Record<
   },
   ai_estimate: {
     label: "검증 필요",
-    className:
-      "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200",
+    className: "bg-warning/10 text-warning",
   },
   user_self_corrected: {
     label: "내가 정정",
-    className:
-      "bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200",
+    className: "bg-info/10 text-info",
   },
   crowd_verified: {
     label: "검증됨",
-    className: "bg-primary/10 text-primary",
+    className: "bg-evergreen/10 text-evergreen",
   },
 };
 
@@ -236,7 +235,7 @@ function CardItem({
             ))}
           </div>
         )}
-        <span className="inline-block rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px]">
+        <span className="inline-block rounded-full bg-secondary text-foreground px-2 py-0.5 text-[10px]">
           내가 올린 시험지
         </span>
       </CardContent>

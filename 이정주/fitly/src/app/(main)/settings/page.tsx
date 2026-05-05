@@ -108,7 +108,7 @@ export default function SettingsPage() {
       />
       <div className="px-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
         {/* 목표 설정 */}
-        <Card className="xl:col-span-2 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <Card className="xl:col-span-2 border-rule">
           <CardHeader>
             <CardTitle className="text-sm">목표 설정</CardTitle>
           </CardHeader>
@@ -200,7 +200,7 @@ export default function SettingsPage() {
 
         {/* 테마 + 계정 */}
         <div className="space-y-3">
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <Card className="border-rule">
             <CardHeader>
               <CardTitle className="text-sm">테마</CardTitle>
             </CardHeader>
@@ -217,7 +217,7 @@ export default function SettingsPage() {
                       className={`flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-[11px] transition-colors ${
                         active
                           ? "border-primary bg-primary/5 text-primary"
-                          : "border-border/60 hover:bg-secondary/40"
+                          : "border-rule hover:bg-secondary/40"
                       }`}
                       aria-pressed={active}
                     >
@@ -235,12 +235,12 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <Card className="border-rule">
             <CardHeader>
               <CardTitle className="text-sm">계정</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
+              <div className="rounded-xl border border-rule bg-background px-3 py-2.5">
                 <p className="text-[11px] text-muted-foreground">로그인 이메일</p>
                 <p className="mt-0.5 text-[13px] font-medium truncate">
                   {email ?? "—"}
@@ -263,9 +263,9 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-amber-50 to-rose-50 dark:from-amber-500/15 dark:to-rose-500/10">
-            <CardContent className="p-4 flex gap-3">
-              <Info className="h-4 w-4 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5" aria-hidden />
+          <Card className="border-warning/40 bg-warning/[0.06]">
+            <CardContent className="p-5 flex gap-3">
+              <Info className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden />
               <div className="text-[12px] text-foreground/80 leading-relaxed">
                 <p className="font-semibold">개인정보·저작권 정책</p>
                 <ul className="mt-1.5 space-y-0.5 text-[11px]">

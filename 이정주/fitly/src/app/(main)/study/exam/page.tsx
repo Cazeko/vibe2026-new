@@ -265,7 +265,7 @@ export default function ExamPage() {
             </p>
           )}
           {feedback && (
-            <p role="status" className="text-[12px] text-emerald-600">
+            <p role="status" className="text-[12px] text-evergreen">
               {feedback}
             </p>
           )}
@@ -280,7 +280,7 @@ export default function ExamPage() {
                 <span
                   className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                     studyMode
-                      ? "bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200"
+                      ? "bg-evergreen/10 text-evergreen"
                       : "bg-secondary text-muted-foreground"
                   }`}
                 >
@@ -292,7 +292,7 @@ export default function ExamPage() {
                     "일반 빈출 (Gemini)"
                   )}
                 </span>
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
+                <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] text-warning">
                   AI 추정 — 검증 필요
                 </span>
               </div>

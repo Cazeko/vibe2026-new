@@ -174,31 +174,12 @@ export default async function MePage() {
   });
   const earnedCount = badges.filter((b) => b.earned).length;
 
+  // 헌법 v2.1 — KPI 톤 통일.
   const statTiles = [
-    {
-      label: "전체 학습",
-      value: fmtMinutes(stats.totalMinutes),
-      Icon: Clock,
-      tone: "text-amber-600 bg-amber-50 dark:text-amber-300 dark:bg-amber-500/15",
-    },
-    {
-      label: "세션 수",
-      value: `${stats.sessions}회`,
-      Icon: Activity,
-      tone: "text-emerald-600 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-500/15",
-    },
-    {
-      label: "평균 정답률",
-      value: `${stats.avgAccuracy}%`,
-      Icon: Target,
-      tone: "text-indigo-600 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-500/15",
-    },
-    {
-      label: "복습 카드",
-      value: `${stats.totalCards}장`,
-      Icon: Layers,
-      tone: "text-rose-600 bg-rose-50 dark:text-rose-300 dark:bg-rose-500/15",
-    },
+    { label: "전체 학습", value: fmtMinutes(stats.totalMinutes), Icon: Clock },
+    { label: "세션 수", value: `${stats.sessions}회`, Icon: Activity },
+    { label: "평균 정답률", value: `${stats.avgAccuracy}%`, Icon: Target },
+    { label: "복습 카드", value: `${stats.totalCards}장`, Icon: Layers },
   ];
 
   return (
@@ -206,32 +187,32 @@ export default async function MePage() {
       <PageHeader title="마이 페이지" subtitle="프로필과 학습 기록을 한 페이지에 모았습니다." />
       <div className="px-6 space-y-3">
         {/* 프로필 + 목표 */}
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <Card className="border-rule">
           <CardContent className="p-5 flex items-center gap-4 flex-wrap">
             <span
               aria-hidden
-              className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white"
+              className="grid h-16 w-16 place-items-center rounded-lg bg-evergreen text-primary-foreground"
             >
               <UserCircle className="h-9 w-9" />
             </span>
             <div className="flex-1 min-w-[200px]">
-              <p className="text-base font-semibold truncate">
+              <p className="font-serif text-lg font-medium truncate">
                 {user.email ?? "Fitly 학습자"}
               </p>
-              <p className="text-[12px] text-muted-foreground">
+              <p className="mt-0.5 text-[12px] text-muted-foreground">
                 목표 {targetShort ?? "미설정"}
                 {examDate && ` · 시험일 ${examDate}`}
                 {daysToExam != null && ` (D-${daysToExam})`}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm" className="h-8 rounded-xl">
+              <Button asChild variant="outline" size="sm">
                 <Link href="/settings">
                   <Settings className="h-4 w-4" aria-hidden />
                   설정 변경
                 </Link>
               </Button>
-              <Button asChild size="sm" className="h-8 rounded-xl">
+              <Button asChild size="sm">
                 <Link href="/study/exam">학습 시작</Link>
               </Button>
             </div>
@@ -240,19 +221,16 @@ export default async function MePage() {
 
         {/* 통계 4 */}
         <section className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-          {statTiles.map(({ label, value, Icon, tone }) => (
-            <Card
-              key={label}
-              className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-            >
-              <CardContent className="p-4 flex items-start justify-between gap-3">
+          {statTiles.map(({ label, value, Icon }) => (
+            <Card key={label} className="border-rule">
+              <CardContent className="p-5 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] text-muted-foreground">{label}</p>
-                  <p className="mt-1 text-xl font-bold tracking-tight">{value}</p>
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+                  <p className="mt-2 font-serif text-2xl font-medium leading-none tracking-tight num">{value}</p>
                 </div>
                 <span
                   aria-hidden
-                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone}`}
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-secondary text-muted-foreground"
                 >
                   <Icon className="h-4 w-4" />
                 </span>
@@ -263,10 +241,10 @@ export default async function MePage() {
 
         {/* 카드 라이브러리 (3종) */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <CardContent className="p-4">
+          <Card className="border-rule">
+            <CardContent className="p-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold">학습 카드</h2>
+                <h2 className="font-serif text-lg font-medium tracking-tight">학습 카드</h2>
                 <Link
                   href="/study/exam"
                   className="text-[11px] text-muted-foreground hover:text-foreground"
@@ -275,7 +253,7 @@ export default async function MePage() {
                 </Link>
               </div>
               <div className="mt-2 flex items-end justify-between">
-                <p className="text-3xl font-bold tracking-tight">
+                <p className="font-serif text-3xl font-medium tracking-tight num">
                   {lib.study}
                   <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
                 </p>
@@ -288,10 +266,10 @@ export default async function MePage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <CardContent className="p-4">
+          <Card className="border-rule">
+            <CardContent className="p-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold">오답 카드</h2>
+                <h2 className="font-serif text-lg font-medium tracking-tight">오답 카드</h2>
                 <Link
                   href="/mistakes"
                   className="text-[11px] text-muted-foreground hover:text-foreground"
@@ -300,7 +278,7 @@ export default async function MePage() {
                 </Link>
               </div>
               <div className="mt-2 flex items-end justify-between">
-                <p className="text-3xl font-bold tracking-tight">
+                <p className="font-serif text-3xl font-medium tracking-tight num">
                   {lib.mistakes}
                   <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
                 </p>
@@ -313,10 +291,10 @@ export default async function MePage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <CardContent className="p-4">
+          <Card className="border-rule">
+            <CardContent className="p-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold">어휘 카드</h2>
+                <h2 className="font-serif text-lg font-medium tracking-tight">어휘 카드</h2>
                 <Link
                   href="/study/vocab"
                   className="text-[11px] text-muted-foreground hover:text-foreground"
@@ -325,7 +303,7 @@ export default async function MePage() {
                 </Link>
               </div>
               <div className="mt-2 flex items-end justify-between">
-                <p className="text-3xl font-bold tracking-tight">
+                <p className="font-serif text-3xl font-medium tracking-tight num">
                   {lib.vocab}
                   <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
                 </p>
@@ -341,10 +319,10 @@ export default async function MePage() {
         </section>
 
         {/* 뱃지 */}
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <Card className="border-rule">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold">획득 뱃지</h2>
+              <h2 className="font-serif text-lg font-medium tracking-tight">획득 뱃지</h2>
               <span className="text-[11px] text-muted-foreground">
                 {earnedCount}/{badges.length}
               </span>
@@ -353,17 +331,17 @@ export default async function MePage() {
               {badges.map((b) => (
                 <li
                   key={b.id}
-                  className={`rounded-xl border border-border/50 px-3 py-3 text-center transition-colors ${
+                  className={`rounded-lg border px-3 py-3 text-center transition-colors ${
                     b.earned
-                      ? "bg-gradient-to-br from-amber-50 to-rose-50 dark:from-amber-500/15 dark:to-rose-500/10"
-                      : "bg-background opacity-60"
+                      ? "border-warning/40 bg-warning/[0.06]"
+                      : "border-rule bg-background opacity-60"
                   }`}
                 >
                   <span
                     aria-hidden
-                    className={`mx-auto grid h-8 w-8 place-items-center rounded-xl ${
+                    className={`mx-auto grid h-8 w-8 place-items-center rounded-md ${
                       b.earned
-                        ? "bg-amber-200/70 text-amber-700 dark:bg-amber-500/30 dark:text-amber-200"
+                        ? "bg-warning/15 text-warning"
                         : "bg-secondary text-muted-foreground"
                     }`}
                   >
@@ -379,18 +357,18 @@ export default async function MePage() {
 
         {/* 히트맵 + 최근 활동 */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
-          <Card className="xl:col-span-2 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <Card className="xl:col-span-2 border-rule">
             <CardContent className="p-4">
-              <h2 className="text-sm font-bold">활동량 (최근 12주)</h2>
+              <h2 className="font-serif text-lg font-medium tracking-tight">활동량 (최근 12주)</h2>
               <div className="mt-3 overflow-x-auto">
                 <ActivityHeatmap cells={heatmap} />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <Card className="border-rule">
             <CardContent className="p-4">
-              <h2 className="text-sm font-bold">최근 학습</h2>
+              <h2 className="font-serif text-lg font-medium tracking-tight">최근 학습</h2>
               {recent.length === 0 ? (
                 <p className="mt-3 text-[12px] text-muted-foreground">
                   학습 세션이 누적되면 여기에 표시됩니다.
@@ -403,9 +381,9 @@ export default async function MePage() {
                     return (
                       <li
                         key={r.id}
-                        className="flex items-center gap-2.5 rounded-xl border border-border/50 bg-background px-2.5 py-2"
+                        className="flex items-center gap-2.5 rounded-lg border border-rule bg-background px-2.5 py-2"
                       >
-                        <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/10 text-primary">
+                        <span className="grid h-7 w-7 place-items-center rounded-md bg-secondary text-muted-foreground">
                           <Icon className="h-3.5 w-3.5" aria-hidden />
                         </span>
                         <div className="flex-1 min-w-0">

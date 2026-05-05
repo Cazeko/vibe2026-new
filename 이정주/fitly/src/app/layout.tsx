@@ -1,7 +1,30 @@
 import type { Metadata, Viewport } from "next";
+import { Newsreader, Geist, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { PwaRegister } from "@/components/shared/pwa-register";
 import "./globals.css";
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
+  display: "swap",
+});
+
+const geist = Geist({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-geist",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Fitly — 편입영어 학습 플래너",
@@ -16,8 +39,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d1018" },
+    { media: "(prefers-color-scheme: light)", color: "#FAF6EE" },
+    { media: "(prefers-color-scheme: dark)", color: "#11151B" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -29,7 +52,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" className="h-full" suppressHydrationWarning>
+    <html
+      lang="ko"
+      className={`h-full ${newsreader.variable} ${geist.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider
           attribute="class"

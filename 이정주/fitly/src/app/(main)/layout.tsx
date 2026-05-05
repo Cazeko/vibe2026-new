@@ -8,9 +8,9 @@ export default function MainLayout({
   return (
     <>
       <TabletGate />
-      <div className="hidden lg:block min-h-screen bg-[#f4f6fb]">
+      <div className="hidden lg:block min-h-screen bg-app-bg">
         <AppSidebar />
-        <main className="ml-60 min-h-screen">{children}</main>
+        <main className="ml-56 min-h-screen">{children}</main>
       </div>
     </>
   );

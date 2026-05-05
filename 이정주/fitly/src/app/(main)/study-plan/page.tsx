@@ -77,9 +77,9 @@ type StudyMode = {
   description: string;
   Icon: LucideIcon;
   hint: string;
-  tone: string;
 };
 
+// 헌법 v2.1 — 모든 모드 카드는 동일 cream 톤, 차별화는 아이콘 + 텍스트로.
 const MODES: StudyMode[] = [
   {
     href: "/study/vocab",
@@ -87,7 +87,6 @@ const MODES: StudyMode[] = [
     description: "FSRS 간격 반복으로 핵심 어휘 누적",
     hint: "오늘 권장 30장",
     Icon: BookOpen,
-    tone: "from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/10",
   },
   {
     href: "/study/exam",
@@ -95,7 +94,6 @@ const MODES: StudyMode[] = [
     description: "TOP 10 대학 출제 패턴 기반 학습",
     hint: "오늘 권장 20문제",
     Icon: Layers,
-    tone: "from-emerald-50 to-cyan-50 dark:from-emerald-500/15 dark:to-cyan-500/10",
   },
   {
     href: "/study/review",
@@ -103,7 +101,6 @@ const MODES: StudyMode[] = [
     description: "내 오답 시카드를 SRS로 자동 복습",
     hint: "복습 대기 자동",
     Icon: RefreshCw,
-    tone: "from-rose-50 to-amber-50 dark:from-rose-500/15 dark:to-amber-500/10",
   },
 ];
 
@@ -113,10 +110,11 @@ const STATE_ICON = {
   locked: Lock,
 } as const;
 
+// 헌법 v2.1 — completed 만 evergreen (진척 마커).
 const STATE_TONE = {
-  in_progress: "text-primary",
-  completed: "text-emerald-500",
-  locked: "text-muted-foreground/60",
+  in_progress: "text-muted-foreground",
+  completed: "text-evergreen",
+  locked: "text-muted-foreground/40",
 } as const;
 
 // 헌법 v1.10 — 학습 플랜. 오늘의 SRS 듀카드 + 모드 진입 + 권장 카드.
@@ -146,42 +144,42 @@ export default async function StudyPlanPage() {
       />
       <div className="px-6 space-y-3">
         {/* 시험일 역산 일일 목표 — v2.0 신규 */}
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <CardContent className="p-4">
+        <Card className="border-rule">
+          <CardContent className="p-5">
             <div className="flex items-center gap-2">
-              <CalendarClock className="h-4 w-4 text-primary" aria-hidden />
-              <h2 className="text-sm font-bold">시험일 역산 — 오늘 목표</h2>
+              <CalendarClock className="h-4 w-4 text-evergreen" aria-hidden />
+              <h2 className="font-serif text-lg font-medium tracking-tight">시험일 역산 — 오늘 목표</h2>
               {summary.kpi.daysToExam != null && (
-                <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                <span className="ml-auto rounded-full bg-evergreen/10 px-2 py-0.5 text-[11px] font-semibold text-evergreen">
                   D-{summary.kpi.daysToExam}
                 </span>
               )}
             </div>
             <ul className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2">
-              <li className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
-                <p className="text-[11px] text-muted-foreground">어휘</p>
-                <p className="mt-0.5 text-xl font-bold tabular-nums">
+              <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">어휘</p>
+                <p className="mt-0.5 font-serif text-2xl font-medium num">
                   {targets.vocabDaily}
-                  <span className="ml-1 text-[11px] font-medium text-muted-foreground">장</span>
+                  <span className="ml-1 text-[11px] font-sans font-normal text-muted-foreground">장</span>
                 </p>
               </li>
-              <li className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
-                <p className="text-[11px] text-muted-foreground">학습 카드</p>
-                <p className="mt-0.5 text-xl font-bold tabular-nums">
+              <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">학습 카드</p>
+                <p className="mt-0.5 font-serif text-2xl font-medium num">
                   {targets.studyDaily}
-                  <span className="ml-1 text-[11px] font-medium text-muted-foreground">장</span>
+                  <span className="ml-1 text-[11px] font-sans font-normal text-muted-foreground">장</span>
                 </p>
               </li>
-              <li className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
-                <p className="text-[11px] text-muted-foreground">오답 복습</p>
-                <p className="mt-0.5 text-xl font-bold tabular-nums">
+              <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">오답 복습</p>
+                <p className="mt-0.5 font-serif text-2xl font-medium num">
                   {targets.mistakeDaily}
-                  <span className="ml-1 text-[11px] font-medium text-muted-foreground">장</span>
+                  <span className="ml-1 text-[11px] font-sans font-normal text-muted-foreground">장</span>
                 </p>
               </li>
-              <li className="rounded-xl border border-border/50 bg-background px-3 py-2.5">
-                <p className="text-[11px] text-muted-foreground">권장 학습 시간</p>
-                <p className="mt-0.5 text-xl font-bold">
+              <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">권장 학습 시간</p>
+                <p className="mt-0.5 font-serif text-2xl font-medium num">
                   {fmtMinutes(targets.minutesDaily)}
                 </p>
               </li>
@@ -196,13 +194,13 @@ export default async function StudyPlanPage() {
         </Card>
 
         {/* 듀카드 요약 */}
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/10">
-          <CardContent className="p-4 flex items-center justify-between flex-wrap gap-3">
+        <Card className="border-evergreen bg-evergreen/[0.06]">
+          <CardContent className="p-5 flex items-center justify-between flex-wrap gap-3">
             <div>
-              <p className="text-[11px] text-muted-foreground">오늘의 복습 대기</p>
-              <p className="mt-1 text-3xl font-bold tracking-tight">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">오늘의 복습 대기</p>
+              <p className="mt-1 font-serif text-evergreen text-3xl font-medium tracking-tight num">
                 {totalDue}
-                <span className="ml-1 text-base font-medium text-muted-foreground">
+                <span className="ml-1 text-base font-sans font-normal text-muted-foreground">
                   장
                 </span>
               </p>
@@ -249,24 +247,22 @@ export default async function StudyPlanPage() {
 
         {/* 모드 3 카드 */}
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {MODES.map(({ href, title, description, Icon, hint, tone }) => (
+          {MODES.map(({ href, title, description, Icon, hint }) => (
             <li key={href}>
               <Link href={href} className="block">
-                <Card
-                  className={`rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md bg-gradient-to-br ${tone}`}
-                >
+                <Card className="border-rule transition-all hover:border-rule-strong hover:-translate-y-0.5">
                   <CardContent className="p-5">
                     <span
                       aria-hidden
-                      className="grid h-11 w-11 place-items-center rounded-xl bg-white/70 text-primary shadow-sm dark:bg-white/10"
+                      className="grid h-11 w-11 place-items-center rounded-lg bg-secondary text-foreground"
                     >
                       <Icon className="h-5 w-5" />
                     </span>
-                    <p className="mt-3 text-base font-bold">{title}</p>
+                    <p className="mt-3 font-serif text-lg font-medium">{title}</p>
                     <p className="mt-1 text-[12px] text-muted-foreground">
                       {description}
                     </p>
-                    <p className="mt-3 text-[11px] font-medium text-primary">
+                    <p className="mt-3 text-[11px] font-medium text-evergreen">
                       {hint} →
                     </p>
                   </CardContent>
@@ -277,9 +273,9 @@ export default async function StudyPlanPage() {
         </ul>
 
         {/* 오늘의 플랜 (서버 계산 결과) */}
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <CardContent className="p-4">
-            <h2 className="text-sm font-bold">오늘의 플랜 진행도</h2>
+        <Card className="border-rule">
+          <CardContent className="p-5">
+            <h2 className="font-serif text-lg font-medium tracking-tight">오늘의 플랜 진행도</h2>
             <ul className="mt-3 space-y-2">
               {summary.plan.map((item) => {
                 const Icon = STATE_ICON[item.state];
@@ -290,10 +286,10 @@ export default async function StudyPlanPage() {
                     <Link
                       href={isLocked ? "#" : item.href}
                       aria-disabled={isLocked}
-                      className={`flex items-center gap-3 rounded-xl border border-border/50 bg-background px-3 py-3 transition-colors ${
+                      className={`flex items-center gap-3 rounded-lg border border-rule bg-background px-3 py-3 transition-colors ${
                         isLocked
                           ? "opacity-60 cursor-not-allowed"
-                          : "hover:bg-secondary/40"
+                          : "hover:bg-secondary"
                       }`}
                     >
                       <Icon className={`h-5 w-5 shrink-0 ${tone}`} aria-hidden />
@@ -304,13 +300,13 @@ export default async function StudyPlanPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-3 text-[11px]">
-                        <div className="hidden sm:block w-28 h-1.5 overflow-hidden rounded-full bg-secondary">
+                        <div className="hidden sm:block w-28 h-1.5 overflow-hidden rounded-full bg-rule">
                           <div
-                            className="h-full bg-primary transition-all"
+                            className="h-full bg-evergreen gauge-fill"
                             style={{ width: `${item.progress}%` }}
                           />
                         </div>
-                        <span className="tabular-nums text-muted-foreground w-9 text-right">
+                        <span className="num text-muted-foreground w-9 text-right">
                           {item.progress}%
                         </span>
                       </div>
@@ -323,9 +319,9 @@ export default async function StudyPlanPage() {
         </Card>
 
         {/* 학습 가이드 */}
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <CardContent className="p-4">
-            <h2 className="text-sm font-bold">학습 가이드</h2>
+        <Card className="border-rule">
+          <CardContent className="p-5">
+            <h2 className="font-serif text-lg font-medium tracking-tight">학습 가이드</h2>
             <ol className="mt-2 space-y-1.5 text-[12px] text-foreground/80 leading-relaxed list-decimal pl-4">
               <li>
                 <strong>어휘 SRS</strong>를 매일 10~30장씩 꾸준히 (FSRS 간격 반복).

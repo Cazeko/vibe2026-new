@@ -149,7 +149,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <p className="pt-2 text-center text-sm text-muted-foreground">
         {swap.label}{" "}
-        <Link href={swap.href} className="font-semibold text-primary">
+        <Link href={swap.href} className="font-medium text-foreground underline underline-offset-4 decoration-rule-strong hover:decoration-foreground">
           {swap.text}
         </Link>
       </p>

@@ -9,19 +9,22 @@ const STATE_ICON = {
   locked: Lock,
 } as const;
 
+// 헌법 v2.1 — completed 만 evergreen (액센트 5번 — 진척 마커), in_progress 는 회색.
 const STATE_TONE: Record<PlanItem["state"], string> = {
-  in_progress: "text-primary",
-  completed: "text-emerald-500",
-  locked: "text-muted-foreground/60",
+  in_progress: "text-muted-foreground",
+  completed: "text-evergreen",
+  locked: "text-muted-foreground/40",
 };
 
 // 헌법 v1.10 — TodayPlan 은 실데이터(SRS 듀카드 + 오늘 푼 문제 수)로 산출된다.
 export function TodayPlan({ items }: { items: PlanItem[] }) {
   return (
-    <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
-      <CardContent className="p-4 h-full">
+    <Card className="border-rule h-full">
+      <CardContent className="p-5 h-full">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold">오늘의 학습 플랜</h2>
+          <h2 className="font-serif text-lg font-medium tracking-tight">
+            오늘의 학습 플랜
+          </h2>
           <Link
             href="/study-plan"
             className="text-[11px] text-muted-foreground hover:text-foreground"
@@ -40,7 +43,7 @@ export function TodayPlan({ items }: { items: PlanItem[] }) {
                 <Link
                   href={isLocked ? "#" : item.href}
                   aria-disabled={isLocked}
-                  className={`flex items-center gap-2.5 rounded-xl border border-border/50 bg-background px-2.5 py-2 transition-colors ${
+                  className={`flex items-center gap-2.5 rounded-xl border border-rule bg-background px-2.5 py-2 transition-colors ${
                     isLocked
                       ? "opacity-60 cursor-not-allowed"
                       : "hover:bg-secondary/40"

@@ -38,9 +38,9 @@ export default async function ExamAnalysisPage() {
 
       <div className="px-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
         {/* 정직 안내 */}
-        <Card className="xl:col-span-3 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-amber-50 to-rose-50 dark:from-amber-500/15 dark:to-rose-500/10">
-          <CardContent className="p-4 flex gap-3">
-            <ShieldAlert className="h-5 w-5 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5" aria-hidden />
+        <Card className="xl:col-span-3 border-warning/40 bg-warning/[0.06]">
+          <CardContent className="p-5 flex gap-3">
+            <ShieldAlert className="h-5 w-5 text-warning shrink-0 mt-0.5" aria-hidden />
             <div className="text-[12.5px] text-foreground/85 leading-relaxed">
               <p className="font-semibold text-foreground">합격 컷·평균을 보여드리지 않는 이유</p>
               <p className="mt-1">
@@ -52,32 +52,32 @@ export default async function ExamAnalysisPage() {
         </Card>
 
         {/* 내 목표 학교 */}
-        <Card className="xl:col-span-2 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <CardContent className="p-4">
+        <Card className="xl:col-span-2 border-rule">
+          <CardContent className="p-5">
             <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-primary" aria-hidden />
-              <h2 className="text-sm font-bold">내 목표 학교</h2>
+              <Star className="h-4 w-4 text-evergreen" aria-hidden />
+              <h2 className="font-serif text-lg font-medium tracking-tight">내 목표 학교</h2>
             </div>
             {targetSeed ? (
               <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="md:col-span-1 rounded-xl border border-border/50 bg-background px-4 py-3">
-                  <p className="text-[11px] text-muted-foreground">학교</p>
-                  <p className="mt-1 text-2xl font-bold tracking-tight">
+                <div className="md:col-span-1 rounded-lg border border-rule bg-background px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">학교</p>
+                  <p className="mt-1 font-serif text-2xl font-medium tracking-tight">
                     {targetSeed.shortName}
                   </p>
                 </div>
-                <div className="rounded-xl border border-border/50 bg-background px-4 py-3">
-                  <p className="text-[11px] text-muted-foreground">시험 시기</p>
-                  <p className="mt-1 text-base font-semibold">
+                <div className="rounded-lg border border-rule bg-background px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">시험 시기</p>
+                  <p className="mt-1 font-serif text-base font-medium">
                     {targetSeed.examMonth ?? "공지 미상"}
                   </p>
                   <p className="mt-0.5 text-[10.5px] text-muted-foreground">
                     매년 학교 공지에 따라 변동
                   </p>
                 </div>
-                <div className="rounded-xl border border-border/50 bg-background px-4 py-3">
-                  <p className="text-[11px] text-muted-foreground">총 문항 수</p>
-                  <p className="mt-1 text-base font-semibold">
+                <div className="rounded-lg border border-rule bg-background px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">총 문항 수</p>
+                  <p className="mt-1 font-serif text-base font-medium num">
                     {targetSeed.totalQuestions ? `약 ${targetSeed.totalQuestions}문항` : "—"}
                   </p>
                   <p className="mt-0.5 text-[10.5px] text-muted-foreground">
@@ -85,18 +85,18 @@ export default async function ExamAnalysisPage() {
                   </p>
                 </div>
                 {targetSeed.sections && (
-                  <div className="md:col-span-3 rounded-xl border border-border/50 bg-background px-4 py-3">
-                    <p className="text-[11px] text-muted-foreground">
+                  <div className="md:col-span-3 rounded-lg border border-rule bg-background px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                       과목 구성 (공개 자료 추정)
                     </p>
                     <ul className="mt-2 grid grid-cols-3 gap-2">
                       {targetSeed.sections.map((s) => (
                         <li
                           key={s.key}
-                          className="rounded-lg bg-secondary/40 px-3 py-2 text-center"
+                          className="rounded-md bg-secondary px-3 py-2 text-center"
                         >
                           <p className="text-[11px] text-muted-foreground">{s.label}</p>
-                          <p className="mt-0.5 text-sm font-semibold">
+                          <p className="mt-0.5 font-serif text-sm font-medium num">
                             {s.approxQuestions ? `≈ ${s.approxQuestions}문항` : "—"}
                           </p>
                         </li>
@@ -114,11 +114,11 @@ export default async function ExamAnalysisPage() {
         </Card>
 
         {/* 학습 가이드 */}
-        <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/10">
-          <CardContent className="p-4 h-full flex flex-col">
+        <Card className="border-evergreen bg-evergreen/[0.06]">
+          <CardContent className="p-5 h-full flex flex-col">
             <div className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-primary" aria-hidden />
-              <h2 className="text-sm font-bold">학교 정보 → 학습 전략</h2>
+              <BookOpen className="h-4 w-4 text-evergreen" aria-hidden />
+              <h2 className="font-serif text-lg font-medium tracking-tight">학교 정보 → 학습 전략</h2>
             </div>
             <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-foreground/85 flex-1">
               <li>• 시험 시기를 알면 <strong>학습 플랜</strong>이 D-day로 자동 역산됩니다.</li>
@@ -129,40 +129,40 @@ export default async function ExamAnalysisPage() {
         </Card>
 
         {/* 학교별 시험 정보 표 */}
-        <Card className="xl:col-span-3 rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <CardContent className="p-4">
+        <Card className="xl:col-span-3 border-rule">
+          <CardContent className="p-5">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-primary" aria-hidden />
-              <h2 className="text-sm font-bold">학교별 시험 정보</h2>
+              <Calendar className="h-4 w-4 text-evergreen" aria-hidden />
+              <h2 className="font-serif text-lg font-medium tracking-tight">학교별 시험 정보</h2>
             </div>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-[12px]">
                 <thead className="text-left text-[11px] text-muted-foreground">
-                  <tr className="border-b border-border/50">
+                  <tr className="border-b border-rule">
                     <th className="py-2 font-medium">학교</th>
                     <th className="py-2 font-medium">시험 시기</th>
                     <th className="py-2 font-medium">총 문항 수</th>
                     <th className="py-2 font-medium">합격 컷·평균</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-rule">
                   {UNIVERSITY_SEEDS.map((u) => {
                     const isTarget = u.name === target;
                     return (
                       <tr
                         key={u.name}
-                        className={isTarget ? "bg-primary/5" : ""}
+                        className={isTarget ? "bg-evergreen/[0.04]" : ""}
                       >
                         <td className="py-2 font-medium">
                           {u.shortName}
                           {isTarget && (
-                            <span className="ml-1.5 text-[9.5px] font-semibold text-primary">
+                            <span className="ml-1.5 text-[9.5px] font-semibold text-evergreen">
                               내 목표
                             </span>
                           )}
                         </td>
                         <td className="py-2">{u.examMonth ?? "공지 미상"}</td>
-                        <td className="py-2 tabular-nums">
+                        <td className="py-2 num">
                           {u.totalQuestions ? `약 ${u.totalQuestions}문항` : "—"}
                         </td>
                         <td className="py-2 text-muted-foreground italic">

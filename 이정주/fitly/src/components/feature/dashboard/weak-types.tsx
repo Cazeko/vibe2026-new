@@ -18,38 +18,41 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   good: "양호",
 };
 
+// DESIGN.md §4.4 — semantic 색은 desaturated 토큰으로. 채도 충돌 회피 + 단계 인식 가능.
 const SEVERITY_BAR: Record<Severity, string> = {
-  weak: "bg-rose-400",
-  warn: "bg-amber-400",
-  ok: "bg-sky-400",
-  good: "bg-emerald-400",
+  weak: "bg-error/70",
+  warn: "bg-warning/70",
+  ok: "bg-info/70",
+  good: "bg-evergreen/70",
 };
 
 const SEVERITY_BADGE: Record<Severity, string> = {
-  weak: "bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300",
-  warn: "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300",
-  ok: "bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300",
-  good: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300",
+  weak: "bg-error/10 text-error",
+  warn: "bg-warning/10 text-warning",
+  ok: "bg-info/10 text-info",
+  good: "bg-evergreen/10 text-evergreen",
 };
 
 export function WeakTypes({ items }: { items: WeakType[] }) {
   return (
-    <Card className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
-      <CardContent className="p-4 h-full">
-        <h2 className="text-sm font-bold">취약 유형 분석</h2>
+    <Card className="border-rule h-full">
+      <CardContent className="p-5 h-full">
+        <h2 className="font-serif text-lg font-medium tracking-tight">
+          취약 유형 분석
+        </h2>
 
         {items.length === 0 ? (
-          <div className="mt-3 grid place-items-center rounded-xl border border-dashed border-border/60 bg-background/50 py-7 text-center text-[11.5px] text-muted-foreground">
+          <div className="mt-3 grid place-items-center rounded-lg border border-dashed border-rule bg-background/50 py-7 text-center text-[11.5px] text-muted-foreground">
             <span className="font-medium text-foreground">아직 분석할 데이터가 없어요</span>
             <Link
               href="/study/exam"
-              className="mt-1 text-[10px] text-primary hover:underline"
+              className="mt-1 text-[10px] text-evergreen hover:underline"
             >
               기출 풀이로 시작 ›
             </Link>
           </div>
         ) : (
-          <ul className="mt-2 space-y-1.5">
+          <ul className="mt-3 space-y-2">
             {items.map((w) => {
               const sev = severityOf(w.accuracy);
               return (
@@ -62,7 +65,7 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
                       </span>
                     </span>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground num">
                         정답률 {w.accuracy}%
                       </span>
                       <span
@@ -72,7 +75,7 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
                       </span>
                     </div>
                   </div>
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-rule">
                     <div
                       className={`h-full ${SEVERITY_BAR[sev]} transition-all`}
                       style={{ width: `${w.accuracy}%` }}

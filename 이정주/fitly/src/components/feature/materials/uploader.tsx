@@ -117,11 +117,11 @@ export function MaterialsUploader() {
     <div className="space-y-3">
       <label
         htmlFor="materials-upload"
-        className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border/60 bg-background/50 p-8 cursor-pointer transition-colors hover:bg-secondary/40"
+        className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-rule bg-background/50 p-8 cursor-pointer transition-colors hover:bg-secondary/40"
       >
         <span
           aria-hidden
-          className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary"
+          className="grid h-12 w-12 place-items-center rounded-lg bg-secondary text-muted-foreground"
         >
           <Upload className="h-5 w-5" />
         </span>
@@ -142,10 +142,10 @@ export function MaterialsUploader() {
       </label>
 
       {picked && (
-        <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background px-3 py-2">
+        <div className="flex items-center gap-3 rounded-lg border border-rule bg-background px-3 py-2">
           <span
             aria-hidden
-            className="grid h-8 w-8 place-items-center rounded-lg bg-rose-50 text-rose-500 dark:bg-rose-500/15 dark:text-rose-300"
+            className="grid h-8 w-8 place-items-center rounded-lg bg-secondary text-muted-foreground"
           >
             <FileText className="h-4 w-4" />
           </span>
@@ -194,16 +194,16 @@ export function MaterialsUploader() {
       )}
 
       {(status === "uploading" || status === "saving" || status === "extracting") && (
-        <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-rule">
           <div
-            className="h-full bg-primary transition-all"
+            className="h-full bg-evergreen gauge-fill"
             style={{ width: `${progress}%` }}
           />
         </div>
       )}
 
       {status === "done" && (
-        <p role="status" className="text-[12px] text-emerald-600">
+        <p role="status" className="text-[12px] text-evergreen">
           업로드 완료
           {extractedCount != null && extractedCount > 0 && (
             <>

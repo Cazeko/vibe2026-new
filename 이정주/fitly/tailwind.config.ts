@@ -11,6 +11,7 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // ── shadcn 호환 시멘틱 토큰 ──
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -44,16 +45,57 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+
+        // ── DESIGN.md v1 직접 토큰 (의미적 사용) ──
+        cream: "hsl(var(--color-bg))",
+        ink: "hsl(var(--color-text))",
+        evergreen: {
+          DEFAULT: "hsl(var(--color-accent))",
+          strong: "hsl(var(--color-accent-strong))",
+        },
+        rule: {
+          DEFAULT: "hsl(var(--color-rule))",
+          strong: "hsl(var(--color-rule-strong))",
+        },
+        warning: "hsl(var(--color-warning))",
+        error: "hsl(var(--color-error))",
+        info: "hsl(var(--color-info))",
+
+        // ── 헌법 v1.9 데시보드 캔버스/사이드바 토큰 (호환 유지) ──
+        "app-bg": "hsl(var(--app-bg))",
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar))",
+          foreground: "hsl(var(--sidebar-foreground))",
+        },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "var(--radius)",                      // 8px
+        md: "calc(var(--radius) - 2px)",          // 6px
+        sm: "calc(var(--radius) - 4px)",          // 4px
       },
       fontFamily: {
+        // 헤드라인·KPI 큰 숫자 (DESIGN.md §3)
+        serif: [
+          "var(--font-newsreader)",
+          "var(--font-noto-serif-kr)",
+          "Georgia",
+          "serif",
+        ],
+        "serif-en": [
+          "var(--font-newsreader)",
+          "Georgia",
+          "serif",
+        ],
+        "serif-kr": [
+          "var(--font-noto-serif-kr)",
+          "var(--font-newsreader)",
+          "Georgia",
+          "serif",
+        ],
+        // 본문·UI (Pretendard 한글 우선, Geist 영문)
         sans: [
-          "Pretendard Variable",
-          "Pretendard",
+          "var(--font-pretendard)",
+          "var(--font-geist)",
           "-apple-system",
           "BlinkMacSystemFont",
           "system-ui",
@@ -62,6 +104,22 @@ const config: Config = {
           "Helvetica Neue",
           "Apple SD Gothic Neo",
           "sans-serif",
+        ],
+        "sans-en": [
+          "var(--font-geist)",
+          "var(--font-pretendard)",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "system-ui",
+          "sans-serif",
+        ],
+        // 코드 (희소 사용)
+        mono: [
+          "var(--font-jetbrains-mono)",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
         ],
       },
       keyframes: {

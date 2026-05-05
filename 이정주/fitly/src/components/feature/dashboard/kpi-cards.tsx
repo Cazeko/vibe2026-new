@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Target, TrendingUp, Clock, Flame } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { DashboardKpi } from "@/lib/dashboard/types";
 
 function formatHourMin(min: number): string {
@@ -11,10 +12,19 @@ function formatHourMin(min: number): string {
   return `${h}시간 ${m}분`;
 }
 
-// 헌법 v2.0 — KPI 4 카드는 실데이터(getDashboardSummary)에서 props로 받는다.
-// "Fit 점수" 폐지 → "학습 진척도(Progress)" 로 재명명.
+// 헌법 v2.1 제16조의2 — 액센트(evergreen)는 *학습 진척도 KPI 와 진척 바 에만* 사용한다.
+// 나머지 3개 KPI 는 단색 + 세리프 큰 숫자 (DESIGN.md §3 헤드라인 패턴).
+type Card = {
+  label: string;
+  value: string;
+  sub: string;
+  Icon: typeof Target;
+  isProgress?: boolean;
+  progressPct?: number;
+};
+
 export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
-  const cards = [
+  const cards: Card[] = [
     {
       label: "목표 학교",
       value: kpi.targetUniversityShort ?? "미설정",
@@ -23,14 +33,14 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
           ? `D-${kpi.daysToExam}`
           : "설정에서 학교·시험일 등록",
       Icon: Target,
-      tone: "text-indigo-600 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-500/15",
     },
     {
       label: "학습 진척도",
       value: `${kpi.progressScore}`,
       sub: `본인 누적 · 어휘 ${kpi.progressBreakdown.vocabMasteryRate}/오답 ${kpi.progressBreakdown.mistakeConquerRate}/일관 ${kpi.progressBreakdown.studyConsistency}`,
       Icon: TrendingUp,
-      tone: "text-emerald-600 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-500/15",
+      isProgress: true,
+      progressPct: kpi.progressScore,
     },
     {
       label: "최근 7일 학습",
@@ -40,14 +50,12 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
           ? `지난 주보다 +${formatHourMin(kpi.studyDeltaMinutes)}`
           : "이번 주 첫 학습 시작 권장",
       Icon: Clock,
-      tone: "text-amber-600 bg-amber-50 dark:text-amber-300 dark:bg-amber-500/15",
     },
     {
       label: "연속 학습",
       value: `${kpi.streakDays}일`,
       sub: kpi.streakBest > 0 ? `최장 ${kpi.streakBest}일` : "오늘부터 첫 기록",
       Icon: Flame,
-      tone: "text-rose-600 bg-rose-50 dark:text-rose-300 dark:bg-rose-500/15",
     },
   ];
 
@@ -56,27 +64,48 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
       aria-label="핵심 지표"
       className="grid grid-cols-2 xl:grid-cols-4 gap-3"
     >
-      {cards.map(({ label, value, sub, Icon, tone }) => (
-        <Card
-          key={label}
-          className="rounded-2xl border-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-        >
-          <CardContent className="p-4 flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[11px] text-muted-foreground">{label}</p>
-              <p className="mt-1 text-2xl font-bold tracking-tight truncate">
-                {value}
-              </p>
-              <p className="mt-1 text-[11px] text-muted-foreground truncate">
-                {sub}
-              </p>
+      {cards.map(({ label, value, sub, Icon, isProgress, progressPct }) => (
+        <Card key={label} className="border-rule">
+          <CardContent className="p-5 flex flex-col">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  {label}
+                </p>
+                <p
+                  className={cn(
+                    "mt-2 font-serif font-medium leading-none tracking-tight num truncate",
+                    isProgress
+                      ? "text-evergreen text-3xl"
+                      : "text-foreground text-2xl"
+                  )}
+                >
+                  {value}
+                  {isProgress && (
+                    <span className="ml-1 text-sm font-sans text-muted-foreground font-normal">
+                      /100
+                    </span>
+                  )}
+                </p>
+                <p className="mt-1.5 text-[11px] text-muted-foreground truncate">
+                  {sub}
+                </p>
+              </div>
+              <span
+                aria-hidden
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-secondary text-muted-foreground"
+              >
+                <Icon className="h-4 w-4" />
+              </span>
             </div>
-            <span
-              aria-hidden
-              className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone}`}
-            >
-              <Icon className="h-4 w-4" />
-            </span>
+            {isProgress && progressPct != null && (
+              <div className="mt-3 h-1 overflow-hidden rounded-full bg-rule">
+                <span
+                  className="block h-full bg-evergreen rounded-full gauge-fill"
+                  style={{ width: `${Math.max(0, Math.min(100, progressPct))}%` }}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}

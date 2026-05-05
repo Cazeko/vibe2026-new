@@ -48,23 +48,25 @@ export function AppSidebar() {
   return (
     <aside
       aria-label="주 메뉴"
-      className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-60 flex-col bg-[#1a1f2e] text-slate-200"
+      className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-56 flex-col bg-sidebar text-sidebar-foreground border-r border-rule"
     >
-      <div className="px-6 pt-7 pb-6">
+      <div className="px-5 pt-6 pb-5">
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white"
+          className="flex items-center gap-2 font-serif text-2xl font-medium tracking-tight text-foreground"
           aria-label="Fitly 대시보드"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-xl gauge-gradient text-sm font-extrabold">
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-evergreen text-primary-foreground font-serif italic font-medium">
             F
           </span>
-          <span>Fitly</span>
+          <span>
+            Fitly<span className="text-evergreen">.</span>
+          </span>
         </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3">
-        <ul className="space-y-1">
+        <ul className="space-y-0.5">
           {MAIN.map(({ href, label, Icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (
@@ -73,13 +75,13 @@ export function AppSidebar() {
                   href={href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] font-medium transition-colors",
                     active
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                      ? "bg-evergreen/10 text-evergreen"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                   )}
                 >
-                  <Icon className="h-4 w-4" aria-hidden />
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden />
                   <span>{label}</span>
                 </Link>
               </li>
@@ -88,15 +90,15 @@ export function AppSidebar() {
         </ul>
       </nav>
 
-      <div className="border-t border-white/5 px-3 py-4 space-y-1">
+      <div className="border-t border-rule px-3 py-3 space-y-0.5">
         <Link
           href="/settings"
           aria-current={pathname.startsWith("/settings") ? "page" : undefined}
           className={cn(
-            "flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-colors",
+            "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] transition-colors",
             pathname.startsWith("/settings")
-              ? "bg-white/10 text-white"
-              : "text-slate-400 hover:bg-white/5 hover:text-white"
+              ? "bg-secondary text-foreground"
+              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
           )}
         >
           <Settings className="h-4 w-4" aria-hidden />
@@ -105,7 +107,7 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
+          className="flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
         >
           <LogOut className="h-4 w-4" aria-hidden />
           <span>로그아웃</span>

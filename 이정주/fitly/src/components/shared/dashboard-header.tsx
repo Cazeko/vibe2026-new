@@ -40,10 +40,10 @@ export function DashboardHeader() {
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 px-6 pt-5 pb-3">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
-          안녕하세요, {greetingName}님!
+        <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">
+          안녕하세요, {greetingName}님.
         </h1>
-        <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
       </div>
       <div className="flex items-center gap-1.5">
         <Button asChild className="h-9 rounded-xl px-3 text-sm">

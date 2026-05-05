@@ -5,12 +5,13 @@ export type HeatmapCell = {
   minutes: number;
 };
 
+// 헌법 v2.1 — 액센트 단일 사용. 활동 강도는 evergreen 명도 단계로 표현.
 const TONE_BG = [
-  "bg-secondary",
-  "bg-emerald-200/70 dark:bg-emerald-500/30",
-  "bg-emerald-300 dark:bg-emerald-500/50",
-  "bg-emerald-400 dark:bg-emerald-500/70",
-  "bg-emerald-500 dark:bg-emerald-400",
+  "bg-rule",
+  "bg-evergreen/20",
+  "bg-evergreen/40",
+  "bg-evergreen/70",
+  "bg-evergreen",
 ];
 
 function level(minutes: number): number {
