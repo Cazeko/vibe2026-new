@@ -1,0 +1,8 @@
+{
+  "pid": 406191,
+  "port": 30775,
+  "token": "ec065c15-f621-4d2d-8ce0-559fbca4575c",
+  "startedAt": "2026-05-05T09:15:09.898Z",
+  "serverPath": "/home/jovyan/.claude/skills/gstack/browse/src/server.ts",
+  "mode": "launched"
+}
