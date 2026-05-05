@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { studyCards } from "@/lib/db/schema";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 // 헌법 v1.11 제13조의2 1항 — SRS 통합 큐의 study_cards 슬라이스.

@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { studySessions, learningLogs } from "@/lib/db/schema";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 type Body = {

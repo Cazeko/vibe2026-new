@@ -9,7 +9,6 @@ import {
 } from "@/lib/ocr";
 import { extractMistakeCards } from "@/lib/ocr/mistake-cards";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {

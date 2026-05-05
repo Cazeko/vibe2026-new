@@ -97,5 +97,3 @@ function OnboardingBanner() {
   );
 }
 
-// Cloudflare Pages — Edge runtime (헌법 v2.1 + 제17조 5항 정합)
-export const runtime = "edge";

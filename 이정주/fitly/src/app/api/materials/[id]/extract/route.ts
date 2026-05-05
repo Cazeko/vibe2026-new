@@ -6,7 +6,6 @@ import { studyCards, materials } from "@/lib/db/schema";
 import { extractTextFromBuffer } from "@/lib/ocr";
 import { extractStudyCards } from "@/lib/ocr/study-cards";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 // 헌법 v1.11 제13조의2 — /materials 업로드된 PDF·이미지 → StudyCard 자동 변환.

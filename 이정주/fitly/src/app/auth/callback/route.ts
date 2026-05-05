@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 
 // 헌법 제17조 5항 + v1.8 미들웨어 패스스루.
 // Supabase OAuth (PKCE) 콜백에서 인가 코드를 세션 토큰으로 교환한다.
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {

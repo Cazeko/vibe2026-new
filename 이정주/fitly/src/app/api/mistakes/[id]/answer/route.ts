@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { mistakes } from "@/lib/db/schema/mistakes";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const schema = z.object({

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDashboardSummary } from "@/lib/dashboard/queries";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 // 헌법 v1.10 — 대시보드 6위젯 단일 진입점.

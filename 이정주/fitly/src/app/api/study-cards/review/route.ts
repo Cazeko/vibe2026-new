@@ -11,7 +11,6 @@ import {
   type ReviewGrade,
 } from "@/lib/srs";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const VALID_GRADES: ReadonlySet<ReviewGrade> = new Set([
