@@ -24,9 +24,23 @@ const PROTECTED_PREFIXES = [
 const AUTH_PREFIXES = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
   // 헌법 제17조 5항 — Supabase OAuth (PKCE) callback 경로는
   // redirect 로직보다 먼저 통과시켜 토큰 교환을 보장한다 (D17 v1.8 정정).
-  if (request.nextUrl.pathname.startsWith("/auth/")) {
+  if (pathname.startsWith("/auth/")) {
+    return NextResponse.next({ request });
+  }
+
+  // 성능 최적화 — 보호도 인증 라우트도 아닌 *완전 공개 페이지* (예: /, /privacy 등)
+  // 는 supabase.auth.getUser() 호출 자체를 건너뛴다 (한국→Supabase RTT 100-200ms 절약).
+  const isProtected = PROTECTED_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+  const isAuthRoute = AUTH_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+  if (!isProtected && !isAuthRoute) {
     return NextResponse.next({ request });
   }
 
@@ -56,14 +70,6 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
-  const isProtected = PROTECTED_PREFIXES.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`)
-  );
-  const isAuthRoute = AUTH_PREFIXES.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`)
-  );
 
   if (!user && isProtected) {
     const url = request.nextUrl.clone();
