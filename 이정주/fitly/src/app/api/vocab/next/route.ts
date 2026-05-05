@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { vocabCards } from "@/lib/db/schema/vocab";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function GET() {

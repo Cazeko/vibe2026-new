@@ -1,8 +1,10 @@
-// pdf-parse@1.1.1의 모듈 진입부에 자체 디버그 PDF 자동 로드 코드가 있어
-// Next.js 빌드/런타임에서 ENOENT를 유발할 수 있다. 함수 모듈을 직접 deep-import 한다.
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
+// 헌법 v2.1 + 제17조 5항 — Cloudflare Pages edge runtime 호환을 위해
+// pdf-parse(Node 전용) → unpdf(edge/web 호환) 로 교체.
+import { extractText, getDocumentProxy } from "unpdf";
 
 export async function extractPdfText(buffer: Buffer): Promise<string> {
-  const result = await pdfParse(buffer);
-  return result.text;
+  const uint8 = new Uint8Array(buffer);
+  const pdf = await getDocumentProxy(uint8);
+  const { text } = await extractText(pdf, { mergePages: true });
+  return Array.isArray(text) ? text.join("\n") : text;
 }

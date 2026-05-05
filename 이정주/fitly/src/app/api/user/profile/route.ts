@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { userProfiles } from "@/lib/db/schema/user-profiles";
 import { UNIVERSITY_NAMES } from "@/types";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const upsertSchema = z.object({

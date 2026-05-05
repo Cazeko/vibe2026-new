@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { materials } from "@/lib/db/schema";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 // 헌법 v1.10 — 자료 목록 GET / 메타데이터 POST.

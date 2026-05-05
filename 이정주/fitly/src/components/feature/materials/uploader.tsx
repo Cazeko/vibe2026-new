@@ -209,7 +209,7 @@ export function MaterialsUploader() {
             <>
               {" — "}
               <strong>{extractedCount}장</strong>의 학습 카드가 추출되어 학습 플랜의
-              "기출 풀이"에서 풀 수 있습니다.
+              &ldquo;기출 풀이&rdquo;에서 풀 수 있습니다.
             </>
           )}
           {extractedCount === 0 && (

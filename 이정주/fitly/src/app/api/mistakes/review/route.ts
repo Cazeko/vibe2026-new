@@ -12,7 +12,7 @@ import {
   type ReviewGrade,
 } from "@/lib/srs";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const schema = z.object({

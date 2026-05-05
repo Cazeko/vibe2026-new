@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { generateExamItem, type ExamSection } from "@/lib/exam/generator";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 // 헌법 v1.8 제30조 4항 — RAG 시드 미완성 시점 출제는 학교 무관 일반 빈출 한정.

@@ -13,6 +13,28 @@ const nextConfig = {
       },
     ],
   },
+  // Cloudflare Pages edge runtime — Node 코어 모듈은 wrangler.toml 의 nodejs_compat 으로 런타임 polyfill.
+  // 빌드 시점 webpack 은 fallback false 로 정적 require 우회.
+  webpack: (config, { nextRuntime }) => {
+    if (nextRuntime === "edge") {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        http: false,
+        https: false,
+        url: false,
+        zlib: false,
+        stream: false,
+        path: false,
+        crypto: false,
+        net: false,
+        tls: false,
+        dns: false,
+        child_process: false,
+      };
+    }
+    return config;
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
