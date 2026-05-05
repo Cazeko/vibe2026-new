@@ -257,38 +257,92 @@ feat(seed): SXX {year} 풀세트 시드 — {N}문항/{P}점/{T}분 (v3.3)
 
 ---
 
-## 8. 다음 세션 시작 명령 예시
+## 8. 단일 세션 시작 명령 (수동 운영용 — deprecated)
 
-새 채팅을 열고 다음과 같이 지시:
+수동으로 한 세션씩 처리할 경우의 명령. **v3.3 이후 자동화는 §10 오케스트레이터 명령** 사용.
 
 ```
-fitly/CLAUDE.md (헌법 v3.2)와
+fitly/CLAUDE.md (헌법 v3.3)와
 fitly/docs/plans/2026-05-06-seed-execution-handoff.md (세션 핸드오프 가이드)를
-읽고, Session 02 (2025 풀세트) 시드 작업을 진행해.
+읽고, Session 02 (2025 풀세트) 시드 작업을 v3.3 절차로 진행해.
 
 처리 대상:
 - /home/jovyan/work/fitly/kice_pdfs/2025-essay.pdf
 - /home/jovyan/work/fitly/kice_pdfs/2025-A.pdf
 - /home/jovyan/work/fitly/kice_pdfs/2025-B.pdf
 
-산출 위치:
-- /home/jovyan/work/.worktrees/v3-seed-pipeline/fitly/scripts/seed/data/papers/2025-{essay,A,B}/items.json
+절차:
+- Step 02a (unpdf) + Step 02b (pdftocairo) — 본문은 PDF 원본
+- Step 03 (LLM 위치 식별) + Step 04 (분석·답안·해설)
+- stem_text 는 raw_text 슬라이스로 강제, LLM 출력 stem 무시
 
-모범답안 품질은 §4.5.1 표준 (서술형 400~800자/소문제, 논술형 1500~2400자) 준수.
-끝나면 세션 commit + 진행 상황 표 갱신.
+품질: §4.5.1 답안 80~250자/소문제, 해설 300~600자 (서술형 기준).
+끝나면 commit + 진행 상황 표 갱신.
 ```
 
 ---
 
-## 9. 비상 — 세션 중단·문제 발생 시
+## 9. Fallback 정책 — subagent 의문 발생 시 [v3.3 강화]
+
+subagent는 사용자에게 직접 질문할 수 없으므로 모든 의문은 다음 정책으로 처리:
 
 | 상황 | 대응 |
 |------|------|
 | 모델 출력 한도 도달 | 부분 commit (작성한 만큼) + 다음 세션이 이어받음 |
-| PDF 분석 오류 (표·도식 모호) | items.json에 `extraction_issues: [...]` 메모 + verified=false 유지 |
+| PDF 분석 오류 (표·도식 모호) | items.json에 `extraction_issues: [...]` 메모 + verified_answer=false 유지 |
 | 점수 합계 불일치 | 메타 `total_points`는 표지 신뢰, 개별 `points`는 추정값으로 명시 |
-| 컨텍스트 50% 초과 | 다음 시험지를 다음 세션으로 미룸 |
+| 컨텍스트 한도 위협 | 다음 시험지를 다음 라운드로 미룸 |
+| stem_text 추출 실패 (offset 식별 어려움) | 페이지 PNG를 stem_image_paths 에 그대로 보존 + stem_text 는 빈 문자열 + extraction_issues 명시 |
+| 답안 분량 §4.5.1 위반 | 재작성 1회, 3회 시도 후에도 실패 시 그대로 시드 + verified_answer=false |
+| 해설 분량 위반 | 동일 |
+| 영역·Bloom 분류 모호 | 가장 보수적 default (예: \"교육학\" / \"적용\") + extraction_issues |
+| **권한 prompt 발생** | bypass 모드면 자동 승인 / bypass 미사용이면 fallback 불가 — 오케스트레이터 채팅을 bypass 모드로 시작해야 함 |
+
+> **원칙: subagent 는 절대 멈추지 않는다.** 모든 의문은 메모로 보존하고 다음 단계로 진행. 운영자는 검수 단계에서 정정.
 
 ---
 
-*본 가이드는 헌법 v3.2 시점의 단기 시드 운영 표준이며, 풀스코프 시드 완료 시 폐기 또는 매년 갱신 가이드로 축약된다.*
+## 10. 오케스트레이터 채팅 시작 명령 [v3.3 자동화]
+
+**필수 사전 조건**: 새 채팅을 **bypass permissions 모드**로 시작 (도구 호출당 권한 prompt 자동 승인).
+
+새 채팅(opus 4.7 1M, bypass 모드)에 다음 명령:
+
+```
+fitly/CLAUDE.md (헌법 v3.3),
+fitly/docs/plans/2026-05-06-seed-execution-handoff.md,
+fitly/docs/plans/2026-05-06-seed-pipeline-implementation.md §4,
+fitly/docs/plans/2026-05-06-seed-subagent-prompt.md
+를 읽고 풀스코프 시드 작업의 오케스트레이터 역할로 진입해.
+
+작업 흐름
+1. Round 0: 2026 풀세트 재시드 (subagent 1개로 검증)
+   - subagent prompt 표준 §3 의 Round 0 변형 적용
+   - 결과 자가 검증 통과 후 Round 1 진입
+2. Round 1: 5 subagent 병렬 호출 (2025·2024·2023·2022·2021 풀세트)
+3. Round 2: 5 subagent (2020·2019·2018·2017·2016)
+4. Round 3: 5 subagent (2015·2014·2013·2008·2007 — Phase 3 일부)
+5. Round 4: 5 subagent (2006·2005·2004·2003·2001 — Phase 3 잔여)
+6. Phase 4 — combined PDF 처리 + dedup + DB 적재 (별도 단계)
+
+각 subagent 호출:
+- subagent prompt 표준 (`docs/plans/2026-05-06-seed-subagent-prompt.md` §1) 그대로 사용
+- ${YEAR} 변수만 치환
+- model: "opus", subagent_type: "general-purpose"
+
+라운드 간 처리:
+- 5 subagent 모두 종료될 때까지 대기 (Promise.all 패턴, run_in_background 활용)
+- 각 라운드 종료 시 진행 상황 표 (§4) 갱신 commit
+- extraction_issues 가 있는 풀세트는 보고에 명시 (운영자 검수 큐)
+
+운영자 보고:
+- 각 라운드 종료 시 1줄 요약 (라운드 번호 + 처리 풀세트 + 의문점 수)
+- Phase 4 종료 후 종합 보고
+
+bypass 모드 의무: subagent 도구 호출이 권한 prompt에 막히지 않도록.
+fallback 정책 (§9) 적용: subagent 가 멈추지 않도록.
+```
+
+---
+
+*본 가이드는 헌법 v3.3 시점의 풀스코프 시드 운영 표준이며, 풀스코프 시드 완료 시 폐기 또는 매년 갱신 가이드로 축약된다.*
