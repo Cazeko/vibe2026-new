@@ -87,7 +87,7 @@
 
 ```ts
 exam_papers {
-  id, year, session ('논술' | 'A' | 'B'),
+  id, year, session ('essay' | 'A' | 'B' | 'combined'),
   pdf_url, source_url,
   verified boolean
 }

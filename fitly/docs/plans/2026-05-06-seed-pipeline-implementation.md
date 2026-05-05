@@ -106,8 +106,8 @@ src/lib/db/schema/
 
 ```ts
 // exam_papers
-{ id uuid PK, year int, session enum('논술','A','B'),
-  pdf_url text, source_url text, verified bool default false,
+{ id uuid PK, year int, session enum('essay','A','B','combined'),
+  pdf_path text, source_url text, verified bool default false,
   created_at, updated_at }
 
 // exam_items
@@ -222,34 +222,42 @@ src/app/admin/seed-review/      (Step 5 — 검토 UI, Phase 1 끝부분)
 
 > Step 5(검토 UI)는 코드가 아니라 별도 페이지라 위 6개 스크립트와 분리.
 
-### 4.2 Step 01 — 메타 정규화
+### 4.2 Step 01 — 메타 정규화 [2026-05-06 — 파일명 사전 정규화 완료, 단순화]
 
-**입력**: `kice_pdfs/*.pdf` (68개)
+**입력**: `kice_pdfs/*.pdf` (정규화 표준 형식 56개)
 **출력**: `scripts/seed/data/papers.json`
+
+**파일명 표준** (사전 정규화, README 정합):
+- `YYYY-{essay|A|B|combined}.pdf` 단일 패턴
+- 예: `2025-essay.pdf`, `2025-A.pdf`, `2025-B.pdf`, `2009-combined.pdf`
+- `_archive/` 하위는 시드 파이프라인 입력에서 제외 (2차 시험 / 정답표 / 분류불명)
 
 ```json
 [
-  { "id": "2024-논술", "year": 2024, "session": "논술",
-    "pdf_path": "fitly/kice_pdfs/2024학년도_초등학교_교직논술.pdf",
+  { "id": "2025-essay", "year": 2025, "session": "essay",
+    "pdf_path": "fitly/kice_pdfs/2025-essay.pdf",
     "status": "pending" },
-  { "id": "2024-A", ...},
+  { "id": "2025-A", "year": 2025, "session": "A",
+    "pdf_path": "fitly/kice_pdfs/2025-A.pdf",
+    "status": "pending" },
   ...
 ]
 ```
 
-**로직**:
-- 정규식 패턴 매칭으로 파일명 → `{year, session}` 추출
-- 패턴 다양성 처리: `2024학년도_..._교직논술.pdf`, `2017학년도 초등학교 교육과정_A.pdf`, `01초등학교교육과정문제지.pdf`(=2001) 등
-- **제외 대상** (헌법 정합):
-  - 정답표 PDF (`*정답*.pdf`) — 사용자 결정 정합
-  - "초등2차" 시리즈 — 1차 시험만 다룸
-  - 2009/2010 통합본 — 별도 처리(스킵 또는 수동 분리, 우선 스킵)
-- 추출 실패 PDF는 별도 `unparsed.json`으로 분류 (운영자 수동 처리 큐)
+**로직** (단순화):
+- 정규식 단일 패턴: `^(\d{4})-(essay|A|B|combined)\.pdf$`
+- match group 1 = year (int), 2 = session (string enum)
+- `_archive/**` 하위 파일은 입력에서 무조건 제외 (glob: `kice_pdfs/*.pdf` 만)
+- combined 세션은 운영자 수동 분리 큐로 라우팅 (헌법 v3.0 Appendix A #7 정합)
 
 **검증**:
-- 출력 JSON 길이 ≥ 50 (목표 ~54건: 23년치 × 3교시 - 누락)
-- `year` ∈ [2002, 2026], `session` ∈ {'논술', 'A', 'B'}
-- 단위 테스트: `file-name-parser.ts` (5~10개 케이스)
+- 출력 JSON 길이 == **56** (목표값 정확히)
+  - essay 23개 (2004~2008, 2013~2026, 2009/2010/2011 제외)
+  - A 25개 (2001, 2003~2008, 2013~2026)
+  - B 14개 (2013~2026)
+  - combined 3개 (2009, 2010, 2011)
+- `year` ∈ [2001, 2026], `session` ∈ {'essay', 'A', 'B', 'combined'}
+- 단위 테스트: `file-name-parser.ts` (단순 패턴 매칭, 4~5개 케이스)
 
 ### 4.3 Step 02 — PDF → 텍스트
 

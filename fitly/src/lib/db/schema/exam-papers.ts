@@ -16,7 +16,7 @@ export const examPapers = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     year: integer("year").notNull(),
-    session: varchar("session", { length: 8 }).notNull(), // '논술' | 'A' | 'B'
+    session: varchar("session", { length: 12 }).notNull(), // 'essay' | 'A' | 'B' | 'combined' (헌법 v3.1 + kice_pdfs/ README 정합)
     pdfPath: text("pdf_path").notNull(), // kice_pdfs/ 내 상대 경로
     sourceUrl: text("source_url"), // KICE 다운로드 URL (있으면)
     verified: boolean("verified").notNull().default(false),
