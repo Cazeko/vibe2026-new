@@ -151,7 +151,11 @@ feat(seed): SXX {year} 풀세트 시드 — {N}문항/{P}점/{T}분 (v3.3)
 | R2 | 2026-05-06 | 2020·2019·2018·2017·2016 풀세트 | 42f5687·40f2be3·d1cf969·81fae20·fe8ab66 | ✅ R2 완료 — 115문항/72 issues (raw_text 비순차·페이지 마커, PNG로 시각 본문 보장) |
 | R3 | 2026-05-06 | 2015·2014·2013·2008·2007 풀세트 | d549734·42cb427·eacf730·7028780·ba65c9b | ✅ R3 완료 — 107문항/61 issues; **2013·2008·2007은 객관식 X (단답·서술형 혼합) 발견** (v3.2 8항 객관식 시대 시작 연도 재검토 필요); 2015는 raw_text 빈약 (이미지 PDF, PNG로 보장) |
 | R4 | 2026-05-06 | 2006·2005·2004·2003·2001 풀세트 | 890e910·6d223a7(2005+2004 race)·5060b85·796d48c | ✅ R4 완료 — 85문항/78 issues; **객관식 X 종합 (R3·R4 모든 PDF 단답·서술형)** v3.2 8항 정의 재검토 필요; 2001 폰트 손상·verified_text=false; 2005·2004 폰트 ghostscript fallback |
-| Phase 4 | 2026-05-06 | combined (2009/2010/2011) + dedup + DB 적재 | — | 🔄 진행 중 (3 단계: combined → dedup·concept note → DB 적재) |
+| Phase 4-1 | 2026-05-06 | combined (2009/2010/2011) | 2b85574 | ✅ 150문항 적재 (모두 객관식·skip_quiz_card=true); 2009·2010 폰트 손상으로 verified_text=false |
+| Phase 4-2a | 2026-05-06 | keyword dedup (전체 papers) | 9eedd37 | ✅ 593 items에서 2,691 instances → 2,044 unique; 2009/2010 over-tagging 발견 |
+| Phase 4-2b | 2026-05-06 | concept note 생성 (빈도≥2) | 85aee51 | ✅ 빈도≥4: 30개 풍부(평균 401자); 빈도 2~3: 175개 간소(평균 221자); 빈도 1: 1,839개 null |
+| Phase 4-3a | 2026-05-06 | schema 정리 + drizzle generate + build | — | 🔄 진행 중 (read-only side) |
+| Phase 4-3b | — | drizzle push + DB 적재 | — | ⏸ 주인님 명시 승인 대기 (destructive action) |
 
 > 각 세션 운영자(또는 Claude)는 본 표 1행을 추가하며 종료.
 
