@@ -167,13 +167,17 @@ if (!DRY_RUN) {
     `\n=== updating DB paths (exam_items.stem_image_path, cards.front_image_path) ===`,
   );
 
+  // postgres-js의 sql 태그가 backslash backreference를 parameter로 오인식해
+  // regexp_replace 대신 단순 replace 두 번으로 prefix·중간 디렉토리 제거.
+  // "scripts/seed/data/papers/2024-essay/pages/page-01.png"
+  //   → "2024-essay/page-01.png"
   const oldPrefix = "scripts/seed/data/papers/";
   const examItemsRows = await sql`
     UPDATE exam_items
-    SET stem_image_path = regexp_replace(
-      stem_image_path,
-      '^scripts/seed/data/papers/([^/]+)/pages/(.+)$',
-      '\1/\2'
+    SET stem_image_path = replace(
+      replace(stem_image_path, 'scripts/seed/data/papers/', ''),
+      '/pages/',
+      '/'
     )
     WHERE stem_image_path LIKE ${oldPrefix + "%"}
     RETURNING id
@@ -182,10 +186,10 @@ if (!DRY_RUN) {
 
   const cardsRows = await sql`
     UPDATE cards
-    SET front_image_path = regexp_replace(
-      front_image_path,
-      '^scripts/seed/data/papers/([^/]+)/pages/(.+)$',
-      '\1/\2'
+    SET front_image_path = replace(
+      replace(front_image_path, 'scripts/seed/data/papers/', ''),
+      '/pages/',
+      '/'
     )
     WHERE front_image_path LIKE ${oldPrefix + "%"}
     RETURNING id
