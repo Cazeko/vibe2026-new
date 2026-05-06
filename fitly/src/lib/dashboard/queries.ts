@@ -1,7 +1,6 @@
 // 헌법 v3.0 / v3.0.1 — 대시보드 실데이터 집계.
-// D-S1.5 — 폐기 5 (vocabCards/studyCards/mistakes/materials/universities) 의존 제거.
-// 풀이/키워드 마스터율은 cards 다형 테이블 + user_card_state 통합 후 D-S2에서 reimplement.
-// 현재는 study_sessions·learning_logs·user_profiles로 산출 가능한 부분만 활용.
+// D-S1.5 stub 해제 (2026-05-06) — cards 다형 테이블 + user_card_state 통합 query를
+// `lib/db/queries.ts`에 도입, 풀이/키워드 마스터율 실측 + plan due 카운트 활성화.
 
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
@@ -11,6 +10,7 @@ import {
   userProfiles,
 } from "@/lib/db/schema";
 import { computeProgress } from "@/lib/progress/score";
+import { getCardCounts, getDueCardCounts } from "@/lib/db/queries";
 import type {
   DashboardKpi,
   DashboardSummary,
@@ -134,9 +134,8 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
   }
   const streakBest = Math.max(streak, best);
 
-  // 학습 진척도(Progress) — v3.0 제9조
-  // 풀이/키워드 마스터율은 cards + user_card_state 통합 후 D-S2에서 산출.
-  // 현 시점은 시드 미적재로 둘 다 0 → 학습 일관성만 의미 있음.
+  // 학습 진척도(Progress) — 헌법 v3.0 제9조
+  //   풀이 마스터율 × 0.5 + 키워드 마스터율 × 0.2 + 학습 일관성 × 0.3
   const since14Days = await db
     .select({ day: sql<string>`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')` })
     .from(studySessions)
@@ -149,11 +148,12 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
     .groupBy(sql`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`);
   const recentStudyDaysOf14 = Math.min(14, since14Days.length);
 
+  const counts = await getCardCounts(userId);
   const breakdown = computeProgress({
-    quizTotal: 0,
-    quizMastered: 0,
-    keywordTotal: 0,
-    keywordMastered: 0,
+    quizTotal: counts.quizTotal,
+    quizMastered: counts.quizMastered,
+    keywordTotal: counts.keywordTotal,
+    keywordMastered: counts.keywordMastered,
     recentStudyDaysOf14,
   });
 
@@ -221,34 +221,51 @@ async function computeTrend(userId: string): Promise<TrendPoint[]> {
   return points;
 }
 
-// v3.0 / D-S1.5 — 풀이/키워드/오답 트랙 카드 카운트는 cards 통합 후 D-S2에서 reimplement.
-// 현재는 시드 미적재 상태이므로 정적 안내 항목으로 구성.
-async function computePlan(_userId: string): Promise<PlanItem[]> {
+// 헌법 v3.0 제13조의2 — 3 트랙 SRS 큐 (풀이·키워드·오답).
+// D-S1.5 stub 해제: getDueCardCounts로 오늘의 due 수를 실측.
+async function computePlan(userId: string): Promise<PlanItem[]> {
+  const due = await getDueCardCounts(userId);
+
+  const planRow = (
+    id: string,
+    title: string,
+    type: "quiz" | "keyword" | "mistake",
+    href: string,
+    fallbackSubtitle: string,
+  ): PlanItem => {
+    const dueCount = due[type];
+    return {
+      id,
+      title,
+      subtitle: dueCount > 0 ? `오늘 ${dueCount}장 due` : fallbackSubtitle,
+      progress: 0,
+      state: dueCount > 0 ? "in_progress" : "locked",
+      href,
+    };
+  };
+
   return [
-    {
-      id: "plan-quiz",
-      title: "풀이 트랙 — 서술형 기출",
-      subtitle: "시드 적재 후 자동으로 오늘의 큐가 채워집니다",
-      progress: 0,
-      state: "locked",
-      href: "/study",
-    },
-    {
-      id: "plan-keyword",
-      title: "키워드 트랙 — 개념 정리 노트",
-      subtitle: "시드 적재 후 자동으로 오늘의 큐가 채워집니다",
-      progress: 0,
-      state: "locked",
-      href: "/study",
-    },
-    {
-      id: "plan-mistake",
-      title: "오답 트랙",
-      subtitle: "풀이를 again/hard 로 평가하면 자동 합류합니다",
-      progress: 0,
-      state: "locked",
-      href: "/study",
-    },
+    planRow(
+      "plan-quiz",
+      "풀이 트랙 — 서술형 기출",
+      "quiz",
+      "/study/quiz",
+      "오늘의 due 없음 — 새 카드 학습",
+    ),
+    planRow(
+      "plan-keyword",
+      "키워드 트랙 — 개념 정리 노트",
+      "keyword",
+      "/study?track=keyword",
+      "오늘의 due 없음 — 새 카드 학습",
+    ),
+    planRow(
+      "plan-mistake",
+      "오답 트랙",
+      "mistake",
+      "/study?track=mistake",
+      "풀이를 again/hard 로 평가하면 자동 합류",
+    ),
   ];
 }
 

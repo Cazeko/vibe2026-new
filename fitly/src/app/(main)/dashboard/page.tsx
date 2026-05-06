@@ -30,7 +30,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen pb-4">
       <DashboardHeader />
 
-      <div className="px-6 space-y-3">
+      <div className="px-6 mx-auto max-w-7xl space-y-3">
         {summary.isEmpty && <OnboardingBanner />}
 
         <KpiCards kpi={summary.kpi} />
