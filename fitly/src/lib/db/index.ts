@@ -18,7 +18,7 @@ function drizzleFromClient(client: ReturnType<typeof postgres>) {
 function createPgClient() {
   return postgres(env.database.url, {
     prepare: false,
-    max: 5,             // serverless 친화 — Pooler free(15) 여유 + dashboard 동시 query 4~5개 대응
+    max: 8,             // Pooler free(15) 한도 안 — /me 페이지 동시 query ~10개 대응 (cache dedupe 후 7~8)
     idle_timeout: 20,   // 20초 유휴 연결 자동 종료
     max_lifetime: 60 * 5, // 5분 후 강제 갱신
     connect_timeout: 10,  // 10초 안에 connect 못 하면 즉시 throw
