@@ -10,7 +10,7 @@ import {
   userProfiles,
 } from "@/lib/db/schema";
 import { computeProgress } from "@/lib/progress/score";
-import { getCardCounts, getDueCardCounts } from "@/lib/db/queries";
+import { getCardCounts, getDueCardCounts, safeRun } from "@/lib/db/queries";
 import type {
   DashboardKpi,
   DashboardSummary,
@@ -20,6 +20,22 @@ import type {
 } from "./types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+const EMPTY_KPI: DashboardKpi = {
+  targetRegion: null,
+  targetRegionShort: null,
+  progressScore: 0,
+  progressBreakdown: {
+    quizMasteryRate: 0,
+    keywordMasteryRate: 0,
+    studyConsistency: 0,
+  },
+  studyMinutes: 0,
+  studyDeltaMinutes: 0,
+  streakDays: 0,
+  streakBest: 0,
+  daysToExam: null,
+};
 
 // 헌법 v3.0 제15조 — 지역 교육청 17개 라벨 (선택 입력).
 const REGION_SHORT: Record<string, string> = {
@@ -276,13 +292,16 @@ async function computeWeakTypes(): Promise<WeakType[]> {
   return [];
 }
 
+// 헌법 제37조 정합 — Dashboard·me·study-plan·study-analysis는 모두 본 함수를
+// 호출하므로, 안의 4 sub-query 중 하나라도 throw하면 SSR 전체가 hang 가능.
+// 각 sub-query는 자체 safeRun 또는 본 wrap 안의 safeRun으로 보호된다.
 export async function getDashboardSummary(
   userId: string,
 ): Promise<DashboardSummary> {
   const [kpi, trend, plan, weakTypes] = await Promise.all([
-    computeKpi(userId),
-    computeTrend(userId),
-    computePlan(userId),
+    safeRun("computeKpi", () => computeKpi(userId), EMPTY_KPI),
+    safeRun("computeTrend", () => computeTrend(userId), [] as TrendPoint[]),
+    safeRun("computePlan", () => computePlan(userId), [] as PlanItem[]),
     computeWeakTypes(),
   ]);
 
