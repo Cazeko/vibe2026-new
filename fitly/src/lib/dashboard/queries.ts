@@ -1,16 +1,13 @@
-// 헌법 v2.0 — 대시보드 실데이터 집계 라이브러리.
-// 입력은 user_id(auth.uid)뿐이며, 모든 쿼리에 user_id 일치를 강제한다(제28조 1항 단서).
-// 외부 합격 컷·평균 의존 0. 본인 데이터로만 Progress 산출 (제3조의2, 제9조).
+// 헌법 v3.0 / v3.0.1 — 대시보드 실데이터 집계.
+// D-S1.5 — 폐기 5 (vocabCards/studyCards/mistakes/materials/universities) 의존 제거.
+// 풀이/키워드 마스터율은 cards 다형 테이블 + user_card_state 통합 후 D-S2에서 reimplement.
+// 현재는 study_sessions·learning_logs·user_profiles로 산출 가능한 부분만 활용.
 
-import { and, count, desc, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import {
-  mistakes,
-  vocabCards,
-  studyCards,
   studySessions,
   learningLogs,
-  materials,
   userProfiles,
 } from "@/lib/db/schema";
 import { computeProgress } from "@/lib/progress/score";
@@ -18,34 +15,31 @@ import type {
   DashboardKpi,
   DashboardSummary,
   PlanItem,
-  RecentMaterial,
   TrendPoint,
   WeakType,
 } from "./types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const SHORT_NAME: Record<string, string> = {
-  한양: "한양대",
-  중앙: "중앙대",
-  성균관: "성균관대",
-  경희: "경희대",
-  이화: "이화여대",
-  서강: "서강대",
-  홍익: "홍익대",
-  동국: "동국대",
-  건국: "건국대",
-  숭실: "숭실대",
-};
 
-const QUESTION_TYPE_LABEL: Record<string, string> = {
-  vocab: "어휘 추론",
-  grammar: "문법 일반",
-  verb_form: "비동사/준동사",
-  relative: "관계사",
-  blank: "빈칸 추론",
-  insert: "문장 삽입",
-  reading: "독해 일반",
-  unknown: "분류 미지정",
+// 헌법 v3.0 제15조 — 지역 교육청 17개 라벨 (선택 입력).
+const REGION_SHORT: Record<string, string> = {
+  서울: "서울",
+  경기: "경기",
+  인천: "인천",
+  부산: "부산",
+  대구: "대구",
+  광주: "광주",
+  대전: "대전",
+  울산: "울산",
+  세종: "세종",
+  강원: "강원",
+  충북: "충북",
+  충남: "충남",
+  전북: "전북",
+  전남: "전남",
+  경북: "경북",
+  경남: "경남",
+  제주: "제주",
 };
 
 function formatMonthDay(d: Date): string {
@@ -54,9 +48,9 @@ function formatMonthDay(d: Date): string {
   return `${m}/${day}`;
 }
 
-function shortName(name: string | null): string | null {
+function regionShort(name: string | null): string | null {
   if (!name) return null;
-  return SHORT_NAME[name] ?? `${name}대`;
+  return REGION_SHORT[name] ?? name;
 }
 
 async function computeKpi(userId: string): Promise<DashboardKpi> {
@@ -68,6 +62,8 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
     .where(eq(userProfiles.userId, userId))
     .limit(1);
 
+  // v3.0 — targetUniversity 컬럼은 v3.0 마이그레이션에서 targetRegion 으로 의미 전환되거나
+  // 별도 컬럼이 추가될 예정. 현 시점은 기존 컬럼을 region 라벨로 임시 재해석.
   const targetName = profileRow?.targetUniversity ?? null;
 
   const now = Date.now();
@@ -122,7 +118,6 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
     else if (i === 0) continue;
     else break;
   }
-  // 최장 스트릭 (날짜 정렬 후 연속 묶음)
   const sorted = [...dateSet].sort();
   let best = 0;
   let run = 0;
@@ -139,44 +134,10 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
   }
   const streakBest = Math.max(streak, best);
 
-  // 학습 진척도(Progress) — v2.0 제9조
-  // 1) 어휘 마스터율
-  const [vocabTotalRow] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(vocabCards)
-    .where(eq(vocabCards.userId, userId));
-  const [vocabMasteredRow] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(vocabCards)
-    .where(
-      and(
-        eq(vocabCards.userId, userId),
-        sql`(${vocabCards.srsState}->>'state')::int >= 2`,
-      ),
-    );
-  const vocabTotal = vocabTotalRow?.n ?? 0;
-  const vocabMastered = vocabMasteredRow?.n ?? 0;
-
-  // 2) 오답 정복률 — 최근 14일 mistakes 리뷰 (good/easy / 전체)
-  const [mistakeReviewAgg] = await db
-    .select({
-      reviews: sql<number>`coalesce(sum(${studySessions.totalCount}), 0)::int`,
-      correct: sql<number>`coalesce(sum(${studySessions.correctCount}), 0)::int`,
-    })
-    .from(studySessions)
-    .where(
-      and(
-        eq(studySessions.userId, userId),
-        eq(studySessions.mode, "review"),
-        gte(studySessions.startedAt, since14),
-      ),
-    );
-  const recentMistakeReviews = Number(mistakeReviewAgg?.reviews ?? 0);
-  const recentMistakeCorrect = Number(mistakeReviewAgg?.correct ?? 0);
-
-  // 3) 학습 일관성 — 최근 14일 학습일수
-  const since14Iso = since14.toISOString();
-  const recentDays = await db
+  // 학습 진척도(Progress) — v3.0 제9조
+  // 풀이/키워드 마스터율은 cards + user_card_state 통합 후 D-S2에서 산출.
+  // 현 시점은 시드 미적재로 둘 다 0 → 학습 일관성만 의미 있음.
+  const since14Days = await db
     .select({ day: sql<string>`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')` })
     .from(studySessions)
     .where(
@@ -186,14 +147,13 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
       ),
     )
     .groupBy(sql`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`);
-  const recentStudyDaysOf14 = Math.min(14, recentDays.length);
-  void since14Iso;
+  const recentStudyDaysOf14 = Math.min(14, since14Days.length);
 
   const breakdown = computeProgress({
-    vocabTotal,
-    vocabMastered,
-    recentMistakeReviews,
-    recentMistakeCorrect,
+    quizTotal: 0,
+    quizMastered: 0,
+    keywordTotal: 0,
+    keywordMastered: 0,
     recentStudyDaysOf14,
   });
 
@@ -204,12 +164,12 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
     : null;
 
   return {
-    targetUniversity: targetName ? `${targetName}대학교` : null,
-    targetUniversityShort: shortName(targetName),
+    targetRegion: targetName,
+    targetRegionShort: regionShort(targetName),
     progressScore: breakdown.total,
     progressBreakdown: {
-      vocabMasteryRate: breakdown.vocabMasteryRate,
-      mistakeConquerRate: breakdown.mistakeConquerRate,
+      quizMasteryRate: breakdown.quizMasteryRate,
+      keywordMasteryRate: breakdown.keywordMasteryRate,
       studyConsistency: breakdown.studyConsistency,
     },
     studyMinutes,
@@ -237,7 +197,7 @@ async function computeTrend(userId: string): Promise<TrendPoint[]> {
     )
     .orderBy(learningLogs.logDate);
 
-  // v2.0 — learning_logs.fitScore 컬럼은 v1 시절 학교 적합도용. 같은 컬럼을
+  // v3.0 — learning_logs.fitScore 컬럼은 v1 시절 학교 적합도용. 같은 컬럼을
   // Progress 점수의 일자별 스냅샷으로 재해석하여 추이 그린다.
   const byDate = new Map<string, { progress: number | null; accuracy: number | null }>();
   for (const log of logs) {
@@ -261,209 +221,58 @@ async function computeTrend(userId: string): Promise<TrendPoint[]> {
   return points;
 }
 
-async function computePlan(userId: string): Promise<PlanItem[]> {
-  const db = getDb();
-  const now = new Date();
-
-  // 어휘 듀카드
-  const [vocabDue] = await db
-    .select({
-      n: count(),
-    })
-    .from(vocabCards)
-    .where(and(eq(vocabCards.userId, userId), lte(vocabCards.dueAt, now)));
-
-  const [vocabTotal] = await db
-    .select({ n: count() })
-    .from(vocabCards)
-    .where(eq(vocabCards.userId, userId));
-
-  // 학습 카드 듀(자료에서 추출된 StudyCard)
-  const [studyDue] = await db
-    .select({ n: count() })
-    .from(studyCards)
-    .where(and(eq(studyCards.userId, userId), lte(studyCards.dueAt, now)));
-
-  const [studyTotal] = await db
-    .select({ n: count() })
-    .from(studyCards)
-    .where(eq(studyCards.userId, userId));
-
-  // 오답 듀카드
-  const [mistakeDue] = await db
-    .select({ n: count() })
-    .from(mistakes)
-    .where(and(eq(mistakes.userId, userId), lte(mistakes.dueAt, now)));
-
-  const [mistakeTotal] = await db
-    .select({ n: count() })
-    .from(mistakes)
-    .where(eq(mistakes.userId, userId));
-
-  // 오늘 푼 문제 수 (today exam_generate sessions)
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const [todayExam] = await db
-    .select({
-      total: sql<number>`coalesce(sum(${studySessions.totalCount}), 0)::int`,
-    })
-    .from(studySessions)
-    .where(
-      and(
-        eq(studySessions.userId, userId),
-        eq(studySessions.mode, "exam"),
-        gte(studySessions.startedAt, todayStart),
-      ),
-    );
-
-  const vocabProgress =
-    vocabTotal && vocabTotal.n > 0
-      ? Math.round(((vocabTotal.n - (vocabDue?.n ?? 0)) / vocabTotal.n) * 100)
-      : 0;
-
-  const mistakeProgress =
-    mistakeTotal && mistakeTotal.n > 0
-      ? Math.round(((mistakeTotal.n - (mistakeDue?.n ?? 0)) / mistakeTotal.n) * 100)
-      : 0;
-
-  const examCount = todayExam?.total ?? 0;
-  const examProgress = Math.min(100, Math.round((examCount / 20) * 100));
-
-  // 학습 카드 진행도(StudyCard)
-  const studyProgress =
-    studyTotal && studyTotal.n > 0
-      ? Math.round(((studyTotal.n - (studyDue?.n ?? 0)) / studyTotal.n) * 100)
-      : 0;
-
+// v3.0 / D-S1.5 — 풀이/키워드/오답 트랙 카드 카운트는 cards 통합 후 D-S2에서 reimplement.
+// 현재는 시드 미적재 상태이므로 정적 안내 항목으로 구성.
+async function computePlan(_userId: string): Promise<PlanItem[]> {
   return [
     {
-      id: "plan-vocab",
-      title: "어휘 — 학습 어휘",
-      subtitle:
-        (vocabTotal?.n ?? 0) === 0
-          ? "어휘 시드 자동 적재됩니다"
-          : `복습 대기 ${vocabDue?.n ?? 0} / 총 ${vocabTotal?.n ?? 0}`,
-      progress: vocabProgress,
-      state: vocabProgress >= 100 ? "completed" : "in_progress",
-      href: "/study/vocab",
+      id: "plan-quiz",
+      title: "풀이 트랙 — 서술형 기출",
+      subtitle: "시드 적재 후 자동으로 오늘의 큐가 채워집니다",
+      progress: 0,
+      state: "locked",
+      href: "/study",
     },
     {
-      id: "plan-study",
-      title: "기출 풀이 — 내 자료",
-      subtitle:
-        (studyTotal?.n ?? 0) === 0
-          ? "자료를 업로드하면 학습 카드가 자동 생성됩니다"
-          : `복습 대기 ${studyDue?.n ?? 0} / 총 ${studyTotal?.n ?? 0}`,
-      progress: studyProgress,
-      state:
-        (studyTotal?.n ?? 0) === 0
-          ? "locked"
-          : studyProgress >= 100
-            ? "completed"
-            : "in_progress",
-      href: "/study/exam",
-    },
-    {
-      id: "plan-exam",
-      title: "기출 풀이 — 오늘",
-      subtitle: `오늘 푼 문제 ${examCount}/20`,
-      progress: examProgress,
-      state: examProgress >= 100 ? "completed" : "in_progress",
-      href: "/study/exam",
+      id: "plan-keyword",
+      title: "키워드 트랙 — 개념 정리 노트",
+      subtitle: "시드 적재 후 자동으로 오늘의 큐가 채워집니다",
+      progress: 0,
+      state: "locked",
+      href: "/study",
     },
     {
       id: "plan-mistake",
-      title: "리뷰 & 오답 노트",
-      subtitle:
-        (mistakeTotal?.n ?? 0) === 0
-          ? "내 자료를 풀다가 틀리면 합류됩니다"
-          : `복습 대기 ${mistakeDue?.n ?? 0} / 총 ${mistakeTotal?.n ?? 0}`,
-      progress: mistakeProgress,
-      state:
-        (mistakeTotal?.n ?? 0) === 0
-          ? "locked"
-          : mistakeProgress >= 100
-            ? "completed"
-            : "in_progress",
-      href: "/study/review",
+      title: "오답 트랙",
+      subtitle: "풀이를 again/hard 로 평가하면 자동 합류합니다",
+      progress: 0,
+      state: "locked",
+      href: "/study",
     },
   ];
 }
 
-async function computeWeakTypes(userId: string): Promise<WeakType[]> {
-  const db = getDb();
-
-  const rows = await db
-    .select({
-      type: mistakes.questionType,
-      total: sql<number>`count(*)::int`,
-      lapses: sql<number>`coalesce(sum(${mistakes.lapseCount}), 0)::int`,
-      reviews: sql<number>`coalesce(sum(${mistakes.reviewCount}), 0)::int`,
-    })
-    .from(mistakes)
-    .where(and(eq(mistakes.userId, userId), isNotNull(mistakes.questionType)))
-    .groupBy(mistakes.questionType);
-
-  const items: WeakType[] = rows.map((r) => {
-    const total = Number(r.total ?? 0);
-    const reviews = Number(r.reviews ?? 0);
-    const lapses = Number(r.lapses ?? 0);
-    // 정답률 ≈ (전체 리뷰 - lapse) / 전체 리뷰
-    const accuracy =
-      reviews > 0
-        ? Math.max(0, Math.round(((reviews - lapses) / reviews) * 100))
-        : 50; // 신규 카드 기본
-    const key = r.type ?? "unknown";
-    return {
-      id: `wt-${key}`,
-      label: QUESTION_TYPE_LABEL[key] ?? key,
-      accuracy,
-      total,
-    };
-  });
-
-  return items.sort((a, b) => a.accuracy - b.accuracy).slice(0, 6);
-}
-
-async function computeRecentMaterials(userId: string): Promise<RecentMaterial[]> {
-  const db = getDb();
-  const rows = await db
-    .select()
-    .from(materials)
-    .where(eq(materials.userId, userId))
-    .orderBy(desc(materials.createdAt))
-    .limit(5);
-
-  return rows.map((r) => {
-    const sizeMb = r.sizeBytes ? (r.sizeBytes / 1024 / 1024).toFixed(1) : "—";
-    const date = new Date(r.createdAt);
-    const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
-    const mime = r.mimeType?.includes("pdf") ? "PDF" : (r.mimeType ?? "FILE");
-    return {
-      id: r.id,
-      name: r.name,
-      meta: `${mime} · ${sizeMb}MB · ${dateStr}`,
-    };
-  });
+// v3.0 / D-S1.5 — questionType 기반 약점 분석은 cards.type / exam_items.format 통합 후
+// D-S2에서 reimplement. 현재는 빈 배열.
+async function computeWeakTypes(_userId: string): Promise<WeakType[]> {
+  return [];
 }
 
 export async function getDashboardSummary(
   userId: string,
 ): Promise<DashboardSummary> {
-  const [kpi, trend, plan, weakTypes, recent] = await Promise.all([
+  const [kpi, trend, plan, weakTypes] = await Promise.all([
     computeKpi(userId),
     computeTrend(userId),
     computePlan(userId),
     computeWeakTypes(userId),
-    computeRecentMaterials(userId),
   ]);
 
   const isEmpty =
     kpi.studyMinutes === 0 &&
     kpi.streakDays === 0 &&
     trend.every((t) => t.progress == null) &&
-    weakTypes.length === 0 &&
-    recent.length === 0;
+    weakTypes.length === 0;
 
-  return { kpi, trend, plan, weakTypes, recent, isEmpty };
+  return { kpi, trend, plan, weakTypes, isEmpty };
 }

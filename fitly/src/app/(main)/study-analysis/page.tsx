@@ -56,7 +56,7 @@ export default async function StudyAnalysisPage() {
     {
       label: "학습 카드",
       value: `${stats.totalCards}장`,
-      sub: `학습 ${lib.study} · 오답 ${lib.mistakes} · 어휘 ${lib.vocab}`,
+      sub: `풀이 ${lib.quiz} · 키워드 ${lib.keyword} · 오답 ${lib.mistake}`,
       Icon: Layers,
     },
   ];

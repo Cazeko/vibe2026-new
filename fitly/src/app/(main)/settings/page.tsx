@@ -16,12 +16,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
-import { UNIVERSITY_SEEDS } from "@/lib/data/universities";
+import { REGION_NAMES, type RegionName } from "@/types";
 import { createClient } from "@/lib/supabase/client";
-import type { UniversityName } from "@/types";
 
+// 헌법 v3.0 — userProfiles.targetUniversity 컬럼은 region 라벨로 임시 재해석.
 type Profile = {
-  targetUniversity: UniversityName | null;
+  targetRegion: RegionName | null;
   examDate: string | null;
 };
 
@@ -35,7 +35,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [profile, setProfile] = useState<Profile>({
-    targetUniversity: null,
+    targetRegion: null,
     examDate: null,
   });
   const [email, setEmail] = useState<string | null>(null);
@@ -59,8 +59,8 @@ export default function SettingsPage() {
         if (!res.ok) throw new Error(data.error ?? "조회 실패");
         if (data.profile) {
           setProfile({
-            targetUniversity: (data.profile.targetUniversity ?? null) as
-              | UniversityName
+            targetRegion: (data.profile.targetUniversity ?? null) as
+              | RegionName
               | null,
             examDate: data.profile.examDate ?? null,
           });
@@ -78,7 +78,11 @@ export default function SettingsPage() {
       const res = await fetch("/api/user/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        // v3.0 — userProfiles.targetUniversity 컬럼에 region 라벨을 그대로 저장 (D-S2 컬럼 재정렬 예정).
+        body: JSON.stringify({
+          targetUniversity: profile.targetRegion,
+          examDate: profile.examDate,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "저장 실패");
@@ -104,7 +108,7 @@ export default function SettingsPage() {
     <div className="min-h-screen pb-10">
       <PageHeader
         title="설정"
-        subtitle="목표 학교·테마·계정을 관리합니다."
+        subtitle="지역 교육청·테마·계정을 관리합니다."
       />
       <div className="px-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
         {/* 목표 설정 */}
@@ -120,29 +124,29 @@ export default function SettingsPage() {
             ) : (
               <>
                 <div className="space-y-1.5">
-                  <Label htmlFor="target-uni">목표 학교</Label>
+                  <Label htmlFor="target-region">지역 교육청</Label>
                   <Select
-                    value={profile.targetUniversity ?? undefined}
+                    value={profile.targetRegion ?? undefined}
                     onValueChange={(v) =>
                       setProfile((p) => ({
                         ...p,
-                        targetUniversity: v as UniversityName,
+                        targetRegion: v as RegionName,
                       }))
                     }
                   >
-                    <SelectTrigger id="target-uni" aria-label="목표 학교 선택">
-                      <SelectValue placeholder="학교를 선택하세요" />
+                    <SelectTrigger id="target-region" aria-label="지역 교육청 선택">
+                      <SelectValue placeholder="지역 교육청을 선택하세요" />
                     </SelectTrigger>
                     <SelectContent>
-                      {UNIVERSITY_SEEDS.map((u) => (
-                        <SelectItem key={u.name} value={u.name}>
-                          {u.name}
+                      {REGION_NAMES.map((r) => (
+                        <SelectItem key={r} value={r}>
+                          {r}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <p className="text-[11px] text-muted-foreground">
-                    헌법 제15조 — 한양·중앙·성균관·경희·이화·서강·홍익·동국·건국·숭실 10개 한정.
+                    헌법 v3.0 제15조 — 17개 지역 교육청 (선택 입력). 합격 컷은 비공개.
                   </p>
                 </div>
 
@@ -269,8 +273,8 @@ export default function SettingsPage() {
               <div className="text-[12px] text-foreground/80 leading-relaxed">
                 <p className="font-semibold">개인정보·저작권 정책</p>
                 <ul className="mt-1.5 space-y-0.5 text-[11px]">
-                  <li>• 업로드 자료는 본인만 접근합니다 (제28조).</li>
-                  <li>• 학원 자체 교재 업로드는 금지됩니다 (제27조).</li>
+                  <li>• 학습 기록은 본인만 접근합니다 (제28조).</li>
+                  <li>• 인강·사설 교재 인덱싱은 금지됩니다 (제27조).</li>
                   <li>• 합격 보장·예측 표현은 사용하지 않습니다 (제29조).</li>
                 </ul>
               </div>
