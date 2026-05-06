@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { ArrowLeft, ShieldCheck, AlertCircle } from "lucide-react";
+import { ArrowLeft, ShieldCheck, AlertCircle, ChevronDown } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -93,89 +93,147 @@ function ItemCard({
   const imageUrl = getExamPageUrl(item.stemImagePath);
 
   return (
-    <Card className="border-rule">
-      <CardContent className="p-5">
-        <div className="flex items-baseline justify-between flex-wrap gap-2">
-          <div className="flex items-baseline gap-2">
-            <span className="font-serif text-lg font-medium tracking-tight tabular-nums">
-              {item.itemNo}번
-            </span>
-            {item.format && (
-              <span className="rounded-full border border-rule px-2 py-0.5 text-[10.5px] text-muted-foreground">
-                {item.format}
+    <Card className="border-rule overflow-hidden">
+      <CardContent className="p-0">
+        <details className="group">
+          {/* 헤더 — 항상 노출. 클릭 시 본문·답안 토글. */}
+          <summary className="cursor-pointer list-none p-5 flex items-baseline justify-between flex-wrap gap-2 hover:bg-secondary/30 transition-colors select-none">
+            <div className="flex items-baseline gap-2">
+              <ChevronDown
+                className="h-4 w-4 shrink-0 self-center text-muted-foreground -rotate-90 group-open:rotate-0 transition-transform"
+                aria-hidden
+              />
+              <span className="font-serif text-lg font-medium tracking-tight tabular-nums">
+                {item.itemNo}번
+              </span>
+              {item.format && (
+                <span className="rounded-full border border-rule px-2 py-0.5 text-[10.5px] text-muted-foreground">
+                  {item.format}
+                </span>
+              )}
+              {item.points != null && (
+                <span className="rounded-full border border-rule px-2 py-0.5 text-[10.5px] text-muted-foreground tabular-nums">
+                  {item.points}점
+                </span>
+              )}
+              {item.bloom && (
+                <span className="rounded-full bg-info/10 px-2 py-0.5 text-[10.5px] text-info">
+                  {item.bloom}
+                </span>
+              )}
+              {item.stemTextPreview && (
+                <span className="hidden md:inline text-[11.5px] text-muted-foreground/80 truncate max-w-[280px] group-open:hidden">
+                  · {item.stemTextPreview.slice(0, 40)}
+                  {item.stemTextPreview.length > 40 && "…"}
+                </span>
+              )}
+            </div>
+            {item.verifiedAnswer ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-info/10 px-1.5 py-0.5 text-[10px] text-info">
+                <ShieldCheck className="h-2.5 w-2.5" />
+                답안 검증
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning">
+                <AlertCircle className="h-2.5 w-2.5" />
+                답안 검증 필요
               </span>
             )}
-            {item.points != null && (
-              <span className="rounded-full border border-rule px-2 py-0.5 text-[10.5px] text-muted-foreground tabular-nums">
-                {item.points}점
-              </span>
+          </summary>
+
+          {/* 본문 — 펼친 상태에서만 노출. */}
+          <div className="px-5 pb-5 pt-1 border-t border-rule">
+            {item.domains.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {item.domains.map((d) => (
+                  <span
+                    key={d}
+                    className="rounded bg-secondary px-1.5 py-0.5 text-[10.5px] text-muted-foreground"
+                  >
+                    {d}
+                  </span>
+                ))}
+              </div>
             )}
-            {item.bloom && (
-              <span className="rounded-full bg-info/10 px-2 py-0.5 text-[10.5px] text-info">
-                {item.bloom}
-              </span>
+
+            {imageUrl && (
+              <div className="mt-4 overflow-hidden rounded-md border border-rule">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imageUrl}
+                  alt={`${item.itemNo}번 본문 이미지`}
+                  className="w-full"
+                  loading="lazy"
+                />
+              </div>
+            )}
+
+            {item.stemTextPreview && (
+              <p className="mt-3 text-[12.5px] text-foreground/80 leading-relaxed line-clamp-3">
+                {item.stemTextPreview}
+                {item.stemTextPreview.length >= 80 && "…"}
+              </p>
+            )}
+
+            {/* 답안·해설 — 중첩 토글. */}
+            {(item.answerMd || item.explanationMd) && (
+              <details className="mt-4 group/answer">
+                <summary className="cursor-pointer list-none flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground transition-colors select-none">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded border border-rule text-[10px] group-open/answer:bg-evergreen/10 group-open/answer:border-evergreen group-open/answer:text-evergreen transition-colors">
+                    +
+                  </span>
+                  <span>답안·해설 펼쳐보기</span>
+                </summary>
+                <div className="mt-4 space-y-4">
+                  {item.answerMd && (
+                    <div className="rounded-md border border-evergreen/40 bg-evergreen/[0.04] p-4">
+                      <div className="text-[10.5px] uppercase tracking-[0.12em] text-evergreen mb-2">
+                        AI 모범답안
+                      </div>
+                      <div className="font-serif text-[13px] leading-[1.7] whitespace-pre-wrap text-foreground/90">
+                        {item.answerMd}
+                      </div>
+                    </div>
+                  )}
+                  {item.explanationMd && (
+                    <div className="rounded-md border border-rule bg-secondary/30 p-4">
+                      <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
+                        해설
+                      </div>
+                      <div className="text-[12.5px] leading-[1.7] whitespace-pre-wrap text-foreground/80">
+                        {item.explanationMd}
+                      </div>
+                    </div>
+                  )}
+                  {!item.verifiedAnswer && (
+                    <p className="text-[10.5px] text-warning leading-relaxed">
+                      ※ 운영자 검수 전 — AI 자동 생성 답안입니다. 학습 참고용으로 활용하세요.
+                    </p>
+                  )}
+                </div>
+              </details>
+            )}
+
+            {!item.answerMd && !item.explanationMd && (
+              <p className="mt-4 text-[11px] text-muted-foreground italic">
+                답안·해설이 아직 시드되지 않았습니다.
+              </p>
+            )}
+
+            {item.keywords.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-rule flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                  키워드
+                </span>
+                {item.keywords.map((k) => (
+                  <span key={k} className="text-[11px] text-foreground/70">
+                    {k}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
-          {item.verifiedAnswer ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-info/10 px-1.5 py-0.5 text-[10px] text-info">
-              <ShieldCheck className="h-2.5 w-2.5" />
-              답안 검증
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning">
-              <AlertCircle className="h-2.5 w-2.5" />
-              답안 검증 필요
-            </span>
-          )}
-        </div>
-
-        {item.domains.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {item.domains.map((d) => (
-              <span
-                key={d}
-                className="rounded bg-secondary px-1.5 py-0.5 text-[10.5px] text-muted-foreground"
-              >
-                {d}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {imageUrl && (
-          <div className="mt-4 overflow-hidden rounded-md border border-rule">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageUrl}
-              alt={`${item.itemNo}번 본문 이미지`}
-              className="w-full"
-              loading="lazy"
-            />
-          </div>
-        )}
-
-        {item.stemTextPreview && (
-          <p className="mt-3 text-[12.5px] text-foreground/80 leading-relaxed line-clamp-3">
-            {item.stemTextPreview}
-            {item.stemTextPreview.length >= 80 && "…"}
-          </p>
-        )}
-
-        {item.keywords.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-rule flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              키워드
-            </span>
-            {item.keywords.map((k) => (
-              <span
-                key={k}
-                className="text-[11px] text-foreground/70"
-              >
-                {k}
-              </span>
-            ))}
-          </div>
-        )}
+        </details>
       </CardContent>
     </Card>
   );

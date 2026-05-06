@@ -32,6 +32,8 @@ export type ItemRow = {
   keywords: string[];
   stemImagePath: string | null;
   stemTextPreview: string;  // stem_text 첫 80자
+  answerMd: string | null;
+  explanationMd: string | null;
   verifiedAnswer: boolean;
 };
 
@@ -138,6 +140,8 @@ export const getPaperItems = cache(async (paperId: string): Promise<ItemRow[]> =
         keywords: string[] | null;
         stem_image_path: string | null;
         stem_preview: string;
+        answer_md: string | null;
+        explanation_md: string | null;
         verified_answer: boolean;
       }>(sql`
         select
@@ -150,6 +154,8 @@ export const getPaperItems = cache(async (paperId: string): Promise<ItemRow[]> =
           keywords,
           stem_image_path,
           left(stem_text, 80) as stem_preview,
+          answer_md,
+          explanation_md,
           verified_answer
         from exam_items
         where paper_id = ${paperId}::uuid
@@ -165,6 +171,8 @@ export const getPaperItems = cache(async (paperId: string): Promise<ItemRow[]> =
         keywords: Array.isArray(r.keywords) ? r.keywords : [],
         stemImagePath: r.stem_image_path,
         stemTextPreview: r.stem_preview ?? "",
+        answerMd: r.answer_md,
+        explanationMd: r.explanation_md,
         verifiedAnswer: r.verified_answer,
       }));
     },
