@@ -1,7 +1,7 @@
-# Fitly 헌법 (CLAUDE.md) — v3.4
+# Fitly 헌법 (CLAUDE.md) — v3.5
 
-> **인덱스 + 헌법층 발췌**. 본 문서는 80줄 상한으로 강제된다 (R004 H2 자기집행).
-> 본문 전체는 `.claude/CONSTITUTION.md` (헌법층) + `.claude/laws/` + `.claude/decrees/` + `.claude/rules/` 에 위계별로 분리되어 있다.
+> **인덱스 + 헌법층 발췌**. 본 문서는 80줄 상한으로 강제된다 (R004 H2 자기집행 — `.claude/BYLAWS.md` 부칙 3 정합).
+> 본문 전체는 `.claude/CONSTITUTION.md` (헌법층 + 메타 제1·3조) + `.claude/BYLAWS.md` (부칙) + `.claude/laws/` + `.claude/decrees/` + `.claude/rules/` 에 위계별로 분리되어 있다.
 > 충돌 시 헌법층 우선, 동일 계층 내 충돌은 신법·특별법 우선 (제38조 v3.4).
 
 ## 헌법층 7개 절대 원칙
@@ -14,18 +14,19 @@
 6. **헌법 근거 의무 (제24조의2)** — 모든 결정·보고·진행은 헌법 조항을 근거로 명시. 근거 없는 결정은 본 헌법에 반한다.
 7. **개정 요건 (제40조·제41조·제43조)** — 헌법 변경은 사용자 명시 승인 필수. Claude는 발의(제42조 5요소)만, 자가 개정 절대 금지.
 
-## 4계층 본문 위치 (v3.4 채택 — 2026-05-06)
+## 4계층 본문 위치 (v3.4 분리 + v3.5 omnibus — 2026-05-06)
 
 | 계층 | 디렉토리 | 파일 (조항 번호) |
 |---|---|---|
-| **헌법** | `.claude/CONSTITUTION.md` | 7개 절대 원칙 |
-| **법률** | `.claude/laws/` | `10_ux_principles` (5~8) · `11_progress_score` (9~12) · `12_sidebar_structure` (13류) · `13_module_scope` (14·15) · `14_tech_stack` (17·19) · `15_ai_models` (18·18의2) · `16_design_system` (16의2) · `17_security_privacy` (27~30) · `18_source_credibility` (30의2) |
+| **헌법** | `.claude/CONSTITUTION.md` | 7개 절대 원칙 + 메타 (제1·3조 v3.5) |
+| **부칙** | `.claude/BYLAWS.md` | 시행·경과·길이 상한 권고 (v3.5) |
+| **법률** | `.claude/laws/` | `10_ux_principles` (5~8) · `11_progress_score` (9~12) · `12_sidebar_structure` (13류) · `13_module_scope` (14·15) · `14_tech_stack` (17·19·19의2) · `15_ai_models` (18·18의2·18의3) · `16_design_system` (16의2) · `17_security_privacy` (27~30) · `18_source_credibility` (30의2) |
 | **시행령** | `.claude/decrees/` | `21_development_discipline` (20~23) · `22_validation` (24·24의3) · `23_auto_push` (24의4) · `24_amendment` (42·44·45) · `25_constitutional_grounding` (24의2) |
-| **시행규칙** | `.claude/rules/` | `31_skill_mapping` (25·26) · `32_taboos` (31~34) · `33_failure_response` (35~37) · `34_meta_documents` (38·39) |
+| **시행규칙** | `.claude/rules/` | `31_skill_mapping` (25·26) · `32_taboos` (31~34) · `33_failure_response` (35~37·35의2) · `34_meta_documents` (38·39) · `35_seed_tagging` (25의2) |
 
 ## 부속 문서
 
-- **개정 이력** — `.claude/CHANGELOG.md` (v1.0~v3.4 전체)
+- **개정 이력** — `.claude/CHANGELOG.md` (v1.0~v3.5 전체)
 - **디자인 시스템** — `fitly/DESIGN.md` (법률층 동급, 제16조의2 정합)
 - **하네스 (시드 LLM)** — `docs/harness/seed-llm-prompts.md` (시행규칙층, R002·R004 통합)
 - **개정 발의 보관소** — `docs/proposals/`
@@ -38,4 +39,4 @@
 
 ## 시행일
 
-본 헌법 v3.4는 **2026-05-06** 부터 시행한다.
+본 헌법 v3.5는 **2026-05-06** 부터 시행한다 (`.claude/BYLAWS.md` 부칙 1 정합).

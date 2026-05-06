@@ -22,6 +22,23 @@ import type { CardType } from "@/types";
 
 const REVIEW_STATE_THRESHOLD = 2;
 
+// 헌법 제37조 정합 — DB 일시 장애·RLS·마이그레이션 미적용 시 페이지 전체 SSR
+// 실패를 막기 위한 그래스풀 디그레이드. 콘솔에는 명시적 보고, UI는 안전한
+// fallback으로 동작 유지. 시드 미적재 상태도 동일 경로로 처리된다.
+export async function safeRun<T>(
+  label: string,
+  fn: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (e) {
+    const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    console.error(`[db.queries] ${label} failed → fallback. cause=${msg}`);
+    return fallback;
+  }
+}
+
 export type CardCounts = {
   quizTotal: number;
   quizMastered: number;
@@ -31,60 +48,70 @@ export type CardCounts = {
   mistakeMastered: number;
 };
 
+const EMPTY_CARD_COUNTS: CardCounts = {
+  quizTotal: 0,
+  quizMastered: 0,
+  keywordTotal: 0,
+  keywordMastered: 0,
+  mistakeTotal: 0,
+  mistakeMastered: 0,
+};
+
 export async function getCardCounts(userId: string): Promise<CardCounts> {
-  const db = getDb();
+  return safeRun("getCardCounts", async () => {
+    const db = getDb();
 
-  // 시드 카드(공유) 전체 카운트 — type별
-  const sharedRows = await db
-    .select({
-      type: cards.type,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(cards)
-    .where(isNull(cards.userId))
-    .groupBy(cards.type);
+    const sharedRows = await db
+      .select({
+        type: cards.type,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(cards)
+      .where(isNull(cards.userId))
+      .groupBy(cards.type);
 
-  // 사용자 본인 카드(주로 mistake) 카운트
-  const userOwnedRows = await db
-    .select({
-      type: cards.type,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(cards)
-    .where(eq(cards.userId, userId))
-    .groupBy(cards.type);
+    const userOwnedRows = await db
+      .select({
+        type: cards.type,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(cards)
+      .where(eq(cards.userId, userId))
+      .groupBy(cards.type);
 
-  // 마스터 카운트 — user_card_state.fsrs_state.state ≥ 2
-  const masteredRows = await db
-    .select({
-      type: cards.type,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(userCardState)
-    .innerJoin(cards, eq(userCardState.cardId, cards.id))
-    .where(
-      and(
-        eq(userCardState.userId, userId),
-        sql`(${userCardState.fsrsState}->>'state')::int >= ${REVIEW_STATE_THRESHOLD}`,
-      ),
-    )
-    .groupBy(cards.type);
+    const masteredRows = await db
+      .select({
+        type: cards.type,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(userCardState)
+      .innerJoin(cards, eq(userCardState.cardId, cards.id))
+      .where(
+        and(
+          eq(userCardState.userId, userId),
+          sql`(${userCardState.fsrsState}->>'state')::int >= ${REVIEW_STATE_THRESHOLD}`,
+        ),
+      )
+      .groupBy(cards.type);
 
-  const totals = new Map<string, number>();
-  for (const row of sharedRows) totals.set(row.type, row.count);
-  for (const row of userOwnedRows) {
-    totals.set(row.type, (totals.get(row.type) ?? 0) + row.count);
-  }
-  const mastered = new Map<string, number>(masteredRows.map((r) => [r.type, r.count]));
+    const totals = new Map<string, number>();
+    for (const row of sharedRows) totals.set(row.type, row.count);
+    for (const row of userOwnedRows) {
+      totals.set(row.type, (totals.get(row.type) ?? 0) + row.count);
+    }
+    const mastered = new Map<string, number>(
+      masteredRows.map((r) => [r.type, r.count]),
+    );
 
-  return {
-    quizTotal: totals.get("quiz") ?? 0,
-    quizMastered: mastered.get("quiz") ?? 0,
-    keywordTotal: totals.get("keyword") ?? 0,
-    keywordMastered: mastered.get("keyword") ?? 0,
-    mistakeTotal: totals.get("mistake") ?? 0,
-    mistakeMastered: mastered.get("mistake") ?? 0,
-  };
+    return {
+      quizTotal: totals.get("quiz") ?? 0,
+      quizMastered: mastered.get("quiz") ?? 0,
+      keywordTotal: totals.get("keyword") ?? 0,
+      keywordMastered: mastered.get("keyword") ?? 0,
+      mistakeTotal: totals.get("mistake") ?? 0,
+      mistakeMastered: mastered.get("mistake") ?? 0,
+    };
+  }, EMPTY_CARD_COUNTS);
 }
 
 export type DueCardCounts = {
@@ -93,33 +120,41 @@ export type DueCardCounts = {
   mistake: number;
 };
 
+const EMPTY_DUE_COUNTS: DueCardCounts = { quiz: 0, keyword: 0, mistake: 0 };
+
 export async function getDueCardCounts(
   userId: string,
   now: Date = new Date(),
 ): Promise<DueCardCounts> {
-  const db = getDb();
-  const rows = await db
-    .select({
-      type: cards.type,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(userCardState)
-    .innerJoin(cards, eq(userCardState.cardId, cards.id))
-    .where(
-      and(
-        eq(userCardState.userId, userId),
-        sql`${userCardState.dueAt} <= ${now}`,
-      ),
-    )
-    .groupBy(cards.type);
+  return safeRun("getDueCardCounts", async () => {
+    const db = getDb();
+    const rows = await db
+      .select({
+        type: cards.type,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(userCardState)
+      .innerJoin(cards, eq(userCardState.cardId, cards.id))
+      .where(
+        and(
+          eq(userCardState.userId, userId),
+          sql`${userCardState.dueAt} <= ${now}`,
+        ),
+      )
+      .groupBy(cards.type);
 
-  const counts: DueCardCounts = { quiz: 0, keyword: 0, mistake: 0 };
-  for (const row of rows) {
-    if (row.type === "quiz" || row.type === "keyword" || row.type === "mistake") {
-      counts[row.type] = row.count;
+    const counts: DueCardCounts = { quiz: 0, keyword: 0, mistake: 0 };
+    for (const row of rows) {
+      if (
+        row.type === "quiz" ||
+        row.type === "keyword" ||
+        row.type === "mistake"
+      ) {
+        counts[row.type] = row.count;
+      }
     }
-  }
-  return counts;
+    return counts;
+  }, EMPTY_DUE_COUNTS);
 }
 
 export type DueCard = {
@@ -141,48 +176,54 @@ export async function getDueCards(
   limit = 20,
   now: Date = new Date(),
 ): Promise<DueCard[]> {
-  const db = getDb();
-  const rows = await db
-    .select({
-      id: cards.id,
-      type: cards.type,
-      frontText: cards.frontText,
-      frontImagePath: cards.frontImagePath,
-      backMd: cards.backMd,
-      verifiedAnswer: cards.verifiedAnswer,
-      dueAt: userCardState.dueAt,
-      paperYear: examPapers.year,
-      paperSession: examPapers.session,
-      itemNo: examItems.itemNo,
-      itemFormat: examItems.format,
-      itemPoints: examItems.points,
-    })
-    .from(userCardState)
-    .innerJoin(cards, eq(userCardState.cardId, cards.id))
-    .leftJoin(examItems, eq(cards.sourceItemId, examItems.id))
-    .leftJoin(examPapers, eq(examItems.paperId, examPapers.id))
-    .where(
-      and(
-        eq(userCardState.userId, userId),
-        eq(cards.type, type),
-        sql`${userCardState.dueAt} <= ${now}`,
-      ),
-    )
-    .orderBy(userCardState.dueAt)
-    .limit(limit);
+  return safeRun(
+    `getDueCards(${type})`,
+    async () => {
+      const db = getDb();
+      const rows = await db
+        .select({
+          id: cards.id,
+          type: cards.type,
+          frontText: cards.frontText,
+          frontImagePath: cards.frontImagePath,
+          backMd: cards.backMd,
+          verifiedAnswer: cards.verifiedAnswer,
+          dueAt: userCardState.dueAt,
+          paperYear: examPapers.year,
+          paperSession: examPapers.session,
+          itemNo: examItems.itemNo,
+          itemFormat: examItems.format,
+          itemPoints: examItems.points,
+        })
+        .from(userCardState)
+        .innerJoin(cards, eq(userCardState.cardId, cards.id))
+        .leftJoin(examItems, eq(cards.sourceItemId, examItems.id))
+        .leftJoin(examPapers, eq(examItems.paperId, examPapers.id))
+        .where(
+          and(
+            eq(userCardState.userId, userId),
+            eq(cards.type, type),
+            sql`${userCardState.dueAt} <= ${now}`,
+          ),
+        )
+        .orderBy(userCardState.dueAt)
+        .limit(limit);
 
-  return rows.map((r) => ({
-    id: r.id,
-    type: r.type as CardType,
-    frontText: r.frontText,
-    frontImagePath: r.frontImagePath,
-    backMd: r.backMd,
-    verifiedAnswer: r.verifiedAnswer,
-    dueAt: r.dueAt,
-    paperLabel: formatPaperLabel(r.paperYear, r.paperSession, r.itemNo),
-    itemFormat: r.itemFormat,
-    itemPoints: r.itemPoints,
-  }));
+      return rows.map((r) => ({
+        id: r.id,
+        type: r.type as CardType,
+        frontText: r.frontText,
+        frontImagePath: r.frontImagePath,
+        backMd: r.backMd,
+        verifiedAnswer: r.verifiedAnswer,
+        dueAt: r.dueAt,
+        paperLabel: formatPaperLabel(r.paperYear, r.paperSession, r.itemNo),
+        itemFormat: r.itemFormat,
+        itemPoints: r.itemPoints,
+      }));
+    },
+    [],
+  );
 }
 
 export function formatPaperLabel(
@@ -211,44 +252,53 @@ export async function getCardById(
   userId: string,
   cardId: string,
 ): Promise<CardWithSource | null> {
-  const db = getDb();
-  const [row] = await db
-    .select({
-      id: cards.id,
-      type: cards.type,
-      frontText: cards.frontText,
-      frontImagePath: cards.frontImagePath,
-      backMd: cards.backMd,
-      verifiedAnswer: cards.verifiedAnswer,
-      dueAt: userCardState.dueAt,
-      paperYear: examPapers.year,
-      paperSession: examPapers.session,
-      itemNo: examItems.itemNo,
-      itemFormat: examItems.format,
-      itemPoints: examItems.points,
-    })
-    .from(cards)
-    .leftJoin(
-      userCardState,
-      and(eq(userCardState.cardId, cards.id), eq(userCardState.userId, userId)),
-    )
-    .leftJoin(examItems, eq(cards.sourceItemId, examItems.id))
-    .leftJoin(examPapers, eq(examItems.paperId, examPapers.id))
-    .where(eq(cards.id, cardId))
-    .limit(1);
+  return safeRun(
+    "getCardById",
+    async () => {
+      const db = getDb();
+      const [row] = await db
+        .select({
+          id: cards.id,
+          type: cards.type,
+          frontText: cards.frontText,
+          frontImagePath: cards.frontImagePath,
+          backMd: cards.backMd,
+          verifiedAnswer: cards.verifiedAnswer,
+          dueAt: userCardState.dueAt,
+          paperYear: examPapers.year,
+          paperSession: examPapers.session,
+          itemNo: examItems.itemNo,
+          itemFormat: examItems.format,
+          itemPoints: examItems.points,
+        })
+        .from(cards)
+        .leftJoin(
+          userCardState,
+          and(
+            eq(userCardState.cardId, cards.id),
+            eq(userCardState.userId, userId),
+          ),
+        )
+        .leftJoin(examItems, eq(cards.sourceItemId, examItems.id))
+        .leftJoin(examPapers, eq(examItems.paperId, examPapers.id))
+        .where(eq(cards.id, cardId))
+        .limit(1);
 
-  if (!row) return null;
+      if (!row) return null;
 
-  return {
-    id: row.id,
-    type: row.type as CardType,
-    frontText: row.frontText,
-    frontImagePath: row.frontImagePath,
-    backMd: row.backMd,
-    verifiedAnswer: row.verifiedAnswer,
-    dueAt: row.dueAt ?? new Date(),
-    paperLabel: formatPaperLabel(row.paperYear, row.paperSession, row.itemNo),
-    itemFormat: row.itemFormat,
-    itemPoints: row.itemPoints,
-  };
+      return {
+        id: row.id,
+        type: row.type as CardType,
+        frontText: row.frontText,
+        frontImagePath: row.frontImagePath,
+        backMd: row.backMd,
+        verifiedAnswer: row.verifiedAnswer,
+        dueAt: row.dueAt ?? new Date(),
+        paperLabel: formatPaperLabel(row.paperYear, row.paperSession, row.itemNo),
+        itemFormat: row.itemFormat,
+        itemPoints: row.itemPoints,
+      };
+    },
+    null,
+  );
 }
