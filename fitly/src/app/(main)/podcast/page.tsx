@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { podcastEpisodes } from "@/lib/db/schema";
+import { safeRun } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -46,26 +47,38 @@ export default async function PodcastPage() {
   if (!user) redirect("/login");
 
   const db = getDb();
-  const episodes = await db
-    .select()
-    .from(podcastEpisodes)
-    .where(
-      or(
-        eq(podcastEpisodes.scope, "shared"),
-        eq(podcastEpisodes.userId, user.id),
-      ),
-    )
-    .orderBy(desc(podcastEpisodes.generatedAt))
-    .limit(40);
+  const episodes = await safeRun(
+    "podcast episodes",
+    async () =>
+      db
+        .select()
+        .from(podcastEpisodes)
+        .where(
+          or(
+            eq(podcastEpisodes.scope, "shared"),
+            eq(podcastEpisodes.userId, user.id),
+          ),
+        )
+        .orderBy(desc(podcastEpisodes.generatedAt))
+        .limit(40),
+    [] as (typeof podcastEpisodes.$inferSelect)[],
+  );
 
-  const [stats] = await db
-    .select({
-      total: sql<number>`count(*)::int`,
-      sharedCount: sql<number>`count(*) filter (where ${podcastEpisodes.scope} = 'shared')::int`,
-      userCount: sql<number>`count(*) filter (where ${podcastEpisodes.scope} = 'user' and ${podcastEpisodes.userId} = ${user.id})::int`,
-      totalDuration: sql<number>`coalesce(sum(${podcastEpisodes.durationSec}), 0)::int`,
-    })
-    .from(podcastEpisodes);
+  const stats = await safeRun(
+    "podcast stats",
+    async () => {
+      const [row] = await db
+        .select({
+          total: sql<number>`count(*)::int`,
+          sharedCount: sql<number>`count(*) filter (where ${podcastEpisodes.scope} = 'shared')::int`,
+          userCount: sql<number>`count(*) filter (where ${podcastEpisodes.scope} = 'user' and ${podcastEpisodes.userId} = ${user.id})::int`,
+          totalDuration: sql<number>`coalesce(sum(${podcastEpisodes.durationSec}), 0)::int`,
+        })
+        .from(podcastEpisodes);
+      return row ?? { total: 0, sharedCount: 0, userCount: 0, totalDuration: 0 };
+    },
+    { total: 0, sharedCount: 0, userCount: 0, totalDuration: 0 },
+  );
 
   const empty = (stats?.total ?? 0) === 0;
 

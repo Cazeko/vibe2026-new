@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { userProfiles, examPapers, examItems } from "@/lib/db/schema";
+import { safeRun } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -47,23 +48,44 @@ export default async function ExamAnalysisPage({
   const tab = ((params.tab as TabKey) ?? "papers") as TabKey;
 
   const db = getDb();
-  const [profile] = await db
-    .select()
-    .from(userProfiles)
-    .where(eq(userProfiles.userId, user.id))
-    .limit(1);
+  const profile = await safeRun(
+    "exam-analysis profile",
+    async () => {
+      const [row] = await db
+        .select()
+        .from(userProfiles)
+        .where(eq(userProfiles.userId, user.id))
+        .limit(1);
+      return row ?? null;
+    },
+    null,
+  );
   const targetRegion = profile?.targetUniversity ?? null;
 
-  const [paperStats] = await db
-    .select({
-      paperCount: sql<number>`count(*)::int`,
-      yearMin: sql<number | null>`min(${examPapers.year})`,
-      yearMax: sql<number | null>`max(${examPapers.year})`,
-    })
-    .from(examPapers);
-  const [itemStats] = await db
-    .select({ itemCount: sql<number>`count(*)::int` })
-    .from(examItems);
+  const paperStats = await safeRun(
+    "exam-analysis paperStats",
+    async () => {
+      const [row] = await db
+        .select({
+          paperCount: sql<number>`count(*)::int`,
+          yearMin: sql<number | null>`min(${examPapers.year})`,
+          yearMax: sql<number | null>`max(${examPapers.year})`,
+        })
+        .from(examPapers);
+      return row ?? { paperCount: 0, yearMin: null, yearMax: null };
+    },
+    { paperCount: 0, yearMin: null as number | null, yearMax: null as number | null },
+  );
+  const itemStats = await safeRun(
+    "exam-analysis itemStats",
+    async () => {
+      const [row] = await db
+        .select({ itemCount: sql<number>`count(*)::int` })
+        .from(examItems);
+      return row ?? { itemCount: 0 };
+    },
+    { itemCount: 0 },
+  );
 
   const seedReady = (itemStats?.itemCount ?? 0) > 0;
 
