@@ -161,6 +161,52 @@ function ItemCard({
           </p>
         )}
 
+        {/* 답안·해설 — 기본 접힘. 사용자가 펼쳐서 학습 참고용으로 활용. */}
+        {(item.answerMd || item.explanationMd) && (
+          <details className="mt-4 group">
+            <summary className="cursor-pointer list-none flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground transition-colors select-none">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded border border-rule text-[10px] group-open:bg-evergreen/10 group-open:border-evergreen group-open:text-evergreen transition-colors">
+                +
+              </span>
+              <span>답안·해설 펼쳐보기</span>
+            </summary>
+            <div className="mt-4 space-y-4">
+              {item.answerMd && (
+                <div className="rounded-md border border-evergreen/40 bg-evergreen/[0.04] p-4">
+                  <div className="text-[10.5px] uppercase tracking-[0.12em] text-evergreen mb-2">
+                    AI 모범답안
+                  </div>
+                  <div className="font-serif text-[13px] leading-[1.7] whitespace-pre-wrap text-foreground/90">
+                    {item.answerMd}
+                  </div>
+                </div>
+              )}
+              {item.explanationMd && (
+                <div className="rounded-md border border-rule bg-secondary/30 p-4">
+                  <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
+                    해설
+                  </div>
+                  <div className="text-[12.5px] leading-[1.7] whitespace-pre-wrap text-foreground/80">
+                    {item.explanationMd}
+                  </div>
+                </div>
+              )}
+              {!item.verifiedAnswer && (
+                <p className="text-[10.5px] text-warning leading-relaxed">
+                  ※ 운영자 검수 전 — AI 자동 생성 답안입니다. 학습 참고용으로 활용하세요.
+                </p>
+              )}
+            </div>
+          </details>
+        )}
+
+        {/* 답안·해설이 아직 시드되지 않은 경우 안내 */}
+        {!item.answerMd && !item.explanationMd && (
+          <p className="mt-4 text-[11px] text-muted-foreground italic">
+            답안·해설이 아직 시드되지 않았습니다.
+          </p>
+        )}
+
         {item.keywords.length > 0 && (
           <div className="mt-3 pt-3 border-t border-rule flex flex-wrap items-center gap-1.5">
             <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
