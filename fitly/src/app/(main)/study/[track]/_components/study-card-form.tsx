@@ -309,15 +309,17 @@ function AnswerBox({
   content: string;
   verified?: boolean;
 }) {
+  // 단단한 bg-card로 body 종이 그레인을 가린다. 차별화 시그널은 좌측 4px
+  // 보더 + uppercase 라벨로 충분 (alpha tone은 가독성 저하).
   const toneClass =
     tone === "evergreen"
-      ? "border-l-4 border-evergreen bg-evergreen/[0.04]"
-      : "border-l-4 border-rule-strong bg-secondary/30";
+      ? "border-l-4 border-evergreen"
+      : "border-l-4 border-rule-strong";
   const labelClass =
     tone === "evergreen" ? "text-evergreen" : "text-muted-foreground";
 
   return (
-    <Card className={`${toneClass} border-y border-r border-rule`}>
+    <Card className={`${toneClass} border-y border-r border-rule bg-card`}>
       <CardContent className="p-5">
         <div className="flex items-center gap-2 flex-wrap">
           <span
