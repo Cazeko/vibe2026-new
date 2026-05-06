@@ -45,12 +45,15 @@ export default async function ExamAnalysisPage({
   if (!user) redirect("/login");
 
   const params = await searchParams;
-  const tab = ((params.tab as TabKey) ?? "papers") as TabKey;
+  const requestedTab = (params.tab as string | undefined) ?? "papers";
+  const tab: TabKey = TABS.some((t) => t.key === requestedTab)
+    ? (requestedTab as TabKey)
+    : "papers";
 
-  const db = getDb();
   const profile = await safeRun(
     "exam-analysis profile",
     async () => {
+      const db = getDb();
       const [row] = await db
         .select()
         .from(userProfiles)
@@ -65,6 +68,7 @@ export default async function ExamAnalysisPage({
   const paperStats = await safeRun(
     "exam-analysis paperStats",
     async () => {
+      const db = getDb();
       const [row] = await db
         .select({
           paperCount: sql<number>`count(*)::int`,
@@ -72,13 +76,20 @@ export default async function ExamAnalysisPage({
           yearMax: sql<number | null>`max(${examPapers.year})`,
         })
         .from(examPapers);
-      return row ?? { paperCount: 0, yearMin: null, yearMax: null };
+      return (
+        row ?? { paperCount: 0, yearMin: null, yearMax: null }
+      );
     },
-    { paperCount: 0, yearMin: null as number | null, yearMax: null as number | null },
+    {
+      paperCount: 0,
+      yearMin: null as number | null,
+      yearMax: null as number | null,
+    },
   );
   const itemStats = await safeRun(
     "exam-analysis itemStats",
     async () => {
+      const db = getDb();
       const [row] = await db
         .select({ itemCount: sql<number>`count(*)::int` })
         .from(examItems);

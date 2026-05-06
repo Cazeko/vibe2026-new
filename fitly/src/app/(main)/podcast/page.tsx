@@ -46,11 +46,11 @@ export default async function PodcastPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const db = getDb();
   const episodes = await safeRun(
     "podcast episodes",
-    async () =>
-      db
+    async () => {
+      const db = getDb();
+      return db
         .select()
         .from(podcastEpisodes)
         .where(
@@ -60,13 +60,15 @@ export default async function PodcastPage() {
           ),
         )
         .orderBy(desc(podcastEpisodes.generatedAt))
-        .limit(40),
+        .limit(40);
+    },
     [] as (typeof podcastEpisodes.$inferSelect)[],
   );
 
   const stats = await safeRun(
     "podcast stats",
     async () => {
+      const db = getDb();
       const [row] = await db
         .select({
           total: sql<number>`count(*)::int`,
@@ -75,7 +77,9 @@ export default async function PodcastPage() {
           totalDuration: sql<number>`coalesce(sum(${podcastEpisodes.durationSec}), 0)::int`,
         })
         .from(podcastEpisodes);
-      return row ?? { total: 0, sharedCount: 0, userCount: 0, totalDuration: 0 };
+      return (
+        row ?? { total: 0, sharedCount: 0, userCount: 0, totalDuration: 0 }
+      );
     },
     { total: 0, sharedCount: 0, userCount: 0, totalDuration: 0 },
   );
