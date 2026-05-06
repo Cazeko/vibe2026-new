@@ -9,11 +9,14 @@ import {
   ThumbsUp,
   Zap,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
+import { cleanMarkdown } from "@/lib/text/markdown";
 import type { CardType } from "@/types";
 import { submitAnswer, gradeCard } from "../actions";
 
@@ -73,9 +76,14 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const { recordCard } = useStudySession(card.type);
   const [answer, setAnswer] = useState("");
   const [revealed, setRevealed] = useState(card.type === "keyword");
+  const [stemExpanded, setStemExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const imageUrl = getExamPageUrl(card.frontImagePath);
+  const cleanAnswer = cleanMarkdown(card.backMd);
+  // 본문은 PDF unpdf 추출본이라 줄바꿈·공백이 raw하게 들어 있다. whitespace-pre-wrap
+  // 으로 표시하되 너무 길면(800자 이상) 기본 접힘 + "본문 펼쳐보기" 토글.
+  const isLongStem = card.frontText.length > 800;
 
   function handleReveal() {
     if (card.type === "quiz" || card.type === "mistake") {
@@ -91,14 +99,13 @@ export function StudyCardForm({ card }: { card: CardData }) {
   }
 
   function handleGrade(grade: Grade) {
-    // again = lapse (incorrect), 나머지(hard·good·easy) = passed (correct).
-    // 학습 시간/정답률 통계가 dashboard·me·study-analysis로 누적된다.
     const isCorrect = grade !== "again";
     recordCard(isCorrect);
     startTransition(async () => {
       await gradeCard(card.id, grade);
       setAnswer("");
       setRevealed(card.type === "keyword");
+      setStemExpanded(false);
       router.refresh();
     });
   }
@@ -108,7 +115,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
 
   return (
     <div className="space-y-5">
-      {/* 출처 메타 */}
+      {/* 출처 메타 + 본문 */}
       <Card className="border-rule">
         <CardContent className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -119,9 +126,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
               </span>
             </div>
             <div className="flex items-center gap-2 text-[11px]">
-              {card.itemFormat && (
-                <Tag>{card.itemFormat}</Tag>
-              )}
+              {card.itemFormat && <Tag>{card.itemFormat}</Tag>}
               {card.itemPoints != null && (
                 <Tag>
                   <span className="tabular-nums">{card.itemPoints}</span>점
@@ -130,28 +135,62 @@ export function StudyCardForm({ card }: { card: CardData }) {
             </div>
           </div>
 
-          {/* 본문 */}
-          <div className="mt-6 space-y-4">
-            {imageUrl && (
-              <div className="overflow-hidden rounded-md border border-rule">
-                {/*
-                  PNG는 학년도별 가변 비율 + Vercel Image optimization 무료
-                  한도(1,000장/월) 초과 시 비용 발생 → 본 시점은 native
-                  <img>로 직접 노출. Supabase Storage가 이미 CDN 역할.
-                */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt="시험 본문 (PDF 페이지)"
-                  className="w-full"
-                  loading="lazy"
-                />
+          {/* PDF 페이지 이미지 — 가독성의 1차. 텍스트는 보조. */}
+          {imageUrl && (
+            <div className="mt-5 overflow-hidden rounded-md border border-rule">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageUrl}
+                alt="시험 본문 (PDF 페이지)"
+                className="w-full"
+                loading="lazy"
+              />
+            </div>
+          )}
+
+          {/* 텍스트 본문 — 길면 접힘. unpdf 추출본은 raw text라 검색·낭독 보조 목적. */}
+          {card.frontText && (
+            <div className="mt-5">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+                  본문 텍스트{imageUrl && " (검색·낭독 보조)"}
+                </span>
+                {isLongStem && (
+                  <button
+                    type="button"
+                    onClick={() => setStemExpanded((v) => !v)}
+                    className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {stemExpanded ? (
+                      <>
+                        <EyeOff className="h-3 w-3" aria-hidden />
+                        접기
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-3 w-3" aria-hidden />
+                        펼치기
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
-            )}
-            <p className="font-serif text-[15px] leading-[1.7] whitespace-pre-wrap text-foreground/90">
-              {card.frontText}
-            </p>
-          </div>
+              <div
+                className={`border-l-4 border-rule pl-4 pr-1 py-1 ${
+                  isLongStem && !stemExpanded
+                    ? "max-h-[180px] overflow-hidden relative"
+                    : ""
+                }`}
+              >
+                <p className="font-serif text-[14px] leading-[1.7] whitespace-pre-wrap text-foreground/85">
+                  {card.frontText}
+                </p>
+                {isLongStem && !stemExpanded && (
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -182,24 +221,34 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </Card>
       )}
 
-      {/* 답안·해설 비교 */}
+      {/* 답안 비교 — quiz/mistake은 좌우, keyword은 단독 */}
       {revealed && card.backMd && (
-        <Card className="border-evergreen/60 bg-evergreen/[0.04]">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] uppercase tracking-[0.12em] text-evergreen">
-                {card.type === "keyword" ? "정리 노트" : "AI 모범답안"}
-              </span>
-              <SourceBadge verified={card.verifiedAnswer} />
+        <>
+          {(card.type === "quiz" || card.type === "mistake") && answer.trim().length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <AnswerBox
+                label="내 답안"
+                tone="muted"
+                content={answer}
+              />
+              <AnswerBox
+                label="AI 모범답안"
+                tone="evergreen"
+                content={cleanAnswer}
+                verified={card.verifiedAnswer}
+              />
             </div>
-            <div className="mt-4 font-serif text-[14.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
-              {card.backMd}
-            </div>
-          </CardContent>
-        </Card>
+          ) : (
+            <AnswerBox
+              label={card.type === "keyword" ? "정리 노트" : "AI 모범답안"}
+              tone="evergreen"
+              content={cleanAnswer}
+              verified={card.verifiedAnswer}
+            />
+          )}
+        </>
       )}
 
-      {/* 채점이 비공개 카드일 때 */}
       {revealed && !card.backMd && (
         <Card className="border-warning/40 bg-warning/[0.04]">
           <CardContent className="p-6 flex gap-3">
@@ -246,6 +295,43 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </Card>
       )}
     </div>
+  );
+}
+
+function AnswerBox({
+  label,
+  tone,
+  content,
+  verified,
+}: {
+  label: string;
+  tone: "evergreen" | "muted";
+  content: string;
+  verified?: boolean;
+}) {
+  const toneClass =
+    tone === "evergreen"
+      ? "border-l-4 border-evergreen bg-evergreen/[0.04]"
+      : "border-l-4 border-rule-strong bg-secondary/30";
+  const labelClass =
+    tone === "evergreen" ? "text-evergreen" : "text-muted-foreground";
+
+  return (
+    <Card className={`${toneClass} border-y border-r border-rule`}>
+      <CardContent className="p-5">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            className={`text-[10.5px] uppercase tracking-[0.12em] ${labelClass}`}
+          >
+            {label}
+          </span>
+          {verified !== undefined && <SourceBadge verified={verified} />}
+        </div>
+        <div className="mt-3 font-serif text-[14px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
+          {content || "—"}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

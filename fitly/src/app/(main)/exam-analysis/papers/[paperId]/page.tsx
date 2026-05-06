@@ -12,6 +12,7 @@ import { safeRun } from "@/lib/db/queries";
 import { getPaperItems } from "@/lib/exam-analysis/queries";
 import { getSessionLabel } from "@/lib/exam/sessions";
 import { getExamPageUrl } from "@/lib/supabase/storage";
+import { cleanMarkdown } from "@/lib/text/markdown";
 
 export const dynamic = "force-dynamic";
 
@@ -121,10 +122,10 @@ function ItemCard({
                   {item.bloom}
                 </span>
               )}
-              {item.stemTextPreview && (
-                <span className="hidden md:inline text-[11.5px] text-muted-foreground/80 truncate max-w-[280px] group-open:hidden">
-                  · {item.stemTextPreview.slice(0, 40)}
-                  {item.stemTextPreview.length > 40 && "…"}
+              {/* 부제는 본문 미리보기 X — 영역·키워드 첫 2개로. */}
+              {(item.domains.length > 0 || item.keywords.length > 0) && (
+                <span className="hidden md:inline text-[11.5px] text-muted-foreground/80 truncate max-w-[320px] group-open:hidden">
+                  · {[...item.domains.slice(0, 1), ...item.keywords.slice(0, 2)].join(" · ")}
                 </span>
               )}
             </div>
@@ -169,13 +170,18 @@ function ItemCard({
             )}
 
             {item.stemTextPreview && (
-              <p className="mt-3 text-[12.5px] text-foreground/80 leading-relaxed line-clamp-3">
-                {item.stemTextPreview}
-                {item.stemTextPreview.length >= 80 && "…"}
-              </p>
+              <div className="mt-3 border-l-4 border-rule pl-3 py-1">
+                <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                  본문 미리보기
+                </span>
+                <p className="mt-1 text-[12.5px] text-foreground/80 leading-relaxed line-clamp-3">
+                  {item.stemTextPreview}
+                  {item.stemTextPreview.length >= 80 && "…"}
+                </p>
+              </div>
             )}
 
-            {/* 답안·해설 — 중첩 토글. */}
+            {/* 답안·해설 — 중첩 토글. cleanMarkdown으로 ###·*** marker 제거. */}
             {(item.answerMd || item.explanationMd) && (
               <details className="mt-4 group/answer">
                 <summary className="cursor-pointer list-none flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground transition-colors select-none">
@@ -186,24 +192,28 @@ function ItemCard({
                 </summary>
                 <div className="mt-4 space-y-4">
                   {item.answerMd && (
-                    <div className="rounded-md border border-evergreen/40 bg-evergreen/[0.04] p-4">
-                      <div className="text-[10.5px] uppercase tracking-[0.12em] text-evergreen mb-2">
-                        AI 모범답안
-                      </div>
-                      <div className="font-serif text-[13px] leading-[1.7] whitespace-pre-wrap text-foreground/90">
-                        {item.answerMd}
-                      </div>
-                    </div>
+                    <Card className="border-l-4 border-evergreen border-y border-r border-rule bg-evergreen/[0.04]">
+                      <CardContent className="p-4">
+                        <div className="text-[10.5px] uppercase tracking-[0.12em] text-evergreen mb-2">
+                          AI 모범답안
+                        </div>
+                        <div className="font-serif text-[13px] leading-[1.7] whitespace-pre-wrap text-foreground/90">
+                          {cleanMarkdown(item.answerMd)}
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
                   {item.explanationMd && (
-                    <div className="rounded-md border border-rule bg-secondary/30 p-4">
-                      <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
-                        해설
-                      </div>
-                      <div className="text-[12.5px] leading-[1.7] whitespace-pre-wrap text-foreground/80">
-                        {item.explanationMd}
-                      </div>
-                    </div>
+                    <Card className="border-l-4 border-info border-y border-r border-rule bg-info/[0.04]">
+                      <CardContent className="p-4">
+                        <div className="text-[10.5px] uppercase tracking-[0.12em] text-info mb-2">
+                          해설
+                        </div>
+                        <div className="text-[12.5px] leading-[1.7] whitespace-pre-wrap text-foreground/80">
+                          {cleanMarkdown(item.explanationMd)}
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
                   {!item.verifiedAnswer && (
                     <p className="text-[10.5px] text-warning leading-relaxed">
