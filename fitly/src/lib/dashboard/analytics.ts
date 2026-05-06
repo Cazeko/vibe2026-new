@@ -5,35 +5,44 @@ import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { studySessions } from "@/lib/db/schema";
 import type { HeatmapCell } from "@/components/feature/analysis/activity-heatmap";
-import { getCardCounts, getDueCardCounts } from "@/lib/db/queries";
+import { getCardCounts, getDueCardCounts, safeRun } from "@/lib/db/queries";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export async function getActivityHeatmap(userId: string): Promise<HeatmapCell[]> {
-  const db = getDb();
-  const since = new Date(Date.now() - 84 * DAY_MS); // 12주
+  return safeRun(
+    "getActivityHeatmap",
+    async () => {
+      const db = getDb();
+      const since = new Date(Date.now() - 84 * DAY_MS); // 12주
 
-  const rows = await db
-    .select({
-      day: sql<string>`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`,
-      sec: sql<number>`coalesce(sum(${studySessions.durationSeconds}), 0)::int`,
-    })
-    .from(studySessions)
-    .where(
-      and(eq(studySessions.userId, userId), gte(studySessions.startedAt, since)),
-    )
-    .groupBy(sql`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`);
+      const rows = await db
+        .select({
+          day: sql<string>`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`,
+          sec: sql<number>`coalesce(sum(${studySessions.durationSeconds}), 0)::int`,
+        })
+        .from(studySessions)
+        .where(
+          and(
+            eq(studySessions.userId, userId),
+            gte(studySessions.startedAt, since),
+          ),
+        )
+        .groupBy(sql`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`);
 
-  const byDay = new Map<string, number>();
-  for (const r of rows) byDay.set(r.day, Math.round(Number(r.sec) / 60));
+      const byDay = new Map<string, number>();
+      for (const r of rows) byDay.set(r.day, Math.round(Number(r.sec) / 60));
 
-  const cells: HeatmapCell[] = [];
-  for (let i = 83; i >= 0; i -= 1) {
-    const d = new Date(Date.now() - i * DAY_MS);
-    const key = d.toISOString().slice(0, 10);
-    cells.push({ date: key, minutes: byDay.get(key) ?? 0 });
-  }
-  return cells;
+      const cells: HeatmapCell[] = [];
+      for (let i = 83; i >= 0; i -= 1) {
+        const d = new Date(Date.now() - i * DAY_MS);
+        const key = d.toISOString().slice(0, 10);
+        cells.push({ date: key, minutes: byDay.get(key) ?? 0 });
+      }
+      return cells;
+    },
+    [],
+  );
 }
 
 export type SessionStat = {
@@ -44,40 +53,54 @@ export type SessionStat = {
   bestDayMinutes: number;
 };
 
+const EMPTY_SESSION_STAT: SessionStat = {
+  sessions: 0,
+  totalMinutes: 0,
+  totalCards: 0,
+  avgAccuracy: 0,
+  bestDayMinutes: 0,
+};
+
 export async function getSessionStats(userId: string): Promise<SessionStat> {
-  const db = getDb();
+  return safeRun(
+    "getSessionStats",
+    async () => {
+      const db = getDb();
 
-  const [agg] = await db
-    .select({
-      sessions: sql<number>`count(*)::int`,
-      sec: sql<number>`coalesce(sum(${studySessions.durationSeconds}), 0)::int`,
-      cards: sql<number>`coalesce(sum(${studySessions.cardsReviewed}), 0)::int`,
-      total: sql<number>`coalesce(sum(${studySessions.totalCount}), 0)::int`,
-      correct: sql<number>`coalesce(sum(${studySessions.correctCount}), 0)::int`,
-    })
-    .from(studySessions)
-    .where(eq(studySessions.userId, userId));
+      const [agg] = await db
+        .select({
+          sessions: sql<number>`count(*)::int`,
+          sec: sql<number>`coalesce(sum(${studySessions.durationSeconds}), 0)::int`,
+          cards: sql<number>`coalesce(sum(${studySessions.cardsReviewed}), 0)::int`,
+          total: sql<number>`coalesce(sum(${studySessions.totalCount}), 0)::int`,
+          correct: sql<number>`coalesce(sum(${studySessions.correctCount}), 0)::int`,
+        })
+        .from(studySessions)
+        .where(eq(studySessions.userId, userId));
 
-  const [bestDay] = await db
-    .select({
-      sec: sql<number>`coalesce(sum(${studySessions.durationSeconds}), 0)::int`,
-    })
-    .from(studySessions)
-    .where(eq(studySessions.userId, userId))
-    .groupBy(sql`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`)
-    .orderBy(sql`coalesce(sum(${studySessions.durationSeconds}), 0) desc`)
-    .limit(1);
+      const [bestDay] = await db
+        .select({
+          sec: sql<number>`coalesce(sum(${studySessions.durationSeconds}), 0)::int`,
+        })
+        .from(studySessions)
+        .where(eq(studySessions.userId, userId))
+        .groupBy(sql`to_char(${studySessions.startedAt}, 'YYYY-MM-DD')`)
+        .orderBy(sql`coalesce(sum(${studySessions.durationSeconds}), 0) desc`)
+        .limit(1);
 
-  return {
-    sessions: agg?.sessions ?? 0,
-    totalMinutes: Math.round((agg?.sec ?? 0) / 60),
-    totalCards: agg?.cards ?? 0,
-    avgAccuracy:
-      agg && agg.total > 0
-        ? Math.round((Number(agg.correct) / Number(agg.total)) * 100)
-        : 0,
-    bestDayMinutes: bestDay ? Math.round(bestDay.sec / 60) : 0,
-  };
+      return {
+        sessions: agg?.sessions ?? 0,
+        totalMinutes: Math.round((agg?.sec ?? 0) / 60),
+        totalCards: agg?.cards ?? 0,
+        avgAccuracy:
+          agg && agg.total > 0
+            ? Math.round((Number(agg.correct) / Number(agg.total)) * 100)
+            : 0,
+        bestDayMinutes: bestDay ? Math.round(bestDay.sec / 60) : 0,
+      };
+    },
+    EMPTY_SESSION_STAT,
+  );
 }
 
 // 헌법 v3.0 제13조의2 — 카드 라이브러리 카운트 (풀이/키워드/오답).
@@ -119,23 +142,29 @@ export async function getRecentActivity(
   userId: string,
   limit = 8,
 ): Promise<RecentActivity[]> {
-  const db = getDb();
-  const rows = await db
-    .select()
-    .from(studySessions)
-    .where(eq(studySessions.userId, userId))
-    .orderBy(desc(studySessions.startedAt))
-    .limit(limit);
+  return safeRun(
+    "getRecentActivity",
+    async () => {
+      const db = getDb();
+      const rows = await db
+        .select()
+        .from(studySessions)
+        .where(eq(studySessions.userId, userId))
+        .orderBy(desc(studySessions.startedAt))
+        .limit(limit);
 
-  return rows.map((r) => ({
-    id: r.id,
-    mode: r.mode,
-    startedAt: r.startedAt.toISOString(),
-    durationMinutes: Math.round(r.durationSeconds / 60),
-    cards: r.cardsReviewed,
-    accuracy:
-      r.totalCount > 0
-        ? Math.round((r.correctCount / r.totalCount) * 100)
-        : null,
-  }));
+      return rows.map((r) => ({
+        id: r.id,
+        mode: r.mode,
+        startedAt: r.startedAt.toISOString(),
+        durationMinutes: Math.round(r.durationSeconds / 60),
+        cards: r.cardsReviewed,
+        accuracy:
+          r.totalCount > 0
+            ? Math.round((r.correctCount / r.totalCount) * 100)
+            : null,
+      }));
+    },
+    [],
+  );
 }
