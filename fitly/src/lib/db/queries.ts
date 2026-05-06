@@ -11,7 +11,7 @@
 // FSRS 상태는 user_card_state 1:1.
 
 import { cache } from "react";
-import { and, eq, isNull, lte, sql } from "drizzle-orm";
+import { and, eq, isNull, lte, or, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import {
   cards,
@@ -127,6 +127,12 @@ export type DueCardCounts = {
 
 const EMPTY_DUE_COUNTS: DueCardCounts = { quiz: 0, keyword: 0, mistake: 0 };
 
+// LEFT JOIN으로 user_card_state row가 *없는* 새 카드(NEW)도 포함한다.
+//   - shared seed (cards.user_id IS NULL) → 모든 사용자에게 노출
+//   - own mistake (cards.user_id = userId) → 본인에게만
+//   - dueAt IS NULL (state row 없음) 또는 dueAt <= now → due
+// 이렇게 하지 않으면 첫 학습 시 user_card_state가 비어 있어 어떤 카드도
+// due로 잡히지 않는 닭과 달걀 상태에 갇힌다.
 export const getDueCardCounts = cache(async (
   userId: string,
   now: Date = new Date(),
@@ -138,12 +144,21 @@ export const getDueCardCounts = cache(async (
         type: cards.type,
         count: sql<number>`count(*)::int`,
       })
-      .from(userCardState)
-      .innerJoin(cards, eq(userCardState.cardId, cards.id))
+      .from(cards)
+      .leftJoin(
+        userCardState,
+        and(
+          eq(userCardState.cardId, cards.id),
+          eq(userCardState.userId, userId),
+        ),
+      )
       .where(
         and(
-          eq(userCardState.userId, userId),
-          lte(userCardState.dueAt, now),
+          or(isNull(cards.userId), eq(cards.userId, userId)),
+          or(
+            isNull(userCardState.dueAt),
+            lte(userCardState.dueAt, now),
+          ),
         ),
       )
       .groupBy(cards.type);
@@ -200,18 +215,29 @@ export async function getDueCards(
           itemFormat: examItems.format,
           itemPoints: examItems.points,
         })
-        .from(userCardState)
-        .innerJoin(cards, eq(userCardState.cardId, cards.id))
+        .from(cards)
+        .leftJoin(
+          userCardState,
+          and(
+            eq(userCardState.cardId, cards.id),
+            eq(userCardState.userId, userId),
+          ),
+        )
         .leftJoin(examItems, eq(cards.sourceItemId, examItems.id))
         .leftJoin(examPapers, eq(examItems.paperId, examPapers.id))
         .where(
           and(
-            eq(userCardState.userId, userId),
             eq(cards.type, type),
-            lte(userCardState.dueAt, now),
+            or(isNull(cards.userId), eq(cards.userId, userId)),
+            or(
+              isNull(userCardState.dueAt),
+              lte(userCardState.dueAt, now),
+            ),
           ),
         )
-        .orderBy(userCardState.dueAt)
+        // dueAt NULL(NEW)을 먼저 노출 → 첫 학습 시 새 카드가 보인다.
+        // 그 다음 dueAt 오래된 순.
+        .orderBy(sql`${userCardState.dueAt} asc nulls first`)
         .limit(limit);
 
       return rows.map((r) => ({
@@ -221,7 +247,7 @@ export async function getDueCards(
         frontImagePath: r.frontImagePath,
         backMd: r.backMd,
         verifiedAnswer: r.verifiedAnswer,
-        dueAt: r.dueAt,
+        dueAt: r.dueAt ?? now,
         paperLabel: formatPaperLabel(r.paperYear, r.paperSession, r.itemNo),
         itemFormat: r.itemFormat,
         itemPoints: r.itemPoints,
