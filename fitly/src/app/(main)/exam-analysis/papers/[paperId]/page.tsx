@@ -12,7 +12,7 @@ import { safeRun } from "@/lib/db/queries";
 import { getPaperItems } from "@/lib/exam-analysis/queries";
 import { getSessionLabel } from "@/lib/exam/sessions";
 import { getExamPageUrl } from "@/lib/supabase/storage";
-import { cleanMarkdown } from "@/lib/text/markdown";
+import { Markdown } from "@/components/shared/markdown";
 
 export const dynamic = "force-dynamic";
 
@@ -192,26 +192,22 @@ function ItemCard({
                 </summary>
                 <div className="mt-4 space-y-4">
                   {item.answerMd && (
-                    <Card className="border-l-4 border-evergreen border-y border-r border-rule bg-evergreen/[0.04]">
+                    <Card className="border-l-4 border-evergreen border-y border-r border-rule bg-card">
                       <CardContent className="p-4">
                         <div className="text-[10.5px] uppercase tracking-[0.12em] text-evergreen mb-2">
                           AI 모범답안
                         </div>
-                        <div className="font-serif text-[13px] leading-[1.7] whitespace-pre-wrap text-foreground/90">
-                          {cleanMarkdown(item.answerMd)}
-                        </div>
+                        <Markdown serif>{item.answerMd}</Markdown>
                       </CardContent>
                     </Card>
                   )}
                   {item.explanationMd && (
-                    <Card className="border-l-4 border-info border-y border-r border-rule bg-info/[0.04]">
+                    <Card className="border-l-4 border-info border-y border-r border-rule bg-card">
                       <CardContent className="p-4">
                         <div className="text-[10.5px] uppercase tracking-[0.12em] text-info mb-2">
                           해설
                         </div>
-                        <div className="text-[12.5px] leading-[1.7] whitespace-pre-wrap text-foreground/80">
-                          {cleanMarkdown(item.explanationMd)}
-                        </div>
+                        <Markdown>{item.explanationMd}</Markdown>
                       </CardContent>
                     </Card>
                   )}

@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/shared/markdown";
 import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
-import { cleanMarkdown } from "@/lib/text/markdown";
 import type { CardType } from "@/types";
 import { submitAnswer, gradeCard } from "../actions";
 
@@ -77,10 +77,10 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const [answer, setAnswer] = useState("");
   const [revealed, setRevealed] = useState(card.type === "keyword");
   const [stemExpanded, setStemExpanded] = useState(false);
+  const [sessionCount, setSessionCount] = useState(0);
   const [pending, startTransition] = useTransition();
 
   const imageUrl = getExamPageUrl(card.frontImagePath);
-  const cleanAnswer = cleanMarkdown(card.backMd);
   // 본문은 PDF unpdf 추출본이라 줄바꿈·공백이 raw하게 들어 있다. whitespace-pre-wrap
   // 으로 표시하되 너무 길면(800자 이상) 기본 접힘 + "본문 펼쳐보기" 토글.
   const isLongStem = card.frontText.length > 800;
@@ -101,6 +101,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
   function handleGrade(grade: Grade) {
     const isCorrect = grade !== "again";
     recordCard(isCorrect);
+    setSessionCount((c) => c + 1);
     startTransition(async () => {
       await gradeCard(card.id, grade);
       setAnswer("");
@@ -115,6 +116,22 @@ export function StudyCardForm({ card }: { card: CardData }) {
 
   return (
     <div className="space-y-5">
+      {/* 세션 진행 — 학습한 카드 수를 시각적으로 누적 표시. */}
+      {sessionCount > 0 && (
+        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+          <span className="uppercase tracking-[0.12em]">세션 진행</span>
+          <span className="tabular-nums font-medium text-foreground">
+            {sessionCount}장 학습
+          </span>
+          <div className="flex-1 h-1 bg-rule rounded-full overflow-hidden">
+            <div
+              className="h-full bg-evergreen transition-all duration-500"
+              style={{ width: `${Math.min(100, sessionCount * 8)}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* 출처 메타 + 본문 */}
       <Card className="border-rule">
         <CardContent className="p-6">
@@ -226,15 +243,11 @@ export function StudyCardForm({ card }: { card: CardData }) {
         <>
           {(card.type === "quiz" || card.type === "mistake") && answer.trim().length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <AnswerBox
-                label="내 답안"
-                tone="muted"
-                content={answer}
-              />
+              <AnswerBox label="내 답안" tone="muted" plainText={answer} />
               <AnswerBox
                 label="AI 모범답안"
                 tone="evergreen"
-                content={cleanAnswer}
+                markdown={card.backMd}
                 verified={card.verifiedAnswer}
               />
             </div>
@@ -242,7 +255,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
             <AnswerBox
               label={card.type === "keyword" ? "정리 노트" : "AI 모범답안"}
               tone="evergreen"
-              content={cleanAnswer}
+              markdown={card.backMd}
               verified={card.verifiedAnswer}
             />
           )}
@@ -301,23 +314,27 @@ export function StudyCardForm({ card }: { card: CardData }) {
 function AnswerBox({
   label,
   tone,
-  content,
+  markdown,
+  plainText,
   verified,
 }: {
   label: string;
   tone: "evergreen" | "muted";
-  content: string;
+  markdown?: string | null;
+  plainText?: string;
   verified?: boolean;
 }) {
+  // 단단한 bg-card로 body 종이 그레인을 가린다. 차별화 시그널은 좌측 4px
+  // 보더 + uppercase 라벨로 충분 (alpha tone은 가독성 저하).
   const toneClass =
     tone === "evergreen"
-      ? "border-l-4 border-evergreen bg-evergreen/[0.04]"
-      : "border-l-4 border-rule-strong bg-secondary/30";
+      ? "border-l-4 border-evergreen"
+      : "border-l-4 border-rule-strong";
   const labelClass =
     tone === "evergreen" ? "text-evergreen" : "text-muted-foreground";
 
   return (
-    <Card className={`${toneClass} border-y border-r border-rule`}>
+    <Card className={`${toneClass} border-y border-r border-rule bg-card`}>
       <CardContent className="p-5">
         <div className="flex items-center gap-2 flex-wrap">
           <span
@@ -327,8 +344,14 @@ function AnswerBox({
           </span>
           {verified !== undefined && <SourceBadge verified={verified} />}
         </div>
-        <div className="mt-3 font-serif text-[14px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
-          {content || "—"}
+        <div className="mt-3">
+          {markdown ? (
+            <Markdown serif>{markdown}</Markdown>
+          ) : (
+            <div className="font-sans text-[13.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
+              {plainText || "—"}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
