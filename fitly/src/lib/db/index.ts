@@ -18,9 +18,16 @@ function drizzleFromClient(client: ReturnType<typeof postgres>) {
 function createPgClient() {
   return postgres(env.database.url, {
     prepare: false,
-    max: 3,             // dev/serverless 친화 — 풀러 한도 보호
+    max: 5,             // serverless 친화 — Pooler free(15) 여유 + dashboard 동시 query 4~5개 대응
     idle_timeout: 20,   // 20초 유휴 연결 자동 종료
     max_lifetime: 60 * 5, // 5분 후 강제 갱신
+    connect_timeout: 10,  // 10초 안에 connect 못 하면 즉시 throw
+    connection: {
+      // 헌법 제37조 + v3.5 제35조의2 정합 — query가 8초 넘어가면 cancel.
+      // SSR이 Vercel function timeout에 걸려 무한 hang하는 패턴 방지.
+      // safeRun이 PostgresError 57014를 catch하여 fallback 처리.
+      statement_timeout: 8000,
+    },
   });
 }
 

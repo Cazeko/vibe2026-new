@@ -10,7 +10,8 @@
 //   - mistake:      user_id NOT NULL (개인 합류 — quiz 등급 again/hard 자동 합류)
 // FSRS 상태는 user_card_state 1:1.
 
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { cache } from "react";
+import { and, eq, isNull, lte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import {
   cards,
@@ -57,7 +58,10 @@ const EMPTY_CARD_COUNTS: CardCounts = {
   mistakeMastered: 0,
 };
 
-export async function getCardCounts(userId: string): Promise<CardCounts> {
+// React cache — 동일 request 내 중복 호출 자동 dedupe.
+// /me 페이지가 getDashboardSummary + getLibraryCounts를 동시 호출하면서
+// getCardCounts가 두 번 실행되던 부하를 한 번으로 축약 (Vercel function 시간 절약).
+export const getCardCounts = cache(async (userId: string): Promise<CardCounts> => {
   return safeRun("getCardCounts", async () => {
     const db = getDb();
 
@@ -112,7 +116,7 @@ export async function getCardCounts(userId: string): Promise<CardCounts> {
       mistakeMastered: mastered.get("mistake") ?? 0,
     };
   }, EMPTY_CARD_COUNTS);
-}
+});
 
 export type DueCardCounts = {
   quiz: number;
@@ -122,10 +126,10 @@ export type DueCardCounts = {
 
 const EMPTY_DUE_COUNTS: DueCardCounts = { quiz: 0, keyword: 0, mistake: 0 };
 
-export async function getDueCardCounts(
+export const getDueCardCounts = cache(async (
   userId: string,
   now: Date = new Date(),
-): Promise<DueCardCounts> {
+): Promise<DueCardCounts> => {
   return safeRun("getDueCardCounts", async () => {
     const db = getDb();
     const rows = await db
@@ -138,7 +142,7 @@ export async function getDueCardCounts(
       .where(
         and(
           eq(userCardState.userId, userId),
-          sql`${userCardState.dueAt} <= ${now}`,
+          lte(userCardState.dueAt, now),
         ),
       )
       .groupBy(cards.type);
@@ -155,7 +159,7 @@ export async function getDueCardCounts(
     }
     return counts;
   }, EMPTY_DUE_COUNTS);
-}
+});
 
 export type DueCard = {
   id: string;
@@ -203,7 +207,7 @@ export async function getDueCards(
           and(
             eq(userCardState.userId, userId),
             eq(cards.type, type),
-            sql`${userCardState.dueAt} <= ${now}`,
+            lte(userCardState.dueAt, now),
           ),
         )
         .orderBy(userCardState.dueAt)
