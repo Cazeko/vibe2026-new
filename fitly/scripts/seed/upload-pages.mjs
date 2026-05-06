@@ -66,6 +66,37 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
 });
 const sql = postgres(DATABASE_URL, { prepare: false, max: 1 });
 
+// 버킷 자동 생성 (없을 때만) — SQL Editor의 postgres role은 storage.buckets·
+// storage.objects의 owner가 아니라 INSERT/CREATE POLICY 거부(42501).
+// service_role 키 + Storage REST API는 권한 우회 가능.
+async function ensureBucket() {
+  const { data: list, error: listErr } = await supabase.storage.listBuckets();
+  if (listErr) {
+    throw new Error(`listBuckets failed: ${listErr.message}`);
+  }
+  const exists = list?.some((b) => b.id === BUCKET);
+  if (exists) {
+    console.log(`[setup] bucket already exists: ${BUCKET}`);
+    return;
+  }
+  if (DRY_RUN) {
+    console.log(`[setup][dry-run] would create bucket: ${BUCKET}`);
+    return;
+  }
+  console.log(`[setup] creating bucket: ${BUCKET} (public=true, 10MB limit)`);
+  const { error: createErr } = await supabase.storage.createBucket(BUCKET, {
+    public: true,
+    fileSizeLimit: 10485760,
+    allowedMimeTypes: ["image/png", "image/webp", "image/jpeg"],
+  });
+  if (createErr) {
+    throw new Error(`createBucket failed: ${createErr.message}`);
+  }
+  console.log(`[setup] bucket created.`);
+}
+
+await ensureBucket();
+
 const dirs = readdirSync(papersBase)
   .filter((d) => /^\d{4}-/.test(d))
   .filter((d) => statSync(join(papersBase, d)).isDirectory())
