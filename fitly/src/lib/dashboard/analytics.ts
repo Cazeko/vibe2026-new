@@ -1,7 +1,7 @@
 // 헌법 v3.0 / v3.0.1 — /study-analysis · /me 전용 보조 집계.
 // D-S1.5 stub 해제 (2026-05-06) — cards 다형 테이블 + user_card_state 통합 query 활용.
 
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gt, gte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { studySessions } from "@/lib/db/schema";
 import type { HeatmapCell } from "@/components/feature/analysis/activity-heatmap";
@@ -67,6 +67,8 @@ export async function getSessionStats(userId: string): Promise<SessionStat> {
     async () => {
       const db = getDb();
 
+      // cards_reviewed=0 row는 통계 노이즈로 제외 (5초 이상 머물기만 한 빈 세션).
+      // 평균 정답률 산출에서 빈 세션이 분모를 흐리지 않도록 가드.
       const [agg] = await db
         .select({
           sessions: sql<number>`count(*)::int`,
@@ -76,7 +78,12 @@ export async function getSessionStats(userId: string): Promise<SessionStat> {
           correct: sql<number>`coalesce(sum(${studySessions.correctCount}), 0)::int`,
         })
         .from(studySessions)
-        .where(eq(studySessions.userId, userId));
+        .where(
+          and(
+            eq(studySessions.userId, userId),
+            gt(studySessions.cardsReviewed, 0),
+          ),
+        );
 
       const [bestDay] = await db
         .select({
