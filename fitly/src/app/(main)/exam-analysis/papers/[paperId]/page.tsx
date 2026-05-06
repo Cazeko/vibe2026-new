@@ -10,16 +10,10 @@ import { getDb } from "@/lib/db";
 import { examPapers } from "@/lib/db/schema";
 import { safeRun } from "@/lib/db/queries";
 import { getPaperItems } from "@/lib/exam-analysis/queries";
+import { getSessionLabel } from "@/lib/exam/sessions";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 
 export const dynamic = "force-dynamic";
-
-const SESSION_LABEL: Record<string, string> = {
-  essay: "교직논술",
-  A: "교육과정 A",
-  B: "교육과정 B",
-  combined: "통합",
-};
 
 export default async function PaperDetailPage({
   params,
@@ -52,7 +46,7 @@ export default async function PaperDetailPage({
 
   const items = await getPaperItems(paperId);
   const totalPoints = items.reduce((s, i) => s + (i.points ?? 0), 0);
-  const sessionLabel = SESSION_LABEL[paper.session] ?? paper.session;
+  const sessionLabel = getSessionLabel(paper.session);
 
   return (
     <div className="min-h-screen pb-12">

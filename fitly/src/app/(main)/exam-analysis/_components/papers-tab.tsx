@@ -2,17 +2,11 @@ import Link from "next/link";
 import { ChevronRight, FileText, ShieldCheck, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getPaperList, type PaperRow } from "@/lib/exam-analysis/queries";
+import { getSessionLabel } from "@/lib/exam/sessions";
 import { EmptySeedNotice } from "./empty-seed-notice";
 
 // 헌법 v3.5 제13조의2·제18조의3 정합 — 학년도별 시험지 목록.
 // 객관식 시대(2002~2013)는 풀이 출제 X 이지만 분석에는 함께 표시된다.
-
-const SESSION_LABEL: Record<string, string> = {
-  essay: "교직논술",
-  A: "교육과정 A",
-  B: "교육과정 B",
-  combined: "통합",
-};
 
 export async function PapersTab() {
   const papers = await getPaperList();
@@ -134,9 +128,7 @@ function YearCard({ year, sessions }: { year: number; sessions: PaperRow[] }) {
                     className="h-3.5 w-3.5 text-muted-foreground shrink-0"
                     aria-hidden
                   />
-                  <span className="truncate">
-                    {SESSION_LABEL[p.session] ?? p.session}
-                  </span>
+                  <span className="truncate">{getSessionLabel(p.session)}</span>
                 </span>
                 <span className="flex items-center gap-2 shrink-0 text-muted-foreground">
                   <span className="tabular-nums text-[11px]">

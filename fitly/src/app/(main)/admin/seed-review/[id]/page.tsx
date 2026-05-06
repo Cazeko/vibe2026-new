@@ -11,6 +11,7 @@ import {
   markAnswerVerified,
   unmarkAnswerVerified,
 } from "@/lib/seed-review/actions";
+import { getSessionLabel } from "@/lib/exam/sessions";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function SeedReviewItemPage({
       </Link>
 
       <PageHeader
-        title={`${item.year} ${labelOfSession(item.session)} · ${item.itemNo}번`}
+        title={`${item.year} ${getSessionLabel(item.session)} · ${item.itemNo}번`}
         subtitle={`format: ${item.format ?? "?"} · bloom: ${item.bloom ?? "?"} · 배점: ${item.points ?? "?"}점`}
       />
 
@@ -136,10 +137,3 @@ function Badge({ label, verified }: { label: string; verified: boolean }) {
   );
 }
 
-function labelOfSession(s: string): string {
-  return (
-    { essay: "교직논술", A: "교육과정 A", B: "교육과정 B", combined: "통합본" }[
-      s
-    ] ?? s
-  );
-}

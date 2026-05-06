@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 import type { CardType } from "@/types";
 import { submitAnswer, gradeCard } from "../actions";
@@ -69,6 +70,7 @@ const GRADES: {
 
 export function StudyCardForm({ card }: { card: CardData }) {
   const router = useRouter();
+  const { recordCard } = useStudySession(card.type);
   const [answer, setAnswer] = useState("");
   const [revealed, setRevealed] = useState(card.type === "keyword");
   const [pending, startTransition] = useTransition();
@@ -89,6 +91,10 @@ export function StudyCardForm({ card }: { card: CardData }) {
   }
 
   function handleGrade(grade: Grade) {
+    // again = lapse (incorrect), 나머지(hard·good·easy) = passed (correct).
+    // 학습 시간/정답률 통계가 dashboard·me·study-analysis로 누적된다.
+    const isCorrect = grade !== "again";
+    recordCard(isCorrect);
     startTransition(async () => {
       await gradeCard(card.id, grade);
       setAnswer("");
