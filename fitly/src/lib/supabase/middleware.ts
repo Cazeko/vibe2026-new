@@ -16,6 +16,8 @@ const PROTECTED_PREFIXES = [
   "/study-analysis",
   "/me",
   "/settings",
+  // 운영자 도구 — 헌법 제28조 정합 (D-S9 MVP, role 체크는 Phase 2)
+  "/admin",
   // 레거시 호환 (단계적 마이그레이션 완료까지 보호 유지)
   "/home",
   "/study",
