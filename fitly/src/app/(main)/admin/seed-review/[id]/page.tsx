@@ -46,7 +46,7 @@ export default async function SeedReviewItemPage({
           <Badge label="답안" verified={item.verifiedAnswer} />
         </div>
         <p className="mt-2 text-xs text-app-muted">
-          본문은 PDF 원본 직접 사용으로 자동 검증 (헌법 v3.3 9항). 답안은 LLM 생성으로 운영자 검수 필요 (제18조의2).
+          본문은 PDF 원본 직접 사용으로 자동 검증됩니다. 답안은 AI 생성이므로 운영자 검수가 필요합니다.
         </p>
       </Section>
 

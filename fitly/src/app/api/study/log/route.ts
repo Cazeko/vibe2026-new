@@ -7,15 +7,15 @@ import { studySessions, learningLogs } from "@/lib/db/schema";
 export const dynamic = "force-dynamic";
 
 type Body = {
-  mode?: "vocab" | "exam" | "review";
+  mode?: "quiz" | "keyword" | "mistake";
   durationSeconds?: number;
   cardsReviewed?: number;
   correctCount?: number;
   totalCount?: number;
 };
 
-// 헌법 v1.10 — 학습 세션 단위 기록.
-// 클라이언트(/study/* 페이지)는 세션 종료 시 본 API에 1회 POST한다.
+// 헌법 v3.0 제9조·제13조의2 — 학습 세션 단위 기록.
+// 클라이언트(/study/[track]) 는 세션 종료 시 본 API에 1회 POST한다.
 // learning_logs 일자별 누적도 함께 갱신한다(대시보드 추이 차트 원천).
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   }
 
   const mode = body.mode;
-  if (!mode || !["vocab", "exam", "review"].includes(mode)) {
+  if (!mode || !["quiz", "keyword", "mistake"].includes(mode)) {
     return NextResponse.json({ error: "mode 가 올바르지 않습니다." }, { status: 400 });
   }
   const durationSeconds = Math.max(0, Math.round(body.durationSeconds ?? 0));

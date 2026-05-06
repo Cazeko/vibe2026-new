@@ -27,8 +27,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fitly — 편입영어 학습 플래너",
-  description: "편입은 열심히 하는 게 아니라, 맞게(Fit) 하는 게임입니다.",
+  title: "Fitly — 초등 임용 1차 학습 플래너",
+  description: "임용은 열심히 하는 게 아니라, 맞게(Fit) 하는 게임입니다.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

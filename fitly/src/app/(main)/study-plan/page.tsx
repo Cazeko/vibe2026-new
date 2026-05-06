@@ -314,15 +314,15 @@ export default async function StudyPlanPage() {
             <ol className="mt-2 space-y-1.5 text-[12px] text-foreground/80 leading-relaxed list-decimal pl-4">
               <li>
                 <strong>풀이 트랙</strong> — 서술형 기출에 답안을 작성하고 AI 모범답안과
-                비교, 자가 채점 (FSRS grade).
+                비교, 자가 채점합니다.
               </li>
               <li>
                 <strong>키워드 트랙</strong> — 개념 정리 노트로 정의·핵심 요소를
-                반복 학습 (객관식 시대 데이터 흡수).
+                반복 학습합니다 (객관식 시대 데이터 포함).
               </li>
               <li>
-                <strong>오답 트랙</strong> — 풀이를 again/hard 로 평가하면 자동 합류,
-                마스터될 때까지 반복.
+                <strong>오답 트랙</strong> — 풀이를 다시/어렵으로 평가하면 자동 합류,
+                마스터될 때까지 반복합니다.
               </li>
               <li>
                 <strong>
@@ -333,8 +333,8 @@ export default async function StudyPlanPage() {
                     팟캐스트 →
                   </Link>
                 </strong>{" "}
-                영역·연도·주제 선택 후 NotebookLM 스타일 2인 화자 대화체로 자동
-                생성, 이동 중에도 청취 학습.
+                영역·연도·주제 선택 후 2인 화자 대화체 팟캐스트로 자동 생성,
+                이동 중에도 청취 학습.
               </li>
             </ol>
           </CardContent>

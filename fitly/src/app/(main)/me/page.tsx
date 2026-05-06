@@ -273,7 +273,7 @@ export default async function MePage() {
                 </p>
               </div>
               <p className="mt-1 text-[10px] text-muted-foreground">
-                서술형 기출 (2014~2026, 제13조의2)
+                서술형 기출 (2014~2026학년도)
               </p>
             </CardContent>
           </Card>

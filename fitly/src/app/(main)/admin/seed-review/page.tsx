@@ -20,7 +20,7 @@ export default async function SeedReviewPage() {
     <div className="px-8 py-10 max-w-6xl">
       <PageHeader
         title="시드 검토 큐"
-        subtitle={`AI 생성 답안의 운영자 검수 (헌법 제18조의2 · v3.3 9항 정합)`}
+        subtitle={`AI 생성 답안의 운영자 검수`}
       />
 
       <div className="grid grid-cols-3 gap-4 mb-8">

@@ -37,7 +37,7 @@ export default function MainSegmentError({
               <p className="mt-2 text-[13px] text-foreground/85 leading-relaxed">
                 서버 응답을 가져오지 못했습니다. 잠시 후 다시 시도해 주세요.
                 문제가 계속되면 재로그인 후 시도해 주시거나, 설정에서 환경
-                정보를 확인해 주세요 (헌법 제37조 — 장애 보고).
+                정보를 확인해 주세요.
               </p>
               {error.digest && (
                 <p className="mt-3 text-[10.5px] text-muted-foreground tabular-nums">
