@@ -31,27 +31,39 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const SHORT_NAME: Record<string, string> = {
-  한양: "한양대",
-  중앙: "중앙대",
-  성균관: "성균관대",
-  경희: "경희대",
-  이화: "이화여대",
-  서강: "서강대",
-  홍익: "홍익대",
-  동국: "동국대",
-  건국: "건국대",
-  숭실: "숭실대",
+// 헌법 v3.0 제15조 — 지역 교육청 17개 라벨 (선택 입력).
+const REGION_SHORT: Record<string, string> = {
+  서울: "서울",
+  경기: "경기",
+  인천: "인천",
+  부산: "부산",
+  대구: "대구",
+  광주: "광주",
+  대전: "대전",
+  울산: "울산",
+  세종: "세종",
+  강원: "강원",
+  충북: "충북",
+  충남: "충남",
+  전북: "전북",
+  전남: "전남",
+  경북: "경북",
+  경남: "경남",
+  제주: "제주",
 };
 
 const MODE_LABEL: Record<string, string> = {
-  vocab: "어휘 SRS",
+  quiz: "풀이",
+  keyword: "키워드 학습",
+  mistake: "오답 복습",
   exam: "기출 풀이",
   review: "오답 복습",
 };
 
 const MODE_ICON = {
-  vocab: BookOpen,
+  quiz: Layers,
+  keyword: BookOpen,
+  mistake: RefreshCw,
   exam: Layers,
   review: RefreshCw,
 } as const;
@@ -101,7 +113,7 @@ function computeBadges(args: {
     {
       id: "target-set",
       title: "목표 설정",
-      description: "목표 학교를 선택했습니다",
+      description: "지역 교육청을 선택했습니다",
       earned: args.hasTarget,
       Icon: Target,
     },
@@ -159,10 +171,9 @@ export default async function MePage() {
     getRecentActivity(user.id, 6),
   ]);
 
+  // v3.0 — targetUniversity 컬럼은 region 라벨로 임시 재해석 (D-S2에서 컬럼 명칭 재정렬 예정).
   const target = profileRow?.targetUniversity ?? null;
-  const targetShort = target
-    ? (SHORT_NAME[target] ?? `${target}대`)
-    : null;
+  const targetShort = target ? (REGION_SHORT[target] ?? target) : null;
   const examDate = profileRow?.examDate ?? null;
   const daysToExam = summary.kpi.daysToExam;
 
@@ -200,7 +211,7 @@ export default async function MePage() {
                 {user.email ?? "Fitly 학습자"}
               </p>
               <p className="mt-0.5 text-[12px] text-muted-foreground">
-                목표 {targetShort ?? "미설정"}
+                지역 교육청 {targetShort ?? "미설정"}
                 {examDate && ` · 시험일 ${examDate}`}
                 {daysToExam != null && ` (D-${daysToExam})`}
               </p>
@@ -213,7 +224,7 @@ export default async function MePage() {
                 </Link>
               </Button>
               <Button asChild size="sm">
-                <Link href="/study/exam">학습 시작</Link>
+                <Link href="/study">학습 시작</Link>
               </Button>
             </div>
           </CardContent>
@@ -239,14 +250,14 @@ export default async function MePage() {
           ))}
         </section>
 
-        {/* 카드 라이브러리 (3종) */}
+        {/* 카드 라이브러리 — v3.0 풀이/키워드/오답 3종 (제13조의2) */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Card className="border-rule">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
-                <h2 className="font-serif text-lg font-medium tracking-tight">학습 카드</h2>
+                <h2 className="font-serif text-lg font-medium tracking-tight">풀이 카드</h2>
                 <Link
-                  href="/study/exam"
+                  href="/study"
                   className="text-[11px] text-muted-foreground hover:text-foreground"
                 >
                   풀기 ›
@@ -254,15 +265,40 @@ export default async function MePage() {
               </div>
               <div className="mt-2 flex items-end justify-between">
                 <p className="font-serif text-3xl font-medium tracking-tight num">
-                  {lib.study}
+                  {lib.quiz}
                   <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  복습 대기 <strong>{lib.studyDue}</strong>
+                  복습 대기 <strong>{lib.quizDue}</strong>
                 </p>
               </div>
               <p className="mt-1 text-[10px] text-muted-foreground">
-                내 자료 추출 (제13조의2)
+                서술형 기출 (2014~2026, 제13조의2)
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-rule">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <h2 className="font-serif text-lg font-medium tracking-tight">키워드 카드</h2>
+                <Link
+                  href="/study"
+                  className="text-[11px] text-muted-foreground hover:text-foreground"
+                >
+                  학습 ›
+                </Link>
+              </div>
+              <div className="mt-2 flex items-end justify-between">
+                <p className="font-serif text-3xl font-medium tracking-tight num">
+                  {lib.keyword}
+                  <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  복습 대기 <strong>{lib.keywordDue}</strong>
+                </p>
+              </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                개념 정리 노트 (2002~2026)
               </p>
             </CardContent>
           </Card>
@@ -271,48 +307,23 @@ export default async function MePage() {
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-lg font-medium tracking-tight">오답 카드</h2>
                 <Link
-                  href="/mistakes"
+                  href="/study"
                   className="text-[11px] text-muted-foreground hover:text-foreground"
                 >
-                  열기 ›
+                  복습 ›
                 </Link>
               </div>
               <div className="mt-2 flex items-end justify-between">
                 <p className="font-serif text-3xl font-medium tracking-tight num">
-                  {lib.mistakes}
+                  {lib.mistake}
                   <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  복습 대기 <strong>{lib.mistakesDue}</strong>
+                  복습 대기 <strong>{lib.mistakeDue}</strong>
                 </p>
               </div>
               <p className="mt-1 text-[10px] text-muted-foreground">
-                내가 틀린 문제
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-rule">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <h2 className="font-serif text-lg font-medium tracking-tight">어휘 카드</h2>
-                <Link
-                  href="/study/vocab"
-                  className="text-[11px] text-muted-foreground hover:text-foreground"
-                >
-                  학습 ›
-                </Link>
-              </div>
-              <div className="mt-2 flex items-end justify-between">
-                <p className="font-serif text-3xl font-medium tracking-tight num">
-                  {lib.vocab}
-                  <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  복습 대기 <strong>{lib.vocabDue}</strong>
-                </p>
-              </div>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                편입 빈출 어휘
+                풀이 again/hard 자동 합류
               </p>
             </CardContent>
           </Card>

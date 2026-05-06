@@ -5,10 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ClipboardList,
-  FolderOpen,
   ScrollText,
   LineChart,
-  AlertCircle,
   UserCircle,
   Settings,
   LogOut,
@@ -23,14 +21,12 @@ type Item = {
   Icon: LucideIcon;
 };
 
-// 헌법 v1.9 제13조 — 사이드바 메인 7
+// 헌법 v3.0 제13조 / v3.0.1 — 사이드바 Phase 1 (자료/오답은 cut/Phase2)
 const MAIN: Item[] = [
   { href: "/dashboard", label: "대시보드", Icon: LayoutDashboard },
-  { href: "/study-plan", label: "학습 플랜", Icon: ClipboardList },
-  { href: "/materials", label: "자료 관리", Icon: FolderOpen },
+  { href: "/study-plan", label: "학습 계획", Icon: ClipboardList },
   { href: "/exam-analysis", label: "기출 분석", Icon: ScrollText },
   { href: "/study-analysis", label: "학습 분석", Icon: LineChart },
-  { href: "/mistakes", label: "오답 노트", Icon: AlertCircle },
   { href: "/me", label: "마이 페이지", Icon: UserCircle },
 ];
 

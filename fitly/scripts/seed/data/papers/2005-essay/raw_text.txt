@@ -1,0 +1,63 @@
+Warning: Cannot substitute the font because of its name: ¹ÙÅÁ
+Warning: loadFont - translateFont failed: "UnknownErrorException: Ensure that the `cMapUrl` API parameter is provided.".
+Warning: Cannot substitute the font because of its name: ¹ÙÅÁ-Bold
+Warning: loadFont - translateFont failed: "UnknownErrorException: Ensure that the `cMapUrl` API parameter is provided.".
+Warning: Cannot substitute the font because of its name: µ¸¿ò-Bold
+Warning: loadFont - translateFont failed: "UnknownErrorException: Ensure that the `cMapUrl` API parameter is provided.".
+=== PDF: /home/jovyan/work/fitly/kice_pdfs/2005-essay.pdf
+=== Total pages: 3
+
+=== Page 1 ===
+. ,
+, .
+. ( )
+, ( )
+. ( 20 )
+A B
+.
+.
+,
+.
+.
+.
+(1,200 )
+( ).
+.
+, ,
+.
+( 10 )
+- (3 )
+- (3 )
+- (4 )
+( 10 )
+- (2
+×2 =4 )
+- ( )(2 ×3 =6 )
+2005
+: ( ) : ( )
+( : )
+, .
+( 3 ) ( ) ( 1 ) ( 20 ) ( 60 )
+( ) 3 - 1
+
+=== Page 2 ===
+: ( ) : ( )
+( ) 3 - 2
+5 10 15 20 25
+100
+200
+300
+400
+500
+600
+700
+
+=== Page 3 ===
+: ( ) : ( )
+( ) 3 - 3
+5 10 15 20 25
+800
+900
+1000
+1100
+1200

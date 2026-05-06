@@ -1,0 +1,2853 @@
+[
+  {
+    "id": "ef95394f-4c10-4b33-ba11-54c417087686",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is closest in meaning to the underlined expression.\n\nThe situation for U.S. equity markets is additionally precarious because those markets were closed on Thursday — the first full day of stock trading after Dubai’s announcement — for American Thanksgiving.",
+    "choices": [
+      "① perilous",
+      "② guarded",
+      "③ definite",
+      "④ strong",
+      "⑤ moored"
+    ],
+    "answer": "①",
+    "explanation": "'precarious(위태로운)'와 가장 가까운 의미를 지닌 단어는 'perilous(위험한)'입니다.",
+    "keywords": [
+      "precarious",
+      "perilous"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "f5e04aa8-2622-4d9e-96d1-c3c87689e3de",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is closest in meaning to the underlined expression.\n\nThis diversification allows the newspaper to engage with readers in various ways, catering to different preferences and making it easier for audiences to latch onto its content.",
+    "choices": [
+      "① turn away",
+      "② release",
+      "③ despise",
+      "④ grasp",
+      "⑤ dishonor"
+    ],
+    "answer": "④",
+    "explanation": "'latch onto(~을 꽉 쥐다, 이해하다)'와 문맥상 가장 비슷한 단어는 'grasp(파악하다, 쥐다)'입니다.",
+    "keywords": [
+      "latch onto",
+      "grasp"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "b9c957dd-47b6-41e7-bd72-fdeec8ed4c37",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is closest in meaning to the underlined expression.\n\nDuring a dinner with my wife, my son and his wife and our two granddaughters at a beachside restaurant, I caught all of us looking at our phones as we waited for our food, paying no heed to the gorgeous scenery right in front of us.",
+    "choices": [
+      "① ignoring",
+      "② acknowledging",
+      "③ going over",
+      "④ dilating",
+      "⑤ outspreading"
+    ],
+    "answer": "①",
+    "explanation": "'pay no heed to(~에 주의를 기울이지 않다)'는 'ignoring(무시하는)'과 의미가 통합니다.",
+    "keywords": [
+      "pay no heed to",
+      "ignore"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "fb22cd29-6217-44d0-a0dd-c4d320925b00",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is closest in meaning to the underlined expression.\n\nSome of the specifics still need to be worked out — how safe is “safe,” how effective is “effective” — but those are the sorts of specifics that a prize committee can adjudicate.",
+    "choices": [
+      "① determine",
+      "② dissuade",
+      "③ dodge",
+      "④ repress",
+      "⑤ initiate"
+    ],
+    "answer": "①",
+    "explanation": "'adjudicate'는 '판결을 내리다, 결정하다'라는 뜻으로 'determine'과 동의어입니다.",
+    "keywords": [
+      "adjudicate",
+      "determine"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "1d24b145-7b7e-4aa5-af14-ee315e841f7d",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is closest in meaning to the underlined expression.\n\nI think the world economy is recovering, although the process of recovery is a slow and torturous one.",
+    "choices": [
+      "① innocent",
+      "② agonizing",
+      "③ homogeneous",
+      "④ virtuous",
+      "⑤ delightful"
+    ],
+    "answer": "②",
+    "explanation": "'torturous'는 '고통스러운'이라는 뜻이므로 'agonizing'이 적절합니다.",
+    "keywords": [
+      "torturous",
+      "agonizing"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "2dca9506-a270-4b21-a1c2-109fb30539d1",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is either ungrammatical or unacceptable.\n\nIn Israel, the country’s missile defense system, the Iron Dome, ①autonomously senses the threat of an ② incoming rocket and sends a warning to an operator, ③ who then ④gives the command ⑤firing a missile.",
+    "choices": [
+      "①",
+      "②",
+      "③",
+      "④",
+      "⑤"
+    ],
+    "answer": "⑤",
+    "explanation": "'명령을 내리다'의 문맥에서 command를 수식하는 to 부정사구 'to fire a missile'가 되어야 자연스럽습니다.",
+    "keywords": [
+      "the command to fire",
+      "to부정사 형용사적 용법"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "b24d802b-df7b-432f-a803-d1f38804b285",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is either ungrammatical or unacceptable.\n\nThe ①highly competitive private clinics ②would generally offer ③whatever therapies ④seemed trendy — such as diet therapy ⑤in the late nineteenth-century America.",
+    "choices": [
+      "①",
+      "②",
+      "③",
+      "④",
+      "⑤"
+    ],
+    "answer": "⑤",
+    "explanation": "국가명 앞에는 정관사 the를 쓰지 않으므로 'in late nineteenth-century America'가 올바른 표현입니다.",
+    "keywords": [
+      "관사 사용",
+      "nineteenth-century America"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "d8ad8587-8eef-4ba0-b4ee-dc559de9ddd6",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is either ungrammatical or unacceptable.\n\nHe was travelling ①on the wrong visa, ②despite her ③ having obtained that visa for his previous trips to the United States to attend ④series of similar ⑤events.",
+    "choices": [
+      "①",
+      "②",
+      "③",
+      "④",
+      "⑤"
+    ],
+    "answer": "④",
+    "explanation": "series는 가산명사이므로 'a series of' 형태로 사용되어야 합니다.",
+    "keywords": [
+      "a series of",
+      "가산명사"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "1a3763f1-137f-485e-9215-0e270bd6136d",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is either ungrammatical or unacceptable.\n\n①Although neither Tanaka nor Ohasi ②assume a central role in the films ③in which they appear, their presence onscreen is ④nonetheless striking, especially ⑤from our vantage point.",
+    "choices": [
+      "①",
+      "②",
+      "③",
+      "④",
+      "⑤"
+    ],
+    "answer": "②",
+    "explanation": "'neither A nor B' 구문에서는 동사를 B에 수일치시키므로, 3인칭 단수인 Ohasi에 맞춰 'assumes'가 되어야 합니다.",
+    "keywords": [
+      "neither A nor B",
+      "수일치"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "20d4583d-ad24-4062-bce6-146972c73452",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is either ungrammatical or unacceptable.\n\n①Not only ②does this not ③involving any major repudiation of liberal thought, ④but this kind of intervention ⑤has a respectable pedigree in the thought of Adam Smith.",
+    "choices": [
+      "①",
+      "②",
+      "③",
+      "④",
+      "⑤"
+    ],
+    "answer": "③",
+    "explanation": "조동사 does 뒤에는 동사원형이 와야 하므로 'involving'이 아니라 'involve'가 되어야 합니다.",
+    "keywords": [
+      "조동사 뒤 동사원형",
+      "not only but also"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "23f46fef-6ed4-4051-bf62-19bc93364014",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nThe IUCN Red List now includes a handful of species that have been revived through conservation efforts, including the European white-tailed eagle and the Mekong catfish. Narrow corridors of protected habitat now connect nature preserves in South Africa, and similar corridors link up the coral reefs of the Bahamas, allowing species in the protected areas to move back and forth, exchange genes and sustain their __________.",
+    "choices": [
+      "① populations",
+      "② territories",
+      "③ originality",
+      "④ migration",
+      "⑤ wilderness"
+    ],
+    "answer": "①",
+    "explanation": "종들이 보호 구역을 이동하며 유전자를 교환하고 '개체군(populations)'을 유지한다는 문맥이 가장 자연스럽습니다.",
+    "keywords": [
+      "sustain populations",
+      "conservation efforts"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "38b4bbf2-c455-476b-8fff-e4f7cc199939",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nThe Armenians were active money brokers, borrowing cheaply in Macao and lending expensively in Canton; most Canton merchants were __________ on a large scale. Trade was fraught with risk but the Armenians showed that small itinerant traders could make a profit; they were determined and independent, and readily accepted by both Protestants and Catholics.",
+    "choices": [
+      "① self-sufficient",
+      "② prosperous",
+      "③ collateral-free",
+      "④ in debt",
+      "⑤ in surplus"
+    ],
+    "answer": "④",
+    "explanation": "아르메니아인들이 Canton에서 비싸게 돈을 빌려주었으므로, Canton의 상인들은 대규모로 '빚을 지고(in debt)' 있었다고 유추할 수 있습니다.",
+    "keywords": [
+      "money brokers",
+      "lending expensively",
+      "in debt"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "ae6e19f4-bc41-4a5c-9b54-390f5d684be6",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nThe chief task of casino design is to arrange the spatial relationships of surrounding areas, the shape and feel of the structural box that encloses the setting in such a way as to encourage machine gamblers’ entry into __________ playing worlds. While players prefer gambling in bustling casinos, they want to be isolated in their own private, intimate world from the surrounding hubbub that attracted them in the first place.",
+    "choices": [
+      "① vibrant",
+      "② noisy",
+      "③ secluded",
+      "④ exposed",
+      "⑤ communal"
+    ],
+    "answer": "③",
+    "explanation": "플레이어들이 자신만의 프라이빗한 세계에 '고립(isolated)'되기를 원하므로, '한적한, 격리된(secluded)' 세계가 적절합니다.",
+    "keywords": [
+      "isolated",
+      "private",
+      "secluded"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "8d3959a8-3344-464a-8c9a-9d9b16d8bf6a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nOfficials and state media painted Western countries as hostile and subversive, and critics of the Kremlin were described as ‘the enemy within’ and collaborators with foreign powers. I began to spend much of my time reporting from courtrooms, charting Kremlin’s increasing efforts to __________ all kinds of dissent.",
+    "choices": [
+      "① establish",
+      "② stamp out",
+      "③ build up",
+      "④ create",
+      "⑤ praise"
+    ],
+    "answer": "②",
+    "explanation": "러시아 정부가 모든 종류의 반대의견을 '근절하고 억압(stamp out)'하려 했다는 부정적 문맥이 어울립니다.",
+    "keywords": [
+      "dissent",
+      "stamp out"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "0a676ec1-9d4a-4696-9077-a8f477dc3cc5",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nMuch of the social and political theory in postwar America extended from the contributions of refugee scholars. In the ensuing years, the emigres’ theories of mass society became widely read and popularized as Americans sought to comprehend the dynamics of Cold War geopolitics abroad and dangerous mass tendencies hiding behind atomistic individualism at home. Thus, the mass emigration of European intellectuals in the 1930s and 1940s __________ in the postwar period.",
+    "choices": [
+      "① resulted in the distortion of American thought",
+      "② heightened the political tensions surrounding America",
+      "③ intensified Americans’ sense of isolation amid the crowd",
+      "④ contributed to developing a new understanding of immigrants",
+      "⑤ had dramatic long-term effects on the shaping of American thought"
+    ],
+    "answer": "⑤",
+    "explanation": "망명 지식인들의 이론이 미국 내에서 널리 읽히며 정치/사회 이론에 기반을 제공했으므로 미국 사상 형성에 장기적인 큰 영향을 미쳤다는 ⑤가 가장 적절합니다.",
+    "keywords": [
+      "refugee scholars",
+      "shaping of American thought"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "edb0bb76-3106-4553-afa9-39fe3f591c53",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\n__________ can contribute to stories about the human condition under duress more fundamentally. Actors in fictions of an existential slant will struggle against injustice caused by bad people, a corrupt system, or a godless world. Few stories capture more brutally and forlornly the reality of political violence than Jean-Paul Sartre’s “The Wall” set during the Spanish Civil War. A prisoner, Pablo Ibbieta, awaits execution and considers the value of life...",
+    "choices": [
+      "① Hate",
+      "② Contentment",
+      "③ Want",
+      "④ Courage",
+      "⑤ Dread"
+    ],
+    "answer": "⑤",
+    "explanation": "억압된 환경, 사형 집행 대기 등의 극한 상황과 실존적 투쟁을 묘사하는 글이므로 인간의 근본적 '공포나 불안(Dread)'이 주제로 적절합니다.",
+    "keywords": [
+      "existential slant",
+      "execution",
+      "Dread"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "98728942-741c-4c9a-bbe8-7666fa9e6a00",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nThe Hollywood sign is perhaps the most conspicuous yet least-__________ landmark in the world. It is monitored 24 hours a day by motion sensors, high-definition cameras and the Los Angeles Police Department... The public is only allowed to view the letters from nearby trails, though some people still try to scramble up the hill to reach them.",
+    "choices": [
+      "① liberal",
+      "② unobtrusive",
+      "③ subtle",
+      "④ accessible",
+      "⑤ conservative"
+    ],
+    "answer": "④",
+    "explanation": "가장 눈에 잘 띄지만 멀리서만 볼 수 있고 접근이 엄격히 통제되므로 가장 '접근하기 어려운(least-accessible)' 랜드마크입니다.",
+    "keywords": [
+      "conspicuous",
+      "accessible"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "9ec51fd7-cf1f-4eff-ae41-ffd11928c092",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nThis type of work is known as extreme event attribution. One common method compares two versions of the world. The first is the real world — where humans burning fossil fuels have caused global warming. The second is what the world would look like __________. Scientists estimate what that second, ideal world where humans dramatically diminish the use of fossil fuels would look like...",
+    "choices": [
+      "① in the near future",
+      "② in a brutal heat wave",
+      "③ without climate change",
+      "④ in any historical event",
+      "⑤ despite extreme weather events"
+    ],
+    "answer": "③",
+    "explanation": "인간이 일으킨 지구 온난화가 있는 현실 세계와 대비되는 두 번째 세계는 화석 연료 사용을 줄인, 즉 '기후 변화가 없는(without climate change)' 세계입니다.",
+    "keywords": [
+      "global warming",
+      "ideal world",
+      "without climate change"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "ca85b154-3c62-4a5b-8301-1e970fd13a7c",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[5] Choose one that is closest in meaning to the underlined expression. \nI think the world economy is recovering, although the process of recovery is a slow and torturous one.\n* underlined: torturous",
+    "choices": [
+      "① innocent",
+      "② agonizing",
+      "③ homogeneous",
+      "④ virtuous",
+      "⑤ delightful"
+    ],
+    "answer": "②",
+    "explanation": "'torturous'는 '고통스러운'이라는 뜻이므로 'agonizing'이 동의어입니다.",
+    "keywords": [
+      "torturous",
+      "agonizing",
+      "recovery"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "34ffe04a-c7be-4791-9ea5-e647c8e94570",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nThe asteroid impact triggered rapid changes in the environment. This could have pushed some birds to evolve larger brains quickly. Parrots and members of the crow family have evolved some of the biggest brains of any bird. And larger brains relative to body size often suggest intelligence. The ancestors of parrots probably had large brains that helped them overcome challenges in their environment. After the asteroid impact, this would have allowed them to __________. Birds that learn how to open pinecones with their beaks, for instance, are more likely to survive...",
+    "choices": [
+      "① go way back in time",
+      "② repeat different sounds",
+      "③ conceal the target",
+      "④ learn from others how to sing or talk",
+      "⑤ outcompete other animals for resources"
+    ],
+    "answer": "⑤",
+    "explanation": "큰 뇌 덕분에 솔방울 까기 등을 학습하여 생존에 유리해졌다는 것은 다른 동물들보다 자원 경쟁에서 이길(outcompete) 수 있었음을 의미합니다.",
+    "keywords": [
+      "larger brains",
+      "overcome challenges",
+      "outcompete"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "ca534a8b-282f-4b88-8f97-90a424352df3",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nStill, as anyone familiar with investing has heard many times, past performance is __________. And, in fact, while the outlook for the U.S. economy is better than that of many other countries, it isn’t exactly rosy.",
+    "choices": [
+      "① remarkably resilient",
+      "② no indication of future results",
+      "③ showing first signs of stabilizing",
+      "④ accurately capturing what would happen in the future",
+      "⑤ affected chiefly by the stock market"
+    ],
+    "answer": "②",
+    "explanation": "투자에서 흔히 쓰이는 격언인 '과거의 성과가 미래의 결과를 보장하지 않는다(past performance is no indication of future results)'가 문맥상 들어맞습니다.",
+    "keywords": [
+      "past performance",
+      "no indication of future results"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "a862864d-0453-4f7c-b43c-5cab8dcc3339",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nIt’s worth noting that while many CEOs are uneasy being champions of this approach themselves, they do want it to be represented on their teams, so they hire challengers but don’t give them enough support. That kind of ideological tokenism is a __________.",
+    "choices": [
+      "① recipe for failure",
+      "② learning by doing",
+      "③ holistic personal growth",
+      "④ property associated with the growth",
+      "⑤ desire to learn from the company’s culture and habits"
+    ],
+    "answer": "①",
+    "explanation": "이념적 형식주의에 불과하게 사람을 고용하고 지원은 하지 않는 것은 '실패의 지름길(recipe for failure)'입니다.",
+    "keywords": [
+      "tokenism",
+      "recipe for failure"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "b78c4d9d-333b-4ef8-873f-192062ce4f49",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose one that is most appropriate for the blank.\n\nWhen the anti-colonial struggles waned, local interest in the Russian language __________. “Moscow support ended at supplying weapons and training for anti-colonialism guerillas. Very few Africans... were eager to learn the Russian language,” says political analyst Kimberly Mutandiro.",
+    "choices": [
+      "① practically ended",
+      "② started to flourish",
+      "③ solidified the diplomatic support",
+      "④ began to show sophisticated power",
+      "⑤ just started to grow"
+    ],
+    "answer": "①",
+    "explanation": "아프리카인들이 러시아어를 배울 열의가 없었고, 지원도 무기 공급에 그쳤으므로 러시아어에 대한 관심은 사실상 끝났다(practically ended)고 볼 수 있습니다.",
+    "keywords": [
+      "waned",
+      "practically ended"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "e822f684-ec0d-43bd-b4cf-d27163e8caf7",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose the one that is inappropriate for the whole context.\n\nThe role of a head-of-state chef stands apart from virtually any other job in hospitality. ⒶNot least because there are real-world diplomatic implications... a mistake during a bilateral meeting can quite literally cause a diplomatic incident while a positive experience can Ⓑsmooth over relations. Billi remembers having lunch with a particularly aggressive Asian foreign minister... By the second course and some French wine, the tone had Ⓒa lingering effect. “Suddenly they were looking at France as a great power in terms of Ⓓgastronomy. The mood and dynamic of the dinner changed after that moment,” says Billi. Then there’s the Ⓔculinary diplomacy aspect...",
+    "choices": [
+      "① Ⓐ",
+      "② Ⓑ",
+      "③ Ⓒ",
+      "④ Ⓓ",
+      "⑤ Ⓔ"
+    ],
+    "answer": "③",
+    "explanation": "분위기나 어조가 바뀌었다는 의미가 와야 하므로 'a lingering effect(여운이 남다)'라는 표현은 문맥상 어색합니다. (softened 등으로 쓰여야 적절함)",
+    "keywords": [
+      "diplomatic incident",
+      "smooth over",
+      "gastronomy"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "55b5b1aa-71da-4b7a-8e72-1e5648716e61",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose the one that is inappropriate for the whole context.\n\nⒶTrace the life of Nelson Mandela... from recruiter for the armed Ⓑresistance... ⒸNowhere is Mandela’s legacy felt more strongly... With the floor for a bed and a bucket for a toilet, his small cell is a stark reminder of the Ⓓ nobility of apartheid and the triumph of the human spirit. Instead of breaking him, the experience transformed Mandela from revolutionary to Ⓔrevered statesperson.",
+    "choices": [
+      "① Ⓐ",
+      "② Ⓑ",
+      "③ Ⓒ",
+      "④ Ⓓ",
+      "⑤ Ⓔ"
+    ],
+    "answer": "④",
+    "explanation": "인종차별 정책인 'apartheid'를 묘사하는 데 'nobility(숭고함)'이라는 긍정적 단어는 명백한 오류입니다. brutality 등의 단어가 와야 합니다.",
+    "keywords": [
+      "apartheid",
+      "nobility",
+      "incarceration"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "0c2cbd07-ae53-456f-8cac-9bf2bbeb8963",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The main point of the following passage would be __________.\n\nOne of the core purposes of education, both public and private, is to prepare students for civic life and to be effective citizens in our democracy. When students are unaware of our history and don’t have a solid grasp of our fundamental political institutions, they’re less prepared for civic life. There’s broad consensus that American democracy is experiencing significant challenges, and it is hard to envision us overcoming those challenges unless citizens understand our political institutions...",
+    "choices": [
+      "① Why do we need to study math and science?",
+      "② Should citizens really protect their freedoms in a democracy?",
+      "③ What is the potential problem associated with free election?",
+      "④ When did the U.S. teacher shortage start?",
+      "⑤ Why do U.S. history and civic education matter?"
+    ],
+    "answer": "⑤",
+    "explanation": "민주주의와 시민 생활을 위해 역사와 정치 제도(시민 교육)를 이해하는 것이 왜 중요한지 역설하고 있습니다.",
+    "keywords": [
+      "civic life",
+      "political institutions",
+      "democracy"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "fc72a654-412b-401e-87df-eedf88f3df4d",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the above passage, the author believes that __________.",
+    "choices": [
+      "① nominal cues in branding turn out to be insignificant",
+      "② moral qualities can never be assessed using AI systems",
+      "③ AI systems will not be able to handle any input",
+      "④ there is a trade-off between flexibility and predictability of AI systems",
+      "⑤ people experience difficulty in understanding the algorithm"
+    ],
+    "answer": "④",
+    "explanation": "본문 후반부에서 '유연성과 예측 가능성 사이에는 미묘한 균형(delicate balance)이 있다'고 서술하며 둘 간의 트레이드오프를 설명하고 있습니다.",
+    "keywords": [
+      "delicate balance",
+      "flexibility and predictability"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "ac91349c-15ad-4ab9-b370-15cfbc10da3c",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The underlined “this phenomenon” would mean that __________.\n\nAs scientific understanding in the fields of stress physiology and epigenetics grew... Living in a racist society can harm the health of all Black people, even those who don’t directly experience racism, according to a public health researcher. “This is akin to other environmental risk factors for health, such as high levels of air pollution,” Devakumar told the Economist in a 2020 interview. Early evidence for this phenomenon began to emerge in the 1990s.",
+    "choices": [
+      "① the exposure to economic disadvantage leads to favorable physical health outcomes",
+      "② the poverty has an influence on poor diet and poor nutrition",
+      "③ the stress of experiencing racism has a negative impact on the body",
+      "④ the high temperature ultimately contributes to racism",
+      "⑤ racism-related challenges do not influence our body and mind"
+    ],
+    "answer": "③",
+    "explanation": "인종차별적 사회에 사는 것만으로도 건강에 악영향을 미친다는 것이 '이 현상'의 핵심입니다.",
+    "keywords": [
+      "weathering hypothesis",
+      "racism",
+      "health effects"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "adc4aeda-e735-4004-868c-3cf66cafafcf",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The main point of the following passage would be __________.\n\nThe amount of popcorn you buy for a movie should probably depend on how much you enjoy popcorn, right? Maybe not. New research shows that people’s consumption habits are surprisingly insensitive to their fondness for products. In fact, consumers themselves are bad at predicting how much their preferences will influence their consumption... At the end of the experiment, the differences in their consumption of preferred and nonpreferred items turned out to be negligible.",
+    "choices": [
+      "① The love for a certain product is not always a good thing.",
+      "② People overestimate how much their consumption is dependent on their preferences.",
+      "③ Shoppers should consider consumers’ favorite products among other factors.",
+      "④ Consumers hated jelly beans because they were actually aware of the value.",
+      "⑤ Consumers tend to consider cheaper alternatives to their unfavorable products."
+    ],
+    "answer": "②",
+    "explanation": "소비자들은 자신의 선호도가 소비량에 미치는 영향을 스스로 과대평가하지만, 실제로는 선호와 상관없이 소비량이 비슷했다는 내용입니다.",
+    "keywords": [
+      "consumption habits",
+      "insensitive to fondness",
+      "preferences"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "cf9a1f6d-65f4-46ea-b5ed-fdaf88cba595",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The most appropriate words for the blanks Ⓐ and Ⓑ are __________.\n\nFor many, deconstructing relationships and interactions with parents can be a mainstay of the therapeutic experience. Naturally... therapists may ask questions about these important dynamics — normally in a neutral, Ⓐ __________ way, designed to ensure clients can make sense of things on their own terms. ...This suggests that reappraising one’s parents can significantly impact your memories from childhood, Ⓑ__________ these effects were relatively short lived, lasting around four weeks.",
+    "choices": [
+      "① provocative — as a result",
+      "② non-leading — though",
+      "③ remarkable — in addition",
+      "④ emotional — moreover",
+      "⑤ impartial — consequently"
+    ],
+    "answer": "②",
+    "explanation": "치료사들은 내담자를 유도하지 않는 '중립적이고 유도하지 않는(non-leading)' 방식으로 질문하며, 단락 후반부에서 그 효과가 나타나긴 했지만 지속 기간이 짧았다는 역접의 '비록 ~일지라도(though)'가 어울립니다.",
+    "keywords": [
+      "neutral",
+      "non-leading",
+      "though"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "bd981a31-762b-4b4c-91ee-93822b698069",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the above passage, the author thinks that question framing can influence __________.",
+    "choices": [
+      "① the frequency of clinic visits",
+      "② different kinds of conditions",
+      "③ how people remember their parents during childhood",
+      "④ how people forget trivial things",
+      "⑤ rights and responsibilities of parents"
+    ],
+    "answer": "③",
+    "explanation": "치료사의 긍정/부정적 질문 프레이밍에 따라 내담자가 어린 시절 부모와의 기억을 다르게 떠올릴 수 있다는 연구 결과를 다루고 있습니다.",
+    "keywords": [
+      "question framing",
+      "reappraise memories"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "5e857f7c-2b9a-435d-b336-1482ab6dd92a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Which is true of the above passage?",
+    "choices": [
+      "① Memories are inherently impeccable and intact.",
+      "② How participants appraised their mother affected their feelings about their mother.",
+      "③ The experiment only takes neutral examples of their mother’s warmth into account.",
+      "④ Participants were always instructed to say something bad.",
+      "⑤ Participants were asked to anticipate their future mood in order to deconstruct relationships with parents."
+    ],
+    "answer": "②",
+    "explanation": "어머니를 긍정적으로 평가한 그룹이 어머니에 대해 더 행복하게 느꼈다고 언급되어 있습니다.",
+    "keywords": [
+      "appraised positively",
+      "feeling happier"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "4b5ab938-0f09-430d-b46d-e6c960a24af2",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The most appropriate expression for the blank would be __________.\n\nIn the coming decades, will America go into Islamic lands and try to wage war with those nations that harbor ill will against it and its allies?... Can we achieve a middle ground... between the more moderate elements in Islam and American civilization? It will be a somber day when the American ideals of freedom, liberty, and equality are sacrificed at the altar of __________.",
+    "choices": [
+      "① the victory of Islamic societies",
+      "② nation building in foreign lands",
+      "③ a period of happiness and prosperity",
+      "④ the economic success of a country",
+      "⑤ the armed force from other parts of the world"
+    ],
+    "answer": "②",
+    "explanation": "본문 초반에서 현대 미국 정책 입안자들이 '국가 재건(nation building)'을 글로벌 권한의 일부로 믿는다고 했고, 이를 위해 미국의 근본 이념이 훼손되면 우울할 것이라는 논지입니다.",
+    "keywords": [
+      "nation building",
+      "American ideals"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "1790bb41-099e-4487-9eb3-e4aaa9c87776",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the passage, which one is NOT relevant to others?",
+    "choices": [
+      "① nation building",
+      "② justice",
+      "③ liberty",
+      "④ equality",
+      "⑤ the pursuit of happiness"
+    ],
+    "answer": "①",
+    "explanation": "건국의 아버지들(founders)이 믿었던 가치들은 자유, 정의, 평등, 행복 추구권이며 다른 나라에서의 국가 재건(nation building)은 지양했습니다.",
+    "keywords": [
+      "founders",
+      "liberty",
+      "justice"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "3302edf7-8f80-4bd6-82cc-cda46bb4b464",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The underlined Ⓐ“machine learning” may suggest that AI has a property of being __________.",
+    "choices": [
+      "① too opaque",
+      "② counterproductive",
+      "③ emotionless",
+      "④ unaccommodating",
+      "⑤ flexible"
+    ],
+    "answer": "⑤",
+    "explanation": "단순한 알고리즘이 아니라 '학습'한다고 브랜딩함으로써 AI가 경직되지 않고 사용자에게 맞춰 적응하는 '유연한(flexible)' 특성이 있음을 강조합니다.",
+    "keywords": [
+      "machine learning",
+      "adaptive",
+      "flexible"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "844b50fa-a314-4618-aa7b-ede7b2014fb5",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The underlined Ⓑ“one-size-fits-all approach” suggests that people may think AI __________.",
+    "choices": [
+      "① ignores an individual’s unique traits",
+      "② provides precise responses",
+      "③ shows a preference towards glaring consumers",
+      "④ is too expensive to purchase",
+      "⑤ has an ability to balance flexibility and predictability"
+    ],
+    "answer": "①",
+    "explanation": "'one-size-fits-all(모두에게 일률적으로 적용되는)' 방식이란 개개인의 독특한 특성이나 차이를 무시한다는 의미입니다.",
+    "keywords": [
+      "one-size-fits-all",
+      "ignores unique traits"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "25ae2c84-cf4e-4b18-96e2-cc6c9764ec89",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the above passage, imposing a maximum-age limit on elected politicians may __________.",
+    "choices": [
+      "① be an ideal solution for the country and politicians",
+      "② appear sensible, but may pose threats to democracy",
+      "③ indicate that politicians are public servants",
+      "④ influence the number of the relatively dangerous jobs",
+      "⑤ be the primary way to understand the symptom of deeper problems in the States"
+    ],
+    "answer": "②",
+    "explanation": "나이 제한을 두는 것이 합리적으로 들릴 수 있지만, 민주주의에 위험한 선례(dangerous precedent)를 남길 수 있다고 경고합니다.",
+    "keywords": [
+      "dangerous precedent",
+      "political meddling"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "a82ab48b-c0e0-47be-9c2c-37901b130440",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The most appropriate expression for the blank would be __________.\n\nThe more governments impose limits on who can stand, the greater danger that such limits will be subject to political meddling. __________. The bar to imposing an age limit should thus be very high.",
+    "choices": [
+      "① Better just to let voters decide",
+      "② Age really matters in politics",
+      "③ Candidates are more intelligent than we think",
+      "④ There is a strong need to enshrine age limits into law",
+      "⑤ Supreme Court judges should be served until a designated age"
+    ],
+    "answer": "①",
+    "explanation": "법적 제한보다는 투표를 통해 유권자가 직접 결정하도록 두는 것이 낫다는 문맥이 앞뒤 흐름과 가장 어울립니다.",
+    "keywords": [
+      "political meddling",
+      "voters decide"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "4c56a4d9-b004-47e7-8f1a-f4966ad6b51c",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The most appropriate expression for the blank would be __________.\n\nNevertheless, they helped inspire sincere dread among their followers that the modern industrial state was horning in on their personal autonomy and __________ on precious liberties.",
+    "choices": [
+      "① elevating",
+      "② looking",
+      "③ focusing",
+      "④ trampling",
+      "⑤ smiling"
+    ],
+    "answer": "④",
+    "explanation": "개인의 자율성을 침해하고 소중한 자유를 '짓밟는다(trampling)'는 문맥이 반대자들의 주장으로 자연스럽습니다.",
+    "keywords": [
+      "horning in on",
+      "trampling on liberties"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "7d9aac3a-0ed1-400d-a384-294d5e72c48a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the author, both Long’s and Coughlin’s criticism of Roosevelt was __________.",
+    "choices": [
+      "① persuasive",
+      "② self-effacing",
+      "③ judicious",
+      "④ constructive",
+      "⑤ unreasonable"
+    ],
+    "answer": "⑤",
+    "explanation": "그들의 비판이 논리적 주장보다는 원한과 분개에 찬 과장/히스테리였다고 평하고 있으므로 '비합리적(unreasonable)'이었다고 볼 수 있습니다.",
+    "keywords": [
+      "rancor and resentment",
+      "unreasonable"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "ca0c54b3-e5f0-40d4-84f8-ab5de78e12f7",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the passage, which of the following is correct?",
+    "choices": [
+      "① Huey Long criticized Roosevelt throughout his career.",
+      "② Critics of Roosevelt helped uphold democracy.",
+      "③ Roosevelt and his New Deal programs garnered an overwhelmingly unfavorable reaction from the public.",
+      "④ Father Charles Coughlin revealed his antipathy to Jews.",
+      "⑤ The two critics’ arguments were too logical to be criticized."
+    ],
+    "answer": "④",
+    "explanation": "Father Charles Coughlin이 극도로 반유대주의적(rabidly anti-Semitic) 비난을 쏟아냈다고 명시되어 있습니다.",
+    "keywords": [
+      "anti-Semitic",
+      "antipathy to Jews"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "29d19414-a14e-45ac-9251-027fe7f4a64a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The author believes that __________.",
+    "choices": [
+      "① A.I. can write fiction in a way similar to how humans do it",
+      "② A.I. can draw creative paintings on its own",
+      "③ A.I. generates both textual and visual content through statistical procedures",
+      "④ It is merely a human-oriented thought that A.I. cannot be a real writer or artist",
+      "⑤ Humans can collaborate with A.I. to create art by entering a well-crafted prompt"
+    ],
+    "answer": "③",
+    "explanation": "AI가 생성하는 창작물은 다른 작가들의 선택의 평균치를 내거나 모방하는 등 통계적/기계적 절차에 의해 만들어진다고 설명합니다.",
+    "keywords": [
+      "average of choices",
+      "style mimicry",
+      "statistical procedures"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "36c03ec2-7f89-4307-b6df-526a26e560a0",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "What does the underlined “highly derivative” mean?",
+    "choices": [
+      "① Every piece of art is, in essence, built upon previous works.",
+      "② What A.I. generates is nothing more than a mimicry of art.",
+      "③ The stories A.I. produces are identical to those written by human writers.",
+      "④ Although A.I. may not create interesting art, it does not mean it lacks originality.",
+      "⑤ The stories A.I. writes result from a number of choices it makes."
+    ],
+    "answer": "②",
+    "explanation": "'매우 파생적인(highly derivative)'이라는 표현은 AI의 결과물이 기존 작가의 스타일을 그대로 흉내낸 모방품에 불과하다는 뜻입니다.",
+    "keywords": [
+      "highly derivative",
+      "mimicry"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "eed7d737-a023-4af9-b005-d993192fd183",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "Choose the most inappropriate word for the blank.\n\n...the image might be exquisitely rendered, but the person entering the prompt can’t claim __________ for that.",
+    "choices": [
+      "① originality",
+      "② ownership",
+      "③ civility",
+      "④ kudos",
+      "⑤ credit"
+    ],
+    "answer": "③",
+    "explanation": "창작에 대한 '독창성, 소유권, 칭찬, 공로'를 주장할 수 없다는 말은 자연스럽지만 '예의/정중함(civility)'은 문맥상 전혀 어울리지 않습니다.",
+    "keywords": [
+      "claim credit",
+      "civility"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "65b28346-7557-4702-b27c-6a3226f55eda",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "What is most appropriate for the blank?\n\nThere is strong __________ between economic and political institutions. Extractive political institutions concentrate power... Extractive economic institutions thus naturally accompany extractive political institutions.",
+    "choices": [
+      "① discord",
+      "② synergy",
+      "③ similarity",
+      "④ antagonism",
+      "⑤ competition"
+    ],
+    "answer": "②",
+    "explanation": "착취적 정치 제도는 필연적으로 착취적 경제 제도를 수반하며 서로 의존하므로 상호 동조하거나 시너지를 낸다는 의미가 가장 적절합니다.",
+    "keywords": [
+      "accompany",
+      "depend on",
+      "synergy"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "54a665f1-e033-4f0a-9a98-321cf4e88900",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the passage, which of the following is a characteristic of extractive political institutions?",
+    "choices": [
+      "① They are governed exclusively by a few elites.",
+      "② They strive to distribute resources to a broader population.",
+      "③ They are often accompanied by inclusive economic institutions.",
+      "④ They are pluralistic because power is distributed without constraints.",
+      "⑤ They eliminate entry barriers for newcomers in the market and society."
+    ],
+    "answer": "①",
+    "explanation": "착취적 정치 제도는 권력을 좁은 엘리트층의 손에 집중시킨다(concentrate power in the hands of a narrow elite)고 설명되어 있습니다.",
+    "keywords": [
+      "concentrate power",
+      "narrow elite",
+      "extractive"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "cc5a83e4-425b-4a92-a359-e9bae49a0988",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The best title of the passage would be __________.",
+    "choices": [
+      "① The Secret of Interlingual Subtitle",
+      "② Differences Between Intralingual Subtitle and Interlingual Subtitle",
+      "③ Different Types of Subtitle",
+      "④ The Role of Subtitler",
+      "⑤ The Importance of Colored Text in Subtitle"
+    ],
+    "answer": "②",
+    "explanation": "청각 장애인을 위한 동일 언어(intralingual) 자막과 비청각장애인을 위한 번역(interlingual) 자막 사이의 주요 차이점들을 대조하여 설명하는 글입니다.",
+    "keywords": [
+      "intralingual",
+      "interlingual",
+      "differences"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "64f08191-e366-4123-ae5c-600af961b89b",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The most appropriate words for the blanks Ⓐ and Ⓑ are __________.\n\nSubtitling is always a matter of compromise between the conflicting requirements of Ⓐ__________ and Ⓑ__________ of information.",
+    "choices": [
+      "① accessibility — variety",
+      "② readability — digression",
+      "③ quality — quantity",
+      "④ accuracy — necessity",
+      "⑤ completeness — concision"
+    ],
+    "answer": "⑤",
+    "explanation": "모든 내용을 빠짐없이 기록하는 '완전성(completeness)'과 읽기 쉽게 줄이는 '간결성(concision)' 사이의 타협이 자막 작업의 핵심이라는 내용입니다.",
+    "keywords": [
+      "compromise",
+      "completeness",
+      "concision"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "9e898bbf-d556-4af5-bfc0-62861b703908",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the passage, intralingual subtitles should be verbatim in order __________.",
+    "choices": [
+      "① to make equal access to information for all viewers",
+      "② to increase the quality of information",
+      "③ to better serve viewers who are not hearing impaired",
+      "④ to improve the ability of lip-readers",
+      "⑤ not to distract language learners’ attention from the video content"
+    ],
+    "answer": "①",
+    "explanation": "청각 장애인도 동일하게 모든 정보에 접근할 수 있게 하기 위해(When equality of access to information is the goal) 말하는 내용을 그대로(verbatim) 전사합니다.",
+    "keywords": [
+      "equality of access",
+      "verbatim"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "a8871b88-81d4-4299-8eed-25f91b5a1089",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "According to the passage, neuropsychoanalysis is NOT __________.",
+    "choices": [
+      "① a discipline that compromises the two different approaches",
+      "② a discipline with a balanced view of consciousness",
+      "③ a discipline partly built on Freud’s theory",
+      "④ a discipline established solely by one prominent scholar",
+      "⑤ an interdisciplinary field"
+    ],
+    "answer": "④",
+    "explanation": "단 하나의 저명한 학자에 의해서만 설립된 것이 아니라 여러 분야의 연구자들과 임상의들로 구성된 소그룹(a small group of researchers)에 의해 명명되고 구성되었습니다.",
+    "keywords": [
+      "interdisciplinary",
+      "a small group of researchers"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "6ee61d6e-5833-4b59-b360-304ee4ee32e9",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "The underlined “vice versa” suggests that ________.",
+    "choices": [
+      "① psychoanalysis and psychiatry would benefit from the empirical knowledge provided by neuroscience",
+      "② neuroscience should not rely on subjective approaches to understanding the human mind",
+      "③ neuroscience and psychiatry are distinct disciplines",
+      "④ researchers and clinicians should cooperate with each other to better understand consciousness",
+      "⑤ clinical observation often provides a biased view of the human mind"
+    ],
+    "answer": "①",
+    "explanation": "앞 문장에서 신경과학의 경험적 발견이 임상적/주관적 관찰의 지식에 의해 향상될 수 있다고 했으므로, '그 반대도 마찬가지(vice versa)'라는 것은 정신분석 역시 신경과학의 지식으로부터 혜택을 받는다는 뜻입니다.",
+    "keywords": [
+      "vice versa",
+      "empirical findings",
+      "enhanced by"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:49:02.407Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:49:02.407Z"
+  },
+  {
+    "id": "42cabb8c-f743-4fa9-81b2-d79c92685385",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": null,
+    "question": "유니티 게임 설계 5단계 중, 오브젝트를 움직일 수 있는 컨트롤러 스크립트를 정하는 단계는 몇 단계인가요?",
+    "choices": null,
+    "answer": "2단계",
+    "explanation": "게임 설계 2단계는 움직이는 오브젝트를 찾고, 그 움직임을 제어할 컨트롤러 스크립트를 정하는 과정입니다.",
+    "keywords": [
+      "게임 설계",
+      "2단계",
+      "컨트롤러 스크립트"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:46:03.100Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:46:03.100Z"
+  },
+  {
+    "id": "dd3a8fbb-09fb-4c5d-a98e-d3476cefcd43",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": null,
+    "question": "화면을 탭하면 탭한 곳으로 날아가는 '밤송이'의 움직임을 제어하기 위해 2단계에서 준비해야 하는 스크립트의 이름은 무엇인가요?",
+    "choices": null,
+    "answer": "밤송이 컨트롤러 (또는 컨트롤러 스크립트)",
+    "explanation": "움직이는 오브젝트는 움직임을 제어하는 대본이 필요하며, 본문에서는 이를 '밤송이 컨트롤러'라고 명명했습니다.",
+    "keywords": [
+      "밤송이",
+      "움직임 제어",
+      "컨트롤러 스크립트"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:46:03.100Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:46:03.100Z"
+  },
+  {
+    "id": "78a12ef0-7e08-4e19-b060-827843a38f10",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": null,
+    "question": "게임 진행 중 화면을 탭할 때마다 밤송이가 날아가도록 오브젝트를 자동으로 생성하려면 어떤 스크립트가 필요한가요?",
+    "choices": null,
+    "answer": "제너레이터 스크립트",
+    "explanation": "게임 도중 자동으로 생성되는 오브젝트(예: 밤송이)를 관리하고 생성하기 위해서는 제너레이터 스크립트가 필요합니다.",
+    "keywords": [
+      "오브젝트 자동 생성",
+      "제너레이터 스크립트"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:46:03.100Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:46:03.100Z"
+  },
+  {
+    "id": "dbdc761f-bc5f-46bf-ba8b-9d81412ae34a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": null,
+    "question": "게임 설계 4단계에서 UI를 갱신할 수 있도록 준비해야 하는 스크립트는 무엇인가요?",
+    "choices": null,
+    "answer": "감독 스크립트",
+    "explanation": "게임 설계 5단계 중 4단계는 UI를 갱신하고 게임의 흐름을 관리하기 위해 감독 스크립트를 준비하는 단계입니다.",
+    "keywords": [
+      "UI 갱신",
+      "감독 스크립트"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T09:46:03.100Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T09:46:03.100Z"
+  },
+  {
+    "id": "f6ac30de-8967-49fd-9790-9219ee652f88",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[1] Choose one that is closest in meaning to the underlined expression. \nThe situation for U.S. equity markets is additionally precarious because those markets were closed on Thursday — the first full day of stock trading after Dubai’s announcement — for American Thanksgiving.\n* underlined: precarious",
+    "choices": [
+      "① perilous",
+      "② guarded",
+      "③ definite",
+      "④ strong",
+      "⑤ moored"
+    ],
+    "answer": "①",
+    "explanation": "'precarious'는 '불안정한, 위태로운'이라는 뜻으로 'perilous(위험한)'와 가장 의미가 가깝습니다.",
+    "keywords": [
+      "precarious",
+      "perilous",
+      "equity markets"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "7e6e192e-71c3-4912-b9fe-73fbb2577222",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[2] Choose one that is closest in meaning to the underlined expression. \nThis diversification allows the newspaper to engage with readers in various ways, catering to different preferences and making it easier for audiences to latch onto its content.\n* underlined: latch onto",
+    "choices": [
+      "① turn away",
+      "② release",
+      "③ despise",
+      "④ grasp",
+      "⑤ dishonor"
+    ],
+    "answer": "④",
+    "explanation": "'latch onto'는 '~을 꽉 쥐다, 이해하다'라는 뜻이므로 'grasp'가 적절합니다.",
+    "keywords": [
+      "latch onto",
+      "grasp",
+      "diversification"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "f9e717a6-3131-42f1-a956-e922fccd1b56",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[3] Choose one that is closest in meaning to the underlined expression. \nDuring a dinner with my wife, my son and his wife and our two granddaughters at a beachside restaurant, I caught all of us looking at our phones as we waited for our food, paying no heed to the gorgeous scenery right in front of us.\n* underlined: paying no heed to",
+    "choices": [
+      "① ignoring",
+      "② acknowledging",
+      "③ going over",
+      "④ dilating",
+      "⑤ outspreading"
+    ],
+    "answer": "①",
+    "explanation": "'pay no heed to'는 '~에 주의를 기울이지 않다'라는 의미로 'ignoring'과 같습니다.",
+    "keywords": [
+      "pay heed to",
+      "ignore",
+      "gorgeous"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "abea678e-6c73-4b26-befa-bd0d5042ae41",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[4] Choose one that is closest in meaning to the underlined expression. \nSome of the specifics still need to be worked out — how safe is “safe,” how effective is “effective” — but those are the sorts of specifics that a prize committee can adjudicate.\n* underlined: adjudicate",
+    "choices": [
+      "① determine",
+      "② dissuade",
+      "③ dodge",
+      "④ repress",
+      "⑤ initiate"
+    ],
+    "answer": "①",
+    "explanation": "'adjudicate'는 '판결하다, 결정하다'는 뜻을 가지므로 'determine'이 가장 가깝습니다.",
+    "keywords": [
+      "adjudicate",
+      "determine",
+      "specifics"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "c7b30985-e416-4c14-810e-e87f7dc626d9",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[6] Choose one that is either ungrammatical or unacceptable. \nIn Israel, the country’s missile defense system, the Iron Dome, ①autonomously senses the threat of an ② incoming rocket and sends a warning to an operator, ③ who then ④gives the command ⑤firing a missile.",
+    "choices": [
+      "① autonomously",
+      "② incoming",
+      "③ who",
+      "④ gives the command",
+      "⑤ firing"
+    ],
+    "answer": "⑤",
+    "explanation": "명령을 나타내는 'command' 뒤에는 부정사구인 'to fire'가 와서 '미사일을 발사하라는 명령'이 되는 것이 문법상 적절합니다.",
+    "keywords": [
+      "command to do",
+      "infinitive"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "09b399ee-8536-4b9c-9ba1-e8d9569630e1",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[7] Choose one that is either ungrammatical or unacceptable. \nThe ①highly competitive private clinics ②would generally offer ③whatever therapies ④seemed trendy — such as diet therapy ⑤in the late nineteenth-century America.",
+    "choices": [
+      "① highly competitive",
+      "② would generally offer",
+      "③ whatever therapies",
+      "④ seemed trendy",
+      "⑤ in the late nineteenth-century America"
+    ],
+    "answer": "⑤",
+    "explanation": "국가명(America) 앞에는 정관사 the를 쓰지 않으므로 'in late nineteenth-century America'로 수정해야 합니다.",
+    "keywords": [
+      "definite article",
+      "grammar correction"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "42202249-b484-4985-9aeb-64466e6501d9",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[8] Choose one that is either ungrammatical or unacceptable. \nHe was travelling ①on the wrong visa, ②despite her ③ having obtained that visa for his previous trips to the United States to attend ④series of similar ⑤events.",
+    "choices": [
+      "① on the wrong visa",
+      "② despite",
+      "③ having obtained",
+      "④ series of similar",
+      "⑤ events"
+    ],
+    "answer": "④",
+    "explanation": "가산 명사인 series 앞에는 부정관사가 필요하므로 'a series of similar events'가 되어야 합니다.",
+    "keywords": [
+      "a series of",
+      "article"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "2fbff1c7-f63e-4011-8c57-bf78d723a20a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[9] Choose one that is either ungrammatical or unacceptable. \n①Although neither Tanaka nor Ohasi ②assume a central role in the films ③in which they appear, their presence onscreen is ④nonetheless striking, especially ⑤from our vantage point.",
+    "choices": [
+      "① Although neither",
+      "② assume",
+      "③ in which",
+      "④ nonetheless",
+      "⑤ from our vantage point"
+    ],
+    "answer": "②",
+    "explanation": "'Neither A nor B' 구문에서 동사의 수는 B(Ohasi, 단수)에 일치시켜야 하므로 'assumes'가 적절합니다.",
+    "keywords": [
+      "neither A nor B",
+      "subject-verb agreement"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "11b6d0bf-fa83-4e46-913c-e989f00ecfde",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[10] Choose one that is either ungrammatical or unacceptable. \n①Not only ②does this not ③involving any major repudiation of liberal thought, ④but this kind of intervention ⑤has a respectable pedigree in the thought of Adam Smith.",
+    "choices": [
+      "① Not only",
+      "② does this not",
+      "③ involving",
+      "④ but",
+      "⑤ has a respectable pedigree"
+    ],
+    "answer": "③",
+    "explanation": "조동사 'does' 뒤에는 동사원형이 와야 하므로 'involve'가 되어야 합니다.",
+    "keywords": [
+      "auxiliary verb",
+      "base form"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "8088e340-2666-419d-907a-ff3a10055916",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[11] Choose one that is most appropriate for the blank. \nThe IUCN Red List now includes a handful of species that have been revived through conservation efforts, including the European white-tailed eagle and the Mekong catfish. Narrow corridors of protected habitat now connect nature preserves in South Africa, and similar corridors link up the coral reefs of the Bahamas, allowing species in the protected areas to move back and forth, exchange genes and sustain their __________.",
+    "choices": [
+      "① populations",
+      "② territories",
+      "③ originality",
+      "④ migration",
+      "⑤ wilderness"
+    ],
+    "answer": "①",
+    "explanation": "동물들이 서식지를 오가며 유전자를 교환하고 '개체군(populations)'을 유지한다는 문맥이 가장 자연스럽습니다.",
+    "keywords": [
+      "populations",
+      "conservation",
+      "habitat"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "4a350009-c050-4923-942d-fcddecf9d0c5",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[12] Choose one that is most appropriate for the blank. \nThe Armenians were active money brokers, borrowing cheaply in Macao and lending expensively in Canton; most Canton merchants were __________ on a large scale. Trade was fraught with risk but the Armenians showed that small itinerant traders could make a profit; they were determined and independent, and readily accepted by both Protestants and Catholics.",
+    "choices": [
+      "① self-sufficient",
+      "② prosperous",
+      "③ collateral-free",
+      "④ in debt",
+      "⑤ in surplus"
+    ],
+    "answer": "④",
+    "explanation": "아르메니아인들이 Canton에 비싸게 돈을 빌려주었다면, Canton 상인들은 자연스럽게 대규모로 '빚을 지게(in debt)' 됩니다.",
+    "keywords": [
+      "in debt",
+      "money brokers",
+      "lending"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "94d8cf99-2baa-4149-b090-cb9fdd82773d",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[13] Choose one that is most appropriate for the blank. \nThe chief task of casino design is to arrange the spatial relationships of surrounding areas, the shape and feel of the structural box that encloses the setting in such a way as to encourage machine gamblers’ entry into __________ playing worlds. While players prefer gambling in bustling casinos, they want to be isolated in their own private, intimate world from the surrounding hubbub that attracted them in the first place.",
+    "choices": [
+      "① vibrant",
+      "② noisy",
+      "③ secluded",
+      "④ exposed",
+      "⑤ communal"
+    ],
+    "answer": "③",
+    "explanation": "뒷문장에서 도박사들이 복잡한 카지노 안에서도 '고립된(isolated) 사적인 세계'에 있기를 원한다고 했으므로 'secluded(은둔한, 외딴)'가 정답입니다.",
+    "keywords": [
+      "secluded",
+      "isolated",
+      "intimate"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "403ce0c7-cc59-4cc9-8f20-f844d26906c6",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[14] Choose one that is most appropriate for the blank. \nOfficials and state media painted Western countries as hostile and subversive, and critics of the Kremlin were described as ‘the enemy within’ and collaborators with foreign powers. I began to spend much of my time reporting from courtrooms, charting Kremlin’s increasing efforts to __________ all kinds of dissent. It was a dark period that opened with the shooting of one opposition politician...",
+    "choices": [
+      "① establish",
+      "② stamp out",
+      "③ build up",
+      "④ create",
+      "⑤ praise"
+    ],
+    "answer": "②",
+    "explanation": "크렘린궁이 반대 의견(dissent)을 억압하고 제거하려는 문맥이므로 'stamp out(근절하다)'이 적절합니다.",
+    "keywords": [
+      "stamp out",
+      "dissent",
+      "subversive"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "847959ef-0ca5-45a4-b26a-867fed9634d0",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[15] Choose one that is most appropriate for the blank. \nMuch of the social and political theory in postwar America extended from the contributions of refugee scholars. In the ensuing years, the emigres’ theories of mass society became widely read and popularized as Americans sought to comprehend the dynamics of Cold War geopolitics abroad and dangerous mass tendencies hiding behind atomistic individualism at home. Thus, the mass emigration of European intellectuals in the 1930s and 1940s __________ in the postwar period.",
+    "choices": [
+      "① resulted in the distortion of American thought",
+      "② heightened the political tensions surrounding America",
+      "③ intensified Americans’ sense of isolation amid the crowd",
+      "④ contributed to developing a new understanding of immigrants",
+      "⑤ had dramatic long-term effects on the shaping of American thought"
+    ],
+    "answer": "⑤",
+    "explanation": "망명 학자들의 이론이 전후 미국의 사회 및 정치 이론 형성에 큰 기여를 했다는 내용이므로, 미국 사상 형성에 장기적인 영향을 미쳤다는 ⑤번이 정답입니다.",
+    "keywords": [
+      "emigration",
+      "long-term effects",
+      "shaping"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "ce96121c-d00f-4d09-b969-6fe68dbc6508",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[16] Choose one that is most appropriate for the blank. \n__________ can contribute to stories about the human condition under duress more fundamentally. Actors in fictions of an existential slant will struggle against injustice caused by bad people, a corrupt system, or a godless world. Few stories capture more brutally and forlornly the reality of political violence than Jean-Paul Sartre’s “The Wall” set during the Spanish Civil War. A prisoner, Pablo Ibbieta, awaits execution and considers the value of life...",
+    "choices": [
+      "① Hate",
+      "② Contentment",
+      "③ Want",
+      "④ Courage",
+      "⑤ Dread"
+    ],
+    "answer": "⑤",
+    "explanation": "사형을 기다리는 죄수의 실존주의적 불안과 정치적 폭력이라는 극단적 상황을 다루고 있으므로 'Dread(공포, 불안)'가 가장 잘 어울립니다.",
+    "keywords": [
+      "Dread",
+      "existential slant",
+      "duress"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "de9b0348-0963-47b1-b2ce-2c1b117411f5",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[17] Choose one that is most appropriate for the blank. \nThe Hollywood sign is perhaps the most conspicuous yet least-__________ landmark in the world. It is monitored 24 hours a day by motion sensors, high-definition cameras and the Los Angeles Police Department, which keeps watch from a TV tower on the hilltop. The public is only allowed to view the letters from nearby trails, though some people still try to scramble up the hill to reach them.",
+    "choices": [
+      "① liberal",
+      "② unobtrusive",
+      "③ subtle",
+      "④ accessible",
+      "⑤ conservative"
+    ],
+    "answer": "④",
+    "explanation": "가장 눈에 잘 띄지만 24시간 감시를 받아 대중이 직접 도달하기 어렵다는 내용이므로 '접근하기 가장 힘든(least-accessible)'이 맞습니다.",
+    "keywords": [
+      "accessible",
+      "conspicuous",
+      "monitored"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "3174a28a-b213-404f-87cd-ccd14f08fa80",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[18] Choose one that is most appropriate for the blank. \nThis type of work is known as extreme event attribution. One common method compares two versions of the world. The first is the real world — where humans burning fossil fuels have caused global warming. The second is what the world would look like __________. Scientists estimate what that second, ideal world where humans dramatically diminish the use of fossil fuels would look like based on historical weather data and climate models.",
+    "choices": [
+      "① in the near future",
+      "② in a brutal heat wave",
+      "③ without climate change",
+      "④ in any historical event",
+      "⑤ despite extreme weather events"
+    ],
+    "answer": "③",
+    "explanation": "첫 번째 세계가 화석연료 연소로 인한 온난화가 있는 세계라면, 대비되는 두 번째 이상적인 세계는 '기후 변화가 없는(without climate change)' 세계입니다.",
+    "keywords": [
+      "climate change",
+      "fossil fuels",
+      "ideal world"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "864ccc01-032d-4365-b10e-d38bc95f046c",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[19] Choose one that is most appropriate for the blank. \nThe asteroid impact triggered rapid changes in the environment. This could have pushed some birds to evolve larger brains quickly. Parrots and members of the crow family have evolved some of the biggest brains of any bird. And larger brains relative to body size often suggest intelligence. The ancestors of parrots probably had large brains that helped them overcome challenges in their environment. After the asteroid impact, this would have allowed them to __________. Birds that learn how to open pinecones with their beaks, for instance, are more likely to survive...",
+    "choices": [
+      "① go way back in time",
+      "② repeat different sounds",
+      "③ conceal the target",
+      "④ learn from others how to sing or talk",
+      "⑤ outcompete other animals for resources"
+    ],
+    "answer": "⑤",
+    "explanation": "지능을 활용하여 먹이 획득 방법을 학습하는 등 환경 변화 속에서 생존 경쟁의 우위를 점했다는 문맥이므로 ⑤번이 가장 적절합니다.",
+    "keywords": [
+      "outcompete",
+      "intelligence",
+      "resources"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "22d474aa-7b10-4bca-8a60-268675421232",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[20] Choose one that is most appropriate for the blank. \nStill, as anyone familiar with investing has heard many times, past performance is __________. And, in fact, while the outlook for the U.S. economy is better than that of many other countries, it isn’t exactly rosy.",
+    "choices": [
+      "① remarkably resilient",
+      "② no indication of future results",
+      "③ showing first signs of stabilizing",
+      "④ accurately capturing what would happen in the future",
+      "⑤ affected chiefly by the stock market"
+    ],
+    "answer": "②",
+    "explanation": "투자 분야의 흔한 격언인 '과거의 성과가 미래의 결과를 보장하지 않는다'를 인용하여 향후 경제가 마냥 장밋빛은 아님을 시사합니다.",
+    "keywords": [
+      "past performance",
+      "indication",
+      "rosy"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "61ba12df-2327-449f-9f33-a8661ef2cdbe",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[21] Choose one that is most appropriate for the blank. \nIt’s worth noting that while many CEOs are uneasy being champions of this approach themselves, they do want it to be represented on their teams, so they hire challengers but don’t give them enough support. That kind of ideological tokenism is a __________.",
+    "choices": [
+      "① recipe for failure",
+      "② learning by doing",
+      "③ holistic personal growth",
+      "④ property associated with the growth",
+      "⑤ desire to learn from the company’s culture and habits"
+    ],
+    "answer": "①",
+    "explanation": "혁신가를 고용만 해놓고 제대로 된 지원을 하지 않는 형식주의(tokenism)는 '실패로 가는 지름길(recipe for failure)'입니다.",
+    "keywords": [
+      "tokenism",
+      "recipe for failure",
+      "support"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "ceaba720-529f-40dd-9b2d-c8a5d992c64a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[22] Choose one that is most appropriate for the blank. \nThe USSR was an eager supplier of weapons and political support for many African nations fighting anti-colonialism wars in the 1960s and 1970s. Yet the Russian language didn’t make a big foray into the African continent compared to French and English. When the anti-colonial struggles waned, local interest in the Russian language __________.",
+    "choices": [
+      "① practically ended",
+      "② started to flourish",
+      "③ solidified the diplomatic support",
+      "④ began to show sophisticated power",
+      "⑤ just started to grow"
+    ],
+    "answer": "①",
+    "explanation": "소련의 무기 지원에 국한되었던 외교가 끝나고 탈식민지 투쟁이 약화되자 아프리카에서 러시아어에 대한 관심은 '사실상 끝이 났다'고 보는 것이 문맥상 맞습니다.",
+    "keywords": [
+      "waned",
+      "practically ended",
+      "foray"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "dd04341d-78de-4003-8dcf-b90cbcfd8b21",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[23] Choose the one that is inappropriate for the whole context. \nThe role of a head-of-state chef stands apart from virtually any other job in hospitality. ⒶNot least because there are real-world diplomatic implications. ... a mistake during a bilateral meeting can quite literally cause a diplomatic incident while a positive experience can Ⓑsmooth over relations. Billi remembers having lunch with a particularly aggressive Asian foreign minister... By the second course and some French wine, the tone had Ⓒa lingering effect. “Suddenly they were looking at France as a great power in terms of Ⓓgastronomy... Then there’s the Ⓔculinary diplomacy aspect...",
+    "choices": [
+      "① Ⓐ",
+      "② Ⓑ",
+      "③ Ⓒ",
+      "④ Ⓓ",
+      "⑤ Ⓔ"
+    ],
+    "answer": "③",
+    "explanation": "음식과 와인을 통해 агреressive했던 분위기가 부드러워지거나 긍정적으로 변했다는 내용이 와야 하므로 'a lingering effect'는 문맥상 어색합니다.",
+    "keywords": [
+      "inappropriate",
+      "diplomatic",
+      "tone"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "22e0e5a4-580b-4ae9-8d5b-6e3f4f81cda8",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[24] Choose the one that is inappropriate for the whole context. \nⒶTrace the life of Nelson Mandela in Cape Town during his drive to end apartheid, from recruiter for the armed Ⓑresistance in the township of Nyanga to City Hall... ⒸNowhere is Mandela’s legacy felt more strongly than in a visit to Robben Island Museum... his small cell is a stark reminder of the Ⓓnobility of apartheid and the triumph of the human spirit. Instead of breaking him, the experience transformed Mandela from revolutionary to Ⓔrevered statesperson.",
+    "choices": [
+      "① Ⓐ",
+      "② Ⓑ",
+      "③ Ⓒ",
+      "④ Ⓓ",
+      "⑤ Ⓔ"
+    ],
+    "answer": "④",
+    "explanation": "인종 차별 정책인 아파르트헤이트(apartheid)를 '고귀함(nobility)'이라고 표현하는 것은 완전히 부적절하며, 잔혹함(brutality) 등의 단어가 들어가야 맞습니다.",
+    "keywords": [
+      "apartheid",
+      "nobility",
+      "stark reminder"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "1d18f96c-c8d6-4453-ae54-4ab51a3e7b6d",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[25] The main point of the following passage would be __________.\nOne of the core purposes of education, both public and private, is to prepare students for civic life and to be effective citizens in our democracy. When students are unaware of our history and don’t have a solid grasp of our fundamental political institutions, they’re less prepared for civic life. There’s broad consensus that American democracy is experiencing significant challenges, and it is hard to envision us overcoming those challenges unless citizens understand our political institutions and learn how to engage as participants in our civic life. It’s also the case that the current moment is not the first time that American democracy has been threatened. An understanding of our nation’s history cannot just equip students for civic life, but hopefully also give them a sense of optimism that we can rise to the challenge.",
+    "choices": [
+      "① Why do we need to study math and science?",
+      "② Should citizens really protect their freedoms in a democracy?",
+      "③ What is the potential problem associated with free election?",
+      "④ When did the U.S. teacher shortage start?",
+      "⑤ Why do U.S. history and civic education matter?"
+    ],
+    "answer": "⑤",
+    "explanation": "글의 핵심은 민주주의의 위기를 극복하고 시민으로서의 역할을 다하기 위해 역사 및 시민 교육이 필수적이라는 것입니다.",
+    "keywords": [
+      "civic life",
+      "history",
+      "democracy"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "26fdd211-d46b-475c-9fbf-859a13e1e9cb",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[26] The underlined “this phenomenon” would mean that __________.\nAs scientific understanding in the fields of stress physiology and epigenetics grew over the next two decades, evidence for the weathering hypothesis began to mount. Researchers are increasingly discovering how the health effects of chronic exposure to discrimination within societies could help explain racial and ethnic disparities in health and disease outcomes that aren’t accounted for by other factors. Living in a racist society can harm the health of all Black people, even those who don’t directly experience racism, according to a public health researcher. “This is akin to other environmental risk factors for health, such as high levels of air pollution,” Devakumar told the Economist in a 2020 interview. Early evidence for *this phenomenon* began to emerge in the 1990s.",
+    "choices": [
+      "① the exposure to economic disadvantage leads to favorable physical health outcomes",
+      "② the poverty has an influence on poor diet and poor nutrition",
+      "③ the stress of experiencing racism has a negative impact on the body",
+      "④ the high temperature ultimately contributes to racism",
+      "⑤ racism-related challenges do not influence our body and mind"
+    ],
+    "answer": "③",
+    "explanation": "밑줄 친 현상은 지속적인 인종차별 노출로 인한 스트레스가 건강에 악영향을 미친다는 '풍화 가설(weathering hypothesis)'을 지칭합니다.",
+    "keywords": [
+      "weathering hypothesis",
+      "discrimination",
+      "health effects"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "35f34203-ffbd-4008-97b1-61795030afeb",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[27] The main point of the following passage would be __________.\nThe amount of popcorn you buy for a movie should probably depend on how much you enjoy popcorn, right? Maybe not. New research shows that people’s consumption habits are surprisingly insensitive to their fondness for products. In fact, consumers themselves are bad at predicting how much their preferences will influence their consumption, assuming that if they like, say comedy specials, they’ll watch more of them than they do of other offerings — for instance, sitcoms. In six studies researchers asked a total of 1,486 U.S. participants to rank their preferences for various items and estimate how much they’d consume of each in a given period. At the end of the experiment, the differences in their consumption of preferred and nonpreferred items turned out to be negligible.",
+    "choices": [
+      "① The love for a certain product is not always a good thing.",
+      "② People overestimate how much their consumption is dependent on their preferences.",
+      "③ Shoppers should consider consumers’ favorite products among other factors.",
+      "④ Consumers hated jelly beans because they were actually aware of the value.",
+      "⑤ Consumers tend to consider cheaper alternatives to their unfavorable products."
+    ],
+    "answer": "②",
+    "explanation": "사람들이 자신이 좋아하는 제품을 훨씬 더 많이 소비할 것이라 예상하지만, 실제 소비량에는 큰 차이가 없었다는 내용입니다.",
+    "keywords": [
+      "preferences",
+      "consumption",
+      "overestimate"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "3ededc00-d7ea-4589-a8b6-cc2088bf0c45",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[28] The most appropriate words for the blanks Ⓐ and Ⓑ are __________.\nFor many, deconstructing relationships and interactions with parents can be a mainstay of the therapeutic experience. Naturally, as part of this experience, therapists may ask questions about these important dynamics — normally in a neutral, Ⓐ __________ way, designed to ensure clients can make sense of things on their own terms. ... This suggests that reappraising one’s parents can significantly impact your memories from childhood, Ⓑ__________ these effects were relatively short lived, lasting around four weeks.",
+    "choices": [
+      "① provocative — as a result",
+      "② non-leading — though",
+      "③ remarkable — in addition",
+      "④ emotional — moreover",
+      "⑤ impartial — consequently"
+    ],
+    "answer": "②",
+    "explanation": "치료사의 질문은 내담자를 이끌지 않는 'non-leading(유도하지 않는)' 방식이어야 하며, Ⓑ 뒤에는 효과가 단기적이었다는 역접이 오므로 'though'가 적절합니다.",
+    "keywords": [
+      "neutral",
+      "non-leading",
+      "short lived"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "99451af4-73f4-45a6-8b12-d20deec1ac2c",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[29] According to the above passage, the author thinks that question framing can influence __________.\n(Based on the passage from question 28 about therapeutic experience and memory reappraisal)",
+    "choices": [
+      "① the frequency of clinic visits",
+      "② different kinds of conditions",
+      "③ how people remember their parents during childhood",
+      "④ how people forget trivial things",
+      "⑤ rights and responsibilities of parents"
+    ],
+    "answer": "③",
+    "explanation": "긍정적 혹은 부정적인 질문의 틀(framing)이 내담자가 유년기 부모를 어떻게 기억하는지에 상당한 영향을 미친다는 것이 지문의 요지입니다.",
+    "keywords": [
+      "question framing",
+      "memories from childhood",
+      "reappraise"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "f990632e-dbf9-473a-958a-5c028e583559",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[30] Which is true of the above passage?\n(Based on the passage from question 28 about therapeutic experience and memory reappraisal)",
+    "choices": [
+      "① Memories are inherently impeccable and intact.",
+      "② How participants appraised their mother affected their feelings about their mother.",
+      "③ The experiment only takes neutral examples of their mother’s warmth into account.",
+      "④ Participants were always instructed to say something bad.",
+      "⑤ Participants were asked to anticipate their future mood in order to deconstruct relationships with parents."
+    ],
+    "answer": "②",
+    "explanation": "참가자들이 어머니를 긍정적으로 평가하도록 이끌렸을 때 어머니에 대해 더 행복하게 느꼈다고 실험 결과가 설명하고 있습니다.",
+    "keywords": [
+      "appraise",
+      "feelings",
+      "associated"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "8dc3241a-2b06-42e2-ac61-25d630c7759c",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[31] The most appropriate expression for the blank would be __________.\nDiscussions about the fate of large empires are not new. ... American policy makers today believe in some form of nation building, both through hard power and soft diplomacy, as part and parcel of their global purview. ... It will be a somber day when the American ideals of freedom, liberty, and equality are sacrificed at the altar of __________. America’s founding principles would need a thorough going revision if America the majestic were to turn into a Roman fortress with security walls around its perimeter.",
+    "choices": [
+      "① the victory of Islamic societies",
+      "② nation building in foreign lands",
+      "③ a period of happiness and prosperity",
+      "④ the economic success of a country",
+      "⑤ the armed force from other parts of the world"
+    ],
+    "answer": "②",
+    "explanation": "자유와 평등 같은 미국의 건국 이념이 타국에 개입하여 제국주의적으로 '국가 건설'을 하려는 정책 때문에 희생되는 것은 암울한 일이라는 문맥입니다.",
+    "keywords": [
+      "nation building",
+      "sacrificed",
+      "American ideals"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "ec6922ba-038a-459e-8f3e-c3ecf33c2660",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[32] According to the passage, which one is NOT relevant to others?\n(Based on the passage from question 31)",
+    "choices": [
+      "① nation building",
+      "② justice",
+      "③ liberty",
+      "④ equality",
+      "⑤ the pursuit of happiness"
+    ],
+    "answer": "①",
+    "explanation": "정의, 자유, 평등, 행복 추구는 모두 미국의 건국 이념(founding principles)에 해당하지만, 'nation building(타국에서의 국가 건설)'은 이와 대치되는 제국주의적 정책을 가리킵니다.",
+    "keywords": [
+      "nation building",
+      "founding principles",
+      "contrast"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "757762e2-45b1-4dd6-bb5f-a081f165370a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[33] The underlined Ⓐ“machine learning” may suggest that AI has a property of being __________.\nEven nominal cues that imply learning potential, such as branding AI as Ⓐ“machine learning” instead of merely an “algorithm,” have boosted engagement.",
+    "choices": [
+      "① too opaque",
+      "② counterproductive",
+      "③ emotionless",
+      "④ unaccommodating",
+      "⑤ flexible"
+    ],
+    "answer": "⑤",
+    "explanation": "'기계 학습'이라는 용어는 AI가 융통성 없이 고정된 것이 아니라, 적응하고 진화하는 '유연함(flexible)'을 지니고 있음을 암시합니다.",
+    "keywords": [
+      "machine learning",
+      "flexible",
+      "adaptive"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "bd294a14-1ff7-4d2e-ba83-cc6fb06e1add",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[34] The underlined Ⓑ“one-size-fits-all approach” suggests that people may think AI __________.\nPeople who think that AI is inflexible may believe that it will treat every person identically, rigidly applying a Ⓑone-size-fits-all approach. Indeed, the more distinctive consumers perceive themselves to be, the less likely they are to use AI.",
+    "choices": [
+      "① ignores an individual’s unique traits",
+      "② provides precise responses",
+      "③ shows a preference towards glaring consumers",
+      "④ is too expensive to purchase",
+      "⑤ has an ability to balance flexibility and predictability"
+    ],
+    "answer": "①",
+    "explanation": "'모두에게 똑같이 적용되는 접근방식'은 AI가 개인의 고유한 특성(unique traits)을 무시하고 동일하게 취급할 것이라는 사람들의 우려를 보여줍니다.",
+    "keywords": [
+      "one-size-fits-all",
+      "identically",
+      "unique traits"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "b7a813b7-7f77-45e5-a09f-bb847746735f",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[35] According to the above passage, the author believes that __________.\nAt the same time, there’s a delicate balance between flexibility and predictability. Even though adoption often increases when companies highlight AI’s ability to learn and evolve, if users feel that the outputs of the system are too unpredictable, the intervention could backfire.",
+    "choices": [
+      "① nominal cues in branding turn out to be insignificant",
+      "② moral qualities can never be assessed using AI systems",
+      "③ AI systems will not be able to handle any input",
+      "④ there is a trade-off between flexibility and predictability of AI systems",
+      "⑤ people experience difficulty in understanding the algorithm"
+    ],
+    "answer": "④",
+    "explanation": "저자는 AI 시스템의 유연성이 높아지면 예측 불가능성과 위험도 함께 증가하는 '상충 관계(trade-off)'가 존재한다고 믿습니다.",
+    "keywords": [
+      "delicate balance",
+      "flexibility",
+      "predictability"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "f6b0a016-e6c8-491c-8140-22287fe00306",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[36] According to the above passage, imposing a maximum-age limit on elected politicians may __________.\nEvery democracy sets a minimum age for holding office. ... It may sound reasonable for democracies to adopt age limits for those seeking elected office. But to do so would set a dangerous precedent. In a free society both the electorate, and the candidates they vote for, should be as broadly representative as possible on who can vote and whom they can vote for.",
+    "choices": [
+      "① be an ideal solution for the country and politicians",
+      "② appear sensible, but may pose threats to democracy",
+      "③ indicate that politicians are public servants",
+      "④ influence the number of the relatively dangerous jobs",
+      "⑤ be the primary way to understand the symptom of deeper problems in the States"
+    ],
+    "answer": "②",
+    "explanation": "정치인에게 상한 연령을 제한하는 것은 일견 합리적으로 보일 수 있지만, 궁극적으로는 민주주의의 폭을 좁히고 정치적 악용의 소지가 있어 위험할 수 있다는 내용입니다.",
+    "keywords": [
+      "maximum-age limit",
+      "dangerous precedent",
+      "democracy"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "98f4733c-a047-4aed-ae2a-b90ffde9465b",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[37] The most appropriate expression for the blank would be __________.\nThe more governments impose limits on who can stand, the greater danger that such limits will be subject to political meddling. __________. The bar to imposing an age limit should thus be very high.",
+    "choices": [
+      "① Better just to let voters decide",
+      "② Age really matters in politics",
+      "③ Candidates are more intelligent than we think",
+      "④ There is a strong need to enshrine age limits into law",
+      "⑤ Supreme Court judges should be served until a designated age"
+    ],
+    "answer": "①",
+    "explanation": "정부가 후보자의 자격을 지나치게 제한하면 정치적 간섭의 위험이 커지므로, '유권자가 직접 결정하도록 내버려 두는 편이 낫다'는 결론이 자연스럽습니다.",
+    "keywords": [
+      "political meddling",
+      "voters decide",
+      "age limit"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "48cc6244-c27e-4a56-8a2c-d9c8d844456e",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[38] The most appropriate expression for the blank would be __________.\nBecause the hyperbole and hysteria of Long’s and Coughlin’s rhetoric exhibited more rancor and resentment than reasoned arguments, piecing together their logic is not easy. Nevertheless, they helped inspire sincere dread among their followers that the modern industrial state was horning in on their personal autonomy and __________ on precious liberties.",
+    "choices": [
+      "① elevating",
+      "② looking",
+      "③ focusing",
+      "④ trampling",
+      "⑤ smiling"
+    ],
+    "answer": "④",
+    "explanation": "현대 산업 국가가 개인의 자율성을 침해하고 소중한 자유를 '짓밟는다(trampling)'는 문맥이 되어야 등위접속사의 부정적 의미와 일치합니다.",
+    "keywords": [
+      "horning in",
+      "trampling",
+      "liberties"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "9c0f08aa-599e-409a-bac6-a93d331e4a4a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[39] According to the author, both Long’s and Coughlin’s criticism of Roosevelt was __________.\n(Based on the passage from question 38: \"Because the hyperbole and hysteria of Long’s and Coughlin’s rhetoric exhibited more rancor and resentment than reasoned arguments...\")",
+    "choices": [
+      "① persuasive",
+      "② self-effacing",
+      "③ judicious",
+      "④ constructive",
+      "⑤ unreasonable"
+    ],
+    "answer": "⑤",
+    "explanation": "그들의 수사가 합리적 논증보다는 과장과 억지, 원한에 기반하고 있다고 평했으므로 '불합리하다(unreasonable)'고 보는 것이 맞습니다.",
+    "keywords": [
+      "rancor",
+      "resentment",
+      "unreasonable"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "eefbdd58-b541-4f8b-b2da-5c768702f753",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[40] According to the passage, which of the following is correct?\n(Based on the passage about Long and Coughlin: \"...Catholic priest and radio personality Father Charles Coughlin... rabidly anti-Semitic diatribes...\")",
+    "choices": [
+      "① Huey Long criticized Roosevelt throughout his career.",
+      "② Critics of Roosevelt helped uphold democracy.",
+      "③ Roosevelt and his New Deal programs garnered an overwhelmingly unfavorable reaction from the public.",
+      "④ Father Charles Coughlin revealed his antipathy to Jews.",
+      "⑤ The two critics’ arguments were too logical to be criticized."
+    ],
+    "answer": "④",
+    "explanation": "찰스 코플린 신부가 '맹렬한 반유대주의적(anti-Semitic) 비난'을 했다고 명시되어 있으므로 유대인에 대한 반감을 드러냈다는 ④번이 정답입니다.",
+    "keywords": [
+      "anti-Semitic",
+      "antipathy",
+      "Jews"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "9d7f3e65-3636-4611-9975-5bf45c7973fb",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[41] The author believes that __________.\nArt is notoriously hard to define, and so are the differences between good art and bad art. But let me offer a generalization: art is something that results from making a lot of choices. ... One is to take an average of the choices that other writers have made, as represented by text found on the Internet; that average is equivalent to the least interesting choices possible, which is why A.I. generated text is often really bland.",
+    "choices": [
+      "① A.I. can write fiction in a way similar to how humans do it",
+      "② A.I. can draw creative paintings on its own",
+      "③ A.I. generates both textual and visual content through statistical procedures",
+      "④ It is merely a human-oriented thought that A.I. cannot be a real writer or artist",
+      "⑤ Humans can collaborate with A.I. to create art by entering a well-crafted prompt"
+    ],
+    "answer": "③",
+    "explanation": "AI는 인간처럼 직접 수많은 선택을 하는 것이 아니라, 인터넷 데이터를 바탕으로 평균을 내거나 스타일을 모방하는 등 통계적 과정을 거쳐 텍스트와 그림을 생성한다고 봅니다.",
+    "keywords": [
+      "statistical procedures",
+      "average",
+      "choices"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "c1122269-aa2a-4346-8625-0902afa97feb",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[42] What does the underlined “highly derivative” mean?\nAnother is to instruct the program to engage in style mimicry, emulating the choices made by a specific writer, which produces a highly derivative story. In neither case is it creating interesting art.",
+    "choices": [
+      "① Every piece of art is, in essence, built upon previous works.",
+      "② What A.I. generates is nothing more than a mimicry of art.",
+      "③ The stories A.I. produces are identical to those written by human writers.",
+      "④ Although A.I. may not create interesting art, it does not mean it lacks originality.",
+      "⑤ The stories A.I. writes result from a number of choices it makes."
+    ],
+    "answer": "②",
+    "explanation": "'highly derivative(매우 파생적인)'는 스스로 독창적 선택을 한 것이 아니라 기존 작가의 스타일을 흉내 내는 것에 불과하다는 의미입니다.",
+    "keywords": [
+      "derivative",
+      "mimicry",
+      "originality"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "29e53276-5765-4507-9810-8b17840efef1",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[43] Choose the most inappropriate word for the blank.\nMost of the choices in the resulting image have to be borrowed from similar paintings found online; the image might be exquisitely rendered, but the person entering the prompt can’t claim __________ for that.",
+    "choices": [
+      "① originality",
+      "② ownership",
+      "③ civility",
+      "④ kudos",
+      "⑤ credit"
+    ],
+    "answer": "③",
+    "explanation": "빈칸에는 예술 작품의 '독창성, 소유권, 공로' 등을 주장할 수 없다는 내용이 들어가야 합니다. '정중함(civility)'은 문맥과 전혀 무관합니다.",
+    "keywords": [
+      "claim credit",
+      "originality",
+      "civility"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "a1e7afb7-05be-4fbe-9d62-6a2747d3df5e",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[44] What is most appropriate for the blank?\nPolitical institutions determine who has power... When either of these conditions fails, we will refer to the institutions as extractive political institutions. There is strong __________ between economic and political institutions. Extractive political institutions concentrate power in the hands of a narrow elite... Extractive economic institutions thus naturally accompany extractive political institutions.",
+    "choices": [
+      "① discord",
+      "② synergy",
+      "③ similarity",
+      "④ antagonism",
+      "⑤ competition"
+    ],
+    "answer": "②",
+    "explanation": "착취적인 정치 제도가 필연적으로 착취적인 경제 제도를 수반하고 상호 의존한다는 점에서 두 제도 사이에 강한 결합(synergy)이 존재함을 나타냅니다.",
+    "keywords": [
+      "synergy",
+      "accompany",
+      "institutions"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "48cf578c-8b28-443c-a5a8-5181cefad2d4",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[45] According to the passage, which of the following is a characteristic of extractive political institutions?\n(Based on the passage from question 44: \"Extractive political institutions concentrate power in the hands of a narrow elite and place few constraints on the exercise of this power.\")",
+    "choices": [
+      "① They are governed exclusively by a few elites.",
+      "② They strive to distribute resources to a broader population.",
+      "③ They are often accompanied by inclusive economic institutions.",
+      "④ They are pluralistic because power is distributed without constraints.",
+      "⑤ They eliminate entry barriers for newcomers in the market and society."
+    ],
+    "answer": "①",
+    "explanation": "지문에서 착취적 정치 제도는 극소수의 엘리트에게 권력이 집중된다고 설명하고 있으므로 ①번이 특성에 부합합니다.",
+    "keywords": [
+      "extractive",
+      "narrow elite",
+      "concentrate power"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "65186632-30df-4a97-928f-d27619c1325a",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[46] The best title of the passage would be __________.\nMost broadcast subtitles are prepared in advance... There are significant differences between intralingual subtitles for accessibility purposes and interlingual subtitles done by organizations such as Netflix for people who are not hearing impaired but cannot understand the original language. ...",
+    "choices": [
+      "① The Secret of Interlingual Subtitle",
+      "② Differences Between Intralingual Subtitle and Interlingual Subtitle",
+      "③ Different Types of Subtitle",
+      "④ The Role of Subtitler",
+      "⑤ The Importance of Colored Text in Subtitle"
+    ],
+    "answer": "③",
+    "explanation": "글은 단일 언어 자막(청각 장애인용)과 번역 자막(이중 언어) 간의 차이와 목적을 설명하고 있으므로 다양한 자막의 종류를 다루는 제목이 적합합니다.",
+    "keywords": [
+      "intralingual",
+      "interlingual",
+      "subtitles"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "442dd0ec-7839-430b-8ea2-dae63945d8b2",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[47] The most appropriate words for the blanks Ⓐ and Ⓑ are __________.\nSubtitling is always a matter of compromise between the conflicting requirements of Ⓐ__________ and Ⓑ__________ of information. When equality of access to information is the goal, the speech content of the broadcast will as far as possible be transcribed verbatim... On the other hand, a hearing viewer using translated subtitles will typically not need colors or indication of background sounds, but will want a condensed version of the dialogue...",
+    "choices": [
+      "① accessibility — variety",
+      "② readability — digression",
+      "③ quality — quantity",
+      "④ accuracy — necessity",
+      "⑤ completeness — concision"
+    ],
+    "answer": "⑤",
+    "explanation": "모든 소리를 있는 그대로 전부 담으려는 '완전성(completeness)'과 화면의 방해를 줄이고 압축하려는 '간결성(concision)' 사이의 타협을 설명하고 있습니다.",
+    "keywords": [
+      "verbatim",
+      "condensed",
+      "completeness",
+      "concision"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "69b02047-0735-41b9-8701-5abacfe463a1",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[48] According to the passage, intralingual subtitles should be verbatim in order __________.\nWhen equality of access to information is the goal, the speech content of the broadcast will as far as possible be transcribed verbatim: any alterations would be confusing for lip-readers, and this kind of subtitle can also support viewers with reading difficulties, as well as language learners.",
+    "choices": [
+      "① to make equal access to information for all viewers",
+      "② to increase the quality of information",
+      "③ to better serve viewers who are not hearing impaired",
+      "④ to improve the ability of lip-readers",
+      "⑤ not to distract language learners’ attention from the video content"
+    ],
+    "answer": "①",
+    "explanation": "청각 장애인을 포함하여 모든 시청자가 정보에 동등하게 접근할 수 있도록 하기 위해 단일 언어 자막은 가능한 한 축약 없이 그대로 표기해야 합니다.",
+    "keywords": [
+      "equality of access",
+      "verbatim",
+      "intralingual"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "7dceec25-27bb-40db-809b-69fd15835c84",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[49] According to the passage, neuropsychoanalysis is NOT __________.\nNeuropsychoanalysis is a diverse, interdisciplinary field that comprises the efforts of researchers and clinicians within several branches of psychoanalysis, neuroscience and psychiatry... It was named and constituted by a small group of researchers at whose heart lies the psychoanalyst and neuropsychologist Mark Solms.",
+    "choices": [
+      "① a discipline that compromises the two different approaches",
+      "② a discipline with a balanced view of consciousness",
+      "③ a discipline partly built on Freud’s theory",
+      "④ a discipline established solely by one prominent scholar",
+      "⑤ an interdisciplinary field"
+    ],
+    "answer": "④",
+    "explanation": "여러 연구자와 임상의들의 노력으로 구성된 소규모 연구 그룹에 의해 세워졌으므로 한 명의 저명한 학자에 의해서만 단독으로 확립되었다는 진술은 틀렸습니다.",
+    "keywords": [
+      "interdisciplinary",
+      "small group of researchers",
+      "solely"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  },
+  {
+    "id": "191eeca6-ffea-43d1-b79a-deacab7928ff",
+    "user_id": "1ed95a22-9ee8-49d2-8a62-6526ecb553e0",
+    "material_id": "a5f5c150-5145-4774-ba00-b7398652a699",
+    "question": "[50] The underlined “vice versa” suggests that ________.\nNeuropsychoanalysis is a diverse, interdisciplinary field that comprises the efforts of researchers and clinicians within several branches of psychoanalysis, neuroscience and psychiatry to construct a shared space of inquiry in which to consider how empirical findings and neuroscientific theories can be enhanced by metapsychological knowledge derived from subjective, clinical observation and vice versa.",
+    "choices": [
+      "① psychoanalysis and psychiatry would benefit from the empirical knowledge provided by neuroscience",
+      "② neuroscience should not rely on subjective approaches to understanding the human mind",
+      "③ neuroscience and psychiatry are distinct disciplines",
+      "④ researchers and clinicians should cooperate with each other to better understand consciousness",
+      "⑤ clinical observation often provides a biased view of the human mind"
+    ],
+    "answer": "①",
+    "explanation": "'vice versa(역도 마찬가지임)'는 주관적 임상 관찰이 신경과학을 향상시키는 것뿐만 아니라, 신경과학의 실증적 지식이 정신분석학을 향상시킬 수 있다는 상호 보완적 의미입니다.",
+    "keywords": [
+      "vice versa",
+      "empirical findings",
+      "subjective"
+    ],
+    "question_type": null,
+    "answer_source": "ai_estimate",
+    "srs_state": null,
+    "due_at": "2026-05-05T10:50:14.075Z",
+    "review_count": 0,
+    "lapse_count": 0,
+    "last_grade": null,
+    "created_at": "2026-05-05T10:50:14.075Z"
+  }
+]

@@ -1,0 +1,2069 @@
+{
+  "paper": {
+    "year": 2009,
+    "session": "combined",
+    "format": "통합본 (제2교시 교육과정 — 50문항 객관식)",
+    "total_points": 70,
+    "duration_min": null,
+    "items_count": 50,
+    "extraction_issues": [
+      "수동 분리 미수행 — combined 시험지로 단일 적재 (handoff §6.4 정합)",
+      "PDF 폰트 손상으로 unpdf 텍스트 레이어 추출 실패 — verified_text=false 일괄 적용",
+      "stem_text는 빈 문자열, 시각 본문은 stem_image_paths의 PNG로 보장",
+      "50문항 객관식 (skip_quiz_card=true, 헌법 v3.2 제13조의2 8항)",
+      "정답·키워드·해설은 placeholder — 운영자 검수 큐 진입 (verified_answer=false)"
+    ]
+  },
+  "items": [
+    {
+      "item_no": 1,
+      "stem_text": "",
+      "stem_pages": [
+        1
+      ],
+      "stem_image_paths": [
+        "pages/page-01.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 1번 (페이지 1)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 1번 (page 1)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 1)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 2,
+      "stem_text": "",
+      "stem_pages": [
+        1
+      ],
+      "stem_image_paths": [
+        "pages/page-01.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 2번 (페이지 1)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 2번 (page 1)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 1)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 3,
+      "stem_text": "",
+      "stem_pages": [
+        1
+      ],
+      "stem_image_paths": [
+        "pages/page-01.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 3번 (페이지 1)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 3번 (page 1)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 1)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 4,
+      "stem_text": "",
+      "stem_pages": [
+        2
+      ],
+      "stem_image_paths": [
+        "pages/page-02.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 4번 (페이지 2)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 4번 (page 2)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 2)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 5,
+      "stem_text": "",
+      "stem_pages": [
+        2
+      ],
+      "stem_image_paths": [
+        "pages/page-02.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 5번 (페이지 2)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 5번 (page 2)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 2)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 6,
+      "stem_text": "",
+      "stem_pages": [
+        2
+      ],
+      "stem_image_paths": [
+        "pages/page-02.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 6번 (페이지 2)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 6번 (page 2)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 2)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 7,
+      "stem_text": "",
+      "stem_pages": [
+        3
+      ],
+      "stem_image_paths": [
+        "pages/page-03.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 7번 (페이지 3)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 7번 (page 3)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 3)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 8,
+      "stem_text": "",
+      "stem_pages": [
+        3
+      ],
+      "stem_image_paths": [
+        "pages/page-03.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 8번 (페이지 3)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 8번 (page 3)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 3)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 9,
+      "stem_text": "",
+      "stem_pages": [
+        3
+      ],
+      "stem_image_paths": [
+        "pages/page-03.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 9번 (페이지 3)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 9번 (page 3)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 3)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 10,
+      "stem_text": "",
+      "stem_pages": [
+        4
+      ],
+      "stem_image_paths": [
+        "pages/page-04.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 10번 (페이지 4)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 10번 (page 4)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 4)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 11,
+      "stem_text": "",
+      "stem_pages": [
+        4
+      ],
+      "stem_image_paths": [
+        "pages/page-04.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 11번 (페이지 4)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 11번 (page 4)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 4)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 12,
+      "stem_text": "",
+      "stem_pages": [
+        4
+      ],
+      "stem_image_paths": [
+        "pages/page-04.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 12번 (페이지 4)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 12번 (page 4)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 4)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 13,
+      "stem_text": "",
+      "stem_pages": [
+        4
+      ],
+      "stem_image_paths": [
+        "pages/page-04.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 13번 (페이지 4)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 13번 (page 4)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 4)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 14,
+      "stem_text": "",
+      "stem_pages": [
+        5
+      ],
+      "stem_image_paths": [
+        "pages/page-05.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 14번 (페이지 5)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 14번 (page 5)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 5)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 15,
+      "stem_text": "",
+      "stem_pages": [
+        5
+      ],
+      "stem_image_paths": [
+        "pages/page-05.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 15번 (페이지 5)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 15번 (page 5)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 5)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 16,
+      "stem_text": "",
+      "stem_pages": [
+        5
+      ],
+      "stem_image_paths": [
+        "pages/page-05.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 16번 (페이지 5)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 16번 (page 5)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 5)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 17,
+      "stem_text": "",
+      "stem_pages": [
+        6
+      ],
+      "stem_image_paths": [
+        "pages/page-06.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 17번 (페이지 6)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 17번 (page 6)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 6)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 18,
+      "stem_text": "",
+      "stem_pages": [
+        6
+      ],
+      "stem_image_paths": [
+        "pages/page-06.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 18번 (페이지 6)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 18번 (page 6)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 6)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 19,
+      "stem_text": "",
+      "stem_pages": [
+        6
+      ],
+      "stem_image_paths": [
+        "pages/page-06.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 19번 (페이지 6)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 19번 (page 6)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 6)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 20,
+      "stem_text": "",
+      "stem_pages": [
+        7
+      ],
+      "stem_image_paths": [
+        "pages/page-07.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 20번 (페이지 7)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 20번 (page 7)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 7)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 21,
+      "stem_text": "",
+      "stem_pages": [
+        7
+      ],
+      "stem_image_paths": [
+        "pages/page-07.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 21번 (페이지 7)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 21번 (page 7)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 7)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 22,
+      "stem_text": "",
+      "stem_pages": [
+        7
+      ],
+      "stem_image_paths": [
+        "pages/page-07.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 22번 (페이지 7)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 22번 (page 7)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 7)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 23,
+      "stem_text": "",
+      "stem_pages": [
+        8
+      ],
+      "stem_image_paths": [
+        "pages/page-08.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 23번 (페이지 8)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 23번 (page 8)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 8)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 24,
+      "stem_text": "",
+      "stem_pages": [
+        8
+      ],
+      "stem_image_paths": [
+        "pages/page-08.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 24번 (페이지 8)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 24번 (page 8)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 8)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 25,
+      "stem_text": "",
+      "stem_pages": [
+        8
+      ],
+      "stem_image_paths": [
+        "pages/page-08.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 25번 (페이지 8)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 25번 (page 8)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 8)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 26,
+      "stem_text": "",
+      "stem_pages": [
+        9
+      ],
+      "stem_image_paths": [
+        "pages/page-09.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 26번 (페이지 9)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 26번 (page 9)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 9)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 27,
+      "stem_text": "",
+      "stem_pages": [
+        9
+      ],
+      "stem_image_paths": [
+        "pages/page-09.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 27번 (페이지 9)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 27번 (page 9)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 9)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 28,
+      "stem_text": "",
+      "stem_pages": [
+        9
+      ],
+      "stem_image_paths": [
+        "pages/page-09.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 28번 (페이지 9)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 28번 (page 9)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 9)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 29,
+      "stem_text": "",
+      "stem_pages": [
+        10
+      ],
+      "stem_image_paths": [
+        "pages/page-10.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 29번 (페이지 10)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 29번 (page 10)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 10)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 30,
+      "stem_text": "",
+      "stem_pages": [
+        10
+      ],
+      "stem_image_paths": [
+        "pages/page-10.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 30번 (페이지 10)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 30번 (page 10)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 10)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 31,
+      "stem_text": "",
+      "stem_pages": [
+        10
+      ],
+      "stem_image_paths": [
+        "pages/page-10.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 31번 (페이지 10)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 31번 (page 10)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 10)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 32,
+      "stem_text": "",
+      "stem_pages": [
+        11
+      ],
+      "stem_image_paths": [
+        "pages/page-11.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 32번 (페이지 11)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 32번 (page 11)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 11)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 33,
+      "stem_text": "",
+      "stem_pages": [
+        11
+      ],
+      "stem_image_paths": [
+        "pages/page-11.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 33번 (페이지 11)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 33번 (page 11)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 11)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 34,
+      "stem_text": "",
+      "stem_pages": [
+        11
+      ],
+      "stem_image_paths": [
+        "pages/page-11.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 34번 (페이지 11)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 34번 (page 11)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 11)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 35,
+      "stem_text": "",
+      "stem_pages": [
+        12
+      ],
+      "stem_image_paths": [
+        "pages/page-12.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 35번 (페이지 12)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 35번 (page 12)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 12)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 36,
+      "stem_text": "",
+      "stem_pages": [
+        12
+      ],
+      "stem_image_paths": [
+        "pages/page-12.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 36번 (페이지 12)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 36번 (page 12)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 12)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 37,
+      "stem_text": "",
+      "stem_pages": [
+        12
+      ],
+      "stem_image_paths": [
+        "pages/page-12.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 37번 (페이지 12)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 37번 (page 12)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 12)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 38,
+      "stem_text": "",
+      "stem_pages": [
+        12
+      ],
+      "stem_image_paths": [
+        "pages/page-12.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 38번 (페이지 12)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 38번 (page 12)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 12)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 39,
+      "stem_text": "",
+      "stem_pages": [
+        13
+      ],
+      "stem_image_paths": [
+        "pages/page-13.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 39번 (페이지 13)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 39번 (page 13)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 13)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 40,
+      "stem_text": "",
+      "stem_pages": [
+        13
+      ],
+      "stem_image_paths": [
+        "pages/page-13.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 40번 (페이지 13)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 40번 (page 13)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 13)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 41,
+      "stem_text": "",
+      "stem_pages": [
+        13
+      ],
+      "stem_image_paths": [
+        "pages/page-13.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 41번 (페이지 13)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 41번 (page 13)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 13)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 42,
+      "stem_text": "",
+      "stem_pages": [
+        14
+      ],
+      "stem_image_paths": [
+        "pages/page-14.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 42번 (페이지 14)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 42번 (page 14)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 14)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 43,
+      "stem_text": "",
+      "stem_pages": [
+        14
+      ],
+      "stem_image_paths": [
+        "pages/page-14.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 43번 (페이지 14)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 43번 (page 14)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 14)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 44,
+      "stem_text": "",
+      "stem_pages": [
+        14
+      ],
+      "stem_image_paths": [
+        "pages/page-14.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 44번 (페이지 14)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 44번 (page 14)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 14)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 45,
+      "stem_text": "",
+      "stem_pages": [
+        15
+      ],
+      "stem_image_paths": [
+        "pages/page-15.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 45번 (페이지 15)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 45번 (page 15)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 15)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 46,
+      "stem_text": "",
+      "stem_pages": [
+        15
+      ],
+      "stem_image_paths": [
+        "pages/page-15.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 46번 (페이지 15)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 46번 (page 15)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 15)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 47,
+      "stem_text": "",
+      "stem_pages": [
+        15
+      ],
+      "stem_image_paths": [
+        "pages/page-15.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 47번 (페이지 15)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 47번 (page 15)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 15)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 48,
+      "stem_text": "",
+      "stem_pages": [
+        16
+      ],
+      "stem_image_paths": [
+        "pages/page-16.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 48번 (페이지 16)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 48번 (page 16)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 16)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 49,
+      "stem_text": "",
+      "stem_pages": [
+        16
+      ],
+      "stem_image_paths": [
+        "pages/page-16.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 49번 (페이지 16)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 49번 (page 16)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 16)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    },
+    {
+      "item_no": 50,
+      "stem_text": "",
+      "stem_pages": [
+        16
+      ],
+      "stem_image_paths": [
+        "pages/page-16.png"
+      ],
+      "stem_offset_start": 0,
+      "stem_offset_end": 0,
+      "format": "객관식",
+      "points": 1.4,
+      "choices": [
+        "①",
+        "②",
+        "③",
+        "④",
+        "⑤"
+      ],
+      "answer_idx": 1,
+      "skip_quiz_card": true,
+      "domains": [
+        "교육학"
+      ],
+      "bloom": "적용",
+      "keywords": [
+        "초등 교육과정",
+        "2007 개정 교육과정",
+        "교과 통합"
+      ],
+      "answer_md": "**정답: 운영자 검수 필요**\n\nPDF 폰트 손상으로 LLM 텍스트 분석이 불가하여 정답 추정을 보류한다. 시각 본문(PNG)을 참조하여 운영자가 정정한다.",
+      "explanation_md": "## 운영자 검수 큐\n\n### 정의·요지\n본 문항은 2009학년도 통합본 시험지의 객관식 문항이다. PDF 텍스트 레이어 손상으로 자동 분석을 보류하였다.\n\n### 핵심 요소\n- 2009 통합본 50번 (페이지 16)\n- 객관식 (skip_quiz_card=true, 헌법 v3.2 8항)\n- 운영자 검수 후 키워드·답안·해설 정정\n\n### 출제 좌표\n- 2009 통합본 50번 (page 16)\n\n### 함께 보는 키워드\n- 검수 대기\n\n### 보충 해설\nPNG 시각 본문이 stem_image_paths에 보장되어 있으므로, 운영자가 PNG를 참조하여 정답·해설·키워드를 후속 정정한다.",
+      "verified_text": false,
+      "verified_answer": false,
+      "extraction_issues": [
+        "PDF 폰트 손상으로 unpdf 텍스트 추출 실패 (handoff §9 fallback) — stem_text 빈 문자열, verified_text=false",
+        "시각 본문은 stem_image_paths의 PNG로 보장 (page 16)",
+        "객관식 시대 (헌법 v3.2 8항) — skip_quiz_card=true. 운영자 검수 후 정답·키워드·해설 정정"
+      ]
+    }
+  ]
+}

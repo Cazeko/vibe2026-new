@@ -1,26 +1,34 @@
-export const UNIVERSITY_NAMES = [
-  "한양",
-  "중앙",
-  "성균관",
-  "경희",
-  "이화",
-  "서강",
-  "홍익",
-  "동국",
-  "건국",
-  "숭실",
+// 헌법 v3.0 제15조 — 지역 교육청 17개 라벨 (선택 입력).
+export const REGION_NAMES = [
+  "서울",
+  "경기",
+  "인천",
+  "부산",
+  "대구",
+  "광주",
+  "대전",
+  "울산",
+  "세종",
+  "강원",
+  "충북",
+  "충남",
+  "전북",
+  "전남",
+  "경북",
+  "경남",
+  "제주",
 ] as const;
 
-export type UniversityName = (typeof UNIVERSITY_NAMES)[number];
+export type RegionName = (typeof REGION_NAMES)[number];
 
-// v2.0 — 학교별 합격 컷·가중치 의존 폐지. `lib/fit/*` 전부 제거됨.
+// v3.0 — 학교별 합격 컷·가중치 의존 폐지. `lib/fit/*` 전부 제거됨.
 // 본인 학습 데이터로 산출되는 진척도는 `lib/progress/score.ts` 에 정의되어 있다.
 
 /**
- * 헌법 제13조의2 — 학습 카드 분류 (v1.6)
+ * 헌법 v3.0 제13조의2 — 학습 카드 분류 (cards 다형 단일 테이블).
+ * QuizCard / KeywordCard / MistakeCard.
  */
-
-export type CardSource = "mistake_upload" | "study_rag" | "vocab_seed";
+export type CardType = "quiz" | "keyword" | "mistake";
 
 /**
  * 헌법 제30조의2 — 정답·해설 4계층 출처 모델 (v1.8)
@@ -35,15 +43,6 @@ export type AnswerSource =
   | "ai_estimate"
   | "user_self_corrected"
   | "crowd_verified";
-
-export type MistakeCard = {
-  question: string;
-  choices?: string[];
-  answer?: string;
-  explanation?: string;
-  keywords: string[];
-  answerSource?: AnswerSource;
-};
 
 export type SrsState = {
   due: string;

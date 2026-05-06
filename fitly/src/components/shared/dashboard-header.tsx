@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bell, Plus, UserCircle } from "lucide-react";
+import { Bell, BookOpen, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 type Profile = {
   displayName: string | null;
-  targetUniversity: string | null;
+  targetRegion: string | null;
 };
 
 export function DashboardHeader() {
   const [profile, setProfile] = useState<Profile>({
     displayName: null,
-    targetUniversity: null,
+    targetRegion: null,
   });
 
   useEffect(() => {
@@ -24,18 +24,19 @@ export function DashboardHeader() {
         if (d.profile) {
           setProfile({
             displayName: d.profile.displayName ?? null,
-            targetUniversity: d.profile.targetUniversity ?? null,
+            // v3.0 — targetUniversity 컬럼은 region 라벨로 임시 재해석 (D-S2에서 컬럼 명칭 재정렬).
+            targetRegion: d.profile.targetUniversity ?? null,
           });
         }
       })
       .catch(() => undefined);
   }, []);
 
-  // 헌법 v1.9 시연 페르소나 라벨 — 프로필 미설정 시 가상 사용자임을 명시.
+  // 헌법 v3.0 — 시연 페르소나 라벨. 지역 교육청은 선택 입력 (제15조).
   const greetingName = profile.displayName ?? "주인";
-  const subtitle = profile.targetUniversity
-    ? `목표 ${profile.targetUniversity}까지, Fitly 가 일정과 자료를 정리해 드릴게요.`
-    : "자료를 업로드하시면 AI 가 자동으로 학습 카드를 만들어 드립니다.";
+  const subtitle = profile.targetRegion
+    ? `${profile.targetRegion} 시험 합격까지, Fitly 가 일정과 진척을 정리해 드릴게요.`
+    : "오늘의 풀이·키워드·오답 트랙이 자동으로 채워지고, 추천 팟캐스트가 생성됩니다.";
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 px-6 pt-5 pb-3">
@@ -47,9 +48,9 @@ export function DashboardHeader() {
       </div>
       <div className="flex items-center gap-1.5">
         <Button asChild className="h-9 rounded-xl px-3 text-sm">
-          <Link href="/materials">
-            <Plus className="h-4 w-4" aria-hidden />
-            자료 업로드
+          <Link href="/study">
+            <BookOpen className="h-4 w-4" aria-hidden />
+            오늘 학습 시작
           </Link>
         </Button>
         <Button

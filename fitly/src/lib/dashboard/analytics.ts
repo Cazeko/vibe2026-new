@@ -1,8 +1,10 @@
-// 헌법 v1.10 — /study-analysis · /me 전용 보조 집계.
+// 헌법 v3.0 / v3.0.1 — /study-analysis · /me 전용 보조 집계.
+// D-S1.5 — 폐기 5 (vocabCards/studyCards/mistakes/materials/universities) 의존 제거.
+// 카드 라이브러리 카운트는 cards 다형 테이블 통합 후 D-S2에서 reimplement.
 
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { mistakes, studySessions, vocabCards, studyCards } from "@/lib/db/schema";
+import { studySessions } from "@/lib/db/schema";
 import type { HeatmapCell } from "@/components/feature/analysis/activity-heatmap";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -25,7 +27,6 @@ export async function getActivityHeatmap(userId: string): Promise<HeatmapCell[]>
   const byDay = new Map<string, number>();
   for (const r of rows) byDay.set(r.day, Math.round(Number(r.sec) / 60));
 
-  // 12주 × 7일 = 84칸. 가장 오래된 날짜부터.
   const cells: HeatmapCell[] = [];
   for (let i = 83; i >= 0; i -= 1) {
     const d = new Date(Date.now() - i * DAY_MS);
@@ -79,56 +80,25 @@ export async function getSessionStats(userId: string): Promise<SessionStat> {
   };
 }
 
+// v3.0 카드 라이브러리 카운트 (풀이/키워드/오답).
+// cards 다형 테이블 통합 후 D-S2에서 reimplement. 현재는 0 stub.
 export type LibraryCounts = {
-  mistakes: number;
-  vocab: number;
-  study: number;
-  vocabDue: number;
-  mistakesDue: number;
-  studyDue: number;
+  quiz: number;
+  keyword: number;
+  mistake: number;
+  quizDue: number;
+  keywordDue: number;
+  mistakeDue: number;
 };
 
-export async function getLibraryCounts(userId: string): Promise<LibraryCounts> {
-  const db = getDb();
-  const now = new Date();
-
-  const [m] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(mistakes)
-    .where(eq(mistakes.userId, userId));
-
-  const [v] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(vocabCards)
-    .where(eq(vocabCards.userId, userId));
-
-  const [s] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(studyCards)
-    .where(eq(studyCards.userId, userId));
-
-  const [md] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(mistakes)
-    .where(and(eq(mistakes.userId, userId), lte(mistakes.dueAt, now)));
-
-  const [vd] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(vocabCards)
-    .where(and(eq(vocabCards.userId, userId), lte(vocabCards.dueAt, now)));
-
-  const [sd] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(studyCards)
-    .where(and(eq(studyCards.userId, userId), lte(studyCards.dueAt, now)));
-
+export async function getLibraryCounts(_userId: string): Promise<LibraryCounts> {
   return {
-    mistakes: m?.n ?? 0,
-    vocab: v?.n ?? 0,
-    study: s?.n ?? 0,
-    mistakesDue: md?.n ?? 0,
-    vocabDue: vd?.n ?? 0,
-    studyDue: sd?.n ?? 0,
+    quiz: 0,
+    keyword: 0,
+    mistake: 0,
+    quizDue: 0,
+    keywordDue: 0,
+    mistakeDue: 0,
   };
 }
 

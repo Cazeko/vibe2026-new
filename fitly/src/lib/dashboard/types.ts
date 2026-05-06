@@ -22,20 +22,16 @@ export type WeakType = {
   total: number;
 };
 
-export type RecentMaterial = {
-  id: string;
-  name: string;
-  meta: string;          // MIME · size · 날짜
-};
-
 export type DashboardKpi = {
-  targetUniversity: string | null;
-  targetUniversityShort: string | null;
-  // v2.0 — 학습 진척도(Progress) 점수. 본인 학습 데이터로만 산출 (제9조).
+  // v3.0 — 지역 교육청 라벨(선택 입력, 제15조). 합격 컷·평균은 비공개이므로 보유하지 않는다.
+  targetRegion: string | null;
+  targetRegionShort: string | null;
+  // v3.0 — 학습 진척도(Progress) 점수. 본인 학습 데이터로만 산출 (제9조).
+  // 공식: 풀이 마스터율 × 0.5 + 키워드 마스터율 × 0.2 + 학습 일관성 × 0.3
   progressScore: number;
   progressBreakdown: {
-    vocabMasteryRate: number;
-    mistakeConquerRate: number;
+    quizMasteryRate: number;
+    keywordMasteryRate: number;
     studyConsistency: number;
   };
   studyMinutes: number;
@@ -50,6 +46,5 @@ export type DashboardSummary = {
   trend: TrendPoint[];
   plan: PlanItem[];
   weakTypes: WeakType[];
-  recent: RecentMaterial[];
   isEmpty: boolean;      // 새 사용자 여부 (모든 카운트 0)
 };

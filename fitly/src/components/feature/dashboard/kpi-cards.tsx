@@ -26,18 +26,18 @@ type Card = {
 export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
   const cards: Card[] = [
     {
-      label: "목표 학교",
-      value: kpi.targetUniversityShort ?? "미설정",
+      label: "지역 교육청",
+      value: kpi.targetRegionShort ?? "미설정",
       sub:
         kpi.daysToExam != null
           ? `D-${kpi.daysToExam}`
-          : "설정에서 학교·시험일 등록",
+          : "설정에서 시험일 등록",
       Icon: Target,
     },
     {
       label: "학습 진척도",
       value: `${kpi.progressScore}`,
-      sub: `본인 누적 · 어휘 ${kpi.progressBreakdown.vocabMasteryRate}/오답 ${kpi.progressBreakdown.mistakeConquerRate}/일관 ${kpi.progressBreakdown.studyConsistency}`,
+      sub: `본인 누적 · 풀이 ${kpi.progressBreakdown.quizMasteryRate}/키워드 ${kpi.progressBreakdown.keywordMasteryRate}/일관 ${kpi.progressBreakdown.studyConsistency}`,
       Icon: TrendingUp,
       isProgress: true,
       progressPct: kpi.progressScore,

@@ -1,16 +1,17 @@
 import { create } from "zustand";
-import type { UniversityName } from "@/types";
+import type { RegionName } from "@/types";
 
+// 헌법 v3.0 제15조 — 지역 교육청 17개 라벨 (선택 입력).
 type AppState = {
-  selectedUniversity: UniversityName | null;
+  selectedRegion: RegionName | null;
   examDate: string | null;
-  setUniversity: (u: UniversityName | null) => void;
+  setRegion: (r: RegionName | null) => void;
   setExamDate: (d: string | null) => void;
 };
 
 export const useAppStore = create<AppState>((set) => ({
-  selectedUniversity: null,
+  selectedRegion: null,
   examDate: null,
-  setUniversity: (u) => set({ selectedUniversity: u }),
+  setRegion: (r) => set({ selectedRegion: r }),
   setExamDate: (d) => set({ examDate: d }),
 }));
