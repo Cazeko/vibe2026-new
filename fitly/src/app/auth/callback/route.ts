@@ -27,8 +27,9 @@ export async function GET(request: NextRequest) {
 
 function sanitizeNext(value: string | null): string {
   // open redirect 방어 — 내부 경로(/로 시작)만 허용.
+  // v3.5 — 인증 후 기본 진입점은 /dashboard (레거시 /home 경유 폐지).
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/home";
+    return "/dashboard";
   }
   return value;
 }

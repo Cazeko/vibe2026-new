@@ -80,8 +80,12 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && isAuthRoute) {
+    // 헌법 v1.9 제13조 — 데시보드가 인증 후 정식 진입점.
+    // /home은 레거시 라우트로 page.tsx에서 다시 /dashboard로 redirect되지만
+    // Vercel에서 두 hop이 stuck 또는 빈 화면 표시되는 경우가 있어 본 미들웨어
+    // 단계에서 직접 /dashboard로 보낸다.
     const url = request.nextUrl.clone();
-    url.pathname = "/home";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
