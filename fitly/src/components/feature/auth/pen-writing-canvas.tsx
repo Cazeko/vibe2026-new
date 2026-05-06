@@ -22,6 +22,16 @@ export function PenWritingCanvas() {
     const container = containerRef.current;
     if (!container) return;
 
+    // 컨테이너 크기 0이면 layout이 안정되지 않은 시점 — 다음 frame에 재시도.
+    // (lg:h-screen으로 명시했지만 첫 mount 시점은 0인 경우 가드.)
+    if (container.clientWidth === 0 || container.clientHeight === 0) {
+      const raf = requestAnimationFrame(() => {
+        // useEffect 내부 re-trigger는 어려움 — state로 강제 re-mount.
+        setPhase((p) => (p === "idle" ? "idle" : p));
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+
     // ── three.js scene 초기화 ───────────────────────────────────────────
     const scene = new THREE.Scene();
     const width = container.clientWidth;

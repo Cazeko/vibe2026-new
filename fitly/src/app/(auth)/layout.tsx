@@ -8,8 +8,10 @@ export default function AuthLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* 좌측 hero — 데스크톱 60%, 모바일 30vh */}
-      <div className="relative h-[30vh] lg:h-auto lg:flex-1 lg:basis-3/5 border-b lg:border-b-0 lg:border-r border-rule">
+      {/* 좌측 hero — 데스크톱 60%(lg:h-screen), 모바일 30vh.
+          lg:h-screen으로 명시 — 이전 lg:h-auto는 flex-1 stretch로 동작했지만
+          mount 시점 height가 측정되지 않아 three.js canvas가 0×0이 되었다. */}
+      <div className="relative h-[30vh] lg:h-screen lg:flex-1 lg:basis-3/5 border-b lg:border-b-0 lg:border-r border-rule">
         <LoginHero />
       </div>
 

@@ -1,7 +1,9 @@
 "use client";
 
-// hero 컨테이너 — viewport·prefers-reduced-motion·session storage 분기 후
-// three.js scene 또는 정적 fallback 노출.
+// hero 컨테이너 — viewport·prefers-reduced-motion 분기 후 three.js scene
+// 또는 정적 fallback 노출. session storage 가드는 의도적으로 제거 — 첫 인상이
+// 보장되어야 'a 진행' 합의의 가치가 있다 (login ↔ signup 전환 시 재생되는
+// 약간의 산만은 메모러블 모먼트의 가치보다 작다).
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -11,8 +13,6 @@ const PenWritingCanvas = dynamic(
   () => import("./pen-writing-canvas").then((m) => m.PenWritingCanvas),
   { ssr: false, loading: () => <StaticHeroFallback /> },
 );
-
-const SESSION_KEY = "fitly:login-hero-played";
 
 export function LoginHero() {
   const [mode, setMode] = useState<"loading" | "canvas" | "static">("loading");
@@ -31,20 +31,12 @@ export function LoginHero() {
       return;
     }
 
-    // 같은 세션 내 재진입 (login ↔ signup 전환 등): 정적 fallback
-    const alreadyPlayed = sessionStorage.getItem(SESSION_KEY) === "true";
-    if (alreadyPlayed) {
-      setMode("static");
-      return;
-    }
-
-    sessionStorage.setItem(SESSION_KEY, "true");
     setMode("canvas");
   }, []);
 
   return (
     <div
-      className="relative w-full h-full overflow-hidden"
+      className="relative w-full h-full min-h-[30vh] lg:min-h-screen overflow-hidden"
       aria-hidden="true"
     >
       {mode === "static" || mode === "loading" ? (
