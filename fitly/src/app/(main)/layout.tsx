@@ -15,7 +15,10 @@ export default function MainLayout({
   return (
     <>
       <TabletGate />
-      <div className="hidden lg:block min-h-screen bg-app-bg">
+      {/* DESIGN.md §4.5 정합 — body 자체의 cream + 1% radial grain 이 그대로 비친다.
+          이 div 에 bg-app-bg 를 두면 그레인이 가려져 로그인 페이지에만 노출되는
+          이전 회귀가 재현된다. 따라서 색을 명시하지 아니한다. */}
+      <div className="hidden lg:block min-h-screen">
         <AppSidebar />
         <main className="ml-56 min-h-screen">{children}</main>
       </div>

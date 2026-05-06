@@ -93,7 +93,7 @@ export default async function PodcastPage() {
     <div className="min-h-screen pb-12">
       <PageHeader
         title="팟캐스트"
-        subtitle="NotebookLM 스타일 2인 화자 대화체로 자동 생성된 학습 청취 — 이동 중에도 학습."
+        subtitle="2인 화자 대화체 팟캐스트로 자동 생성된 학습 청취 — 이동 중에도 학습."
       />
 
       <div className="px-6 mx-auto max-w-7xl space-y-8">
@@ -115,7 +115,7 @@ export default async function PodcastPage() {
             unit=""
           />
           <StatCard
-            label="TTS 상태"
+            label="음성 합성"
             value={empty ? "대기" : "활성"}
             unit=""
             accent={!empty}
@@ -124,7 +124,7 @@ export default async function PodcastPage() {
 
         <SectionRule />
 
-        {/* 헌법 정합 안내 (TTS 미통합 시점) */}
+        {/* 음성 합성 통합 안내 (시드 + TTS 미통합 시점) */}
         {empty && (
           <Card className="border-warning/40 bg-warning/[0.06]">
             <CardContent className="p-6 flex gap-3">
@@ -134,12 +134,12 @@ export default async function PodcastPage() {
               />
               <div className="text-[13px] text-foreground/85 leading-relaxed">
                 <p className="font-serif text-base font-medium text-foreground">
-                  Gemini multi-speaker TTS 통합 후 활성화됩니다
+                  음성 합성 통합 후 활성화됩니다
                 </p>
                 <p className="mt-1.5">
-                  팟캐스트 생성은 Gemini의 multi-speaker TTS (제18조 1항 A
-                  매트릭스)로 동작합니다. 가용성 변동 시 단일 화자 백업 또는
-                  Phase 2 외부 임베드로 우회합니다 (제35조 백업 표).
+                  팟캐스트는 2인 화자 대화체로 자동 생성됩니다. 음성 합성
+                  서비스 가용성 변동 시 단일 화자 또는 외부 임베드로 우회할 수
+                  있습니다.
                 </p>
               </div>
             </CardContent>
@@ -168,7 +168,7 @@ export default async function PodcastPage() {
             </div>
             <Button disabled={empty} className="shrink-0">
               <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-              {empty ? "TTS 통합 후 활성화" : "즉석 생성"}
+              {empty ? "음성 합성 통합 후 활성화" : "즉석 생성"}
             </Button>
           </CardContent>
         </Card>

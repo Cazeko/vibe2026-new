@@ -50,9 +50,9 @@ export default async function DashboardPage() {
         </section>
 
         <p className="pt-1 text-[10px] text-muted-foreground">
-          본 대시보드의 KPI·차트·플랜은 <strong>본인 계정의 실제 학습 기록</strong>{" "}
-          만으로 산출됩니다 (헌법 v3.0 제9조). 지역 교육청별 합격 컷·평균은 비공개이므로 Fitly 가
-          보유하지 아니합니다 (제3조의2).
+          본 대시보드의 KPI·차트·플랜은 <strong>본인 계정의 실제 학습 기록</strong>
+          만으로 산출됩니다. 지역 교육청별 합격 컷·평균은 비공개이므로 Fitly 가
+          보유하지 않습니다.
         </p>
       </div>
     </div>

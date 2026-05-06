@@ -115,14 +115,13 @@ export default async function StudyAnalysisPage() {
               <ActivityHeatmap cells={heatmap} />
             </div>
             <p className="mt-2 text-[10.5px] text-muted-foreground">
-              헌법 제8조(도파민 트리거) — 매일의 학습이 그래프 한 칸으로 누적됩니다.
+              매일의 학습이 그래프 한 칸으로 누적됩니다.
             </p>
           </CardContent>
         </Card>
 
         <p className="text-[10.5px] text-muted-foreground">
-          본 분석은 <strong>본인 계정의 실제 학습 기록</strong>으로 산출됩니다 (헌법
-          v1.10 · 제13조의2).
+          본 분석은 <strong>본인 계정의 실제 학습 기록</strong>으로 산출됩니다.
         </p>
       </div>
     </div>

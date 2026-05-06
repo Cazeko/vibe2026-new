@@ -19,6 +19,7 @@ import {
   examPapers,
   userCardState,
 } from "@/lib/db/schema";
+import { getSessionLabel } from "@/lib/exam/sessions";
 import type { CardType } from "@/types";
 
 const REVIEW_STATE_THRESHOLD = 2;
@@ -236,17 +237,7 @@ export function formatPaperLabel(
   itemNo: number | null,
 ): string | null {
   if (!year || !session || !itemNo) return null;
-  const sessionLabel =
-    session === "essay"
-      ? "교직논술"
-      : session === "A"
-        ? "교육과정 A"
-        : session === "B"
-          ? "교육과정 B"
-          : session === "combined"
-            ? "통합"
-            : session;
-  return `${year}학년도 ${sessionLabel} ${itemNo}번`;
+  return `${year}학년도 ${getSessionLabel(session)} ${itemNo}번`;
 }
 
 // 시드 카드 단건 조회 — 풀이 페이지·상세 화면용.

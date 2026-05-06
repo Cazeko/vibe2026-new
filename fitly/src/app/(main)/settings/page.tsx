@@ -146,7 +146,7 @@ export default function SettingsPage() {
                     </SelectContent>
                   </Select>
                   <p className="text-[11px] text-muted-foreground">
-                    헌법 v3.0 제15조 — 17개 지역 교육청 (선택 입력). 합격 컷은 비공개.
+                    17개 지역 교육청 중 선택 (선택 입력). 합격 컷은 공개되지 않습니다.
                   </p>
                 </div>
 
@@ -273,9 +273,9 @@ export default function SettingsPage() {
               <div className="text-[12px] text-foreground/80 leading-relaxed">
                 <p className="font-semibold">개인정보·저작권 정책</p>
                 <ul className="mt-1.5 space-y-0.5 text-[11px]">
-                  <li>• 학습 기록은 본인만 접근합니다 (제28조).</li>
-                  <li>• 인강·사설 교재 인덱싱은 금지됩니다 (제27조).</li>
-                  <li>• 합격 보장·예측 표현은 사용하지 않습니다 (제29조).</li>
+                  <li>• 학습 기록은 본인만 접근합니다.</li>
+                  <li>• 인강·사설 교재 인덱싱은 하지 않습니다.</li>
+                  <li>• 합격 보장·점수 예측 표현은 사용하지 않습니다.</li>
                 </ul>
               </div>
             </CardContent>

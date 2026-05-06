@@ -7,6 +7,7 @@ import {
   getReviewQueue,
   getReviewQueueStats,
 } from "@/lib/seed-review/queries";
+import { getSessionLabel } from "@/lib/exam/sessions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export default async function SeedReviewPage() {
     <div className="px-8 py-10 max-w-6xl">
       <PageHeader
         title="시드 검토 큐"
-        subtitle={`AI 생성 답안의 운영자 검수 (헌법 제18조의2 · v3.3 9항 정합)`}
+        subtitle={`AI 생성 답안의 운영자 검수`}
       />
 
       <div className="grid grid-cols-3 gap-4 mb-8">
@@ -43,7 +44,7 @@ export default async function SeedReviewPage() {
               >
                 <div className="flex items-baseline justify-between gap-4">
                   <div className="font-mono text-xs text-app-muted">
-                    {row.year} {labelOfSession(row.session)} · {row.itemNo}번
+                    {row.year} {getSessionLabel(row.session)} · {row.itemNo}번
                   </div>
                   <div className="flex gap-2 text-[11px]">
                     {row.format && <Tag>{row.format}</Tag>}
@@ -102,10 +103,3 @@ function Tag({ children }: { children: React.ReactNode }) {
   );
 }
 
-function labelOfSession(s: string): string {
-  return (
-    { essay: "교직논술", A: "교육과정 A", B: "교육과정 B", combined: "통합본" }[
-      s
-    ] ?? s
-  );
-}

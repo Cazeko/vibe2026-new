@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useRef } from "react";
 
-// 헌법 v1.10 — 학습 세션 추적·로깅 훅.
-// 페이지 마운트 시 시작 시각을 잡고, 카운터(answered/correct/cards)를 누적한다.
+// 헌법 v3.0 제9조·제13조의2 — 학습 세션 추적·로깅 훅.
+// 페이지 마운트 시 시작 시각을 잡고 카운터(cards/correct/total)를 누적,
 // finish() 호출 시 /api/study/log 에 한 번 POST한다.
+// (D-S2 — study/[track]/_components/study-card-form 마운트 시 본 훅 hookup 예정)
 
-type Mode = "vocab" | "exam" | "review";
+type Mode = "quiz" | "keyword" | "mistake";
 
 export function useStudySession(mode: Mode) {
   const startedRef = useRef(Date.now());

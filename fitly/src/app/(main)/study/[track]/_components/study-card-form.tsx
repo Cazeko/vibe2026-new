@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 import type { CardType } from "@/types";
 import { submitAnswer, gradeCard } from "../actions";
@@ -69,6 +70,7 @@ const GRADES: {
 
 export function StudyCardForm({ card }: { card: CardData }) {
   const router = useRouter();
+  const { recordCard } = useStudySession(card.type);
   const [answer, setAnswer] = useState("");
   const [revealed, setRevealed] = useState(card.type === "keyword");
   const [pending, startTransition] = useTransition();
@@ -89,6 +91,10 @@ export function StudyCardForm({ card }: { card: CardData }) {
   }
 
   function handleGrade(grade: Grade) {
+    // again = lapse (incorrect), 나머지(hard·good·easy) = passed (correct).
+    // 학습 시간/정답률 통계가 dashboard·me·study-analysis로 누적된다.
+    const isCorrect = grade !== "again";
+    recordCard(isCorrect);
     startTransition(async () => {
       await gradeCard(card.id, grade);
       setAnswer("");
@@ -203,7 +209,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
             />
             <p className="text-[12.5px] text-foreground/80 leading-relaxed">
               본 카드의 답안·해설이 아직 시드되지 않았습니다. 운영자 시드 후 자동
-              표시됩니다 (헌법 제30조의2 4계층 출처 모델 정합).
+              표시됩니다.
             </p>
           </CardContent>
         </Card>
@@ -214,7 +220,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
         <Card className="border-rule">
           <CardContent className="p-6">
             <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              자가 채점 — FSRS 등급
+              자가 채점 — 복습 등급
             </p>
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {GRADES.map(({ key, label, hint, tone, Icon }) => (
@@ -234,7 +240,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
               ))}
             </div>
             <p className="mt-4 text-[10.5px] text-muted-foreground leading-relaxed">
-              {`"다시"·"어렵"는 다음 학습 시 다시 등장합니다. 풀이 트랙에서 "다시"로 평가하면 오답 트랙에 자동 합류합니다 (헌법 제13조의2 5항).`}
+              {`"다시"·"어렵"는 다음 학습 시 다시 등장합니다. 풀이 트랙에서 "다시"로 평가하면 오답 트랙에 자동 합류합니다.`}
             </p>
           </CardContent>
         </Card>

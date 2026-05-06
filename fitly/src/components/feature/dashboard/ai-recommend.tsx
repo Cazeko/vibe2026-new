@@ -28,8 +28,8 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
             </h2>
             <p className="mt-2 text-[12px] text-muted-foreground leading-relaxed">
               {weakest
-                ? `${weakest.label} 유형을 집중 학습하시면 학습 진척도를 더 빠르게 올릴 수 있습니다.`
-                : "기출 풀이를 시작하면 AI 가 취약 유형을 분석해 드립니다."}
+                ? `${weakest.label} 영역을 집중 학습하시면 학습 진척도를 더 빠르게 올릴 수 있습니다.`
+                : "풀이·키워드·오답 트랙을 시작하면 AI 가 취약 영역을 분석해 드립니다."}
             </p>
             <p className="mt-1 text-[10px] text-muted-foreground">
               ※ AI 추천은 본인 학습 이력 집계 산출물 (검증 필요).
@@ -39,7 +39,7 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
 
         <div className="mt-4">
           <Button asChild size="sm" className="h-8 px-4 text-xs">
-            <Link href="/study/exam">추천 문제 풀기</Link>
+            <Link href="/study/quiz">추천 풀이 시작</Link>
           </Button>
         </div>
       </CardContent>

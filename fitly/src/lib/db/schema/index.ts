@@ -10,6 +10,7 @@ export * from "./learning-logs";
 
 // v3.0 신설 — 헌법 v3.0 제2조·제13조의2·제13조의3·제15조 정합
 export * from "./regions";
+export * from "./cut-scores";
 export * from "./exam-papers";
 export * from "./exam-items";
 export * from "./cards";

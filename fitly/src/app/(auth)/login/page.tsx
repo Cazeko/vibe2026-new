@@ -9,7 +9,7 @@ export default function LoginPage() {
         </span>
         <h1 className="font-serif text-3xl font-medium tracking-tight">로그인</h1>
         <p className="font-serif text-sm text-muted-foreground text-center text-balance">
-          편입은 열심히가 아니라, <em className="text-evergreen">맞게(Fit)</em> 하는 게임입니다.
+          임용은 열심히 하는 게 아니라, <em className="text-evergreen">맞게(Fit)</em> 하는 게임입니다.
         </p>
       </div>
       <AuthForm mode="login" />

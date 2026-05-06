@@ -45,10 +45,10 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
           <div className="mt-3 grid place-items-center rounded-lg border border-dashed border-rule bg-background/50 py-7 text-center text-[11.5px] text-muted-foreground">
             <span className="font-medium text-foreground">아직 분석할 데이터가 없어요</span>
             <Link
-              href="/study/exam"
+              href="/study/quiz"
               className="mt-1 text-[10px] text-evergreen hover:underline"
             >
-              기출 풀이로 시작 ›
+              풀이 트랙 시작 ›
             </Link>
           </div>
         ) : (
