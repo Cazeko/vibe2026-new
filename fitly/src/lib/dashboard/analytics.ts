@@ -1,11 +1,11 @@
 // 헌법 v3.0 / v3.0.1 — /study-analysis · /me 전용 보조 집계.
-// D-S1.5 — 폐기 5 (vocabCards/studyCards/mistakes/materials/universities) 의존 제거.
-// 카드 라이브러리 카운트는 cards 다형 테이블 통합 후 D-S2에서 reimplement.
+// D-S1.5 stub 해제 (2026-05-06) — cards 다형 테이블 + user_card_state 통합 query 활용.
 
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { studySessions } from "@/lib/db/schema";
 import type { HeatmapCell } from "@/components/feature/analysis/activity-heatmap";
+import { getCardCounts, getDueCardCounts } from "@/lib/db/queries";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -80,8 +80,8 @@ export async function getSessionStats(userId: string): Promise<SessionStat> {
   };
 }
 
-// v3.0 카드 라이브러리 카운트 (풀이/키워드/오답).
-// cards 다형 테이블 통합 후 D-S2에서 reimplement. 현재는 0 stub.
+// 헌법 v3.0 제13조의2 — 카드 라이브러리 카운트 (풀이/키워드/오답).
+// D-S1.5 stub 해제: getCardCounts + getDueCardCounts 통합 query.
 export type LibraryCounts = {
   quiz: number;
   keyword: number;
@@ -91,14 +91,18 @@ export type LibraryCounts = {
   mistakeDue: number;
 };
 
-export async function getLibraryCounts(_userId: string): Promise<LibraryCounts> {
+export async function getLibraryCounts(userId: string): Promise<LibraryCounts> {
+  const [counts, due] = await Promise.all([
+    getCardCounts(userId),
+    getDueCardCounts(userId),
+  ]);
   return {
-    quiz: 0,
-    keyword: 0,
-    mistake: 0,
-    quizDue: 0,
-    keywordDue: 0,
-    mistakeDue: 0,
+    quiz: counts.quizTotal,
+    keyword: counts.keywordTotal,
+    mistake: counts.mistakeTotal,
+    quizDue: due.quiz,
+    keywordDue: due.keyword,
+    mistakeDue: due.mistake,
   };
 }
 
