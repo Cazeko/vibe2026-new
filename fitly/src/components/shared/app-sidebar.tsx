@@ -69,6 +69,7 @@ export function AppSidebar() {
               <li key={href}>
                 <Link
                   href={href}
+                  prefetch={false}
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] font-medium transition-colors",
@@ -89,6 +90,7 @@ export function AppSidebar() {
       <div className="border-t border-rule px-3 py-3 space-y-0.5">
         <Link
           href="/settings"
+          prefetch={false}
           aria-current={pathname.startsWith("/settings") ? "page" : undefined}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] transition-colors",
