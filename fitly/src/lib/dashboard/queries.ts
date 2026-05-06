@@ -269,9 +269,10 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
   ];
 }
 
-// v3.0 / D-S1.5 — questionType 기반 약점 분석은 cards.type / exam_items.format 통합 후
-// D-S2에서 reimplement. 현재는 빈 배열.
-async function computeWeakTypes(_userId: string): Promise<WeakType[]> {
+// v3.0 / D-S1.5 — questionType 기반 약점 분석은 cards.type / exam_items.format
+// 통합 후 D-S2에서 reimplement. 현재는 빈 배열 — 매개변수 미사용 경고 회피를
+// 위해 인자를 받지 아니한다 (D-S2 시 user_attempts JOIN으로 인자 부활).
+async function computeWeakTypes(): Promise<WeakType[]> {
   return [];
 }
 
@@ -282,7 +283,7 @@ export async function getDashboardSummary(
     computeKpi(userId),
     computeTrend(userId),
     computePlan(userId),
-    computeWeakTypes(userId),
+    computeWeakTypes(),
   ]);
 
   const isEmpty =

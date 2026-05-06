@@ -128,6 +128,12 @@ export function StudyCardForm({ card }: { card: CardData }) {
           <div className="mt-6 space-y-4">
             {imageUrl && (
               <div className="overflow-hidden rounded-md border border-rule">
+                {/*
+                  PNG는 학년도별 가변 비율 + Vercel Image optimization 무료
+                  한도(1,000장/월) 초과 시 비용 발생 → 본 시점은 native
+                  <img>로 직접 노출. Supabase Storage가 이미 CDN 역할.
+                */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imageUrl}
                   alt="시험 본문 (PDF 페이지)"
