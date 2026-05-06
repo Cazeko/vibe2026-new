@@ -1,24 +1,32 @@
--- Fitly · 0009_exam_pages_storage
+-- Fitly · 0009_exam_pages_storage (문서용 — SQL Editor 실행 불필요)
 -- 헌법 v3.0 제13조의2 9항 (v3.3 본문 정확성 정책) 정합 — stem_image_path 호스팅.
--- KICE 공개 기출 PDF 페이지 PNG는 운영자가 시드 시 본 버킷에 업로드하고
--- 사용자에게는 public read로 노출된다. 시드 데이터는 모든 사용자 공통 (제13조의2 6항).
+--
+-- ⚠ 본 SQL은 SQL Editor에서 직접 실행하지 아니한다.
+-- Supabase SQL Editor의 postgres role은 storage.buckets·storage.objects의
+-- owner가 아니라 INSERT 또는 CREATE POLICY 시 ERROR 42501이 발생한다.
+--
+-- 실제 버킷 생성은 다음 두 방법 중 하나로 수행한다:
+--   1. (권장) `node scripts/seed/upload-pages.mjs` — service_role 키로
+--      Supabase Storage REST API를 호출하여 ensureBucket()이 자동 생성.
+--   2. Supabase Dashboard → Storage → New bucket
+--      - Name: exam-pages
+--      - Public bucket: ON
+--      - File size limit: 10485760 (10 MB)
+--      - Allowed MIME types: image/png, image/webp, image/jpeg
+--
+-- 본 SQL은 마이그레이션 이력 보존 + 명세 기록 목적으로만 보존된다 (제45조 정합).
 
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'exam-pages',
-  'exam-pages',
-  true,                                          -- public read (KICE 공개 자료)
-  10485760,                                      -- 10MB per file
-  ARRAY['image/png', 'image/webp', 'image/jpeg'] -- pdftocairo 출력 + 압축 변형 허용
-)
-ON CONFLICT (id) DO NOTHING;
+-- (참고용 — 실행 X)
+-- INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+-- VALUES (
+--   'exam-pages',
+--   'exam-pages',
+--   true,
+--   10485760,
+--   ARRAY['image/png', 'image/webp', 'image/jpeg']
+-- )
+-- ON CONFLICT (id) DO NOTHING;
 
--- 정책: anon/authenticated public read.
--- 업로드/삭제는 service_role 키로만 (운영자 시드 시 — 헌법 제18조 1항 단서 정합).
-DROP POLICY IF EXISTS "exam_pages_public_read" ON storage.objects;
-CREATE POLICY "exam_pages_public_read"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'exam-pages');
-
-COMMENT ON POLICY "exam_pages_public_read" ON storage.objects IS
-  '헌법 v3.0 제13조의2 6항 — 시드 시험지 PNG는 모든 사용자에게 동일 노출.';
+-- public=true 버킷이면 storage.objects의 default SELECT 정책이 자동 적용되어
+-- 별도 CREATE POLICY가 불필요. 업로드는 service_role 키로 수행 (RLS 우회).
+SELECT 1; -- no-op (헌법 제45조 — 마이그레이션 이력 보존용)
