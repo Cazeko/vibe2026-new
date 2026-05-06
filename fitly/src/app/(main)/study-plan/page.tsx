@@ -78,21 +78,21 @@ type StudyMode = {
 // 헌법 v3.0 제13조 — 학습 페이지의 3 트랙 SRS 큐 (풀이/키워드/오답).
 const MODES: StudyMode[] = [
   {
-    href: "/study",
+    href: "/study/quiz",
     title: "풀이 트랙",
     description: "서술형 기출 (2014~2026) — 답안 작성 + AI 모범답안 비교",
     hint: "오늘 권장 자동",
     Icon: Layers,
   },
   {
-    href: "/study",
+    href: "/study/keyword",
     title: "키워드 트랙",
     description: "개념 정리 노트 — 정의·핵심 요소·출제 이력",
     hint: "오늘 권장 자동",
     Icon: BookOpen,
   },
   {
-    href: "/study",
+    href: "/study/mistake",
     title: "오답 트랙",
     description: "풀이의 again/hard 자동 합류",
     hint: "복습 대기 자동",
@@ -136,7 +136,7 @@ export default async function StudyPlanPage() {
         title="학습 계획"
         subtitle="시험일 기준으로 오늘 해야 할 양을 자동 계산해 드립니다."
       />
-      <div className="px-6 space-y-3">
+      <div className="px-6 mx-auto max-w-7xl space-y-3">
         {/* 시험일 역산 일일 목표 */}
         <Card className="border-rule">
           <CardContent className="p-5">
@@ -222,7 +222,7 @@ export default async function StudyPlanPage() {
             </div>
             <div className="flex items-center gap-2">
               <Button asChild size="sm" className="h-8 rounded-xl">
-                <Link href="/study">
+                <Link href="/study/quiz">
                   학습 시작 <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -325,8 +325,16 @@ export default async function StudyPlanPage() {
                 마스터될 때까지 반복.
               </li>
               <li>
-                <strong>팟캐스트</strong> — 영역·연도·주제 선택 후 NotebookLM 스타일
-                2인 화자 대화체로 자동 생성, 이동 중에도 청취 학습.
+                <strong>
+                  <Link
+                    href="/podcast"
+                    className="text-evergreen hover:underline underline-offset-2"
+                  >
+                    팟캐스트 →
+                  </Link>
+                </strong>{" "}
+                영역·연도·주제 선택 후 NotebookLM 스타일 2인 화자 대화체로 자동
+                생성, 이동 중에도 청취 학습.
               </li>
             </ol>
           </CardContent>

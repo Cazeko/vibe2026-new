@@ -196,7 +196,7 @@ export default async function MePage() {
   return (
     <div className="min-h-screen pb-10">
       <PageHeader title="마이 페이지" subtitle="프로필과 학습 기록을 한 페이지에 모았습니다." />
-      <div className="px-6 space-y-3">
+      <div className="px-6 mx-auto max-w-7xl space-y-3">
         {/* 프로필 + 목표 */}
         <Card className="border-rule">
           <CardContent className="p-5 flex items-center gap-4 flex-wrap">
@@ -224,7 +224,7 @@ export default async function MePage() {
                 </Link>
               </Button>
               <Button asChild size="sm">
-                <Link href="/study">학습 시작</Link>
+                <Link href="/study/quiz">학습 시작</Link>
               </Button>
             </div>
           </CardContent>
@@ -257,7 +257,7 @@ export default async function MePage() {
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-lg font-medium tracking-tight">풀이 카드</h2>
                 <Link
-                  href="/study"
+                  href="/study/quiz"
                   className="text-[11px] text-muted-foreground hover:text-foreground"
                 >
                   풀기 ›
@@ -282,7 +282,7 @@ export default async function MePage() {
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-lg font-medium tracking-tight">키워드 카드</h2>
                 <Link
-                  href="/study"
+                  href="/study/keyword"
                   className="text-[11px] text-muted-foreground hover:text-foreground"
                 >
                   학습 ›
@@ -307,7 +307,7 @@ export default async function MePage() {
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-lg font-medium tracking-tight">오답 카드</h2>
                 <Link
-                  href="/study"
+                  href="/study/mistake"
                   className="text-[11px] text-muted-foreground hover:text-foreground"
                 >
                   복습 ›
