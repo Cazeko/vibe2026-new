@@ -1,3 +1,9 @@
+-- v3.0/v3.0.1 마이그레이션 — 폐기 4 테이블 DROP (헌법 v3.0 plan §1.2 정합)
+-- 백업: backups/2026-05-06-pre-drop/ (245 rows)
+DROP TABLE IF EXISTS "study_cards" CASCADE;--> statement-breakpoint
+DROP TABLE IF EXISTS "vocab_cards" CASCADE;--> statement-breakpoint
+DROP TABLE IF EXISTS "materials" CASCADE;--> statement-breakpoint
+DROP TABLE IF EXISTS "mistakes" CASCADE;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_profiles" (
 	"user_id" uuid PRIMARY KEY NOT NULL,
 	"target_university" varchar(16),

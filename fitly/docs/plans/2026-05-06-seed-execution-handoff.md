@@ -154,8 +154,9 @@ feat(seed): SXX {year} 풀세트 시드 — {N}문항/{P}점/{T}분 (v3.3)
 | Phase 4-1 | 2026-05-06 | combined (2009/2010/2011) | 2b85574 | ✅ 150문항 적재 (모두 객관식·skip_quiz_card=true); 2009·2010 폰트 손상으로 verified_text=false |
 | Phase 4-2a | 2026-05-06 | keyword dedup (전체 papers) | 9eedd37 | ✅ 593 items에서 2,691 instances → 2,044 unique; 2009/2010 over-tagging 발견 |
 | Phase 4-2b | 2026-05-06 | concept note 생성 (빈도≥2) | 85aee51 | ✅ 빈도≥4: 30개 풍부(평균 401자); 빈도 2~3: 175개 간소(평균 221자); 빈도 1: 1,839개 null |
-| Phase 4-3a | 2026-05-06 | schema 정리 + drizzle generate | 73557e4 | ⚠ 부분 완료 — schema 5 제거 + drizzle/0000_exotic_boomerang.sql 생성 (12 CREATE/6 FK/12 INDEX). **차단 1**: DROP TABLE 0건 (Supabase 잔존 가능 — 수동 보강 필요). **차단 2**: `npm run build` 실패 (D-S1.5 후속 미완 — API routes·components가 폐기 schema import 중) |
-| Phase 4-3b | — | drizzle push + DB 적재 | — | ⏸ **차단** — D-S1.5 (폐기 사용처 정리) 선결 + DROP TABLE 보강 + 주인님 승인 |
+| Phase 4-3a | 2026-05-06 | schema 정리 + drizzle generate | 73557e4 | ✅ schema 5 제거 + drizzle/0000_exotic_boomerang.sql 생성 (12 CREATE/6 FK/12 INDEX) |
+| D-S1.5 | 2026-05-06 | 폐기 사용처 코드 정리 | 506c15a | ✅ 18 routes + 5 pages + components 폐기, `npm run build` 통과 (10/10 tests) |
+| Phase 4-3b | 2026-05-06 | DB 백업 + DROP 보강 + 적재 | (직접) | ✅ **완료** — 백업 245 rows + DROP 4 보강 + drizzle/0000 직접 실행 + 적재 스크립트. exam_papers 57, exam_items 593, cards 648 (quiz 443 + keyword 205). 24년 × papers, 모든 row 정합 |
 
 > 각 세션 운영자(또는 Claude)는 본 표 1행을 추가하며 종료.
 
