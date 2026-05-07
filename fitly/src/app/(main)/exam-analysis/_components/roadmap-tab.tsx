@@ -92,7 +92,7 @@ export async function RoadmapTab() {
       <Card className="border-rule">
         <CardContent className="p-0">
           <table className="w-full text-[12.5px]">
-            <thead className="bg-surface-deep/40 text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+            <thead className="bg-secondary/40 text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
               <tr>
                 <th className="text-left px-5 py-2.5 w-16">등급</th>
                 <th className="text-left px-5 py-2.5">영역</th>

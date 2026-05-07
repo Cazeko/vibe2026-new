@@ -31,19 +31,19 @@ export default async function SeedReviewPage() {
       </div>
 
       {queue.length === 0 ? (
-        <div className="text-app-muted text-sm py-12 text-center">
+        <div className="text-muted-foreground text-sm py-12 text-center">
           모든 항목이 검증되었습니다.
         </div>
       ) : (
-        <ul className="divide-y divide-app-line border border-app-line rounded-md bg-app-surface">
+        <ul className="divide-y divide-border border border-border rounded-md bg-card">
           {queue.map((row) => (
             <li key={row.id}>
               <Link
                 href={`/admin/seed-review/${row.id}`}
-                className="block px-5 py-4 hover:bg-app-bg transition-colors"
+                className="block px-5 py-4 hover:bg-background transition-colors"
               >
                 <div className="flex items-baseline justify-between gap-4">
-                  <div className="font-mono text-xs text-app-muted">
+                  <div className="font-mono text-xs text-muted-foreground">
                     {row.year} {getSessionLabel(row.session)} · {row.itemNo}번
                   </div>
                   <div className="flex gap-2 text-[11px]">
@@ -54,7 +54,7 @@ export default async function SeedReviewPage() {
                     ))}
                   </div>
                 </div>
-                <p className="mt-2 text-sm text-app-fg/80 line-clamp-2">
+                <p className="mt-2 text-sm text-foreground/80 line-clamp-2">
                   {row.answerPreview}
                 </p>
               </Link>
@@ -78,15 +78,15 @@ function StatCard({
   return (
     <div
       className={
-        "rounded-md border border-app-line p-5 " +
-        (highlight ? "bg-app-accent/5" : "bg-app-surface")
+        "rounded-md border border-border p-5 " +
+        (highlight ? "bg-evergreen/5" : "bg-card")
       }
     >
-      <div className="text-xs text-app-muted">{label}</div>
+      <div className="text-xs text-muted-foreground">{label}</div>
       <div
         className={
           "mt-1 text-2xl font-serif " +
-          (highlight ? "text-app-accent" : "text-app-fg")
+          (highlight ? "text-evergreen" : "text-foreground")
         }
       >
         {value.toLocaleString("ko-KR")}
@@ -97,7 +97,7 @@ function StatCard({
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="px-2 py-0.5 rounded border border-app-line text-app-muted">
+    <span className="px-2 py-0.5 rounded border border-border text-muted-foreground">
       {children}
     </span>
   );

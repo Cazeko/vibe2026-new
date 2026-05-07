@@ -236,7 +236,7 @@ export default async function MePage() {
             <Card key={label} className="border-rule">
               <CardContent className="p-5 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
                   <p className="mt-2 font-serif text-2xl font-medium leading-none tracking-tight num">{value}</p>
                 </div>
                 <span
@@ -342,10 +342,8 @@ export default async function MePage() {
               {badges.map((b) => (
                 <li
                   key={b.id}
-                  className={`rounded-lg border px-3 py-3 text-center transition-colors ${
-                    b.earned
-                      ? "border-warning/40 bg-warning/[0.06]"
-                      : "border-rule bg-background opacity-60"
+                  className={`rounded-lg border border-rule px-3 py-3 text-center transition-colors ${
+                    b.earned ? "bg-card" : "bg-background opacity-60"
                   }`}
                 >
                   <span

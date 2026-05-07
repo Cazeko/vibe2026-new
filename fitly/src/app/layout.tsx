@@ -44,8 +44,8 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // userScalable·maximumScale 제거 — 사용자 zoom 차단은 WCAG 1.4.4 위반 (시각
+  // 약자가 텍스트 확대 못 함). PWA 설치 후에도 사용자가 자유롭게 zoom 가능.
 };
 
 export default function RootLayout({

@@ -44,7 +44,7 @@ export function AppSidebar() {
   return (
     <aside
       aria-label="주 메뉴"
-      className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-56 flex-col bg-sidebar text-sidebar-foreground border-r border-rule"
+      className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-60 flex-col bg-sidebar text-sidebar-foreground border-r border-rule"
     >
       <div className="px-5 pt-6 pb-5">
         <Link

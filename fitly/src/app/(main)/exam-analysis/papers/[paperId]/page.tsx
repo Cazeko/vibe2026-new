@@ -192,7 +192,7 @@ function ItemCard({
                 </summary>
                 <div className="mt-4 space-y-4">
                   {item.answerMd && (
-                    <Card className="border-l-4 border-evergreen border-y border-r border-rule bg-card">
+                    <Card className="border-l-[3px] border-l-evergreen border-y border-r border-rule bg-card">
                       <CardContent className="p-4">
                         <div className="text-[10.5px] uppercase tracking-[0.12em] text-evergreen mb-2">
                           AI 모범답안
@@ -202,7 +202,7 @@ function ItemCard({
                     </Card>
                   )}
                   {item.explanationMd && (
-                    <Card className="border-l-4 border-info border-y border-r border-rule bg-card">
+                    <Card className="border-l-[3px] border-l-info border-y border-r border-rule bg-card">
                       <CardContent className="p-4">
                         <div className="text-[10.5px] uppercase tracking-[0.12em] text-info mb-2">
                           해설

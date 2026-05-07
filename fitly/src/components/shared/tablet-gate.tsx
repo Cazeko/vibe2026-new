@@ -6,10 +6,11 @@ export function TabletGate() {
   return (
     <div className="lg:hidden flex min-h-screen items-center justify-center bg-background px-6 text-center">
       <div className="max-w-sm space-y-4">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
-          <MonitorSmartphone className="h-7 w-7" aria-hidden />
-        </div>
-        <h1 className="text-xl font-bold tracking-tight">
+        <MonitorSmartphone
+          className="mx-auto h-12 w-12 text-muted-foreground"
+          aria-hidden
+        />
+        <h1 className="font-serif text-xl font-medium tracking-tight">
           태블릿 가로 모드를 권장합니다
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">

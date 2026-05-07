@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { getReviewItemDetail } from "@/lib/seed-review/queries";
@@ -31,7 +32,7 @@ export default async function SeedReviewItemPage({
     <div className="px-8 py-10 max-w-5xl">
       <Link
         href="/admin/seed-review"
-        className="text-xs text-app-muted hover:text-app-fg"
+        className="text-xs text-muted-foreground hover:text-foreground"
       >
         ← 검토 큐로
       </Link>
@@ -46,17 +47,17 @@ export default async function SeedReviewItemPage({
           <Badge label="본문" verified={item.verifiedText} />
           <Badge label="답안" verified={item.verifiedAnswer} />
         </div>
-        <p className="mt-2 text-xs text-app-muted">
+        <p className="mt-2 text-xs text-muted-foreground">
           본문은 PDF 원본 직접 사용으로 자동 검증됩니다. 답안은 AI 생성이므로 운영자 검수가 필요합니다.
         </p>
       </Section>
 
       <Section title="문제 본문 (PDF 원본)">
-        <div className="rounded-md border border-app-line bg-app-surface p-5 whitespace-pre-wrap text-sm text-app-fg/90 font-mono">
+        <div className="rounded-md border border-border bg-card p-5 whitespace-pre-wrap text-sm text-foreground/90 font-mono">
           {item.stemText || "(stem_text 없음 — stemImagePath PNG 참조)"}
         </div>
         {item.stemImagePath && (
-          <p className="mt-2 text-xs text-app-muted font-mono">
+          <p className="mt-2 text-xs text-muted-foreground font-mono">
             이미지 경로: {item.stemImagePath}
           </p>
         )}
@@ -70,13 +71,13 @@ export default async function SeedReviewItemPage({
       </Section>
 
       <Section title="모범답안 (LLM 생성, 검증 필요)">
-        <div className="rounded-md border border-app-line bg-app-surface p-5 whitespace-pre-wrap text-sm">
+        <div className="rounded-md border border-border bg-card p-5 whitespace-pre-wrap text-sm">
           {item.answerMd ?? "(답안 없음)"}
         </div>
       </Section>
 
       <Section title="해설 (LLM 생성)">
-        <div className="rounded-md border border-app-line bg-app-surface p-5 whitespace-pre-wrap text-sm">
+        <div className="rounded-md border border-border bg-card p-5 whitespace-pre-wrap text-sm">
           {item.explanationMd ?? "(해설 없음)"}
         </div>
       </Section>
@@ -107,7 +108,7 @@ function Section({
 }) {
   return (
     <section className="mt-8">
-      <h2 className="text-sm font-medium text-app-muted mb-3">{title}</h2>
+      <h2 className="text-sm font-medium text-muted-foreground mb-3">{title}</h2>
       {children}
     </section>
   );
@@ -116,8 +117,8 @@ function Section({
 function KV({ k, v }: { k: string; v: string }) {
   return (
     <div>
-      <div className="text-xs text-app-muted">{k}</div>
-      <div className="mt-1 text-app-fg">{v || "—"}</div>
+      <div className="text-xs text-muted-foreground">{k}</div>
+      <div className="mt-1 text-foreground">{v || "—"}</div>
     </div>
   );
 }
@@ -126,13 +127,21 @@ function Badge({ label, verified }: { label: string; verified: boolean }) {
   return (
     <span
       className={
-        "px-3 py-1 rounded-full text-xs border " +
+        "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs border " +
         (verified
-          ? "border-app-accent text-app-accent"
-          : "border-app-line text-app-muted")
+          ? "border-evergreen text-evergreen"
+          : "border-border text-muted-foreground")
       }
     >
-      {label} {verified ? "✓ 검증" : "검증 필요"}
+      {label}
+      {verified ? (
+        <>
+          <CheckCircle2 className="h-3 w-3" aria-hidden />
+          검증
+        </>
+      ) : (
+        "검토 필요"
+      )}
     </span>
   );
 }

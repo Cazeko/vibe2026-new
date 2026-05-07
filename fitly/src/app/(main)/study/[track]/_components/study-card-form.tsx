@@ -263,7 +263,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
       )}
 
       {revealed && !card.backMd && (
-        <Card className="border-warning/40 bg-warning/[0.04]">
+        <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
           <CardContent className="p-6 flex gap-3">
             <AlertCircle
               className="h-5 w-5 text-warning shrink-0 mt-0.5"
@@ -291,7 +291,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
                   type="button"
                   disabled={pending}
                   onClick={() => handleGrade(key)}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-surface px-3 py-3.5 text-[13px] font-medium transition-colors disabled:opacity-50 ${tone}`}
+                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-card px-3 py-3.5 text-[13px] font-medium transition-colors disabled:opacity-50 ${tone}`}
                 >
                   <Icon className="h-4 w-4" aria-hidden />
                   <span>{label}</span>

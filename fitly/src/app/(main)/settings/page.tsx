@@ -218,7 +218,7 @@ export default function SettingsPage() {
                       key={value}
                       type="button"
                       onClick={() => setTheme(value)}
-                      className={`flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-[11px] transition-colors ${
+                      className={`flex flex-col items-center gap-1.5 rounded-lg border px-3 py-3 text-[11px] transition-colors ${
                         active
                           ? "border-primary bg-primary/5 text-primary"
                           : "border-rule hover:bg-secondary/40"
@@ -244,7 +244,7 @@ export default function SettingsPage() {
               <CardTitle className="text-sm">계정</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="rounded-xl border border-rule bg-background px-3 py-2.5">
+              <div className="rounded-lg border border-rule bg-background px-3 py-2.5">
                 <p className="text-[11px] text-muted-foreground">로그인 이메일</p>
                 <p className="mt-0.5 text-[13px] font-medium truncate">
                   {email ?? "—"}
@@ -267,7 +267,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-warning/40 bg-warning/[0.06]">
+          <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
             <CardContent className="p-5 flex gap-3">
               <Info className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden />
               <div className="text-[12px] text-foreground/80 leading-relaxed">

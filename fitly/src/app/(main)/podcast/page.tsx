@@ -126,7 +126,7 @@ export default async function PodcastPage() {
 
         {/* 음성 합성 통합 안내 (시드 + TTS 미통합 시점) */}
         {empty && (
-          <Card className="border-warning/40 bg-warning/[0.06]">
+          <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
             <CardContent className="p-6 flex gap-3">
               <ShieldAlert
                 className="h-5 w-5 text-warning shrink-0 mt-0.5"
@@ -152,7 +152,7 @@ export default async function PodcastPage() {
             <div className="flex items-start gap-4">
               <span
                 aria-hidden
-                className="grid h-11 w-11 place-items-center rounded-lg bg-evergreen text-primary-foreground font-serif italic font-medium"
+                className="grid h-8 w-8 place-items-center rounded-full bg-evergreen text-primary-foreground font-serif italic font-medium text-sm"
               >
                 F
               </span>
