@@ -260,7 +260,8 @@ export function FitlySignIn({ mode }: Props) {
         className="hidden md:flex flex-1 relative bg-secondary/30 overflow-hidden"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(to bottom, transparent 0, transparent 35px, hsl(var(--color-rule)) 35px, hsl(var(--color-rule)) 36px)",
+            "repeating-linear-gradient(to bottom, transparent 0, transparent 47px, hsl(var(--color-rule)) 47px, hsl(var(--color-rule)) 48px)",
+          backgroundPositionY: "9px",
         }}
         aria-hidden
       >
@@ -270,14 +271,7 @@ export function FitlySignIn({ mode }: Props) {
             <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-5">
               Fitly · 초등 임용 1차 학습 플래너
             </p>
-            <p className="font-serif text-3xl lg:text-4xl leading-[1.35] tracking-tight text-foreground/95">
-              임용은 열심히 하는 게 아니라,
-              <br />
-              <em className="font-serif italic font-semibold text-foreground">
-                맞게(Fit)
-              </em>{" "}
-              하는 게임입니다.
-            </p>
+            <HandwritingHeroCopy />
           </div>
 
           {/* 하단: 기능 강조 카드 3장 — 카드 제목은 sans Small (§3 스케일) */}
@@ -315,5 +309,36 @@ function GlassInputWrapper({ children }: { children: React.ReactNode }) {
     <div className="mt-1.5 rounded-lg border border-rule-strong bg-background transition-[box-shadow,border-color] focus-within:border-evergreen focus-within:shadow-[0_0_0_3px_hsl(var(--color-accent)/0.18)]">
       {children}
     </div>
+  );
+}
+
+function HandwritingHeroCopy() {
+  return (
+    <svg
+      className="handwriting-copy text-foreground"
+      viewBox="0 0 720 126"
+      role="img"
+      aria-label="임용은 열심히 하는 게 아니라, 맞게(Fit) 하는 게임입니다."
+    >
+      <text className="handwriting-fill handwriting-fill-1" x="0" y="38">
+        임용은 열심히 하는 게 아니라,
+      </text>
+      <text className="handwriting-fill handwriting-fill-2" x="0" y="94">
+        <tspan className="handwriting-accent" fontStyle="italic" fontWeight="700">
+          맞게(Fit)
+        </tspan>
+        <tspan dx="10">하는 게임입니다.</tspan>
+      </text>
+
+      <text className="handwriting-stroke handwriting-stroke-1" x="0" y="38">
+        임용은 열심히 하는 게 아니라,
+      </text>
+      <text className="handwriting-stroke handwriting-stroke-2" x="0" y="94">
+        <tspan className="handwriting-accent" fontStyle="italic" fontWeight="700">
+          맞게(Fit)
+        </tspan>
+        <tspan dx="10">하는 게임입니다.</tspan>
+      </text>
+    </svg>
   );
 }
