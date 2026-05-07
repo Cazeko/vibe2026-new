@@ -235,7 +235,7 @@ export default async function StudyPlanPage() {
           {MODES.map(({ href, title, description, Icon, hint }) => (
             <li key={title}>
               <Link href={href} className="block">
-                <Card className="border-rule transition-all hover:border-rule-strong hover:-translate-y-0.5">
+                <Card className="border-rule transition-colors hover:border-rule-strong">
                   <CardContent className="p-5">
                     <span
                       aria-hidden
@@ -263,7 +263,7 @@ export default async function StudyPlanPage() {
             <h2 className="font-serif text-lg font-medium tracking-tight">
               오늘의 플랜 진행도
             </h2>
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-3 -mx-5 divide-y divide-rule border-y border-rule">
               {summary.plan.map((item) => {
                 const Icon = STATE_ICON[item.state];
                 const tone = STATE_TONE[item.state];
@@ -273,10 +273,10 @@ export default async function StudyPlanPage() {
                     <Link
                       href={isLocked ? "#" : item.href}
                       aria-disabled={isLocked}
-                      className={`flex items-center gap-3 rounded-lg border border-rule bg-background px-3 py-3 transition-colors ${
+                      className={`flex items-center gap-3 px-5 py-3 transition-colors ${
                         isLocked
                           ? "opacity-60 cursor-not-allowed"
-                          : "hover:bg-secondary"
+                          : "hover:bg-secondary/40"
                       }`}
                     >
                       <Icon className={`h-5 w-5 shrink-0 ${tone}`} aria-hidden />
