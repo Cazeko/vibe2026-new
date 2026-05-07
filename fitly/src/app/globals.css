@@ -201,17 +201,17 @@
 
 .animate-element {
   opacity: 0;
-  animation: fadeSlideIn 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeSlideIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-slide-right {
   opacity: 0;
-  animation: slideRightIn 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideRightIn 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-testimonial {
   opacity: 0;
-  animation: testimonialIn 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: testimonialIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-delay-100 { animation-delay: 100ms; }
