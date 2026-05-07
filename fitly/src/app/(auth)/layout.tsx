@@ -1,23 +1,7 @@
-import { LoginHero } from "@/components/feature/auth/login-hero";
-
-// (auth) 그룹 공통 레이아웃 — 좌측 hero(공책 + 만년필 글쓰기) + 우측 form 카드.
-// 데스크톱(≥1024px): 좌우 분할. 모바일: 상하 (hero 30vh + form 자연 높이).
-// 디자인 plan: docs/plans/2026-05-06-login-landing-design.md
+// (auth) 그룹은 FitlySignIn 컴포넌트가 자체 layout(좌우 분할)을 가지므로
+// 여기서는 children만 통과한다. RootLayout의 ThemeProvider·body 배경은 그대로.
 export default function AuthLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* 좌측 hero — 데스크톱 60%(lg:h-screen), 모바일 30vh.
-          aside landmark — main 외 보조 콘텐츠. lg:h-screen으로 명시. */}
-      <aside className="relative h-[30vh] lg:h-screen lg:flex-1 lg:basis-3/5 border-b lg:border-b-0 lg:border-r border-rule">
-        <LoginHero />
-      </aside>
-
-      {/* 우측 form 영역 — main landmark (Document should have one main 정합) */}
-      <main className="lg:basis-2/5 lg:max-w-[520px] flex items-center justify-center px-6 py-10 lg:py-16">
-        {children}
-      </main>
-    </div>
-  );
+  return <>{children}</>;
 }
