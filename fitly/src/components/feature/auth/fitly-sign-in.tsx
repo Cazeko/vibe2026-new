@@ -236,7 +236,7 @@ export function FitlySignIn({ mode }: Props) {
               {swap.label}{" "}
               <Link
                 href={swap.href}
-                className="font-medium text-evergreen hover:underline underline-offset-2"
+                className="font-medium text-foreground underline underline-offset-2 hover:text-evergreen"
               >
                 {swap.text}
               </Link>
@@ -263,7 +263,7 @@ export function FitlySignIn({ mode }: Props) {
             <p className="font-serif text-3xl lg:text-4xl xl:text-[2.5rem] leading-[1.35] tracking-tight text-foreground/95">
               임용은 열심히 하는 게 아니라,
               <br />
-              <em className="not-italic font-semibold text-evergreen">
+              <em className="font-serif italic font-semibold text-foreground">
                 맞게(Fit)
               </em>{" "}
               하는 게임입니다.
@@ -280,7 +280,7 @@ export function FitlySignIn({ mode }: Props) {
                 } rounded-lg bg-card border border-rule p-4 lg:p-5`}
               >
                 <card.Icon
-                  className="h-4 w-4 text-evergreen mb-2"
+                  className="h-4 w-4 text-muted-foreground mb-2"
                   aria-hidden
                 />
                 <p className="font-serif text-[14px] font-medium tracking-tight">
