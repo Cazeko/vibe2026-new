@@ -8,7 +8,7 @@
 // - 헌법 §4 펀치라인 그대로 노출
 // - 헌법 §3.2 정직성 — 후기는 익명 가공 자료 X, *기능 강조*로 대체
 
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, Mail, BookOpen, Sparkles, BarChart3 } from "lucide-react";
@@ -37,6 +37,20 @@ const FEATURE_CARDS = [
     body: "서술·논술 답안을 작성하고 AI 모범답안과 비교, 자가 채점.",
   },
 ];
+
+const HANDWRITING_LINES = [
+  {
+    segments: [{ text: "임용은 열심히 하는 게 아니라," }],
+  },
+  {
+    segments: [
+      { text: "맞게", accent: true, units: ["맞게"] },
+      { text: "(Fit)", accent: true, fit: true, units: ["(Fit)"] },
+      { text: " 하는 게임입니다." },
+    ],
+  },
+] as const;
+const HANDWRITING_START_DELAY_MS = 1000;
 
 export function FitlySignIn({ mode }: Props) {
   const router = useRouter();
@@ -257,27 +271,20 @@ export function FitlySignIn({ mode }: Props) {
 
       {/* 우측 hero — 가로 괘선 노트 + 펀치라인 + 기능 강조 카드 */}
       <aside
-        className="hidden md:flex flex-1 relative bg-secondary/30 overflow-hidden"
+        className="auth-paper hidden md:flex flex-1 relative bg-secondary/30 overflow-hidden"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(to bottom, transparent 0, transparent 35px, hsl(var(--color-rule)) 35px, hsl(var(--color-rule)) 36px)",
+            "repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--paper-line) - 1px), hsl(var(--color-rule)) calc(var(--paper-line) - 1px), hsl(var(--color-rule)) var(--paper-line))",
         }}
         aria-hidden
       >
-        <div className="relative z-10 flex flex-col justify-between w-full p-10 lg:p-14">
+        <div className="relative z-10 flex flex-col justify-between w-full px-12 py-12">
           {/* 상단: 펀치라인 */}
-          <div className="animate-slide-right animate-delay-300 max-w-xl pt-10 lg:pt-20">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-5">
+          <div className="animate-slide-right animate-delay-300 handwriting-block">
+            <p className="handwriting-kicker text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
               Fitly · 초등 임용 1차 학습 플래너
             </p>
-            <p className="font-serif text-3xl lg:text-4xl leading-[1.35] tracking-tight text-foreground/95">
-              임용은 열심히 하는 게 아니라,
-              <br />
-              <em className="font-serif italic font-semibold text-foreground">
-                맞게(Fit)
-              </em>{" "}
-              하는 게임입니다.
-            </p>
+            <HandwritingHeroCopy />
           </div>
 
           {/* 하단: 기능 강조 카드 3장 — 카드 제목은 sans Small (§3 스케일) */}
@@ -314,6 +321,50 @@ function GlassInputWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="mt-1.5 rounded-lg border border-rule-strong bg-background transition-[box-shadow,border-color] focus-within:border-evergreen focus-within:shadow-[0_0_0_3px_hsl(var(--color-accent)/0.18)]">
       {children}
+    </div>
+  );
+}
+
+function HandwritingHeroCopy() {
+  let charIndex = 0;
+
+  return (
+    <div
+      className="handwriting-copy text-foreground"
+      role="img"
+      aria-label="임용은 열심히 하는 게 아니라, 맞게(Fit) 하는 게임입니다."
+    >
+      {HANDWRITING_LINES.map((line, lineIdx) => (
+        <p key={`line-${lineIdx}`} className="handwriting-line">
+          {line.segments.flatMap((segment) =>
+            (segment.units ?? Array.from(segment.text)).map((char) => {
+              const delay = HANDWRITING_START_DELAY_MS + charIndex * 55;
+              const key = `char-${lineIdx}-${charIndex}`;
+              charIndex += 1;
+
+              return (
+                <span
+                  key={key}
+                  className={
+                    segment.accent
+                      ? `handwriting-char handwriting-accent${
+                          segment.fit ? " handwriting-fit" : ""
+                        }`
+                      : "handwriting-char"
+                  }
+                  style={
+                    {
+                      "--char-delay": `${delay}ms`,
+                    } as CSSProperties
+                  }
+                >
+                  {char === " " ? "\u00A0" : char}
+                </span>
+              );
+            }),
+          )}
+        </p>
+      ))}
     </div>
   );
 }
