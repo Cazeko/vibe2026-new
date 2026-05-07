@@ -23,7 +23,7 @@ export default function MainSegmentError({
 
   return (
     <div className="min-h-screen px-6 py-12 mx-auto max-w-3xl">
-      <Card className="border-warning/40 bg-warning/[0.06]">
+      <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
         <CardContent className="p-8">
           <div className="flex items-start gap-3">
             <ShieldAlert

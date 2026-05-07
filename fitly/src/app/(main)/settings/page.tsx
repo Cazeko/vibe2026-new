@@ -267,7 +267,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-warning/40 bg-warning/[0.06]">
+          <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
             <CardContent className="p-5 flex gap-3">
               <Info className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden />
               <div className="text-[12px] text-foreground/80 leading-relaxed">

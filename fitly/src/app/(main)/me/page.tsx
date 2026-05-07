@@ -342,10 +342,8 @@ export default async function MePage() {
               {badges.map((b) => (
                 <li
                   key={b.id}
-                  className={`rounded-lg border px-3 py-3 text-center transition-colors ${
-                    b.earned
-                      ? "border-warning/40 bg-warning/[0.06]"
-                      : "border-rule bg-background opacity-60"
+                  className={`rounded-lg border border-rule px-3 py-3 text-center transition-colors ${
+                    b.earned ? "bg-card" : "bg-background opacity-60"
                   }`}
                 >
                   <span

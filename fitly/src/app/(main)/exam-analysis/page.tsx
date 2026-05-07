@@ -202,7 +202,7 @@ function SectionRule() {
 
 function HonestyCard({ className = "" }: { className?: string }) {
   return (
-    <Card className={`${className} border-warning/40 bg-warning/[0.06]`}>
+    <Card className={`${className} border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30`}>
       <CardContent className="p-6 flex gap-3">
         <ShieldAlert
           className="h-5 w-5 text-warning shrink-0 mt-0.5"
