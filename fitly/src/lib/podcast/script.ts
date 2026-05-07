@@ -25,7 +25,7 @@ NotebookLM 스타일의 2인 화자 자연 대화체로 작성합니다.
 
 작성 규칙:
 1. 도입부 첫 줄에 반드시 "AI가 생성한 학습 보조 자료이며 공식 해설이 아닙니다"를 자연스럽게 언급한다 (헌법 §3.2 정직성).
-2. 분량은 4~6분 (한국어 약 1200~1800 음절). 너무 길면 청취 부담.
+2. 분량은 4~6분 (한국어 약 1200~1800 음절). dialogue 항목은 *최대 32 lines* 이내로 작성한다 (TTS 합성 시간 한도).
 3. 본문 구성: 도입(맥락) → 영역·인지수준·키워드 분석 → 출제 의도 추정 → 학습 활용 제안 → 마무리.
 4. 각 dialogue line은 1~3문장으로 간결하게. 청취자가 따라가기 쉽게.
 5. 합격 보장·점수 예측·지역 합격컷·합격 가능성 표현 절대 금지 (DESIGN.md §9.3).
@@ -78,7 +78,14 @@ export async function generatePodcastScript(
   if (!text || typeof text !== "string") {
     throw new Error("Empty Gemini script response");
   }
-  const parsed = JSON.parse(text) as PodcastScript;
+  // PR-004 — JSON.parse 폴백 (Gemini가 ```json``` 펜스 끼는 경우 대비)
+  let parsed: PodcastScript;
+  try {
+    parsed = JSON.parse(text) as PodcastScript;
+  } catch {
+    const stripped = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+    parsed = JSON.parse(stripped) as PodcastScript;
+  }
   if (
     !parsed.speakers ||
     parsed.speakers.length !== 2 ||
@@ -86,6 +93,10 @@ export async function generatePodcastScript(
     parsed.dialogue.length === 0
   ) {
     throw new Error("Invalid script schema");
+  }
+  // PR-005 — dialogue 길이 제한 (TTS 합성 + Vercel 60초 한도)
+  if (parsed.dialogue.length > 32) {
+    parsed.dialogue = parsed.dialogue.slice(0, 32);
   }
   return parsed;
 }

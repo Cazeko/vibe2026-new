@@ -10,6 +10,10 @@ import { podcastEpisodes, podcastProgress } from "@/lib/db/schema";
 import type { PodcastScript } from "@/lib/podcast/script";
 import { AudioPlayer } from "./_components/audio-player";
 
+// HIGH-003 — UUID 형식 검증 (eq에 잘못된 string 전달 시 PostgreSQL 5xx)
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // 헌법 §3.2 정직성 — verified=false면 "AI 생성, 공식 해설이 아님" 안내 명시 (§8.4 좌측 3px 패턴).
 // 권한 — shared = 모두, user scope = 본인만.
 
@@ -21,6 +25,8 @@ export default async function PodcastEpisodePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  if (!UUID_RE.test(id)) return notFound();
+
   const supabase = await createClient();
   const {
     data: { user },

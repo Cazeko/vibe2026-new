@@ -25,21 +25,34 @@ export function InstantGenerate() {
     }
     setStatus("loading");
     setError(null);
+    // HIGH-002 — Vercel maxDuration=60 안에서 끝나도록 클라이언트도 55s 한도
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 55_000);
     try {
       const res = await fetch("/api/podcast/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ theme: t, scope: "user" }),
+        signal: controller.signal,
       });
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 504) {
+          throw new Error("생성 시간 초과 — 더 짧은 주제로 다시 시도해 주세요");
+        }
         throw new Error(data.error ?? "생성 실패");
       }
       router.push(`/podcast/${data.episodeId}`);
       router.refresh();
     } catch (e) {
       setStatus("error");
-      setError(e instanceof Error ? e.message : "생성 실패");
+      if (e instanceof Error && e.name === "AbortError") {
+        setError("생성이 1분을 초과했습니다 — 다시 시도해 주세요");
+      } else {
+        setError(e instanceof Error ? e.message : "생성 실패");
+      }
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -76,7 +89,7 @@ export function InstantGenerate() {
           {status === "loading" ? (
             <>
               <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" aria-hidden />
-              생성 중… (최대 60초)
+              생성 중…
             </>
           ) : (
             <>
@@ -104,7 +117,7 @@ export function InstantGenerate() {
       )}
       <p className="text-[11px] text-muted-foreground leading-relaxed">
         본 에피소드는 본인만 청취할 수 있으며, AI 생성으로 공식 해설이 아닙니다.
-        스크립트 생성과 음성 합성에 약 30~60초가 소요됩니다.
+        생성에 약 1분 정도 소요됩니다.
       </p>
     </div>
   );

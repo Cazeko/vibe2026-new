@@ -132,10 +132,16 @@ export async function POST(req: Request) {
       .where(eq(podcastEpisodes.id, episodeId));
   } catch (e) {
     console.error("[podcast/generate] storage error", e);
+    // HIGH-001 — 고아 레코드 방지: storage 실패 시 INSERT한 row 삭제.
+    await db
+      .delete(podcastEpisodes)
+      .where(eq(podcastEpisodes.id, episodeId))
+      .catch((delErr) => {
+        console.error("[podcast/generate] cleanup delete failed", delErr);
+      });
     return NextResponse.json(
       {
-        error: "Storage 업로드 실패 (DB 레코드는 audio_url 미설정 상태로 남음)",
-        episodeId,
+        error: "Storage 업로드 실패 — 다시 시도해 주세요",
         detail: e instanceof Error ? e.message : String(e),
       },
       { status: 502 },

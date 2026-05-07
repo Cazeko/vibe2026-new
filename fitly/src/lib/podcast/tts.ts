@@ -3,8 +3,9 @@ import type { PodcastScript } from "./script";
 
 // 헌법 v3.5 §15 line 28 — Gemini multi-speaker TTS.
 // 출력: PCM L16 24kHz mono — WAV 헤더 wrapping 후 audio/wav 로 저장.
+// PR-008 — 헌법 §15 5항 정합. 모델 ID는 GEMINI_MODEL_TTS env로 노출하여 출시 주기에 따른 업그레이드를 키 교체 없이.
 
-const TTS_MODEL = "gemini-2.5-flash-preview-tts";
+const DEFAULT_TTS_MODEL = "gemini-2.5-flash-preview-tts";
 
 // Gemini prebuilt voices — multilingual (한국어 지원). 호스트 여 / 게스트 남.
 const VOICE_MAP: Record<string, string> = {
@@ -36,8 +37,9 @@ export async function generatePodcastAudio(script: PodcastScript): Promise<{
     },
   }));
 
+  const ttsModel = process.env.GEMINI_MODEL_TTS ?? DEFAULT_TTS_MODEL;
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

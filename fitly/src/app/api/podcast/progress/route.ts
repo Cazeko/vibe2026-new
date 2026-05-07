@@ -16,6 +16,9 @@ type ProgressBody = {
   completed?: boolean;
 };
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function POST(req: Request) {
   let body: ProgressBody;
   try {
@@ -23,8 +26,10 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "잘못된 JSON" }, { status: 400 });
   }
+  // HIGH-003 — UUID 형식 검증 (drizzle eq에 invalid uuid 전달 시 5xx noise)
   if (
     !body.episodeId ||
+    !UUID_RE.test(body.episodeId) ||
     typeof body.currentSec !== "number" ||
     body.currentSec < 0 ||
     body.currentSec > 86400
@@ -79,8 +84,11 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const episodeId = url.searchParams.get("episodeId");
-  if (!episodeId) {
-    return NextResponse.json({ error: "episodeId 필요" }, { status: 400 });
+  if (!episodeId || !UUID_RE.test(episodeId)) {
+    return NextResponse.json(
+      { error: "잘못된 episodeId" },
+      { status: 400 },
+    );
   }
   const supabase = await createClient();
   const {
