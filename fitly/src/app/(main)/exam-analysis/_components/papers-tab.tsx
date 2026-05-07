@@ -73,11 +73,7 @@ function YearGroup({
         </h3>
         <p className="mt-0.5 text-[11.5px] text-muted-foreground">{subtitle}</p>
       </header>
-      <ul
-        className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 ${
-          dimmed ? "opacity-90" : ""
-        }`}
-      >
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {years.map((year) => {
           const sessions = byYear.get(year)!;
           return (
