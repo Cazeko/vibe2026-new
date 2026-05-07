@@ -47,7 +47,7 @@ export function DashboardHeader() {
         <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
       </div>
       <div className="flex items-center gap-1.5">
-        <Button asChild className="h-9 rounded-xl px-3 text-sm">
+        <Button asChild className="h-9 rounded-lg px-3 text-sm">
           <Link href="/study/quiz">
             <BookOpen className="h-4 w-4" aria-hidden />
             오늘 학습 시작

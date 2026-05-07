@@ -30,7 +30,7 @@ export function PageSkeleton({
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-xl border border-rule bg-card p-5"
+              className="rounded-lg border border-rule bg-card p-5"
               aria-hidden
             >
               <div className="skeleton h-2.5 w-20 rounded-full" />
@@ -43,7 +43,7 @@ export function PageSkeleton({
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-rule bg-card p-5 space-y-3"
+            className="rounded-lg border border-rule bg-card p-5 space-y-3"
             aria-hidden
           >
             <div className="skeleton h-4 w-32 rounded-md" />

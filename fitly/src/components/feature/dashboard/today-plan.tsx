@@ -43,7 +43,7 @@ export function TodayPlan({ items }: { items: PlanItem[] }) {
                 <Link
                   href={isLocked ? "#" : item.href}
                   aria-disabled={isLocked}
-                  className={`flex items-center gap-2.5 rounded-xl border border-rule bg-background px-2.5 py-2 transition-colors ${
+                  className={`flex items-center gap-2.5 rounded-lg border border-rule bg-background px-2.5 py-2 transition-colors ${
                     isLocked
                       ? "opacity-60 cursor-not-allowed"
                       : "hover:bg-secondary/40"

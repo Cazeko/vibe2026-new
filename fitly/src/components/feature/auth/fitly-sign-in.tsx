@@ -144,7 +144,7 @@ export function FitlySignIn({ mode }: Props) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full bg-transparent text-[14px] px-4 py-3.5 rounded-xl focus:outline-none placeholder:text-muted-foreground/60"
+                    className="w-full bg-transparent text-[14px] px-4 py-3.5 rounded-lg focus:outline-none placeholder:text-muted-foreground/60"
                   />
                 </GlassInputWrapper>
               </div>
@@ -170,7 +170,7 @@ export function FitlySignIn({ mode }: Props) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="6자 이상"
-                      className="w-full bg-transparent text-[14px] px-4 py-3.5 pr-12 rounded-xl focus:outline-none placeholder:text-muted-foreground/60"
+                      className="w-full bg-transparent text-[14px] px-4 py-3.5 pr-12 rounded-lg focus:outline-none placeholder:text-muted-foreground/60"
                     />
                     <button
                       type="button"
@@ -191,7 +191,7 @@ export function FitlySignIn({ mode }: Props) {
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="w-full rounded-xl bg-evergreen py-3.5 font-medium text-primary-foreground hover:bg-evergreen-strong transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-2 text-[14px]"
+                className="w-full rounded-lg bg-evergreen py-3.5 font-medium text-primary-foreground hover:bg-evergreen-strong transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-2 text-[14px]"
               >
                 {status === "loading" ? (
                   <>
@@ -216,7 +216,7 @@ export function FitlySignIn({ mode }: Props) {
               type="button"
               onClick={handleKakao}
               disabled={status === "loading"}
-              className="animate-element animate-delay-600 w-full rounded-xl border border-rule-strong py-3.5 hover:bg-secondary/50 transition-colors disabled:opacity-60 text-[14px] font-medium"
+              className="animate-element animate-delay-600 w-full rounded-lg border border-rule-strong py-3.5 hover:bg-secondary/50 transition-colors disabled:opacity-60 text-[14px] font-medium"
             >
               카카오로 {cta}
             </button>
@@ -277,7 +277,7 @@ export function FitlySignIn({ mode }: Props) {
                 key={card.title}
                 className={`animate-testimonial animate-delay-${
                   1000 + idx * 200
-                } rounded-xl bg-card border border-rule p-4 lg:p-5`}
+                } rounded-lg bg-card border border-rule p-4 lg:p-5`}
               >
                 <card.Icon
                   className="h-4 w-4 text-evergreen mb-2"
@@ -300,7 +300,7 @@ export function FitlySignIn({ mode }: Props) {
 
 function GlassInputWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-1.5 rounded-xl border border-rule-strong bg-card transition-colors focus-within:border-evergreen focus-within:bg-evergreen/[0.03]">
+    <div className="mt-1.5 rounded-lg border border-rule-strong bg-card transition-colors focus-within:border-evergreen focus-within:bg-evergreen/[0.03]">
       {children}
     </div>
   );
