@@ -118,6 +118,13 @@
   ::selection {
     @apply bg-primary/20 text-foreground;
   }
+  /* DESIGN.md §10.2 — 모든 입력에 일관 3px accent-soft 박스 섀도 + 보더 accent.
+     shadcn Button 컴포넌트는 자체 ring-2 ring-ring 정의가 있으나 일반 a/Link/
+     button 등에는 보장 X — globals 단계에서 일관 정합 (A012). */
+  :where(a, button, [role="button"], input, textarea, select):focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px hsl(var(--color-accent) / 0.18);
+  }
 }
 
 @layer utilities {
