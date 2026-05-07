@@ -9,16 +9,15 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* 좌측 hero — 데스크톱 60%(lg:h-screen), 모바일 30vh.
-          lg:h-screen으로 명시 — 이전 lg:h-auto는 flex-1 stretch로 동작했지만
-          mount 시점 height가 측정되지 않아 three.js canvas가 0×0이 되었다. */}
-      <div className="relative h-[30vh] lg:h-screen lg:flex-1 lg:basis-3/5 border-b lg:border-b-0 lg:border-r border-rule">
+          aside landmark — main 외 보조 콘텐츠. lg:h-screen으로 명시. */}
+      <aside className="relative h-[30vh] lg:h-screen lg:flex-1 lg:basis-3/5 border-b lg:border-b-0 lg:border-r border-rule">
         <LoginHero />
-      </div>
+      </aside>
 
-      {/* 우측 form 영역 — 데스크톱 40%, 모바일 자연 높이 */}
-      <div className="lg:basis-2/5 lg:max-w-[520px] flex items-center justify-center px-6 py-10 lg:py-16">
+      {/* 우측 form 영역 — main landmark (Document should have one main 정합) */}
+      <main className="lg:basis-2/5 lg:max-w-[520px] flex items-center justify-center px-6 py-10 lg:py-16">
         {children}
-      </div>
+      </main>
     </div>
   );
 }

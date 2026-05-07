@@ -58,6 +58,9 @@ export function PenWritingCanvas() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 0);
+    // 캔버스 자체는 장식이라 SR이 읽지 않음. 펀치라인 텍스트는 HTML overlay에
+    // 별도로 노출되어 SR이 읽는다.
+    renderer.domElement.setAttribute("aria-hidden", "true");
     container.appendChild(renderer.domElement);
 
     // ── 종이 평면 (cream + 미세한 종이 결) ───────────────────────────────

@@ -35,10 +35,7 @@ export function LoginHero() {
   }, []);
 
   return (
-    <div
-      className="relative w-full h-full min-h-[30vh] lg:min-h-screen overflow-hidden"
-      aria-hidden="true"
-    >
+    <div className="relative w-full h-full min-h-[30vh] lg:min-h-screen overflow-hidden">
       {mode === "static" || mode === "loading" ? (
         <StaticHeroFallback />
       ) : (
