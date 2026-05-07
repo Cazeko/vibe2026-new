@@ -32,7 +32,8 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
                 : "풀이·키워드·오답 트랙을 시작하면 AI 가 취약 영역을 분석해 드립니다."}
             </p>
             <p className="mt-1 text-[10px] text-muted-foreground">
-              ※ AI 추천은 본인 학습 이력 집계 산출물 (검증 필요).
+              ※ 본인의 학습 이력에서 집계한 추천입니다. 학습 결정 시 참고로
+              활용해 주세요.
             </p>
           </div>
         </div>
