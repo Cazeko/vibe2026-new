@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   ClipboardList,
   ScrollText,
+  Headphones,
   LineChart,
   UserCircle,
   Settings,
@@ -22,10 +23,12 @@ type Item = {
 };
 
 // 헌법 v3.0 제13조 / v3.0.1 — 사이드바 Phase 1 (자료/오답은 cut/Phase2)
+// 법률 12 v3.0 line 21 — 팟캐스트는 Phase 1 신규 1개로 정식 등록.
 const MAIN: Item[] = [
   { href: "/dashboard", label: "대시보드", Icon: LayoutDashboard },
   { href: "/study-plan", label: "학습 계획", Icon: ClipboardList },
   { href: "/exam-analysis", label: "기출 분석", Icon: ScrollText },
+  { href: "/podcast", label: "팟캐스트", Icon: Headphones },
   { href: "/study-analysis", label: "학습 분석", Icon: LineChart },
   { href: "/me", label: "마이 페이지", Icon: UserCircle },
 ];

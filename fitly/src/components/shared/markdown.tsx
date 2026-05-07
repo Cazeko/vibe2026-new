@@ -73,7 +73,7 @@ export function Markdown({
           a: ({ href, children }) => (
             <a
               href={href}
-              className="text-evergreen underline underline-offset-2 hover:text-evergreen-strong"
+              className="text-info underline underline-offset-2 hover:text-foreground"
               target="_blank"
               rel="noopener noreferrer"
             >
