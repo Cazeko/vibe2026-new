@@ -117,7 +117,7 @@ export function InstantGenerate() {
       )}
       <p className="text-[11px] text-muted-foreground leading-relaxed">
         본 에피소드는 본인만 청취할 수 있으며, AI 생성으로 공식 해설이 아닙니다.
-        2~3분 분량으로 생성에 30~50초 소요됩니다.
+        1~2분 분량으로 생성에 약 20~40초 소요됩니다.
       </p>
     </div>
   );
