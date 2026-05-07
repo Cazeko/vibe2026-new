@@ -35,7 +35,7 @@ export function DashboardHeader() {
   // 헌법 v3.0 — 시연 페르소나 라벨. 지역 교육청은 선택 입력 (제15조).
   const greetingName = profile.displayName ?? "주인";
   const subtitle = profile.targetRegion
-    ? `${profile.targetRegion} 시험 합격까지, Fitly 가 일정과 진척을 정리해 드릴게요.`
+    ? `${profile.targetRegion} 시험 대비 일정과 학습 진척을 정리해 드릴게요.`
     : "오늘의 풀이·키워드·오답 트랙이 자동으로 채워지고, 추천 팟캐스트가 생성됩니다.";
 
   return (
