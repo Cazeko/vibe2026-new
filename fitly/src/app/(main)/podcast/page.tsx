@@ -1,12 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { desc, eq, or, sql } from "drizzle-orm";
-import {
-  Mic,
-  Headphones,
-  Clock,
-  ShieldAlert,
-} from "lucide-react";
+import { Mic, Headphones, Clock } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { InstantGenerate } from "./_components/instant-generate";
@@ -83,8 +78,6 @@ export default async function PodcastPage() {
     { total: 0, sharedCount: 0, userCount: 0, totalDuration: 0 },
   );
 
-  const empty = (stats?.total ?? 0) === 0;
-
   const sharedEpisodes = episodes.filter((e) => e.scope === "shared");
   const userEpisodes = episodes.filter((e) => e.scope === "user");
 
@@ -96,8 +89,8 @@ export default async function PodcastPage() {
       />
 
       <div className="px-6 mx-auto max-w-7xl space-y-8">
-        {/* KPI 줄 */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* KPI 줄 — 3 카드로 단순화 (이전 "음성 합성 대기/활성" 카드 제거 — TTS 통합 완료) */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard
             label="공유 에피소드"
             value={stats?.sharedCount ?? 0}
@@ -113,37 +106,9 @@ export default async function PodcastPage() {
             value={fmtDuration(stats?.totalDuration ?? 0)}
             unit=""
           />
-          <StatCard
-            label="음성 합성"
-            value={empty ? "대기" : "활성"}
-            unit=""
-            accent={!empty}
-          />
         </section>
 
         <SectionRule />
-
-        {/* 음성 합성 통합 안내 (시드 + TTS 미통합 시점) */}
-        {empty && (
-          <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
-            <CardContent className="p-6 flex gap-3">
-              <ShieldAlert
-                className="h-5 w-5 text-warning shrink-0 mt-0.5"
-                aria-hidden
-              />
-              <div className="text-[13px] text-foreground/85 leading-relaxed">
-                <p className="font-serif text-base font-medium text-foreground">
-                  음성 합성 통합 후 활성화됩니다
-                </p>
-                <p className="mt-1.5">
-                  팟캐스트는 2인 화자 대화체로 자동 생성됩니다. 음성 합성
-                  서비스 가용성 변동 시 단일 화자 또는 외부 임베드로 우회할 수
-                  있습니다.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* 즉석 생성 진입점 — DESIGN.md §8.5 AI Recommend Card 정합 */}
         <Card className="border-evergreen bg-evergreen/[0.04]">
