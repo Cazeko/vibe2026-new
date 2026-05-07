@@ -16,33 +16,20 @@ export function LoginHero() {
   const [mode, setMode] = useState<"loading" | "canvas" | "static">("loading");
 
   useEffect(() => {
-    console.log("[Fitly:LoginHero] useEffect mount");
-    if (typeof window === "undefined") {
-      console.log("[Fitly:LoginHero] window undefined — abort");
-      return;
-    }
+    if (typeof window === "undefined") return;
 
     const isMobile = window.innerWidth < 768;
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    console.log("[Fitly:LoginHero] decision", {
-      innerWidth: window.innerWidth,
-      isMobile,
-      reducedMotion,
-    });
 
     if (isMobile || reducedMotion) {
-      console.log("[Fitly:LoginHero] → static");
       setMode("static");
       return;
     }
 
-    console.log("[Fitly:LoginHero] → canvas");
     setMode("canvas");
   }, []);
-
-  console.log("[Fitly:LoginHero] render mode=", mode);
 
   return (
     <div className="relative w-full h-full min-h-[30vh] lg:min-h-screen overflow-hidden">

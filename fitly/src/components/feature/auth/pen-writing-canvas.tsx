@@ -1,18 +1,18 @@
 "use client";
 
-// three.js scene — 가로 괘선 노트 + 미니멀 라인 만년필 + 글쓰기 trail.
-// dynamic import 로만 로드 (SSR X). bundle은 (auth) 청크에만 포함.
+// three.js scene — 가로 괘선 노트 + 정교한 만년필 mesh + 펀치라인 두 줄 밑줄.
 //
 // 펀치라인 텍스트는 HTML overlay (CSS clip-path reveal)로 처리하고,
-// three.js scene은 *공간 구성*(종이 isometric + 만년필 mesh + 잉크 trail
+// three.js scene은 *공간 구성*(종이 isometric + 만년필 mesh + 밑줄 잉크
 // 셰이더)만 담당한다. 한국어 폰트를 three.js에 로드하는 비용을 회피한다.
+//
+// 만년필이 펀치라인 두 줄 *아래에* 부드러운 evergreen 밑줄을 그어 *강조한다*.
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-// 글쓰기 모션 timing — 펀치라인 한 글자당 약 90ms × 28자 = ~2.5s.
-const WRITE_DURATION_MS = 2600;
-const WRITE_DELAY_MS = 400; // 페이지 마운트 후 짧은 호흡
+const WRITE_DURATION_MS = 2400;
+const WRITE_DELAY_MS = 400;
 
 export function PenWritingCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,35 +20,15 @@ export function PenWritingCanvas() {
   const [retryToken, setRetryToken] = useState(0);
 
   useEffect(() => {
-    console.log("[Fitly:PenCanvas] useEffect mount, retry=", retryToken);
     const container = containerRef.current;
-    if (!container) {
-      console.log("[Fitly:PenCanvas] container ref null — abort");
-      return;
-    }
+    if (!container) return;
 
-    console.log(
-      "[Fitly:PenCanvas] container w=",
-      container.clientWidth,
-      "h=",
-      container.clientHeight,
-    );
-
-    // 컨테이너 크기 0이면 layout이 안정되지 않은 시점 — 다음 frame에 재시도.
     if (container.clientWidth === 0 || container.clientHeight === 0) {
-      console.log("[Fitly:PenCanvas] size 0 — retry next frame");
       const raf = requestAnimationFrame(() => {
         setRetryToken((t) => t + 1);
       });
       return () => cancelAnimationFrame(raf);
     }
-
-    console.log("[Fitly:PenCanvas] init three.js scene");
-
-    // WebGL 지원 확인
-    const testCanvas = document.createElement("canvas");
-    const gl = testCanvas.getContext("webgl") || testCanvas.getContext("experimental-webgl");
-    console.log("[Fitly:PenCanvas] WebGL support=", !!gl);
 
     // ── three.js scene 초기화 ───────────────────────────────────────────
     const scene = new THREE.Scene();
@@ -64,8 +44,7 @@ export function PenWritingCanvas() {
       0.1,
       100,
     );
-    // Side-isometric — 종이 평면을 12~15도 기울인 시점.
-    camera.position.set(0, 5, 10);
+    camera.position.set(0, 0, 10);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({
@@ -75,107 +54,122 @@ export function PenWritingCanvas() {
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
-    // 진단: 배경을 *반투명 빨강*으로 일시 변경 — canvas가 viewport에 있는지
-    // 시각적으로 즉시 확인 가능. scene mount 정상이면 다음 commit에서 0x000000, 0으로 복구.
-    renderer.setClearColor(0xff0000, 0.15);
+    renderer.setClearColor(0x000000, 0);
     renderer.domElement.setAttribute("aria-hidden", "true");
-    // canvas의 inline style 명시 — 일부 브라우저에서 setSize만으로 실제 화면
-    // 크기가 0인 케이스 가드.
     renderer.domElement.style.position = "absolute";
     renderer.domElement.style.inset = "0";
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
+    renderer.domElement.style.pointerEvents = "none";
     container.appendChild(renderer.domElement);
-    console.log(
-      "[Fitly:PenCanvas] canvas appended w=",
-      renderer.domElement.width,
-      "h=",
-      renderer.domElement.height,
-      "styleW=",
-      renderer.domElement.style.width,
-    );
 
-    // ── 종이 평면 (cream + 미세한 종이 결) ───────────────────────────────
-    // CSS variable에서 색 읽어 three.js color 동기화.
-    const styles = getComputedStyle(document.documentElement);
-    const cream = new THREE.Color().setHSL(
-      parseInt(styles.getPropertyValue("--color-bg")) / 360 || 0.1,
-      0.56,
-      0.96,
-    );
-    const ruleColor = new THREE.Color(0xe8e2d5); // --color-rule
+    // ── 색 ──────────────────────────────────────────────────────────────
     const inkColor = new THREE.Color(0x1f5c4a); // --color-accent (evergreen)
-    const penBodyColor = new THREE.Color(0x1a2027); // --color-text (deep ink)
+    const inkInk = new THREE.Color(0x173f33); // --color-accent-strong
+    const penBodyDark = new THREE.Color(0x111418); // 더 진한 검정
+    const penBodyMid = new THREE.Color(0x2a2f37); // 중간 톤 — 입체감
+    const penAccent = new THREE.Color(0xc9a96a); // 골드 클립·링 (펜의 정교함)
 
-    const paperGeo = new THREE.PlaneGeometry(frustumSize * aspect, frustumSize);
-    const paperMat = new THREE.MeshBasicMaterial({ color: cream });
-    const paper = new THREE.Mesh(paperGeo, paperMat);
-    // 살짝 기울임 (12~15도 isometric 시점)
-    paper.rotation.x = -0.22;
-    paper.position.z = 0;
-    scene.add(paper);
-
-    // ── 가로 괘선 ────────────────────────────────────────────────────────
-    const ruleGroup = new THREE.Group();
-    const lineSpacing = 0.6;
-    const lineCount = Math.ceil(frustumSize / lineSpacing);
-    for (let i = 0; i < lineCount; i += 1) {
-      const y = frustumSize / 2 - i * lineSpacing - 0.3;
-      const ruleGeo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3((-frustumSize * aspect) / 2 + 0.5, y, 0.01),
-        new THREE.Vector3((frustumSize * aspect) / 2 - 0.5, y, 0.01),
-      ]);
-      const ruleMat = new THREE.LineBasicMaterial({
-        color: ruleColor,
-        transparent: true,
-        opacity: 0.7,
-      });
-      const line = new THREE.Line(ruleGeo, ruleMat);
-      ruleGroup.add(line);
-    }
-    ruleGroup.rotation.x = -0.22;
-    scene.add(ruleGroup);
-
-    // ── 만년필 mesh — low-poly 검은 라인 실루엣 ───────────────────────────
+    // ── 만년필 mesh — 정교화 ─────────────────────────────────────────────
+    // 비율: 총 길이 3.4, body 2.2, cap 1.0, nib 0.3
     const penGroup = new THREE.Group();
-    // body cylinder
-    const bodyGeo = new THREE.CylinderGeometry(0.08, 0.06, 2.4, 16);
-    const bodyMat = new THREE.MeshBasicMaterial({ color: penBodyColor });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = 1.2;
-    penGroup.add(body);
-    // tip cone (닙)
-    const tipGeo = new THREE.ConeGeometry(0.06, 0.32, 12);
-    const tipMat = new THREE.MeshBasicMaterial({ color: penBodyColor });
-    const tip = new THREE.Mesh(tipGeo, tipMat);
-    tip.position.y = -0.16;
-    tip.rotation.x = Math.PI; // 끝이 아래
-    penGroup.add(tip);
-    // 캡 분리 라인 (미세 디테일)
-    const capGeo = new THREE.CylinderGeometry(0.085, 0.085, 0.04, 16);
-    const capMat = new THREE.MeshBasicMaterial({ color: 0x6b6256 });
+
+    // Lower body (닙쪽 — 약간 더 슬림)
+    const lowerBodyGeo = new THREE.CylinderGeometry(0.075, 0.085, 1.0, 32);
+    const lowerBodyMat = new THREE.MeshBasicMaterial({ color: penBodyDark });
+    const lowerBody = new THREE.Mesh(lowerBodyGeo, lowerBodyMat);
+    lowerBody.position.y = 0.5;
+    penGroup.add(lowerBody);
+
+    // Grip ring (golden) — body와 cap 사이 데코
+    const gripRingGeo = new THREE.TorusGeometry(0.092, 0.02, 12, 32);
+    const gripRingMat = new THREE.MeshBasicMaterial({ color: penAccent });
+    const gripRing = new THREE.Mesh(gripRingGeo, gripRingMat);
+    gripRing.position.y = 1.05;
+    gripRing.rotation.x = Math.PI / 2;
+    penGroup.add(gripRing);
+
+    // Upper body (cap 직전 — 살짝 두껍게)
+    const upperBodyGeo = new THREE.CylinderGeometry(0.092, 0.075, 1.2, 32);
+    const upperBodyMat = new THREE.MeshBasicMaterial({ color: penBodyMid });
+    const upperBody = new THREE.Mesh(upperBodyGeo, upperBodyMat);
+    upperBody.position.y = 1.65;
+    penGroup.add(upperBody);
+
+    // Cap separator ring
+    const capRingGeo = new THREE.TorusGeometry(0.094, 0.018, 12, 32);
+    const capRingMat = new THREE.MeshBasicMaterial({ color: penAccent });
+    const capRing = new THREE.Mesh(capRingGeo, capRingMat);
+    capRing.position.y = 2.25;
+    capRing.rotation.x = Math.PI / 2;
+    penGroup.add(capRing);
+
+    // Cap (body)
+    const capGeo = new THREE.CylinderGeometry(0.094, 0.094, 0.95, 32);
+    const capMat = new THREE.MeshBasicMaterial({ color: penBodyDark });
     const cap = new THREE.Mesh(capGeo, capMat);
-    cap.position.y = 1.6;
+    cap.position.y = 2.78;
     penGroup.add(cap);
 
-    // 만년필을 펀치라인 시작점에 배치 (글쓰기 시작 위치)
-    // 좌측에서 시작, 살짝 기울어진 자세
-    const penStartX = -3.5;
+    // Cap top (살짝 둥근 끝)
+    const capTopGeo = new THREE.SphereGeometry(0.094, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+    const capTopMat = new THREE.MeshBasicMaterial({ color: penBodyDark });
+    const capTop = new THREE.Mesh(capTopGeo, capTopMat);
+    capTop.position.y = 3.255;
+    penGroup.add(capTop);
+
+    // Pocket clip (golden, BoxGeometry)
+    const clipGeo = new THREE.BoxGeometry(0.018, 0.6, 0.045);
+    const clipMat = new THREE.MeshBasicMaterial({ color: penAccent });
+    const clip = new THREE.Mesh(clipGeo, clipMat);
+    clip.position.set(0.105, 2.85, 0);
+    penGroup.add(clip);
+    // Clip 끝 dot
+    const clipDotGeo = new THREE.SphereGeometry(0.025, 16, 16);
+    const clipDotMat = new THREE.MeshBasicMaterial({ color: penAccent });
+    const clipDot = new THREE.Mesh(clipDotGeo, clipDotMat);
+    clipDot.position.set(0.105, 2.55, 0);
+    penGroup.add(clipDot);
+
+    // Nib (cone) — golden gradient 느낌으로 두 segment
+    const nibUpperGeo = new THREE.CylinderGeometry(0.075, 0.045, 0.18, 24);
+    const nibUpperMat = new THREE.MeshBasicMaterial({ color: penAccent });
+    const nibUpper = new THREE.Mesh(nibUpperGeo, nibUpperMat);
+    nibUpper.position.y = -0.09;
+    penGroup.add(nibUpper);
+
+    const nibTipGeo = new THREE.ConeGeometry(0.045, 0.16, 24);
+    const nibTipMat = new THREE.MeshBasicMaterial({ color: penAccent });
+    const nibTip = new THREE.Mesh(nibTipGeo, nibTipMat);
+    nibTip.position.y = -0.26;
+    nibTip.rotation.x = Math.PI; // 끝이 아래
+    penGroup.add(nibTip);
+
+    // Nib slit (가운데 검은 선)
+    const slitGeo = new THREE.BoxGeometry(0.005, 0.18, 0.05);
+    const slitMat = new THREE.MeshBasicMaterial({ color: penBodyDark });
+    const slit = new THREE.Mesh(slitGeo, slitMat);
+    slit.position.y = -0.18;
+    penGroup.add(slit);
+
+    // 만년필을 펀치라인 옆에 배치 — 글쓰기 시작 위치(좌측)
+    const penStartX = -3.8;
     const penY = -1.0;
     penGroup.position.set(penStartX, penY, 0.5);
-    penGroup.rotation.z = -0.4; // 30도 정도 기울임 (글쓰기 자세)
-    penGroup.rotation.x = -0.22; // 종이 isometric 정합
+    // 글쓰기 자세 — 약 40도 기울어진 상태
+    penGroup.rotation.z = -0.55;
     scene.add(penGroup);
 
-    // ── 글쓰기 trail (evergreen 잉크 라인) ────────────────────────────────
+    // ── 글쓰기 trail (evergreen 밑줄) ─────────────────────────────────────
+    // 두 줄 펀치라인 *아래*에 부드러운 밑줄. zigzag 가로지르기 X.
+    // 손글씨 밑줄 느낌으로 살짝 떨림 (sin wave 0.03 amplitude).
     const trailMat = new THREE.LineBasicMaterial({
       color: inkColor,
-      linewidth: 2,
       transparent: true,
       opacity: 0.9,
     });
     const trailGeo = new THREE.BufferGeometry();
-    const maxTrailPoints = 200;
+    const maxTrailPoints = 220;
     const trailPositions = new Float32Array(maxTrailPoints * 3);
     trailGeo.setAttribute(
       "position",
@@ -183,8 +177,49 @@ export function PenWritingCanvas() {
     );
     trailGeo.setDrawRange(0, 0);
     const trail = new THREE.Line(trailGeo, trailMat);
-    trail.rotation.x = -0.22;
     scene.add(trail);
+
+    // 두 번째 trail (조금 더 진한 톤 — 잉크 두께감)
+    const trailMat2 = new THREE.LineBasicMaterial({
+      color: inkInk,
+      transparent: true,
+      opacity: 0.4,
+    });
+    const trailGeo2 = new THREE.BufferGeometry();
+    const trailPositions2 = new Float32Array(maxTrailPoints * 3);
+    trailGeo2.setAttribute(
+      "position",
+      new THREE.BufferAttribute(trailPositions2, 3),
+    );
+    trailGeo2.setDrawRange(0, 0);
+    const trail2 = new THREE.Line(trailGeo2, trailMat2);
+    scene.add(trail2);
+
+    // 밑줄 path — 두 줄 펀치라인 각각 아래에 한 줄씩
+    // (펀치라인은 HTML overlay에 있고 그 좌표를 추정 — 카메라 frustum 기준)
+    const trailPath: { x: number; y: number }[] = [];
+    const lineY1 = 0.4; // 첫 줄 펀치라인 ("임용은 열심히...") 아래
+    const lineY2 = -0.6; // 두 번째 줄 ("맞게(Fit) 하는...") 아래
+    const startX = -3.5;
+    const endX = 3.5;
+    const segments = 100;
+
+    // 첫 줄 밑줄 (좌→우)
+    for (let i = 0; i <= segments; i += 1) {
+      const t = i / segments;
+      const x = startX + (endX - startX) * t;
+      // 손글씨 떨림 — sin + 살짝 우상향
+      const y = lineY1 + Math.sin(t * 7) * 0.025 + t * 0.03;
+      trailPath.push({ x, y });
+    }
+    // 두 줄 사이 살짝 떨어짐 (lift X — 끊김 표현)
+    // 두 번째 줄 밑줄 (좌→우)
+    for (let i = 0; i <= segments; i += 1) {
+      const t = i / segments;
+      const x = startX + (endX - startX) * t;
+      const y = lineY2 + Math.sin(t * 7 + 1) * 0.025 + t * 0.02;
+      trailPath.push({ x, y });
+    }
 
     // ── 마우스 parallax state ───────────────────────────────────────────
     const mouseNorm = { x: 0, y: 0 };
@@ -203,64 +238,40 @@ export function PenWritingCanvas() {
     let writeStart = 0;
     let writeDone = false;
 
-    // 글쓰기 trail이 그려질 경로 (단순 zigzag — 펀치라인 두 줄 시뮬레이션)
-    const trailPath: { x: number; y: number }[] = [];
-    const writePathStartX = -3.2;
-    const writePathEndX = 3.2;
-    const writePathLineY1 = -0.8;
-    const writePathLineY2 = -1.6;
-    // 첫 줄: "임용은 열심히 하는 게 아니라,"
-    for (let i = 0; i <= 50; i += 1) {
-      trailPath.push({
-        x: writePathStartX + (writePathEndX - writePathStartX) * (i / 50),
-        y: writePathLineY1 + Math.sin(i * 0.4) * 0.04, // 살짝 떨림
-      });
-    }
-    // 두 줄째: "맞게(Fit) 하는 게임입니다."
-    for (let i = 0; i <= 50; i += 1) {
-      trailPath.push({
-        x: writePathStartX + (writePathEndX - writePathStartX) * (i / 50),
-        y: writePathLineY2 + Math.sin(i * 0.4) * 0.04,
-      });
-    }
-
     setTimeout(() => {
       writeStart = performance.now();
       setPhase("writing");
     }, WRITE_DELAY_MS);
 
-    let frameCount = 0;
     function animate() {
       const now = performance.now();
-      frameCount += 1;
-      if (frameCount === 1 || frameCount === 60) {
-        console.log("[Fitly:PenCanvas] animate frame=", frameCount);
-      }
 
-      // 글쓰기 진행
       if (writeStart > 0 && !writeDone) {
         const elapsed = now - writeStart;
         const progress = Math.min(1, elapsed / WRITE_DURATION_MS);
-        // ease-out cubic
         const eased = 1 - Math.pow(1 - progress, 3);
         const pointCount = Math.floor(eased * trailPath.length);
 
-        // trail 점 업데이트
         for (let i = 0; i < pointCount; i += 1) {
           const p = trailPath[i];
           trailPositions[i * 3] = p.x;
           trailPositions[i * 3 + 1] = p.y;
           trailPositions[i * 3 + 2] = 0.02;
+          trailPositions2[i * 3] = p.x;
+          trailPositions2[i * 3 + 1] = p.y - 0.012;
+          trailPositions2[i * 3 + 2] = 0.015;
         }
         trailGeo.setDrawRange(0, pointCount);
         trailGeo.attributes.position.needsUpdate = true;
+        trailGeo2.setDrawRange(0, pointCount);
+        trailGeo2.attributes.position.needsUpdate = true;
 
-        // 만년필 위치 — trail 끝 지점 따라가기
         if (pointCount > 0) {
           const tipPoint = trailPath[Math.min(pointCount - 1, trailPath.length - 1)];
-          // 만년필 끝(닙)이 trail 끝점에 닿도록 보정
-          penGroup.position.x = tipPoint.x + 0.3;
-          penGroup.position.y = tipPoint.y + 0.9;
+          // 만년필 닙(끝)이 trail 끝점에 닿도록 — 펜의 끝 좌표를 보정
+          // 펜이 -0.55 rad 기울어져 있으므로 nib offset 보정
+          penGroup.position.x = tipPoint.x + 0.18;
+          penGroup.position.y = tipPoint.y + 1.05;
         }
 
         if (progress >= 1) {
@@ -270,15 +281,15 @@ export function PenWritingCanvas() {
         }
       }
 
-      // 글쓰기 완료 후 마우스 parallax
       if (parallaxActive) {
-        // 마지막 trail 끝점 + 마우스 미세 흔들림
         const lastPoint = trailPath[trailPath.length - 1];
-        const targetX = lastPoint.x + 0.3 + mouseNorm.x * 0.08;
-        const targetY = lastPoint.y + 0.9 + mouseNorm.y * 0.06;
-        // ease 보간
-        penGroup.position.x += (targetX - penGroup.position.x) * 0.06;
-        penGroup.position.y += (targetY - penGroup.position.y) * 0.06;
+        const targetX = lastPoint.x + 0.4 + mouseNorm.x * 0.06;
+        const targetY = lastPoint.y + 1.05 + mouseNorm.y * 0.04;
+        penGroup.position.x += (targetX - penGroup.position.x) * 0.05;
+        penGroup.position.y += (targetY - penGroup.position.y) * 0.05;
+        // 미세 회전 (잡고 있는 손의 떨림 느낌)
+        const targetRot = -0.55 + mouseNorm.x * 0.025;
+        penGroup.rotation.z += (targetRot - penGroup.rotation.z) * 0.05;
       }
 
       renderer.render(scene, camera);
@@ -287,7 +298,6 @@ export function PenWritingCanvas() {
 
     let frameId = requestAnimationFrame(animate);
 
-    // ── resize handler ──────────────────────────────────────────────────
     function handleResize() {
       if (!container) return;
       const w = container.clientWidth;
@@ -302,27 +312,21 @@ export function PenWritingCanvas() {
     const ro = new ResizeObserver(handleResize);
     ro.observe(container);
 
-    // ── cleanup ─────────────────────────────────────────────────────────
     return () => {
       cancelAnimationFrame(frameId);
       ro.disconnect();
       container.removeEventListener("mousemove", handleMouseMove);
-      paperGeo.dispose();
-      paperMat.dispose();
-      bodyGeo.dispose();
-      bodyMat.dispose();
-      tipGeo.dispose();
-      tipMat.dispose();
-      capGeo.dispose();
-      capMat.dispose();
-      trailGeo.dispose();
-      trailMat.dispose();
-      ruleGroup.children.forEach((line) => {
-        if (line instanceof THREE.Line) {
-          line.geometry.dispose();
-          (line.material as THREE.Material).dispose();
+      // dispose all geometries + materials
+      penGroup.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry.dispose();
+          (obj.material as THREE.Material).dispose();
         }
       });
+      trailGeo.dispose();
+      trailMat.dispose();
+      trailGeo2.dispose();
+      trailMat2.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
@@ -332,9 +336,6 @@ export function PenWritingCanvas() {
 
   return (
     <div ref={containerRef} className="absolute inset-0">
-      {/* 펀치라인 HTML overlay — three.js scene 위에 겹쳐 노출.
-          three.js scene이 *글쓰기 trail*을 그리는 동안 텍스트는 fade-in.
-          접근성: 스크린 리더가 텍스트를 읽을 수 있다 (scene은 aria-hidden). */}
       <div className="relative z-10 w-full h-full flex items-center justify-center pointer-events-none px-8">
         <div className="max-w-md">
           <p
