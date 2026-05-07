@@ -27,10 +27,12 @@ export function PenWritingCanvas() {
       return;
     }
 
-    console.log("[Fitly:PenCanvas] container size", {
-      width: container.clientWidth,
-      height: container.clientHeight,
-    });
+    console.log(
+      "[Fitly:PenCanvas] container w=",
+      container.clientWidth,
+      "h=",
+      container.clientHeight,
+    );
 
     // 컨테이너 크기 0이면 layout이 안정되지 않은 시점 — 다음 frame에 재시도.
     if (container.clientWidth === 0 || container.clientHeight === 0) {
@@ -42,6 +44,11 @@ export function PenWritingCanvas() {
     }
 
     console.log("[Fitly:PenCanvas] init three.js scene");
+
+    // WebGL 지원 확인
+    const testCanvas = document.createElement("canvas");
+    const gl = testCanvas.getContext("webgl") || testCanvas.getContext("experimental-webgl");
+    console.log("[Fitly:PenCanvas] WebGL support=", !!gl);
 
     // ── three.js scene 초기화 ───────────────────────────────────────────
     const scene = new THREE.Scene();
@@ -68,11 +75,25 @@ export function PenWritingCanvas() {
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
-    renderer.setClearColor(0x000000, 0);
-    // 캔버스 자체는 장식이라 SR이 읽지 않음. 펀치라인 텍스트는 HTML overlay에
-    // 별도로 노출되어 SR이 읽는다.
+    // 진단: 배경을 *반투명 빨강*으로 일시 변경 — canvas가 viewport에 있는지
+    // 시각적으로 즉시 확인 가능. scene mount 정상이면 다음 commit에서 0x000000, 0으로 복구.
+    renderer.setClearColor(0xff0000, 0.15);
     renderer.domElement.setAttribute("aria-hidden", "true");
+    // canvas의 inline style 명시 — 일부 브라우저에서 setSize만으로 실제 화면
+    // 크기가 0인 케이스 가드.
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.inset = "0";
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
     container.appendChild(renderer.domElement);
+    console.log(
+      "[Fitly:PenCanvas] canvas appended w=",
+      renderer.domElement.width,
+      "h=",
+      renderer.domElement.height,
+      "styleW=",
+      renderer.domElement.style.width,
+    );
 
     // ── 종이 평면 (cream + 미세한 종이 결) ───────────────────────────────
     // CSS variable에서 색 읽어 three.js color 동기화.
@@ -208,8 +229,13 @@ export function PenWritingCanvas() {
       setPhase("writing");
     }, WRITE_DELAY_MS);
 
+    let frameCount = 0;
     function animate() {
       const now = performance.now();
+      frameCount += 1;
+      if (frameCount === 1 || frameCount === 60) {
+        console.log("[Fitly:PenCanvas] animate frame=", frameCount);
+      }
 
       // 글쓰기 진행
       if (writeStart > 0 && !writeDone) {
