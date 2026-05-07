@@ -4,13 +4,12 @@ import { desc, eq, or, sql } from "drizzle-orm";
 import {
   Mic,
   Headphones,
-  Sparkles,
   Clock,
   ShieldAlert,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { InstantGenerate } from "./_components/instant-generate";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { podcastEpisodes } from "@/lib/db/schema";
@@ -146,30 +145,29 @@ export default async function PodcastPage() {
           </Card>
         )}
 
-        {/* 즉석 생성 진입점 (사용자 약점 기반) */}
+        {/* 즉석 생성 진입점 — DESIGN.md §8.5 AI Recommend Card 정합 */}
         <Card className="border-evergreen bg-evergreen/[0.04]">
-          <CardContent className="p-6 flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-start gap-4">
-              <span
-                aria-hidden
-                className="grid h-8 w-8 place-items-center rounded-full bg-evergreen text-primary-foreground font-serif italic font-medium text-sm"
-              >
-                F
-              </span>
-              <div>
-                <p className="font-serif text-lg font-medium tracking-tight">
-                  내 약점 영역 즉석 청취
-                </p>
-                <p className="mt-1 text-[12.5px] text-muted-foreground leading-relaxed max-w-lg">
-                  학습 분석에서 추출한 약점 영역·연도·주제를 선택하시면 2인 화자
-                  대화체 5~10분 청취 학습이 즉석 생성됩니다.
-                </p>
+          <CardContent className="p-6 flex items-start gap-4 flex-wrap">
+            <span
+              aria-hidden
+              className="grid h-8 w-8 place-items-center rounded-full bg-evergreen text-primary-foreground font-serif italic font-medium text-sm shrink-0"
+            >
+              F
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <p className="font-serif text-lg font-medium tracking-tight">
+                    내 약점 영역 즉석 청취
+                  </p>
+                  <p className="mt-1 text-[12.5px] text-muted-foreground leading-relaxed max-w-lg">
+                    학습 분석에서 추출한 약점 영역·연도·주제를 선택하시면 2인 화자
+                    대화체 4~6분 청취 학습이 즉석 생성됩니다.
+                  </p>
+                </div>
+                <InstantGenerate />
               </div>
             </div>
-            <Button disabled={empty} className="shrink-0">
-              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-              {empty ? "음성 합성 통합 후 활성화" : "즉석 생성"}
-            </Button>
           </CardContent>
         </Card>
 
