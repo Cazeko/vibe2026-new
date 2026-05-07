@@ -141,7 +141,7 @@ export default async function StudyPlanPage() {
         <Card className="border-rule">
           <CardContent className="p-5">
             <div className="flex items-center gap-2">
-              <CalendarClock className="h-4 w-4 text-evergreen" aria-hidden />
+              <CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden />
               <h2 className="font-serif text-lg font-medium tracking-tight">
                 시험일 역산 — 오늘 목표
               </h2>
@@ -328,7 +328,7 @@ export default async function StudyPlanPage() {
                 <strong>
                   <Link
                     href="/podcast"
-                    className="text-evergreen hover:underline underline-offset-2"
+                    className="text-info underline underline-offset-2 hover:text-foreground"
                   >
                     팟캐스트 →
                   </Link>

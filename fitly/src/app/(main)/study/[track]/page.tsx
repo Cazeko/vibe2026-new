@@ -151,7 +151,7 @@ function EmptyQueue({
     <Card className="border-rule border-dashed">
       <CardContent className="p-10 text-center">
         <BookOpenCheck
-          className="h-6 w-6 mx-auto text-evergreen"
+          className="h-6 w-6 mx-auto text-muted-foreground"
           aria-hidden
         />
         <p className="mt-3 font-serif text-base font-medium tracking-tight">

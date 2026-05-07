@@ -236,7 +236,7 @@ function SectionHeader({
     <div className="flex items-end justify-between gap-3 flex-wrap">
       <div>
         <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-evergreen" aria-hidden />
+          <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
           <h2 className="font-serif text-xl font-medium tracking-tight">
             {title}
           </h2>

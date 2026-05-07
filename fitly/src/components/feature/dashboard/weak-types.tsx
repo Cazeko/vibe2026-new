@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import type { WeakType } from "@/lib/dashboard/types";
 
+// SEVERITY_BAR 제거 (B004) — Severity type 은 BADGE/LABEL에서 계속 사용.
 type Severity = "weak" | "warn" | "ok" | "good";
 
 function severityOf(accuracy: number): Severity {
@@ -18,14 +19,9 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   good: "양호",
 };
 
-// DESIGN.md §4.4 — semantic 색은 desaturated 토큰으로. 채도 충돌 회피 + 단계 인식 가능.
-const SEVERITY_BAR: Record<Severity, string> = {
-  weak: "bg-error/70",
-  warn: "bg-warning/70",
-  ok: "bg-info/70",
-  good: "bg-evergreen/70",
-};
-
+// DESIGN.md §4.4 — 진척 바는 단일 단색. 차별은 우측 SEVERITY_BADGE 라벨로만.
+// §4.3 — evergreen은 진척도 KPI / Primary CTA / 활성 사이드바 / AI 추천 / 잉크 trail
+// 6 위치 한정. weak-types 진척 바는 6 위치 외 — bg-foreground/40 단색 통일 (B004).
 const SEVERITY_BADGE: Record<Severity, string> = {
   weak: "bg-error/10 text-error",
   warn: "bg-warning/10 text-warning",
@@ -46,7 +42,7 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
             <span className="font-medium text-foreground">아직 분석할 데이터가 없어요</span>
             <Link
               href="/study/quiz"
-              className="mt-1 text-[10px] text-evergreen hover:underline"
+              className="mt-1 text-[10px] text-foreground underline underline-offset-2 hover:text-evergreen"
             >
               풀이 트랙 시작 ›
             </Link>
@@ -77,7 +73,7 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
                   </div>
                   <div className="h-1 w-full overflow-hidden rounded-full bg-rule">
                     <div
-                      className={`h-full ${SEVERITY_BAR[sev]} transition-all`}
+                      className="h-full bg-foreground/40 transition-all"
                       style={{ width: `${w.accuracy}%` }}
                     />
                   </div>
