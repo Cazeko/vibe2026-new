@@ -291,7 +291,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
                   type="button"
                   disabled={pending}
                   onClick={() => handleGrade(key)}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-surface px-3 py-3.5 text-[13px] font-medium transition-colors disabled:opacity-50 ${tone}`}
+                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-card px-3 py-3.5 text-[13px] font-medium transition-colors disabled:opacity-50 ${tone}`}
                 >
                   <Icon className="h-4 w-4" aria-hidden />
                   <span>{label}</span>
