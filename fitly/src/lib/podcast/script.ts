@@ -25,7 +25,7 @@ NotebookLM 스타일의 2인 화자 자연 대화체로 작성합니다.
 
 작성 규칙:
 1. 도입부 첫 줄에 반드시 "AI가 생성한 학습 보조 자료이며 공식 해설이 아닙니다"를 자연스럽게 언급한다 (헌법 §3.2 정직성).
-2. 분량은 4~6분 (한국어 약 1200~1800 음절). dialogue 항목은 *최대 32 lines* 이내로 작성한다 (TTS 합성 시간 한도).
+2. 분량은 2~3분 (한국어 약 500~900 음절). dialogue 항목은 *최대 16 lines* 이내로 작성한다 (TTS 합성 시간 한도 — Vercel 60초 한도 안에서 끝나야 함).
 3. 본문 구성: 도입(맥락) → 영역·인지수준·키워드 분석 → 출제 의도 추정 → 학습 활용 제안 → 마무리.
 4. 각 dialogue line은 1~3문장으로 간결하게. 청취자가 따라가기 쉽게.
 5. 합격 보장·점수 예측·지역 합격컷·합격 가능성 표현 절대 금지 (DESIGN.md §9.3).
@@ -80,7 +80,9 @@ export async function generatePodcastScript(
 
   // 헌법 §35 백업 — preview 모델 503/429/500 일시 과부하 시 stable model로 fallback.
   // 사용자 체감은 응답 약간 느려질 뿐, 성공률 99%+. preview 모델 가용성 spike 회피.
-  const PRIMARY = process.env.GEMINI_MODEL_PRO ?? "gemini-3.1-pro-preview";
+  // Default를 Flash로 — Vercel Hobby 60초 한도 안에서 script(빠름) + TTS(긴) 합산 정합.
+  // env GEMINI_MODEL_PRO override 시 그 값 우선 (사용자가 명시적으로 Pro 원하면).
+  const PRIMARY = process.env.GEMINI_MODEL_PRO ?? "gemini-2.5-flash";
   const FALLBACK =
     process.env.GEMINI_MODEL_PRO_FALLBACK ?? "gemini-2.5-pro";
   const prompt = SCRIPT_PROMPT_BASE + theme;
@@ -123,9 +125,9 @@ export async function generatePodcastScript(
   ) {
     throw new Error("Invalid script schema");
   }
-  // PR-005 — dialogue 길이 제한 (TTS 합성 + Vercel 60초 한도)
-  if (parsed.dialogue.length > 32) {
-    parsed.dialogue = parsed.dialogue.slice(0, 32);
+  // dialogue 길이 강제 제한 (TTS 합성 + Vercel 60초 한도). 16 line ≈ 2-3분 audio.
+  if (parsed.dialogue.length > 16) {
+    parsed.dialogue = parsed.dialogue.slice(0, 16);
   }
   return parsed;
 }

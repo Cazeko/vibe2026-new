@@ -162,7 +162,7 @@ export default async function PodcastPage() {
                   </p>
                   <p className="mt-1 text-[12.5px] text-muted-foreground leading-relaxed max-w-lg">
                     학습 분석에서 추출한 약점 영역·연도·주제를 선택하시면 2인 화자
-                    대화체 4~6분 청취 학습이 즉석 생성됩니다.
+                    대화체 2~3분 청취 학습이 즉석 생성됩니다.
                   </p>
                 </div>
                 <InstantGenerate />
