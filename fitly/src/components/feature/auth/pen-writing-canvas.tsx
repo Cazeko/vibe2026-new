@@ -17,20 +17,31 @@ const WRITE_DELAY_MS = 400; // 페이지 마운트 후 짧은 호흡
 export function PenWritingCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<"idle" | "writing" | "done">("idle");
+  const [retryToken, setRetryToken] = useState(0);
 
   useEffect(() => {
+    console.log("[Fitly:PenCanvas] useEffect mount, retry=", retryToken);
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      console.log("[Fitly:PenCanvas] container ref null — abort");
+      return;
+    }
+
+    console.log("[Fitly:PenCanvas] container size", {
+      width: container.clientWidth,
+      height: container.clientHeight,
+    });
 
     // 컨테이너 크기 0이면 layout이 안정되지 않은 시점 — 다음 frame에 재시도.
-    // (lg:h-screen으로 명시했지만 첫 mount 시점은 0인 경우 가드.)
     if (container.clientWidth === 0 || container.clientHeight === 0) {
+      console.log("[Fitly:PenCanvas] size 0 — retry next frame");
       const raf = requestAnimationFrame(() => {
-        // useEffect 내부 re-trigger는 어려움 — state로 강제 re-mount.
-        setPhase((p) => (p === "idle" ? "idle" : p));
+        setRetryToken((t) => t + 1);
       });
       return () => cancelAnimationFrame(raf);
     }
+
+    console.log("[Fitly:PenCanvas] init three.js scene");
 
     // ── three.js scene 초기화 ───────────────────────────────────────────
     const scene = new THREE.Scene();
@@ -291,7 +302,7 @@ export function PenWritingCanvas() {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [retryToken]);
 
   return (
     <div ref={containerRef} className="absolute inset-0">
