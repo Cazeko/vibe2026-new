@@ -38,22 +38,30 @@ export async function generatePodcastAudio(script: PodcastScript): Promise<{
   }));
 
   const ttsModel = process.env.GEMINI_MODEL_TTS ?? DEFAULT_TTS_MODEL;
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${apiKey}`,
-    {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${apiKey}`;
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: dialogueText }] }],
+    generationConfig: {
+      responseModalities: ["AUDIO"],
+      speechConfig: { multiSpeakerVoiceConfig: { speakerVoiceConfigs } },
+    },
+  });
+
+  // 헌법 §35 백업 — TTS preview 모델 503/429 일시 과부하 시 2초 후 1회 재시도.
+  let response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+  });
+  if (!response.ok && (response.status === 503 || response.status === 429)) {
+    console.warn(`[podcast/tts] ${ttsModel} ${response.status} — retrying once after 2s`);
+    await new Promise((r) => setTimeout(r, 2000));
+    response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: dialogueText }] }],
-        generationConfig: {
-          responseModalities: ["AUDIO"],
-          speechConfig: {
-            multiSpeakerVoiceConfig: { speakerVoiceConfigs },
-          },
-        },
-      }),
-    },
-  );
+      body,
+    });
+  }
   if (!response.ok) {
     const errBody = await response.text();
     throw new Error(`Gemini TTS API ${response.status}: ${errBody.slice(0, 300)}`);

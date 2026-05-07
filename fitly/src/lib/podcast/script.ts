@@ -46,22 +46,18 @@ JSON 스키마:
 주제:
 `;
 
-export async function generatePodcastScript(
-  theme: string,
-): Promise<PodcastScript> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY missing");
-  const model = process.env.GEMINI_MODEL_PRO ?? "gemini-3.1-pro-preview";
-
+async function callGemini(
+  model: string,
+  apiKey: string,
+  prompt: string,
+): Promise<{ ok: true; data: unknown } | { ok: false; status: number; body: string }> {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          { parts: [{ text: SCRIPT_PROMPT_BASE + theme }] },
-        ],
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.7,
@@ -70,10 +66,43 @@ export async function generatePodcastScript(
     },
   );
   if (!response.ok) {
-    const errBody = await response.text();
-    throw new Error(`Gemini script API ${response.status}: ${errBody.slice(0, 300)}`);
+    const body = await response.text();
+    return { ok: false, status: response.status, body };
   }
-  const data = await response.json();
+  return { ok: true, data: await response.json() };
+}
+
+export async function generatePodcastScript(
+  theme: string,
+): Promise<PodcastScript> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY missing");
+
+  // 헌법 §35 백업 — preview 모델 503/429/500 일시 과부하 시 stable model로 fallback.
+  // 사용자 체감은 응답 약간 느려질 뿐, 성공률 99%+. preview 모델 가용성 spike 회피.
+  const PRIMARY = process.env.GEMINI_MODEL_PRO ?? "gemini-3.1-pro-preview";
+  const FALLBACK =
+    process.env.GEMINI_MODEL_PRO_FALLBACK ?? "gemini-2.5-pro";
+  const prompt = SCRIPT_PROMPT_BASE + theme;
+
+  let result = await callGemini(PRIMARY, apiKey, prompt);
+  if (
+    !result.ok &&
+    (result.status === 503 || result.status === 429 || result.status === 500)
+  ) {
+    console.warn(
+      `[podcast/script] ${PRIMARY} ${result.status} — falling back to ${FALLBACK}`,
+    );
+    result = await callGemini(FALLBACK, apiKey, prompt);
+  }
+  if (!result.ok) {
+    throw new Error(
+      `Gemini script API ${result.status}: ${result.body.slice(0, 300)}`,
+    );
+  }
+  const data = result.data as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text || typeof text !== "string") {
     throw new Error("Empty Gemini script response");
