@@ -67,7 +67,7 @@ export default async function StudyAnalysisPage() {
         title="학습 분석"
         subtitle="본인 학습 기록의 추이·취약점·활동량을 한눈에 분석합니다."
       />
-      <div className="px-6 space-y-3">
+      <div className="px-6 mx-auto max-w-7xl space-y-3">
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {kpiCards.map(({ label, value, sub, Icon }) => (
             <Card key={label} className="border-rule">
