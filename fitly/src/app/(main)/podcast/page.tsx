@@ -152,7 +152,7 @@ export default async function PodcastPage() {
             <div className="flex items-start gap-4">
               <span
                 aria-hidden
-                className="grid h-11 w-11 place-items-center rounded-lg bg-evergreen text-primary-foreground font-serif italic font-medium"
+                className="grid h-8 w-8 place-items-center rounded-full bg-evergreen text-primary-foreground font-serif italic font-medium text-sm"
               >
                 F
               </span>
