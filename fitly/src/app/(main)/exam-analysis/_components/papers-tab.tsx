@@ -45,7 +45,6 @@ export async function PapersTab() {
           subtitle="풀이 출제 X · 키워드 트랙·분석으로 흡수"
           years={oldEra}
           byYear={byYear}
-          dimmed
         />
       )}
     </div>
@@ -57,13 +56,11 @@ function YearGroup({
   subtitle,
   years,
   byYear,
-  dimmed = false,
 }: {
   title: string;
   subtitle: string;
   years: number[];
   byYear: Map<number, PaperRow[]>;
-  dimmed?: boolean;
 }) {
   return (
     <section className="space-y-3">
