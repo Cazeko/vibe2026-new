@@ -119,6 +119,16 @@ export function FitlySignIn({ mode }: Props) {
               </span>
             </div>
 
+            {/* 모바일 전용 펀치라인 — md+ 는 우측 hero에서 큰 사이즈로 노출.
+                D006 정합 — 모바일 사용자 첫 가치 제안 누락 보강. */}
+            <p className="md:hidden animate-element animate-delay-150 font-serif text-[15px] leading-[1.5] text-foreground/85">
+              임용은 열심히 하는 게 아니라,{" "}
+              <em className="font-serif italic font-semibold text-foreground">
+                맞게(Fit)
+              </em>{" "}
+              하는 게임입니다.
+            </p>
+
             <h1 className="animate-element animate-delay-200 font-serif text-3xl md:text-4xl font-medium leading-[1.2] tracking-tight">
               {heading}
             </h1>
@@ -260,7 +270,7 @@ export function FitlySignIn({ mode }: Props) {
             <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-5">
               Fitly · 초등 임용 1차 학습 플래너
             </p>
-            <p className="font-serif text-3xl lg:text-4xl xl:text-[2.5rem] leading-[1.35] tracking-tight text-foreground/95">
+            <p className="font-serif text-3xl lg:text-4xl leading-[1.35] tracking-tight text-foreground/95">
               임용은 열심히 하는 게 아니라,
               <br />
               <em className="font-serif italic font-semibold text-foreground">
@@ -270,7 +280,7 @@ export function FitlySignIn({ mode }: Props) {
             </p>
           </div>
 
-          {/* 하단: 기능 강조 카드 3장 */}
+          {/* 하단: 기능 강조 카드 3장 — 카드 제목은 sans Small (§3 스케일) */}
           <ul className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 mt-10">
             {FEATURE_CARDS.map((card, idx) => (
               <li
@@ -283,7 +293,7 @@ export function FitlySignIn({ mode }: Props) {
                   className="h-4 w-4 text-muted-foreground mb-2"
                   aria-hidden
                 />
-                <p className="font-serif text-[14px] font-medium tracking-tight">
+                <p className="font-sans text-sm font-semibold tracking-tight text-foreground">
                   {card.title}
                 </p>
                 <p className="mt-1 text-[11.5px] text-muted-foreground leading-relaxed">
@@ -299,8 +309,10 @@ export function FitlySignIn({ mode }: Props) {
 }
 
 function GlassInputWrapper({ children }: { children: React.ReactNode }) {
+  // DESIGN.md §8.3 — 보더 1px rule-strong, 배경 cream(=bg), focus 시 보더 evergreen +
+  // 3px accent-soft 박스 섀도 (D005 정합).
   return (
-    <div className="mt-1.5 rounded-lg border border-rule-strong bg-card transition-colors focus-within:border-evergreen focus-within:bg-evergreen/[0.03]">
+    <div className="mt-1.5 rounded-lg border border-rule-strong bg-background transition-[box-shadow,border-color] focus-within:border-evergreen focus-within:shadow-[0_0_0_3px_hsl(var(--color-accent)/0.18)]">
       {children}
     </div>
   );
