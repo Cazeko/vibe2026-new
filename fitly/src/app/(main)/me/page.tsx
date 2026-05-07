@@ -236,7 +236,7 @@ export default async function MePage() {
             <Card key={label} className="border-rule">
               <CardContent className="p-5 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
                   <p className="mt-2 font-serif text-2xl font-medium leading-none tracking-tight num">{value}</p>
                 </div>
                 <span

@@ -153,7 +153,7 @@ export default async function StudyPlanPage() {
             </div>
             <ul className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2">
               <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   풀이
                 </p>
                 <p className="mt-0.5 font-serif text-2xl font-medium num">
@@ -164,7 +164,7 @@ export default async function StudyPlanPage() {
                 </p>
               </li>
               <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   키워드
                 </p>
                 <p className="mt-0.5 font-serif text-2xl font-medium num">
@@ -175,7 +175,7 @@ export default async function StudyPlanPage() {
                 </p>
               </li>
               <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   오답 복습
                 </p>
                 <p className="mt-0.5 font-serif text-2xl font-medium num">
@@ -186,7 +186,7 @@ export default async function StudyPlanPage() {
                 </p>
               </li>
               <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   권장 학습 시간
                 </p>
                 <p className="mt-0.5 font-serif text-2xl font-medium num">
@@ -207,7 +207,7 @@ export default async function StudyPlanPage() {
         <Card className="border-evergreen bg-evergreen/[0.06]">
           <CardContent className="p-5 flex items-center justify-between flex-wrap gap-3">
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                 오늘의 복습 대기
               </p>
               <p className="mt-1 font-serif text-evergreen text-3xl font-medium tracking-tight num">

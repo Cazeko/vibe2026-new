@@ -69,7 +69,7 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
           <CardContent className="p-5 flex flex-col">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   {label}
                 </p>
                 <p
