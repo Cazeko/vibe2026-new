@@ -11,21 +11,31 @@
    Fitly Design System v2.1 — 헌법 제16조의2 / DESIGN.md v1 정합
    ===================================================================== */
 @layer base {
-  /* 라이트 — 공책+세리프+에버그린 앵커 */
+  /* 라이트 — 신규 디자인 (Intro/Dashboard/MyPage) 토큰 정합 (2026-05-12) */
   :root {
-    /* DESIGN.md v1 직접 토큰 (HSL 표기) */
-    --color-bg: 36 56% 96%;            /* #FAF6EE warm cream */
-    --color-surface: 36 73% 97%;       /* #FFFAF1 */
-    --color-surface-deep: 36 41% 91%;  /* #F3EDE0 */
-    --color-text: 213 21% 13%;         /* #1A2027 deep ink */
-    --color-text-muted: 30 11% 38%;    /* #6B6256 warm gray */
-    --color-rule: 39 31% 87%;          /* #E8E2D5 */
-    --color-rule-strong: 38 25% 73%;   /* #C8BFA8 */
-    --color-accent: 161 50% 24%;       /* #1F5C4A deep evergreen — 5곳 한정 */
-    --color-accent-strong: 161 47% 17%;/* #173F33 */
-    --color-warning: 36 60% 44%;       /* #B5862D desaturated mustard */
-    --color-error: 8 56% 40%;          /* #A03B2D rust */
-    --color-info: 213 39% 30%;         /* #2E4A6B navy */
+    /* 베이스 — 따뜻한 cream + ink */
+    --color-bg: 42 65% 95%;            /* #faf6ed cream */
+    --color-surface: 42 67% 96%;       /* #fbf8f1 cream-soft */
+    --color-surface-deep: 39 47% 93%;  /* #f5efe4 cream-deep */
+    --color-paper: 43 69% 95%;         /* #fbf6e9 paper */
+    --color-text: 36 10% 10%;          /* #1c1a17 ink */
+    --color-text-2: 38 11% 15%;        /* #2a2722 ink-2 */
+    --color-text-muted: 41 7% 51%;     /* #8a857a muted */
+    --color-text-muted-deep: 38 8% 33%;/* #5b574e muted-deep */
+    --color-rule: 43 41% 87%;          /* #ebe3cf line */
+    --color-rule-soft: 44 50% 89%;     /* #f0e9d6 line-soft */
+    --color-rule-strong: 41 35% 77%;   /* #d8cdb0 line-deep */
+    /* 액센트 — primary evergreen + secondary gold */
+    --color-accent: 158 41% 21%;       /* #1f4a3c primary evergreen */
+    --color-accent-strong: 163 45% 16%;/* #163a30 primary-dark */
+    --color-accent-2: 158 39% 28%;     /* #2c6450 primary-2 mid */
+    --color-accent-soft: 132 11% 92%;  /* #e7ede8 primary-soft */
+    --color-gold: 40 51% 57%;          /* #c9a55b gold */
+    --color-gold-soft: 43 56% 87%;     /* #efe6cf gold-soft */
+    /* 시맨틱 */
+    --color-warning: 40 51% 57%;       /* #c9a55b — gold tone */
+    --color-error: 7 52% 48%;          /* #b94a3b danger */
+    --color-info: 213 39% 30%;         /* #2E4A6B navy (유지) */
 
     /* shadcn 호환 토큰 — 모두 위 직접 토큰 참조 (단일 소스 오브 트루스) */
     --background: var(--color-bg);
@@ -55,35 +65,42 @@
     --ring: var(--color-accent);
 
     --app-bg: var(--color-bg);
-    --sidebar: var(--color-surface);
+    --sidebar: var(--color-surface-deep); /* cream-deep 사이드바 (신규 디자인) */
     --sidebar-foreground: var(--color-text);
 
     --gauge-from: var(--color-accent);
     --gauge-to: var(--color-accent);
 
     --radius: 0.5rem;       /* DESIGN.md radius-md 8px */
+    --radius-card: 0.875rem; /* 14px — 신규 디자인 카드 */
 
     /* 폰트 변수 — next/font 가 자동 정의하는 것 외에 한글 폰트 직접 지정 */
     --font-pretendard: "Pretendard Variable", Pretendard;
     --font-noto-serif-kr: "Noto Serif KR";
   }
 
-  /* 다크 — 깊은 잉크 + 밝게 보정한 에버그린 */
+  /* 다크 — 깊은 잉크 + 밝게 보정한 evergreen + gold */
   .dark {
-    --color-bg: 213 25% 9%;            /* #11151B */
-    --color-surface: 213 21% 13%;      /* #1A2027 */
-    --color-surface-deep: 213 17% 17%; /* #232A33 */
-    --color-text: 36 36% 93%;          /* #F5EFE3 warm white */
-    --color-text-muted: 36 12% 53%;    /* #948A7A */
-    --color-rule: 213 18% 21%;         /* #2A323E */
-    --color-rule-strong: 215 14% 29%;  /* #3D4654 */
-    --color-accent: 161 51% 36%;       /* #2D8B6F brightened evergreen */
-    --color-accent-strong: 161 41% 47%;/* #46A98A */
-    --color-warning: 36 67% 62%;       /* #E0B458 */
-    --color-error: 8 59% 59%;          /* #D1685A */
-    --color-info: 213 38% 54%;         /* #6088B5 */
-
-    /* shadcn 토큰은 var() 참조라 자동 전환됨 — 명시 정의 불필요 */
+    --color-bg: 36 12% 9%;             /* deep warm ink */
+    --color-surface: 36 11% 13%;
+    --color-surface-deep: 36 10% 17%;
+    --color-paper: 36 12% 11%;
+    --color-text: 42 36% 93%;
+    --color-text-2: 42 24% 88%;
+    --color-text-muted: 38 12% 53%;
+    --color-text-muted-deep: 38 16% 68%;
+    --color-rule: 38 14% 21%;
+    --color-rule-soft: 38 12% 24%;
+    --color-rule-strong: 38 11% 29%;
+    --color-accent: 158 41% 38%;       /* brightened primary */
+    --color-accent-strong: 158 39% 50%;
+    --color-accent-2: 158 39% 28%;
+    --color-accent-soft: 158 15% 22%;
+    --color-gold: 40 51% 65%;          /* brightened gold */
+    --color-gold-soft: 38 25% 24%;
+    --color-warning: 40 51% 65%;
+    --color-error: 7 59% 59%;
+    --color-info: 213 38% 54%;
   }
 
   * {

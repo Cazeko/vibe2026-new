@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { FitlyLogo } from "@/components/shared/fitly-logo";
 
 type Item = {
   href: string;
@@ -22,8 +24,6 @@ type Item = {
   Icon: LucideIcon;
 };
 
-// 헌법 v3.0 제13조 / v3.0.1 — 사이드바 Phase 1 (자료/오답은 cut/Phase2)
-// 법률 12 v3.0 line 21 — 팟캐스트는 Phase 1 신규 1개로 정식 등록.
 const MAIN: Item[] = [
   { href: "/dashboard", label: "대시보드", Icon: LayoutDashboard },
   { href: "/study-plan", label: "학습 계획", Icon: ClipboardList },
@@ -33,9 +33,40 @@ const MAIN: Item[] = [
   { href: "/me", label: "마이 페이지", Icon: UserCircle },
 ];
 
+function dDayLabel(examDate: string | null): string | null {
+  if (!examDate) return null;
+  const t = new Date(examDate);
+  if (Number.isNaN(t.getTime())) return null;
+  const now = new Date();
+  const a = Date.UTC(t.getFullYear(), t.getMonth(), t.getDate());
+  const b = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const days = Math.round((a - b) / 86_400_000);
+  if (days > 0) return `D−${days}`;
+  if (days === 0) return "D-DAY";
+  return `D+${Math.abs(days)}`;
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [target, setTarget] = useState<{
+    region: string | null;
+    examDate: string | null;
+  }>({ region: null, examDate: null });
+
+  useEffect(() => {
+    fetch("/api/user/profile")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.profile) {
+          setTarget({
+            region: d.profile.targetUniversity ?? null,
+            examDate: d.profile.examDate ?? null,
+          });
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -44,27 +75,31 @@ export function AppSidebar() {
     router.refresh();
   }
 
+  const dDay = dDayLabel(target.examDate);
+  const examDateLabel = target.examDate
+    ? new Date(target.examDate).toLocaleDateString("ko-KR", {
+        month: "long",
+        day: "numeric",
+      })
+    : null;
+
   return (
     <aside
       aria-label="주 메뉴"
-      className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-60 flex-col bg-sidebar text-sidebar-foreground border-r border-rule"
+      className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-[248px] flex-col bg-cream-deep text-foreground border-r border-rule"
     >
-      <div className="px-5 pt-6 pb-5">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-serif text-2xl font-medium tracking-tight text-foreground"
-          aria-label="Fitly 대시보드"
-        >
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-evergreen text-primary-foreground font-serif italic font-medium">
-            F
-          </span>
-          <span>
-            Fitly<span className="text-evergreen">.</span>
-          </span>
+      {/* ─ 브랜드 ─ */}
+      <div className="px-5 pt-6 pb-5 border-b border-rule">
+        <Link href="/dashboard" aria-label="Fitly 대시보드">
+          <FitlyLogo size="md" />
         </Link>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3">
+      {/* ─ MENU 라벨 + 내비 ─ */}
+      <nav className="flex-1 overflow-y-auto px-3 pt-5">
+        <p className="px-3 pb-2.5 text-[10.5px] font-bold tracking-[0.18em] text-muted-foreground">
+          MENU
+        </p>
         <ul className="space-y-0.5">
           {MAIN.map(({ href, label, Icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
@@ -75,32 +110,53 @@ export function AppSidebar() {
                   prefetch={false}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] font-medium transition-colors",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium tracking-[-0.01em] transition-colors",
                     active
-                      ? "bg-evergreen/10 text-evergreen"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      ? "bg-evergreen text-white"
+                      : "text-ink-2 hover:bg-evergreen/[0.06]"
                   )}
                 >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                  <Icon
+                    className={cn(
+                      "h-[17px] w-[17px] shrink-0",
+                      active ? "text-gold" : "text-muted-foreground/80"
+                    )}
+                    aria-hidden
+                  />
                   <span>{label}</span>
                 </Link>
               </li>
             );
           })}
         </ul>
+
+        {/* ─ D-day 칩 (시험 카운트다운) ─ */}
+        {dDay && (
+          <div className="mt-4 mx-1 rounded-[10px] bg-evergreen px-3.5 py-3 text-cream relative overflow-hidden">
+            <p className="text-[10px] font-bold tracking-[0.2em] text-gold mb-2">
+              2026 · 1차
+            </p>
+            <p className="font-extrabold text-[30px] leading-none tracking-[-0.02em] num">
+              {dDay}
+            </p>
+            {(examDateLabel || target.region) && (
+              <p className="mt-1.5 text-[11.5px] text-cream/75">
+                {examDateLabel && <>{examDateLabel}</>}
+                {examDateLabel && target.region && " · "}
+                {target.region && <>{target.region} 시험 대비</>}
+              </p>
+            )}
+          </div>
+        )}
       </nav>
 
-      <div className="border-t border-rule px-3 py-3 space-y-0.5">
+      {/* ─ 푸터 (설정 + 로그아웃) ─ */}
+      <div className="border-t border-rule px-3 py-3.5 space-y-0.5">
         <Link
           href="/settings"
           prefetch={false}
           aria-current={pathname.startsWith("/settings") ? "page" : undefined}
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] transition-colors",
-            pathname.startsWith("/settings")
-              ? "bg-secondary text-foreground"
-              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-          )}
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] text-muted2-deep hover:bg-evergreen/[0.06] hover:text-foreground transition-colors"
         >
           <Settings className="h-4 w-4" aria-hidden />
           <span>설정</span>
@@ -108,7 +164,7 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] text-muted2-deep hover:bg-evergreen/[0.06] hover:text-foreground transition-colors"
         >
           <LogOut className="h-4 w-4" aria-hidden />
           <span>로그아웃</span>

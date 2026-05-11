@@ -20,7 +20,7 @@ export default function MainLayout({
           이전 회귀가 재현된다. 따라서 색을 명시하지 아니한다. */}
       <div className="hidden lg:block min-h-screen">
         <AppSidebar />
-        <main className="ml-60 min-h-screen">{children}</main>
+        <main className="ml-[248px] min-h-screen">{children}</main>
       </div>
     </>
   );
