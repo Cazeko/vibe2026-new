@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import dynamicImport from "next/dynamic";
 import { Activity, Target, Layers } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { LearningTrend } from "@/components/feature/dashboard/learning-trend";
 import { WeakTypes } from "@/components/feature/dashboard/weak-types";
 import { ActivityHeatmap } from "@/components/feature/analysis/activity-heatmap";
 import { createClient } from "@/lib/supabase/server";
@@ -14,27 +14,10 @@ import {
   getLibraryCounts,
 } from "@/lib/dashboard/analytics";
 
-// O3 (헌법 제19조 정합) — recharts 번들 큼 → dynamic + ssr:false, 차트 스켈레톤 로딩.
-const LearningTrend = dynamicImport(
-  () =>
-    import("@/components/feature/dashboard/learning-trend").then(
-      (m) => m.LearningTrend,
-    ),
-  {
-    ssr: false,
-    loading: () => <ChartSkeleton />,
-  },
-);
-
-function ChartSkeleton() {
-  return (
-    <div className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 h-full">
-      <div className="skeleton h-5 w-32 rounded-md" />
-      <div className="skeleton h-3 w-2/3 max-w-xs rounded-md mt-2" />
-      <div className="skeleton h-[180px] md:h-[240px] w-full rounded-md mt-4" />
-    </div>
-  );
-}
+// O3 (헌법 제19조 정합) — recharts 번들 큼. learning-trend.tsx 자체가 `"use client"`
+// 이므로 Next.js 15 가 자동 코드 분할한다. `next/dynamic` + `ssr:false` 는 서버
+// 컴포넌트에서 허용되지 않으므로 (Vercel 빌드 실패) 직접 import 한다. 클라이언트
+// 측 hydration 만 발생하여 동일 효과를 얻는다.
 
 export const dynamic = "force-dynamic";
 
