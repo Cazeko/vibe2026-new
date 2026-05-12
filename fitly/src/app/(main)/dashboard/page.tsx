@@ -34,37 +34,38 @@ export default async function DashboardPage() {
 
   return (
     // 헌법 제24조의2 정합 — viewport fit:
-    // - 모바일·태블릿(<lg): 기존 자연 스크롤 유지 (콘텐츠 우선)
-    // - lg+: h-screen + overflow-hidden + flex column 으로 한 화면에 카드 분배
-    //   sticky 헤더 자체 높이는 flex 안에서 자기 자리만 차지하고, 나머지를
-    //   `flex-1 min-h-0` 컨테이너가 row 비율로 분배한다.
-    <div className="min-h-screen pb-12 lg:h-screen lg:pb-0 lg:overflow-hidden lg:flex lg:flex-col">
+    // - 모바일·태블릿·좁은 데스크톱(<xl): 자연 스크롤 (콘텐츠 우선)
+    // - xl+(≥1280px): h-screen + overflow-hidden + flex column 으로 한 화면 분배
+    // P0-12 (외부 평가 2026-05-12) — 종전 lg(1024) 임계는 1024~1279 좁은 데스크톱
+    // 에서 flex-1 분배 잔여 공간이 카드 내부 콘텐츠 최소 높이보다 작아 카드끼리
+    // 시각적 겹침 발생. xl 로 상향하여 좁은 화면은 자연 스크롤로 회피.
+    <div className="min-h-screen pb-12 xl:h-screen xl:pb-0 xl:overflow-hidden xl:flex xl:flex-col">
       <DashboardHeader />
 
-      <div className="grid gap-[22px] px-10 py-7 lg:flex lg:flex-col lg:gap-3 lg:px-8 lg:py-4 lg:flex-1 lg:min-h-0">
+      <div className="grid gap-[22px] px-10 py-7 xl:flex xl:flex-col xl:gap-3 xl:px-8 xl:py-4 xl:flex-1 xl:min-h-0">
         {summary.isEmpty && <OnboardingBanner />}
 
         <KpiCards kpi={summary.kpi} />
 
-        <section className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-[22px] lg:gap-3 lg:flex-1 lg:min-h-0">
+        <section className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-[22px] xl:gap-3 xl:flex-1 xl:min-h-0">
           <LearningTrend data={summary.trend} />
           <TodayPlan items={summary.plan} />
         </section>
 
-        <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.05fr] gap-[22px] lg:gap-3 lg:flex-1 lg:min-h-0">
+        <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.05fr] gap-[22px] xl:gap-3 xl:flex-1 xl:min-h-0">
           <WeakTypes items={summary.weakTypes} />
           <AiRecommend weakest={weakest} />
         </section>
 
         {/* K1 (헌법 제4조의3 정합) — 한글 줄바꿈 의미 단위 br.
-            lg+ viewport fit 에서는 disclaimer 1줄로 압축. */}
-        <p className="pt-2 lg:pt-0 max-w-[920px] text-[11.5px] lg:text-[10.5px] text-muted-foreground leading-[1.6] lg:leading-[1.4] shrink-0">
+            xl+ viewport fit 에서는 disclaimer 1줄로 압축. */}
+        <p className="pt-2 xl:pt-0 max-w-[920px] text-[11.5px] xl:text-[10.5px] text-muted-foreground leading-[1.6] xl:leading-[1.4] shrink-0">
           본 대시보드의 KPI·차트·플랜은{" "}
           <strong className="font-semibold text-muted2-deep">
             본인 계정의 실제 학습 기록
           </strong>
           만으로 산출됩니다.
-          <br className="hidden sm:inline lg:hidden" />
+          <br className="hidden sm:inline xl:hidden" />
           지역 교육청별 합격 컷·평균은 비공개이므로 Fitly가 보유하지 않습니다.
         </p>
       </div>

@@ -15,6 +15,9 @@ export function DashboardHeader() {
     displayName: null,
     targetRegion: null,
   });
+  // P0-11 (외부 평가 2026-05-12) — client-side fetch 로딩 상태. 인사말이
+  // null → 실제 이름으로 깜빡이지 않도록 fetch 동안 스켈레톤 노출.
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     fetch("/api/user/profile")
@@ -27,11 +30,16 @@ export function DashboardHeader() {
           });
         }
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => setLoaded(true));
   }, []);
 
-  const greetingName = profile.displayName ?? "주인";
-  const initial = (greetingName ?? "주").trim().charAt(0) || "주";
+  // 호칭 정책 (2026-05-12 사용자 명시 결정) — UI 학습자 호칭은 "{이름} 선생님"
+  // 으로 고정. 헌법 제0조의 "주인님"은 Claude↔주관자 대화 호칭이며, UI 학습자
+  // 호칭과는 분리 사안 (제38조 7항 사용자 즉시 발화 우선).
+  const greetingName = profile.displayName ?? null;
+  const initial = (greetingName ?? "선").trim().charAt(0) || "선";
+
   const subtitle = profile.targetRegion
     ? `${profile.targetRegion} 시험 대비 일정과 학습 진척을 정리해 드릴게요.`
     : "오늘의 풀이·키워드·오답 트랙이 자동으로 채워지고, 추천 팟캐스트가 생성됩니다.";
@@ -40,7 +48,31 @@ export function DashboardHeader() {
     <header className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b border-rule bg-cream/95 backdrop-blur px-10 py-[22px] mb-5 lg:mb-0">
       <div className="min-w-0">
         <h1 className="font-sans text-[22px] font-bold tracking-[-0.025em] leading-tight">
-          안녕하세요, <em className="not-italic font-extrabold text-evergreen px-[0.02em]">{greetingName}</em>님.
+          {loaded ? (
+            <>
+              안녕하세요,{" "}
+              {greetingName ? (
+                <>
+                  <em className="not-italic font-extrabold text-evergreen px-[0.02em]">
+                    {greetingName}
+                  </em>{" "}
+                  선생님.
+                </>
+              ) : (
+                <em className="not-italic font-extrabold text-evergreen px-[0.02em]">
+                  선생님.
+                </em>
+              )}
+            </>
+          ) : (
+            <>
+              안녕하세요,{" "}
+              <span
+                className="skeleton inline-block h-[1.1em] w-32 rounded-md align-[-0.15em]"
+                aria-label="이름 로딩 중"
+              />
+            </>
+          )}
         </h1>
         <p className="mt-1 text-[13.5px] text-muted-foreground leading-[1.5]">
           {subtitle}

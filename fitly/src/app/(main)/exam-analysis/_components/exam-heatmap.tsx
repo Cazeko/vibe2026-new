@@ -101,11 +101,15 @@ export function ExamHeatmap({
                   const bg = filled
                     ? `hsl(${palette.color} / ${0.12 + intensity * 0.88})`
                     : palette.faintBg;
-                  // 진한 셀(intensity ≥ 0.6) 위 텍스트는 cream 으로 대비 확보
+                  // P0-09 (외부 평가 2026-05-12) — 진한 셀 위 텍스트 자동 반전.
+                  // 종전 0.6 임계 + cream 톤은 0.45~0.60 구간에서 대비가 모자라
+                  // 가독성 저하. 임계 0.45 로 낮추고 순수 흰색으로 명확화.
+                  // WCAG AA 4.5:1 정합 — info(navy)·warning(mustard) 모두 alpha
+                  // 0.45 부터 흰색이 본문보다 가독성 우위.
                   const numColor =
-                    intensity >= 0.6
-                      ? "hsl(var(--color-bg))"
-                      : "hsl(var(--color-text) / 0.85)";
+                    intensity >= 0.45
+                      ? "#FFFFFF"
+                      : "hsl(var(--color-text) / 0.88)";
                   return (
                     <td
                       key={y}

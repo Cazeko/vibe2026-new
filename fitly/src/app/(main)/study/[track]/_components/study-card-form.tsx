@@ -72,6 +72,10 @@ const GRADES: {
   },
 ];
 
+// P0-06 (외부 평가 2026-05-12) — 답안 LocalStorage 자동 저장 키 prefix.
+// 카드 id 별로 별도 키. 채점 완료(handleGrade) 시 삭제.
+const DRAFT_KEY_PREFIX = "fitly:draft:";
+
 export function StudyCardForm({ card }: { card: CardData }) {
   const router = useRouter();
   const { recordCard } = useStudySession(card.type);
@@ -79,14 +83,23 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const [revealed, setRevealed] = useState(card.type === "keyword");
   const [stemExpanded, setStemExpanded] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
   // I1 — 답안 보기 후 비교 영역으로 스크롤하기 위한 ref.
   const answerCompareRef = useRef<HTMLDivElement | null>(null);
+  // 외부 리뷰 H2 fix — draft 복원 effect 완료 전까지 setItem 보호 플래그.
+  // 마운트 직후 [answer] effect가 빈 값으로 removeItem/setItem 호출하는 race 방지.
+  const draftRestoredRef = useRef(false);
+  // 외부 리뷰 M1 fix — 첫 mount scrollTo 스킵. 페이지 anchor 진입·뒤로가기
+  // 복원 시 사용자 의도 스크롤을 강제 리셋하지 않음.
+  const firstMountRef = useRef(true);
 
   const imageUrl = getExamPageUrl(card.frontImagePath);
   // 본문은 PDF unpdf 추출본이라 줄바꿈·공백이 raw하게 들어 있다. whitespace-pre-wrap
   // 으로 표시하되 너무 길면(800자 이상) 기본 접힘 + "본문 펼쳐보기" 토글.
   const isLongStem = card.frontText.length > 800;
+  const draftKey = `${DRAFT_KEY_PREFIX}${card.id}`;
+  const supportsDraft = card.type === "quiz" || card.type === "mistake";
 
   function handleReveal() {
     if (card.type === "quiz" || card.type === "mistake") {
@@ -105,6 +118,11 @@ export function StudyCardForm({ card }: { card: CardData }) {
     const isCorrect = grade !== "again";
     recordCard(isCorrect);
     setSessionCount((c) => c + 1);
+    // P0-06 — 채점 완료 시 draft 삭제. 다음 카드 진입 시 빈 textarea 시작.
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(draftKey);
+    }
+    setSavedAt(null);
     startTransition(async () => {
       await gradeCard(card.id, grade);
       setAnswer("");
@@ -126,6 +144,60 @@ export function StudyCardForm({ card }: { card: CardData }) {
       });
     }
   }, [revealed]);
+
+  // P0-14 (외부 평가 2026-05-12) — 다음 문제로 넘어갈 때(card.id 변경)
+  // 페이지 상단으로 자동 스크롤. 긴 본문 학습 후 다음 카드도 상단부터 읽도록.
+  // 외부 리뷰 M1 fix — 첫 mount 는 사용자 진입 스크롤 위치 존중, 두번째 변경부터.
+  useEffect(() => {
+    if (firstMountRef.current) {
+      firstMountRef.current = false;
+      return;
+    }
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [card.id]);
+
+  // P0-06 (외부 평가 2026-05-12) — 마운트 시 LocalStorage draft 복원.
+  // 키워드 트랙은 답안 입력 없으므로 제외. card.id 변경 시 새 카드의 draft 로드.
+  // 외부 리뷰 H2 fix — 복원 완료 플래그를 세팅하여 [answer] effect가
+  // 복원 직전 빈 값으로 setItem 하는 race 회피.
+  useEffect(() => {
+    draftRestoredRef.current = false;
+    if (!supportsDraft) {
+      draftRestoredRef.current = true;
+      return;
+    }
+    if (typeof window === "undefined") return;
+    const draft = window.localStorage.getItem(draftKey);
+    if (draft) {
+      setAnswer(draft);
+      setSavedAt(Date.now());
+    } else {
+      setAnswer("");
+      setSavedAt(null);
+    }
+    draftRestoredRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card.id]);
+
+  // P0-06 — 답안 변경 시 1초 debounce LocalStorage 저장. 빈 값이면 키 삭제.
+  // 외부 리뷰 H2 fix — 복원 완료 전 (mount 직후) 은 skip.
+  useEffect(() => {
+    if (!supportsDraft) return;
+    if (!draftRestoredRef.current) return;
+    if (typeof window === "undefined") return;
+    if (!answer) {
+      window.localStorage.removeItem(draftKey);
+      setSavedAt(null);
+      return;
+    }
+    const t = setTimeout(() => {
+      window.localStorage.setItem(draftKey, answer);
+      setSavedAt(Date.now());
+    }, 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answer]);
 
   // S1 — 키보드 단축키 1/2/3/4 자가 채점 (revealed 상태에서만, textarea/input 포커스 제외).
   useEffect(() => {
@@ -319,12 +391,29 @@ export function StudyCardForm({ card }: { card: CardData }) {
       {showAnswerInput && (
         <Card className="border-rule">
           <CardContent className="p-6">
-            <label
-              htmlFor="answer-input"
-              className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground cursor-pointer"
-            >
-              내 답안
-            </label>
+            <div className="flex items-baseline justify-between gap-2">
+              <label
+                htmlFor="answer-input"
+                className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground cursor-pointer"
+              >
+                내 답안
+              </label>
+              {/* P0-06 (외부 평가 2026-05-12) — autosave 피드백 + 글자 수 카운터.
+                  brave 뒤로가기/재진입 시 draft 복원되므로 사용자 안심 시그널. */}
+              <span
+                className="inline-flex items-center gap-2 text-[10.5px] text-muted-foreground tabular-nums"
+                aria-live="polite"
+              >
+                {savedAt ? (
+                  <span className="inline-flex items-center gap-1 text-evergreen/80">
+                    <CheckCircle2 className="h-3 w-3" aria-hidden /> 자동 저장됨
+                  </span>
+                ) : answer ? (
+                  <span className="opacity-70">자동 저장 중…</span>
+                ) : null}
+                <span>{answer.length}자</span>
+              </span>
+            </div>
             <textarea
               id="answer-input"
               value={answer}
@@ -383,10 +472,13 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </Card>
       )}
 
-      {/* 등급 버튼 — G1 톤별 hover bg, Q1 44px 보장, S1 키보드 단축키 1/2/3/4. */}
+      {/* 등급 버튼 — G1 톤별 hover bg, Q1 44px 보장, S1 키보드 단축키 1/2/3/4.
+          P0-07 (외부 평가 2026-05-12) — sticky bottom 적용. 본문이 길어도 스크롤
+          중 어디서든 즉시 채점 가능. PageHeader top-0 sticky 와 자연 공존.
+          P0-08 — 단축키 배지를 키캡 모양으로 강화 (kbd 시멘틱 + 음각 box-shadow). */}
       {revealed && (
-        <Card className="border-rule">
-          <CardContent className="p-6">
+        <Card className="sticky bottom-3 z-20 border-rule shadow-[0_-6px_18px_rgba(26,32,39,0.06)] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
+          <CardContent className="p-5">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                 자가 채점 — 복습 등급
@@ -408,9 +500,11 @@ export function StudyCardForm({ card }: { card: CardData }) {
                   <Icon className="h-4 w-4" aria-hidden />
                   <span className="flex items-center gap-1.5">
                     {label}
-                    <span className="hidden sm:inline-flex items-center justify-center h-4 min-w-[16px] rounded-sm border border-current/30 text-[9.5px] opacity-70 tabular-nums px-1">
+                    {/* 외부 리뷰 M2 fix — 키캡 보더를 등급 톤(border-current)에서
+                        muted-foreground/30 으로 통일. §4.3 단일 액센트 정합. */}
+                    <kbd className="hidden sm:inline-flex items-center justify-center h-[20px] min-w-[20px] rounded-[4px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[10.5px] font-bold leading-none tabular-nums px-1 shadow-[inset_0_-1.5px_0_rgba(0,0,0,0.08)] font-sans">
                       {idx + 1}
-                    </span>
+                    </kbd>
                   </span>
                   <span className="text-[10.5px] font-normal text-muted-foreground tabular-nums">
                     {hint}
@@ -418,10 +512,8 @@ export function StudyCardForm({ card }: { card: CardData }) {
                 </button>
               ))}
             </div>
-            <p className="mt-4 text-[10.5px] text-muted-foreground leading-relaxed">
-              {`"다시" · "어려움"은 다음 학습 시 다시 등장합니다.`}
-              <br />
-              {`풀이 · 키워드 트랙에서 "다시" 또는 "어려움"으로 평가하면 오답 트랙에 자동 합류합니다.`}
+            <p className="mt-3 text-[10px] text-muted-foreground leading-relaxed">
+              {`"다시" · "어려움"은 다음 학습 시 다시 등장 · 오답 트랙에 자동 합류합니다.`}
             </p>
           </CardContent>
         </Card>

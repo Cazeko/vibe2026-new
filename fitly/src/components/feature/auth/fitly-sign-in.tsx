@@ -59,6 +59,26 @@ const PAPER_GRAIN_STYLE: React.CSSProperties = {
   backgroundSize: "4px 4px",
 };
 
+// 카카오 브랜드 가이드 정합 (developers.kakao.com/docs/latest/ko/kakaologin/design-guide).
+// 배경 #FEE500, 텍스트 rgba(0,0,0,0.85), 검은 말풍선 심볼. 외부 평가 P0-02
+// (2026-05-12) — 일반 outlined 버튼은 카카오 인지성 부족.
+function KakaoSymbol({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 18 18"
+      width="18"
+      height="18"
+      aria-hidden="true"
+      className={className}
+    >
+      <path
+        fill="currentColor"
+        d="M9 1C4.58 1 1 3.86 1 7.39c0 2.27 1.49 4.27 3.74 5.41-.17.62-.6 2.2-.69 2.55-.11.43.16.43.34.31.14-.09 2.2-1.5 3.09-2.1.5.07 1 .1 1.52.1 4.42 0 8-2.86 8-6.39S13.42 1 9 1z"
+      />
+    </svg>
+  );
+}
+
 export function FitlySignIn({ mode }: Props) {
   const router = useRouter();
   const supabase = createClient();
@@ -117,6 +137,11 @@ export function FitlySignIn({ mode }: Props) {
       setError(err.message);
     }
   }
+
+  // P0-05 (2026-05-12 외부 평가) — 이메일·비번 양쪽 유효성 통과해야만
+  // submit 활성. 카카오는 input 의존성 없으므로 별도 비활성 조건 없음.
+  const isFormValid = EMAIL_RE.test(email) && password.length >= 6;
+  const isLoading = status === "loading";
 
   const titleTop = mode === "login" ? "오늘의 한 걸음을" : "학습 여정을";
   const titleBottom = "시작합니다.";
@@ -217,11 +242,13 @@ export function FitlySignIn({ mode }: Props) {
               <span className="text-[12.5px] font-semibold text-muted2-deep mb-2">
                 이메일
               </span>
-              <span className="flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft transition-colors duration-150">
+              {/* P0-03 (외부 평가, DESIGN §10.2 정합) — focus-within 시 ring 강화 */}
+              <span className="flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft focus-within:ring-2 focus-within:ring-evergreen/30 focus-within:ring-offset-0 transition-all duration-150">
                 <input
                   type="email"
                   required
                   autoComplete="email"
+                  inputMode="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -241,7 +268,8 @@ export function FitlySignIn({ mode }: Props) {
                   </span>
                 )}
               </span>
-              <span className="relative flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft transition-colors duration-150">
+              {/* P0-03 (외부 평가, DESIGN §10.2 정합) — focus-within 시 ring 강화 */}
+              <span className="relative flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft focus-within:ring-2 focus-within:ring-evergreen/30 focus-within:ring-offset-0 transition-all duration-150">
                 <input
                   type={showPassword ? "text" : "password"}
                   required
@@ -252,13 +280,16 @@ export function FitlySignIn({ mode }: Props) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none pr-10 placeholder:text-muted-foreground/75"
+                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none pr-12 placeholder:text-muted-foreground/75"
                 />
+                {/* P0-04 (외부 평가) — WCAG 2.5.5 정합 — hitbox 44×44 보장.
+                    터치 영역만 확대하고 아이콘 자체는 18px 유지. */}
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 표시"}
-                  className="absolute right-3 inline-flex items-center justify-center rounded p-1 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-pressed={showPassword}
+                  className="absolute right-1 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="h-[18px] w-[18px]" aria-hidden />
@@ -269,12 +300,15 @@ export function FitlySignIn({ mode }: Props) {
               </span>
             </label>
 
+            {/* P0-05 (외부 평가) — 이메일·비번 유효성 미통과 시 disabled +
+                아이콘 변화. aria-disabled 로 스크린리더 안내 보강. */}
             <button
               type="submit"
-              disabled={status === "loading"}
-              className="mt-1.5 inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-evergreen px-4 text-[15px] font-semibold text-white hover:bg-evergreen-strong active:translate-y-px transition-all disabled:opacity-60"
+              disabled={isLoading || !isFormValid}
+              aria-disabled={isLoading || !isFormValid}
+              className="mt-1.5 inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-evergreen px-4 text-[15px] font-semibold text-white hover:bg-evergreen-strong active:translate-y-px transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0"
             >
-              {status === "loading" ? (
+              {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   처리 중…
@@ -287,12 +321,15 @@ export function FitlySignIn({ mode }: Props) {
               )}
             </button>
 
+            {/* P0-02 (외부 평가, 카카오 브랜드 가이드 정합) — #FEE500 배경 +
+                심볼 + rgba(0,0,0,0.85) 텍스트. */}
             <button
               type="button"
               onClick={handleKakao}
-              disabled={status === "loading"}
-              className="inline-flex h-[52px] items-center justify-center rounded-md border border-rule-strong bg-transparent text-[14.5px] font-semibold text-foreground hover:bg-secondary/60 hover:border-rule-strong transition-colors disabled:opacity-60"
+              disabled={isLoading}
+              className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-[#FEE500] text-[14.5px] font-semibold text-[rgba(0,0,0,0.85)] hover:brightness-[0.96] active:translate-y-px transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FEE500] focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60 disabled:cursor-not-allowed disabled:active:translate-y-0"
             >
+              <KakaoSymbol className="text-[rgba(0,0,0,0.9)]" />
               카카오로 계속하기
             </button>
           </form>
