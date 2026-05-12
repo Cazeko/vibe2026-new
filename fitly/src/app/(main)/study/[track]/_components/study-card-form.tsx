@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
+  Maximize2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,8 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const [stemExpanded, setStemExpanded] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
   const [pending, startTransition] = useTransition();
+  // I1 — 답안 보기 후 비교 영역으로 스크롤하기 위한 ref.
+  const answerCompareRef = useRef<HTMLDivElement | null>(null);
 
   const imageUrl = getExamPageUrl(card.frontImagePath);
   // 본문은 PDF unpdf 추출본이라 줄바꿈·공백이 raw하게 들어 있다. whitespace-pre-wrap
@@ -114,19 +117,67 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const showAnswerInput =
     !revealed && (card.type === "quiz" || card.type === "mistake");
 
+  // I1 — 답안 공개 시 비교 영역으로 부드럽게 스크롤.
+  useEffect(() => {
+    if (revealed && answerCompareRef.current) {
+      answerCompareRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [revealed]);
+
+  // S1 — 키보드 단축키 1/2/3/4 자가 채점 (revealed 상태에서만, textarea/input 포커스 제외).
+  useEffect(() => {
+    if (!revealed) return;
+    function onKey(e: KeyboardEvent) {
+      const tgt = e.target as HTMLElement | null;
+      const tag = tgt?.tagName;
+      if (tag === "TEXTAREA" || tag === "INPUT" || tgt?.isContentEditable) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const map: Record<string, Grade> = {
+        "1": "again",
+        "2": "hard",
+        "3": "good",
+        "4": "easy",
+      };
+      const g = map[e.key];
+      if (g && !pending) {
+        e.preventDefault();
+        handleGrade(g);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed, pending]);
+
+  // C1 — sessionCount 진행바 100% clamp 명확화 (12+ 카드 시 동일 폭 유지).
+  const sessionProgressPct = Math.min(100, sessionCount * 8);
+
   return (
     <div className="space-y-5">
-      {/* 세션 진행 — 학습한 카드 수를 시각적으로 누적 표시. */}
+      {/* 세션 진행 — 학습한 카드 수를 시각적으로 누적 표시. S1 aria-live 정합. */}
       {sessionCount > 0 && (
-        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+        <div
+          className="flex items-center gap-3 text-[11px] text-muted-foreground"
+          aria-live="polite"
+        >
           <span className="uppercase tracking-[0.12em]">세션 진행</span>
           <span className="tabular-nums font-medium text-foreground">
             {sessionCount}장 학습
           </span>
-          <div className="flex-1 h-1 bg-rule rounded-full overflow-hidden">
+          <div
+            className="flex-1 h-1 bg-rule rounded-full overflow-hidden"
+            role="progressbar"
+            aria-valuenow={sessionProgressPct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="세션 진행률"
+          >
             <div
               className="h-full bg-evergreen transition-all duration-500"
-              style={{ width: `${Math.min(100, sessionCount * 8)}%` }}
+              style={{ width: `${sessionProgressPct}%` }}
             />
           </div>
         </div>
@@ -152,17 +203,31 @@ export function StudyCardForm({ card }: { card: CardData }) {
             </div>
           </div>
 
-          {/* PDF 페이지 이미지 — 가독성의 1차. 텍스트는 보조. */}
+          {/* E2 — PDF 이미지 클릭 시 새 탭 전체보기 (exam-analysis 패턴 정합).
+              헌법 §16 스코프 보호 — lightbox modal 신규 도입 보류, 새 탭으로 대체.
+              O1 — width/height 명시(CLS 방지) + lazy loading. */}
           {imageUrl && (
-            <div className="mt-5 overflow-hidden rounded-md border border-rule">
+            <a
+              href={imageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="시험 본문 이미지 새 탭에서 전체 크기로 보기"
+              className="mt-5 group relative block overflow-hidden rounded-md border border-rule focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageUrl}
                 alt="시험 본문 (PDF 페이지)"
                 className="w-full"
                 loading="lazy"
+                width={1240}
+                height={1754}
               />
-            </div>
+              <span className="pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-[10.5px] text-foreground/80 border border-rule opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                <Maximize2 className="h-3 w-3" aria-hidden />
+                전체보기
+              </span>
+            </a>
           )}
 
           {/* 텍스트 본문 — 길면 접힘. unpdf 추출본은 raw text라 검색·낭독 보조 목적. */}
@@ -202,8 +267,9 @@ export function StudyCardForm({ card }: { card: CardData }) {
                 <p className="font-serif text-[14px] leading-[1.7] whitespace-pre-wrap text-foreground/85">
                   {card.frontText}
                 </p>
+                {/* A1 — fade height 50px 이상으로 확장, 텍스트 겹침 방지. */}
                 {isLongStem && !stemExpanded && (
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-card via-card/90 to-transparent pointer-events-none" />
                 )}
               </div>
             </div>
@@ -211,23 +277,24 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </CardContent>
       </Card>
 
-      {/* 답안 입력 (풀이/오답 트랙만) */}
+      {/* 답안 입력 (풀이/오답 트랙만) — J2 label htmlFor 연결 OK, J1 focus ring 강화. */}
       {showAnswerInput && (
         <Card className="border-rule">
           <CardContent className="p-6">
             <label
-              htmlFor="answer"
-              className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground"
+              htmlFor="answer-input"
+              className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground cursor-pointer"
             >
               내 답안
             </label>
             <textarea
-              id="answer"
+              id="answer-input"
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               rows={9}
-              className="mt-2 w-full rounded-md border border-rule-strong bg-background px-3.5 py-3 text-[13.5px] leading-[1.7] focus:border-evergreen focus:outline-none focus:ring-2 focus:ring-evergreen/20 resize-y"
-              placeholder="답안을 작성해 주세요. 채점 버튼을 누르면 모범답안과 비교됩니다. 답안 작성 없이도 채점은 가능합니다."
+              // J1 focus ring 강화 + K1 placeholder 50자 이내 단축 + 의미 단위 \n.
+              className="mt-2 w-full rounded-md border border-rule-strong bg-background px-3.5 py-3 text-[13.5px] leading-[1.7] resize-y focus:border-evergreen focus:outline-none focus:ring-2 focus:ring-evergreen/40 transition-colors"
+              placeholder={"답안을 작성해 주세요.\n비워두고 채점도 가능합니다."}
             />
             <div className="mt-4 flex justify-end">
               <Button onClick={handleReveal} disabled={pending}>
@@ -238,9 +305,9 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </Card>
       )}
 
-      {/* 답안 비교 — quiz/mistake은 좌우, keyword은 단독 */}
+      {/* 답안 비교 — quiz/mistake은 좌우, keyword은 단독. I1 auto-scroll target. */}
       {revealed && card.backMd && (
-        <>
+        <div ref={answerCompareRef} className="scroll-mt-4">
           {(card.type === "quiz" || card.type === "mistake") && answer.trim().length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <AnswerBox label="내 답안" tone="muted" plainText={answer} />
@@ -259,7 +326,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
               verified={card.verifiedAnswer}
             />
           )}
-        </>
+        </div>
       )}
 
       {revealed && !card.backMd && (
@@ -277,24 +344,35 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </Card>
       )}
 
-      {/* 등급 버튼 */}
+      {/* 등급 버튼 — G1 톤별 hover bg, Q1 44px 보장, S1 키보드 단축키 1/2/3/4. */}
       {revealed && (
         <Card className="border-rule">
           <CardContent className="p-6">
-            <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              자가 채점 — 복습 등급
-            </p>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                자가 채점 — 복습 등급
+              </p>
+              <p className="hidden sm:block text-[10.5px] text-muted-foreground tabular-nums">
+                키보드 1 · 2 · 3 · 4 로 빠른 채점
+              </p>
+            </div>
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {GRADES.map(({ key, label, hint, tone, Icon }) => (
+              {GRADES.map(({ key, label, hint, tone, Icon }, idx) => (
                 <button
                   key={key}
                   type="button"
                   disabled={pending}
                   onClick={() => handleGrade(key)}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-card px-3 py-3.5 text-[13px] font-medium transition-colors disabled:opacity-50 ${tone}`}
+                  aria-keyshortcuts={String(idx + 1)}
+                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-card px-3 py-3.5 min-h-[56px] text-[13px] font-medium transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${tone}`}
                 >
                   <Icon className="h-4 w-4" aria-hidden />
-                  <span>{label}</span>
+                  <span className="flex items-center gap-1.5">
+                    {label}
+                    <span className="hidden sm:inline-flex items-center justify-center h-4 min-w-[16px] rounded-sm border border-current/30 text-[9.5px] opacity-70 tabular-nums px-1">
+                      {idx + 1}
+                    </span>
+                  </span>
                   <span className="text-[10.5px] font-normal text-muted-foreground tabular-nums">
                     {hint}
                   </span>
@@ -302,7 +380,9 @@ export function StudyCardForm({ card }: { card: CardData }) {
               ))}
             </div>
             <p className="mt-4 text-[10.5px] text-muted-foreground leading-relaxed">
-              {`"다시"·"어렵"는 다음 학습 시 다시 등장합니다. 풀이 트랙에서 "다시"로 평가하면 오답 트랙에 자동 합류합니다.`}
+              {`"다시"·"어렵"는 다음 학습 시 다시 등장합니다.`}
+              <br />
+              {`풀이 트랙에서 "다시"로 평가하면 오답 트랙에 자동 합류합니다.`}
             </p>
           </CardContent>
         </Card>
@@ -344,7 +424,9 @@ function AnswerBox({
           </span>
           {verified !== undefined && <SourceBadge verified={verified} />}
         </div>
-        <div className="mt-3">
+        {/* F1 — markdown 답안 폰트 메트릭 정렬 (tabular-nums + variant-numeric).
+            unicode(ⓑ·㉠) 폭 불일치 완화 + 숫자 lining 정합. */}
+        <div className="mt-3 [font-variant-numeric:tabular-nums] tabular-nums">
           {markdown ? (
             <Markdown serif>{markdown}</Markdown>
           ) : (

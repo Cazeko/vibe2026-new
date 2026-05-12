@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
@@ -13,10 +14,12 @@ import {
   Layers,
   RefreshCw,
   Activity,
+  Pencil,
+  Calendar,
+  TrendingUp,
+  Headphones,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ActivityHeatmap } from "@/components/feature/analysis/activity-heatmap";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
@@ -31,25 +34,18 @@ import {
 
 export const dynamic = "force-dynamic";
 
-// 헌법 v3.0 제15조 — 지역 교육청 17개 라벨 (선택 입력).
+// N1 (헌법 제24조의2 정합) — 마이 페이지 메타데이터
+export const metadata: Metadata = {
+  title: "마이 페이지 · Fitly",
+  description:
+    "프로필·3 트랙 통계·학습 활동 히트맵·배지 등 본인 학습 기록을 한 페이지에 모았습니다.",
+};
+
 const REGION_SHORT: Record<string, string> = {
-  서울: "서울",
-  경기: "경기",
-  인천: "인천",
-  부산: "부산",
-  대구: "대구",
-  광주: "광주",
-  대전: "대전",
-  울산: "울산",
-  세종: "세종",
-  강원: "강원",
-  충북: "충북",
-  충남: "충남",
-  전북: "전북",
-  전남: "전남",
-  경북: "경북",
-  경남: "경남",
-  제주: "제주",
+  서울: "서울", 경기: "경기", 인천: "인천", 부산: "부산", 대구: "대구",
+  광주: "광주", 대전: "대전", 울산: "울산", 세종: "세종", 강원: "강원",
+  충북: "충북", 충남: "충남", 전북: "전북", 전남: "전남", 경북: "경북",
+  경남: "경남", 제주: "제주",
 };
 
 const MODE_LABEL: Record<string, string> = {
@@ -66,6 +62,8 @@ const MODE_ICON = {
   mistake: RefreshCw,
   exam: Layers,
   review: RefreshCw,
+  podcast: Headphones,
+  analysis: TrendingUp,
 } as const;
 
 function fmtMinutes(min: number): string {
@@ -85,7 +83,9 @@ function timeAgo(iso: string): string {
   const h = Math.floor(min / 60);
   if (h < 24) return `${h}시간 전`;
   const d = Math.floor(h / 24);
-  return `${d}일 전`;
+  if (d < 7) return `${d}일 전`;
+  const date = new Date(iso);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
 type Badge = {
@@ -113,42 +113,41 @@ function computeBadges(args: {
     {
       id: "target-set",
       title: "목표 설정",
-      description: "지역 교육청을 선택했습니다",
+      description: "지역 교육청 선택",
       earned: args.hasTarget,
       Icon: Target,
     },
     {
       id: "streak-3",
       title: "3일 연속",
-      description: "3일 연속 학습 달성",
+      description: "연속 학습 3일",
       earned: args.streak >= 3,
       Icon: Flame,
     },
     {
       id: "streak-7",
       title: "1주 연속",
-      description: "7일 연속 학습 달성",
+      description: "한 주를 채우면",
       earned: args.streak >= 7,
-      Icon: Flame,
+      Icon: Calendar,
     },
     {
       id: "minutes-300",
       title: "5시간 돌파",
-      description: "누적 학습 5시간 돌파",
+      description: "누적 학습 5시간",
       earned: args.totalMinutes >= 300,
       Icon: Clock,
     },
     {
       id: "cards-100",
       title: "100장 마스터",
-      description: "카드 100장 복습 완료",
+      description: "카드 100장 복습",
       earned: args.totalCards >= 100,
       Icon: Trophy,
     },
   ];
 }
 
-// 헌법 v1.10 — 마이 페이지. 프로필·통계·뱃지·활동 히트맵·최근 활동.
 export default async function MePage() {
   const supabase = await createClient();
   const {
@@ -156,26 +155,32 @@ export default async function MePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // O2 (헌법 제24조의2 정합) — 프로필 + 분석 5종을 단일 Promise.all로 병렬 fetch
   const db = getDb();
-  const [profileRow] = await db
-    .select()
-    .from(userProfiles)
-    .where(eq(userProfiles.userId, user.id))
-    .limit(1);
-
-  const [summary, heatmap, stats, lib, recent] = await Promise.all([
+  const [profileRows, summary, heatmap, stats, lib, recent] = await Promise.all([
+    db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, user.id))
+      .limit(1),
     getDashboardSummary(user.id),
     getActivityHeatmap(user.id),
     getSessionStats(user.id),
     getLibraryCounts(user.id),
-    getRecentActivity(user.id, 6),
+    getRecentActivity(user.id, 5),
   ]);
+  const profileRow = profileRows[0];
 
-  // v3.0 — targetUniversity 컬럼은 region 라벨로 임시 재해석 (D-S2에서 컬럼 명칭 재정렬 예정).
   const target = profileRow?.targetUniversity ?? null;
   const targetShort = target ? (REGION_SHORT[target] ?? target) : null;
-  const examDate = profileRow?.examDate ?? null;
   const daysToExam = summary.kpi.daysToExam;
+  const joinedAt = user.created_at
+    ? new Date(user.created_at).toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+    : null;
 
   const badges = computeBadges({
     streak: summary.kpi.streakDays,
@@ -185,239 +190,314 @@ export default async function MePage() {
   });
   const earnedCount = badges.filter((b) => b.earned).length;
 
-  // 헌법 v2.1 — KPI 톤 통일.
-  const statTiles = [
-    { label: "전체 학습", value: fmtMinutes(stats.totalMinutes), Icon: Clock },
-    { label: "세션 수", value: `${stats.sessions}회`, Icon: Activity },
-    { label: "평균 정답률", value: `${stats.avgAccuracy}%`, Icon: Target },
-    { label: "복습 카드", value: `${stats.totalCards}장`, Icon: Layers },
+  const accuracy = stats.avgAccuracy;
+  const features = [
+    {
+      title: "풀이 트랙",
+      href: "/study/quiz",
+      value: lib.quiz,
+      unit: "문항",
+      footL: (
+        <>
+          정답률 <b className="text-foreground font-semibold">{accuracy}%</b>
+        </>
+      ),
+      footR: lib.quizDue > 0 ? `복습 대기 ${lib.quizDue}` : "오늘 due 0",
+      isZero: lib.quiz === 0,
+    },
+    {
+      title: "키워드 트랙",
+      href: "/study/keyword",
+      value: lib.keyword,
+      unit: "개념",
+      footL: (
+        <>
+          오늘 due <b className="text-foreground font-semibold">{lib.keywordDue}</b>
+        </>
+      ),
+      footR: lib.keyword === 0 ? "아직 시작 전" : "개념 정리 노트",
+      isZero: lib.keyword === 0,
+    },
+    {
+      title: "오답 노트",
+      href: "/study/mistake",
+      value: lib.mistake,
+      unit: "문항",
+      footL: (
+        <>
+          다시보기 대기 <b className="text-foreground font-semibold">{lib.mistakeDue}</b>
+        </>
+      ),
+      footR: lib.mistake === 0 ? "again/hard 자동 합류" : "오답 복습",
+      isZero: lib.mistake === 0,
+    },
   ];
 
   return (
-    <div className="min-h-screen pb-10">
-      <PageHeader title="마이 페이지" subtitle="프로필과 학습 기록을 한 페이지에 모았습니다." />
-      <div className="px-6 mx-auto max-w-7xl space-y-3">
-        {/* 프로필 + 목표 */}
-        <Card className="border-rule">
-          <CardContent className="p-5 flex items-center gap-4 flex-wrap">
-            <span
-              aria-hidden
-              className="grid h-16 w-16 place-items-center rounded-lg bg-evergreen text-primary-foreground"
+    <div className="min-h-screen pb-12">
+      <PageHeader
+        title="마이 페이지"
+        subtitle="프로필과 학습 기록을 한 페이지에 모았습니다."
+      />
+      <div className="grid gap-[22px] px-10 py-7">
+        {/* ─ 프로필 카드 ─ */}
+        <article className="rounded-card border border-rule bg-cream-soft px-6 py-[22px] flex items-center gap-5 flex-wrap">
+          <span
+            aria-hidden
+            className="grid h-16 w-16 shrink-0 place-items-center rounded-[14px] bg-evergreen text-gold"
+          >
+            <UserCircle className="h-7 w-7" />
+          </span>
+          <div className="flex-1 min-w-[200px]">
+            {/* B2 (헌법 제24조의2 정합) — 긴 이메일 truncate 시 title로 hover 표시 */}
+            <p
+              className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground break-all"
+              title={user.email ?? undefined}
             >
-              <UserCircle className="h-9 w-9" />
-            </span>
-            <div className="flex-1 min-w-[200px]">
-              <p className="font-serif text-lg font-medium truncate">
-                {user.email ?? "Fitly 학습자"}
-              </p>
-              <p className="mt-0.5 text-[12px] text-muted-foreground">
-                지역 교육청 {targetShort ?? "미설정"}
-                {examDate && ` · 시험일 ${examDate}`}
-                {daysToExam != null && ` (D-${daysToExam})`}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/settings">
-                  <Settings className="h-4 w-4" aria-hidden />
-                  설정 변경
-                </Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link href="/study/quiz">학습 시작</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              {user.email ?? "Fitly 학습자"}
+            </p>
+            <p className="mt-1 text-[13px] text-muted-foreground tracking-[-0.005em]">
+              2026학년도 1차
+              {targetShort && (
+                <>
+                  {" · "}
+                  <b className="font-semibold text-foreground">{targetShort}</b>
+                </>
+              )}
+              {joinedAt && (
+                <>
+                  <span className="inline-block w-[3px] h-[3px] mx-2 align-middle rounded-full bg-rule-strong" />
+                  가입일 {joinedAt}
+                </>
+              )}
+              {daysToExam != null && (
+                <>
+                  <span className="inline-block w-[3px] h-[3px] mx-2 align-middle rounded-full bg-rule-strong" />
+                  D−{daysToExam}
+                </>
+              )}
+            </p>
+          </div>
+          {/* G2 (헌법 제24조의2 정합) — focus-visible ring 추가. evergreen은 CTA(계정 설정)에만, 일반은 rule-strong */}
+          <div className="inline-flex gap-2.5 flex-wrap">
+            <Link
+              href="/settings"
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-rule-strong px-4 text-[13px] font-semibold text-ink-2 hover:border-evergreen hover:text-evergreen transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule-strong/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <Pencil className="h-3.5 w-3.5" aria-hidden />
+              프로필 편집
+            </Link>
+            <Link
+              href="/settings"
+              className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-[18px] text-[13px] font-semibold text-white hover:bg-evergreen-strong transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <Settings className="h-3.5 w-3.5" aria-hidden />
+              계정 설정
+            </Link>
+          </div>
+        </article>
 
-        {/* 통계 4 */}
-        <section className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-          {statTiles.map(({ label, value, Icon }) => (
-            <Card key={label} className="border-rule">
-              <CardContent className="p-5 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-                  <p className="mt-2 font-serif text-2xl font-medium leading-none tracking-tight num">{value}</p>
-                </div>
-                <span
-                  aria-hidden
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-secondary text-muted-foreground"
-                >
-                  <Icon className="h-4 w-4" />
+        {/* ─ 3 트랙 통계 ─ A1 (헌법 제24조의2 정합): md:2 lg:3 단계화 */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {features.map((f) => (
+            <article
+              key={f.title}
+              className="rounded-card border border-rule bg-cream-soft px-[22px] py-5"
+            >
+              <div className="flex items-center justify-between mb-3.5">
+                <span className="text-[14.5px] font-bold tracking-[-0.02em] text-foreground">
+                  {f.title}
                 </span>
-              </CardContent>
-            </Card>
+                <Link
+                  href={f.href}
+                  className="text-[12px] text-muted-foreground border-b border-rule-strong pb-px hover:text-evergreen hover:border-evergreen transition-colors"
+                >
+                  기록 ›
+                </Link>
+              </div>
+              {/* C2 (헌법 제24조의2·제3조의2 정합) — lib===0 시 단독 "0" 대신 "—" 노출 */}
+              <p
+                className={`font-extrabold text-[38px] leading-none tracking-[-0.03em] num inline-flex items-baseline gap-1.5 ${f.isZero ? "text-muted2-deep" : "text-foreground"}`}
+              >
+                {f.isZero ? "—" : f.value}
+                {!f.isZero && (
+                  <span className="text-base font-medium text-muted-foreground tracking-normal">
+                    {f.unit}
+                  </span>
+                )}
+              </p>
+              <div className="flex items-center justify-between mt-4 text-[12px] text-muted-foreground tracking-[-0.005em]">
+                <span>{f.footL}</span>
+                <span>{f.footR}</span>
+              </div>
+            </article>
           ))}
         </section>
 
-        {/* 카드 라이브러리 — v3.0 풀이/키워드/오답 3종 (제13조의2) */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Card className="border-rule">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <h2 className="font-serif text-lg font-medium tracking-tight">풀이 카드</h2>
-                <Link
-                  href="/study/quiz"
-                  className="text-[11px] text-muted-foreground hover:text-foreground"
-                >
-                  풀기 ›
-                </Link>
-              </div>
-              <div className="mt-2 flex items-end justify-between">
-                <p className="font-serif text-3xl font-medium tracking-tight num">
-                  {lib.quiz}
-                  <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  복습 대기 <strong>{lib.quizDue}</strong>
-                </p>
-              </div>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                서술형 기출 (2014~2026학년도)
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-rule">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <h2 className="font-serif text-lg font-medium tracking-tight">키워드 카드</h2>
-                <Link
-                  href="/study/keyword"
-                  className="text-[11px] text-muted-foreground hover:text-foreground"
-                >
-                  학습 ›
-                </Link>
-              </div>
-              <div className="mt-2 flex items-end justify-between">
-                <p className="font-serif text-3xl font-medium tracking-tight num">
-                  {lib.keyword}
-                  <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  복습 대기 <strong>{lib.keywordDue}</strong>
-                </p>
-              </div>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                개념 정리 노트 (2002~2026)
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-rule">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <h2 className="font-serif text-lg font-medium tracking-tight">오답 카드</h2>
-                <Link
-                  href="/study/mistake"
-                  className="text-[11px] text-muted-foreground hover:text-foreground"
-                >
-                  복습 ›
-                </Link>
-              </div>
-              <div className="mt-2 flex items-end justify-between">
-                <p className="font-serif text-3xl font-medium tracking-tight num">
-                  {lib.mistake}
-                  <span className="ml-1 text-sm font-medium text-muted-foreground">장</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  복습 대기 <strong>{lib.mistakeDue}</strong>
-                </p>
-              </div>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                풀이 again/hard 자동 합류
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* 뱃지 */}
-        <Card className="border-rule">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-serif text-lg font-medium tracking-tight">획득 뱃지</h2>
-              <span className="text-[11px] text-muted-foreground">
-                {earnedCount}/{badges.length}
+        {/* ─ 활동 히트맵 + 최근 활동 ─ */}
+        <section className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-[22px]">
+          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5">
+            <div className="flex items-center gap-2.5">
+              <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
+                학습 활동
+              </h2>
+              <span className="ml-auto text-[11.5px] text-muted-foreground">
+                <b className="font-bold text-foreground">
+                  {fmtMinutes(stats.totalMinutes)}
+                </b>
+                {" · 최근 7일"}
               </span>
             </div>
-            <ul className="mt-3 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
-              {badges.map((b) => (
-                <li
-                  key={b.id}
-                  className={`rounded-lg border border-rule px-3 py-3 text-center transition-colors ${
-                    b.earned ? "bg-card" : "bg-background opacity-60"
+            {/* K1 (헌법 제4조의3 정합) — 의미 단위 줄바꿈 */}
+            <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
+              최근 13주간 일별 학습 시간.
+              <br className="hidden sm:inline" />
+              짙을수록 오래 학습한 날입니다.
+            </p>
+            {/* E1 (헌법 제24조의2 정합) — overflow-x-auto 보장 + max-w 안전 */}
+            <div className="overflow-x-auto max-w-full">
+              <ActivityHeatmap cells={heatmap} />
+            </div>
+            {/* H3 (헌법 제24조의2 정합) — 범례 sticky-bottom (카드 하단 고정) */}
+            <div className="mt-3.5 sticky bottom-0 bg-cream-soft/95 backdrop-blur-sm flex items-center gap-1.5 text-[11.5px] text-muted-foreground flex-wrap">
+              <span>적음</span>
+              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-cream-deep" />
+              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-[#d8e4dc] dark:bg-evergreen/30" />
+              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-[#9bbaa6] dark:bg-evergreen/50" />
+              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-[#5a8b71] dark:bg-evergreen/70" />
+              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-evergreen" />
+              <span>많음</span>
+              <span className="ml-auto">
+                연속 학습{" "}
+                <b className="font-bold text-foreground num">
+                  {summary.kpi.streakDays}일
+                </b>
+                {summary.kpi.streakBest > 0 && (
+                  <> · 최장 {summary.kpi.streakBest}일</>
+                )}
+              </span>
+            </div>
+          </article>
+
+          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5">
+            <div className="flex items-center gap-2.5">
+              <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
+                최근 활동
+              </h2>
+              <Link
+                href="/study-analysis"
+                className="ml-auto inline-flex items-center gap-0.5 text-[12px] text-muted2-deep border-b border-rule-strong pb-px hover:text-evergreen hover:border-evergreen transition-colors"
+              >
+                전체 ›
+              </Link>
+            </div>
+            <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em]">
+              최근 학습 이력 {recent.length}건
+            </p>
+            {recent.length === 0 ? (
+              <p className="mt-3 text-[12.5px] text-muted-foreground">
+                학습 세션이 누적되면 여기에 표시됩니다.
+              </p>
+            ) : (
+              <ul className="grid gap-2">
+                {recent.map((r) => {
+                  const Icon =
+                    MODE_ICON[r.mode as keyof typeof MODE_ICON] ?? Activity;
+                  return (
+                    <li
+                      key={r.id}
+                      className="grid grid-cols-[32px_1fr_auto] items-center gap-3 rounded-[10px] border border-rule bg-cream px-3.5 py-3"
+                    >
+                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-cream-deep text-evergreen">
+                        <Icon className="h-[15px] w-[15px]" aria-hidden />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[13.5px] font-semibold tracking-[-0.02em] truncate text-foreground">
+                          {MODE_LABEL[r.mode] ?? r.mode}
+                        </p>
+                        <p className="text-[11.5px] text-muted-foreground mt-px">
+                          {fmtMinutes(r.durationMinutes)} · {r.cards}장
+                          {r.accuracy != null && ` · 정답률 ${r.accuracy}%`}
+                        </p>
+                      </div>
+                      <span className="text-[11.5px] text-muted-foreground whitespace-nowrap num">
+                        {timeAgo(r.startedAt)}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </article>
+        </section>
+
+        {/* ─ 학습 배지 ─ */}
+        <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
+              학습 배지
+            </h2>
+            <span className="ml-auto text-[12px] font-semibold text-muted-foreground num">
+              {earnedCount} / {badges.length} 획득
+            </span>
+          </div>
+          {/* K1 (헌법 제4조의3 정합) — 의미 단위 줄바꿈 */}
+          <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
+            꾸준한 학습으로 배지를 모아 보세요.
+            <br className="hidden sm:inline" />
+            모든 배지는 본인 활동 기록을 기반으로 자동 지급됩니다.
+          </p>
+
+          {/* A1 (헌법 제24조의2 정합) — 배지 grid 단계화: 2→3→4→6 */}
+          <ul
+            aria-live="polite"
+            aria-label={`학습 배지: ${earnedCount} / ${badges.length} 획득`}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
+          >
+            {/* E2 (헌법 제24조의2 정합) — 미획득 명도 차 강화: opacity-60 + grayscale */}
+            {badges.map((b) => (
+              <li
+                key={b.id}
+                className={`rounded-[12px] border px-3 pt-[18px] pb-3.5 text-center transition-all ${
+                  b.earned
+                    ? "border-gold bg-cream-soft hover:-translate-y-0.5"
+                    : "border-rule bg-cream opacity-60 grayscale"
+                }`}
+              >
+                <span
+                  aria-hidden
+                  className={`mx-auto grid h-9 w-9 place-items-center rounded-full mb-2.5 ${
+                    b.earned
+                      ? "bg-gold-soft text-gold"
+                      : "bg-cream-deep text-muted-foreground"
                   }`}
                 >
-                  <span
-                    aria-hidden
-                    className={`mx-auto grid h-8 w-8 place-items-center rounded-md ${
-                      b.earned
-                        ? "bg-warning/15 text-warning"
-                        : "bg-secondary text-muted-foreground"
-                    }`}
-                  >
-                    <b.Icon className="h-4 w-4" />
-                  </span>
-                  <p className="mt-1.5 text-[12px] font-semibold">{b.title}</p>
-                  <p className="text-[10px] text-muted-foreground">{b.description}</p>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* 히트맵 + 최근 활동 */}
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
-          <Card className="xl:col-span-2 border-rule">
-            <CardContent className="p-4">
-              <h2 className="font-serif text-lg font-medium tracking-tight">활동량 (최근 12주)</h2>
-              <div className="mt-3 overflow-x-auto">
-                <ActivityHeatmap cells={heatmap} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-rule">
-            <CardContent className="p-4">
-              <h2 className="font-serif text-lg font-medium tracking-tight">최근 학습</h2>
-              {recent.length === 0 ? (
-                <p className="mt-3 text-[12px] text-muted-foreground">
-                  학습 세션이 누적되면 여기에 표시됩니다.
+                  <b.Icon className="h-[18px] w-[18px]" />
+                </span>
+                <p
+                  className={`text-[13px] font-bold tracking-[-0.02em] ${b.earned ? "text-foreground" : "text-muted2-deep"}`}
+                >
+                  {b.title}
                 </p>
-              ) : (
-                <ul className="mt-2 space-y-1.5">
-                  {recent.map((r) => {
-                    const Icon =
-                      MODE_ICON[r.mode as keyof typeof MODE_ICON] ?? Activity;
-                    return (
-                      <li
-                        key={r.id}
-                        className="flex items-center gap-2.5 rounded-lg border border-rule bg-background px-2.5 py-2"
-                      >
-                        <span className="grid h-7 w-7 place-items-center rounded-md bg-secondary text-muted-foreground">
-                          <Icon className="h-3.5 w-3.5" aria-hidden />
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[12px] font-medium">
-                            {MODE_LABEL[r.mode] ?? r.mode}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {fmtMinutes(r.durationMinutes)} · {r.cards}장
-                            {r.accuracy != null && ` · ${r.accuracy}%`}
-                          </p>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground">
-                          {timeAgo(r.startedAt)}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
-        </section>
+                <p className="text-[11px] text-muted-foreground mt-1 leading-[1.4] tracking-[-0.005em]">
+                  {b.description}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        {/* K1 (헌법 제4조의3·제3조의2 정합) — 정직성 안내, 의미 단위 줄바꿈 */}
+        <p className="pt-2 max-w-[920px] text-[11.5px] text-muted-foreground leading-[1.6] break-keep">
+          본 마이 페이지의 통계·배지·활동 기록은{" "}
+          <strong className="font-semibold text-muted2-deep">
+            본인 계정의 실제 학습 데이터
+          </strong>
+          만으로 산출됩니다.
+          <br className="hidden sm:inline" />
+          합격 컷·타사용자 평균 같은 외부 비교 지표는 사용하지 않습니다.
+        </p>
       </div>
     </div>
   );
 }
-
-

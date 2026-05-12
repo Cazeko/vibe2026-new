@@ -3,19 +3,18 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent } from "@/components/ui/card";
 import type { TrendPoint } from "@/lib/dashboard/types";
 
-// 헌법 제19조 — 차트는 Recharts.
-// 헌법 v2.1 제16조의2 — accent(evergreen)는 단일 시리즈만, 보조 시리즈는 명도 단계로 구분.
+// 차트: 신규 디자인 정합 — 진척도(evergreen 라인) + 정답률(gold 면+라인)
 function readVar(name: string, fallback: string) {
   if (typeof window === "undefined") return fallback;
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -29,102 +28,139 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
     axis: "transparent",
     progress: "transparent",
     accuracy: "transparent",
+    accuracyFill: "transparent",
     tooltipBg: "transparent",
     tooltipBorder: "transparent",
   });
+  // S3 (헌법 제24조의2 정합) — prefers-reduced-motion 미디어 쿼리 → 차트 애니메이션 비활성화
+  const [reducedMotion, setReducedMotion] = useState(false);
 
-  // 다크/라이트 토큰을 클라이언트에서 추출 — Recharts 가 inline color string 만 받기 때문
   useEffect(() => {
+    const gold = readVar("--color-gold", "#c9a55b");
     setColors({
       grid: readVar("--color-rule", "#e8e2d5"),
-      axis: readVar("--color-text-muted", "#6b6256"),
-      progress: readVar("--color-accent", "#1f5c4a"),
-      // 보조 시리즈(정답률) — accent 와 같은 hue, 더 밝은 명도
-      accuracy: readVar("--color-accent-strong", "#173f33") + "55", // ~33% alpha
-      tooltipBg: readVar("--color-surface", "#fffaf1"),
-      tooltipBorder: readVar("--color-rule", "#e8e2d5"),
+      axis: readVar("--color-text-muted", "#8a857a"),
+      progress: readVar("--color-accent", "#1f4a3c"),
+      accuracy: gold,
+      accuracyFill: gold,
+      tooltipBg: readVar("--color-surface", "#fbf8f1"),
+      tooltipBorder: readVar("--color-rule", "#ebe3cf"),
     });
   }, [resolvedTheme]);
 
-  const hasData = data.some((d) => d.progress != null || d.accuracy != null);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
+
+  // C1 (헌법 제24조의2 정합) — null != 0 강화. 누적 0 만 있어도 빈 상태로 처리.
+  const hasData = data.some(
+    (d) =>
+      (typeof d.progress === "number" && d.progress > 0) ||
+      (typeof d.accuracy === "number" && d.accuracy > 0),
+  );
+  const isAnimationActive = !reducedMotion;
 
   return (
-    <Card className="border-rule h-full">
-      <CardContent className="p-5 h-full">
-        <div className="flex items-center justify-between">
-          <h2 className="font-serif text-lg font-medium tracking-tight">
-            학습 성과 추이
-          </h2>
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-            <Legend color={colors.progress} label="진척도" />
-            <Legend color={colors.accuracy} label="정답률(%)" />
-          </div>
+    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 h-full">
+      <div className="flex items-center gap-2.5 flex-wrap">
+        <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
+          학습 성과 추이
+        </h2>
+        <div className="ml-auto flex items-center gap-3.5 text-[11.5px] text-muted-foreground">
+          {/* H2 단위 명시 — 진척도도 % 단위 */}
+          <Legend color={colors.progress} label="진척도(%)" />
+          <Legend color={colors.accuracy} label="정답률(%)" />
         </div>
+      </div>
+      <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
+        최근 14일간의 일일 진척도와 정답률 흐름.
+      </p>
 
-        <div className="mt-3 h-44">
-          {hasData ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={data}
-                margin={{ top: 8, right: 6, left: -22, bottom: 0 }}
-              >
-                <CartesianGrid stroke={colors.grid} strokeDasharray="2 4" vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  stroke={colors.axis}
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  domain={[0, 100]}
-                  stroke={colors.axis}
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                  ticks={[0, 25, 50, 75, 100]}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: 8,
-                    border: `1px solid ${colors.tooltipBorder}`,
-                    background: colors.tooltipBg,
-                    fontSize: 11,
-                    padding: "6px 10px",
-                  }}
-                  formatter={(value: number, name: string) => [
-                    name === "progress" ? `${value}` : `${value}%`,
-                    name === "progress" ? "학습 진척도" : "정답률",
-                  ]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="progress"
-                  stroke={colors.progress}
-                  strokeWidth={2.25}
-                  dot={{ r: 2.5, fill: colors.progress }}
-                  activeDot={{ r: 4 }}
-                  connectNulls
-                />
-                <Line
-                  type="monotone"
-                  dataKey="accuracy"
-                  stroke={colors.accuracy}
-                  strokeWidth={2}
-                  dot={{ r: 2.5, fill: colors.accuracy }}
-                  activeDot={{ r: 4 }}
-                  connectNulls
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="grid h-full place-items-center text-center text-[12px] text-muted-foreground">
-              학습을 시작하면 매일 진척도·정답률 추이가 그려집니다.
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      {/* H4 모바일 180px / md+ 240px (헌법 제24조의2) */}
+      <div className="h-[180px] md:h-[240px]">
+        {hasData ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={data}
+              // H1 margin 음수 제거 — YAxis width=36으로 left padding 흡수
+              margin={{ top: 12, right: 8, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="accuracyFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={colors.accuracyFill} stopOpacity={0.18} />
+                  <stop offset="100%" stopColor={colors.accuracyFill} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke={colors.grid} strokeDasharray="2 4" vertical={false} />
+              <XAxis
+                dataKey="date"
+                stroke={colors.axis}
+                fontSize={10.5}
+                tickLine={false}
+                axisLine={false}
+              />
+              {/* H2 YAxis label — 진척도·정답률 단위 혼합 해소 */}
+              <YAxis
+                domain={[0, 100]}
+                stroke={colors.axis}
+                fontSize={10.5}
+                tickLine={false}
+                axisLine={false}
+                ticks={[0, 25, 50, 75, 100]}
+                width={36}
+              />
+              {/* H3 cursor=false — 모바일 hit box 35px 큼 해소 */}
+              <Tooltip
+                cursor={false}
+                contentStyle={{
+                  borderRadius: 8,
+                  border: `1px solid ${colors.tooltipBorder}`,
+                  background: colors.tooltipBg,
+                  fontSize: 11,
+                  padding: "6px 10px",
+                }}
+                formatter={(value: number, name: string) => [
+                  `${value}%`,
+                  name === "progress" ? "학습 진척도" : "정답률",
+                ]}
+              />
+              <Area
+                type="monotone"
+                dataKey="accuracy"
+                stroke={colors.accuracy}
+                strokeWidth={1.6}
+                fill="url(#accuracyFill)"
+                // H3 dot r 축소 (2.5 → 2)
+                dot={{ r: 2, fill: colors.accuracy, strokeWidth: 0 }}
+                activeDot={{ r: 3.5 }}
+                connectNulls
+                isAnimationActive={isAnimationActive}
+              />
+              <Line
+                type="monotone"
+                dataKey="progress"
+                stroke={colors.progress}
+                strokeWidth={2.4}
+                // H3 dot r 축소 (3 → 2.5)
+                dot={{ r: 2.5, fill: colors.progress, strokeWidth: 0 }}
+                activeDot={{ r: 4 }}
+                connectNulls
+                isAnimationActive={isAnimationActive}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="grid h-full place-items-center text-center text-[12px] text-muted-foreground break-keep">
+            학습을 시작하면 매일 진척도·정답률 추이가 그려집니다.
+          </div>
+        )}
+      </div>
+    </article>
   );
 }
 
@@ -132,7 +168,7 @@ function Legend({ color, label }: { color: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="h-1.5 w-1.5 rounded-full"
+        className="h-2 w-2 rounded-full"
         style={{ backgroundColor: color }}
       />
       {label}

@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
 import type { WeakType } from "@/lib/dashboard/types";
 
-// SEVERITY_BAR 제거 (B004) — Severity type 은 BADGE/LABEL에서 계속 사용.
 type Severity = "weak" | "warn" | "ok" | "good";
 
 function severityOf(accuracy: number): Severity {
@@ -19,9 +18,6 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   good: "양호",
 };
 
-// DESIGN.md §4.4 — 진척 바는 단일 단색. 차별은 우측 SEVERITY_BADGE 라벨로만.
-// §4.3 — evergreen은 진척도 KPI / Primary CTA / 활성 사이드바 / AI 추천 / 잉크 trail
-// 6 위치 한정. weak-types 진척 바는 6 위치 외 — bg-foreground/40 단색 통일 (B004).
 const SEVERITY_BADGE: Record<Severity, string> = {
   weak: "bg-error/10 text-error",
   warn: "bg-warning/10 text-warning",
@@ -31,58 +27,74 @@ const SEVERITY_BADGE: Record<Severity, string> = {
 
 export function WeakTypes({ items }: { items: WeakType[] }) {
   return (
-    <Card className="border-rule h-full">
-      <CardContent className="p-5 h-full">
-        <h2 className="font-serif text-lg font-medium tracking-tight">
+    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 h-full">
+      <div className="flex items-center gap-2.5">
+        <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
           취약 유형 분석
         </h2>
+        <Link
+          href="/study-analysis"
+          className="ml-auto inline-flex items-center gap-0.5 text-[12px] text-muted2-deep border-b border-rule-strong pb-px hover:text-evergreen hover:border-evergreen transition-colors"
+        >
+          자세히 ›
+        </Link>
+      </div>
+      <p className="mt-[2px] mb-[18px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em]">
+        풀이 50개 이상 누적되면 자동 산출됩니다.
+      </p>
 
-        {items.length === 0 ? (
-          <div className="mt-3 grid place-items-center rounded-lg border border-dashed border-rule bg-background/50 py-7 text-center text-[11.5px] text-muted-foreground">
-            <span className="font-medium text-foreground">아직 분석할 데이터가 없어요</span>
-            <Link
-              href="/study/quiz"
-              className="mt-1 text-[10px] text-foreground underline underline-offset-2 hover:text-evergreen"
-            >
-              풀이 트랙 시작 ›
-            </Link>
-          </div>
-        ) : (
-          <ul className="mt-3 space-y-2">
-            {items.map((w) => {
-              const sev = severityOf(w.accuracy);
-              return (
-                <li key={w.id} className="space-y-1">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                      <span className="font-medium text-foreground">
-                        {w.label}
-                      </span>
+      {items.length === 0 ? (
+        <div
+          className="rounded-[12px] border border-dashed border-rule-strong px-6 py-9 text-center"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(to bottom, transparent 0, transparent 30px, hsl(var(--color-rule-soft)) 30px, hsl(var(--color-rule-soft)) 31px)",
+          }}
+        >
+          <p className="text-[13.5px] font-semibold text-muted2-deep m-0">
+            아직 분석할 데이터가 없어요.
+          </p>
+          <Link
+            href="/study/quiz"
+            className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-evergreen border-b border-evergreen pb-px hover:text-evergreen-strong"
+          >
+            풀이 트랙 시작
+            <ArrowRight className="h-3 w-3" aria-hidden />
+          </Link>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {items.map((w) => {
+            const sev = severityOf(w.accuracy);
+            return (
+              <li key={w.id} className="space-y-1.5">
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-1 w-1 rounded-full bg-rule-strong" />
+                    <span className="font-semibold text-foreground">{w.label}</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground num">
+                      정답률 {w.accuracy}%
                     </span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground num">
-                        정답률 {w.accuracy}%
-                      </span>
-                      <span
-                        className={`rounded-md px-1.5 py-px text-[9.5px] font-semibold ${SEVERITY_BADGE[sev]}`}
-                      >
-                        {SEVERITY_LABEL[sev]}
-                      </span>
-                    </div>
+                    <span
+                      className={`rounded-md px-1.5 py-px text-[10px] font-bold ${SEVERITY_BADGE[sev]}`}
+                    >
+                      {SEVERITY_LABEL[sev]}
+                    </span>
                   </div>
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-rule">
-                    <div
-                      className="h-full bg-foreground/40 transition-all"
-                      style={{ width: `${w.accuracy}%` }}
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+                </div>
+                <div className="h-1 w-full overflow-hidden rounded-full bg-cream-deep">
+                  <div
+                    className="h-full bg-foreground/40 transition-all"
+                    style={{ width: `${w.accuracy}%` }}
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </article>
   );
 }

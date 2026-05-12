@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -19,6 +20,13 @@ import { getDashboardSummary } from "@/lib/dashboard/queries";
 import { getLibraryCounts } from "@/lib/dashboard/analytics";
 
 export const dynamic = "force-dynamic";
+
+// N1 (헌법 제24조의2 정합) — 학습 계획 페이지 메타데이터
+export const metadata: Metadata = {
+  title: "학습 계획 · Fitly",
+  description:
+    "시험일 역산으로 오늘 풀이·키워드·오답 학습량을 자동 계산해 드립니다.",
+};
 
 // 헌법 v3.0 제13조 6번 — 학습 계획 페이지: D-day 카운트다운 + 페이스 토글.
 // 일정은 SRS 자동 산출, 사용자는 페이스만 선택 (가벼움/표준/집중).
@@ -54,7 +62,8 @@ function computeDailyTargets(
     keywordDaily,
     mistakeDaily,
     minutesDaily,
-    reason: `D-${daysToExam} 기준 자동 역산 (보유 카드 ÷ 남은 일수)`,
+    // B1 (헌법 제24조의2 정합) — 역산 산식 비노출 fix: 보유/남은 일수 동적 표기
+    reason: `D-${daysToExam} 기준 자동 역산 (보유 ${lib.quiz}장 ÷ ${safeDays}일)`,
     hasExamDate: true,
   } as const;
 }
@@ -151,7 +160,8 @@ export default async function StudyPlanPage() {
                 </span>
               )}
             </div>
-            <ul className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2">
+            {/* A1 (헌법 제24조의2 정합) — 일일 목표 grid 단계화 (lg 2 → xl 4) */}
+            <ul className="mt-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-4 gap-2">
               <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   풀이
@@ -194,16 +204,27 @@ export default async function StudyPlanPage() {
                 </p>
               </li>
             </ul>
-            <p className="mt-2 text-[10.5px] text-muted-foreground">
+            {/* K1 (헌법 제4조의3 정합) — 안내 문구 의미 단위 줄바꿈 */}
+            <p className="mt-2 text-[10.5px] text-muted-foreground leading-[1.6]">
               {targets.reason}.{" "}
-              {targets.hasExamDate
-                ? "시험일이 가까워질수록 키워드 비중이 자동 증가합니다."
-                : "설정에서 시험일을 등록하시면 본인 보유 카드 기준으로 자동 분배됩니다."}
+              {targets.hasExamDate ? (
+                <>
+                  시험일이 가까워질수록
+                  <br className="hidden sm:inline" />
+                  키워드 비중이 자동 증가합니다.
+                </>
+              ) : (
+                <>
+                  설정에서 시험일을 등록하시면
+                  <br className="hidden sm:inline" />
+                  본인 보유 카드 기준으로 자동 분배됩니다.
+                </>
+              )}
             </p>
           </CardContent>
         </Card>
 
-        {/* 듀카드 요약 */}
+        {/* 듀카드 요약 — C1/C2 (헌법 제24조의2 정합): totalDue===0 시 "—" + 친화 메시지 */}
         <Card className="border-evergreen bg-evergreen/[0.06]">
           <CardContent className="p-5 flex items-center justify-between flex-wrap gap-3">
             <div>
@@ -211,13 +232,22 @@ export default async function StudyPlanPage() {
                 오늘의 복습 대기
               </p>
               <p className="mt-1 font-serif text-evergreen text-3xl font-medium tracking-tight num">
-                {totalDue}
-                <span className="ml-1 text-base font-sans font-normal text-muted-foreground">
-                  장
-                </span>
+                {totalDue > 0 ? totalDue : "—"}
+                {totalDue > 0 && (
+                  <span className="ml-1 text-base font-sans font-normal text-muted-foreground">
+                    장
+                  </span>
+                )}
               </p>
               <p className="mt-1 text-[12px] text-muted-foreground">
-                풀이 {lib.quizDue}장 · 키워드 {lib.keywordDue}장 · 오답 {lib.mistakeDue}장
+                {totalDue > 0 ? (
+                  <>
+                    풀이 {lib.quizDue}장 · 키워드 {lib.keywordDue}장 · 오답{" "}
+                    {lib.mistakeDue}장
+                  </>
+                ) : (
+                  <>오늘 due 없음 — 새 카드를 학습하시면 복습 큐가 형성됩니다.</>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -230,12 +260,15 @@ export default async function StudyPlanPage() {
           </CardContent>
         </Card>
 
-        {/* 모드 3 카드 */}
+        {/* 모드 3 카드 — G1 (헌법 제16조의2 정합): evergreen 보호, hover는 rule-strong+shadow */}
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {MODES.map(({ href, title, description, Icon, hint }) => (
             <li key={title}>
-              <Link href={href} className="block">
-                <Card className="border-rule transition-colors hover:border-rule-strong">
+              <Link
+                href={href}
+                className="block rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule-strong/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                <Card className="border-rule transition-all hover:border-rule-strong hover:shadow-sm">
                   <CardContent className="p-5">
                     <span
                       aria-hidden
@@ -305,7 +338,7 @@ export default async function StudyPlanPage() {
           </CardContent>
         </Card>
 
-        {/* 학습 가이드 — v3.0 */}
+        {/* 학습 가이드 — v3.0 · I3 (헌법 제24조의2 정합): 실제 due 카운트 동적 연결 */}
         <Card className="border-rule">
           <CardContent className="p-5">
             <h2 className="font-serif text-lg font-medium tracking-tight">
@@ -313,16 +346,32 @@ export default async function StudyPlanPage() {
             </h2>
             <ol className="mt-2 space-y-1.5 text-[12px] text-foreground/80 leading-relaxed list-decimal pl-4">
               <li>
-                <strong>풀이 트랙</strong> — 서술형 기출에 답안을 작성하고 AI 모범답안과
-                비교, 자가 채점합니다.
+                <strong>풀이 트랙</strong>
+                {lib.quizDue > 0 && (
+                  <span className="ml-1 text-evergreen font-medium num">
+                    (오늘 {lib.quizDue}장 추천)
+                  </span>
+                )}{" "}
+                — 서술형 기출에 답안을 작성하고 AI 모범답안과 비교, 자가 채점합니다.
               </li>
               <li>
-                <strong>키워드 트랙</strong> — 개념 정리 노트로 정의·핵심 요소를
-                반복 학습합니다 (객관식 시대 데이터 포함).
+                <strong>키워드 트랙</strong>
+                {lib.keywordDue > 0 && (
+                  <span className="ml-1 text-evergreen font-medium num">
+                    (오늘 {lib.keywordDue}장 추천)
+                  </span>
+                )}{" "}
+                — 개념 정리 노트로 정의·핵심 요소를 반복 학습합니다
+                (객관식 시대 데이터 포함).
               </li>
               <li>
-                <strong>오답 트랙</strong> — 풀이를 다시/어렵으로 평가하면 자동 합류,
-                마스터될 때까지 반복합니다.
+                <strong>오답 트랙</strong>
+                {lib.mistakeDue > 0 && (
+                  <span className="ml-1 text-evergreen font-medium num">
+                    (오늘 {lib.mistakeDue}장 추천)
+                  </span>
+                )}{" "}
+                — 풀이를 다시/어렵으로 평가하면 자동 합류, 마스터될 때까지 반복합니다.
               </li>
               <li>
                 <strong>

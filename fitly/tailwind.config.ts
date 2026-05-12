@@ -46,15 +46,34 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
 
-        // ── DESIGN.md v1 직접 토큰 (의미적 사용) ──
-        cream: "hsl(var(--color-bg))",
-        ink: "hsl(var(--color-text))",
+        // ── DESIGN.md v1 + 신규 디자인 (2026-05-12) 직접 토큰 ──
+        cream: {
+          DEFAULT: "hsl(var(--color-bg))",
+          soft: "hsl(var(--color-surface))",
+          deep: "hsl(var(--color-surface-deep))",
+          paper: "hsl(var(--color-paper))",
+        },
+        ink: {
+          DEFAULT: "hsl(var(--color-text))",
+          2: "hsl(var(--color-text-2))",
+        },
+        muted2: {
+          DEFAULT: "hsl(var(--color-text-muted))",
+          deep: "hsl(var(--color-text-muted-deep))",
+        },
         evergreen: {
           DEFAULT: "hsl(var(--color-accent))",
           strong: "hsl(var(--color-accent-strong))",
+          mid: "hsl(var(--color-accent-2))",
+          soft: "hsl(var(--color-accent-soft))",
+        },
+        gold: {
+          DEFAULT: "hsl(var(--color-gold))",
+          soft: "hsl(var(--color-gold-soft))",
         },
         rule: {
           DEFAULT: "hsl(var(--color-rule))",
+          soft: "hsl(var(--color-rule-soft))",
           strong: "hsl(var(--color-rule-strong))",
         },
         warning: "hsl(var(--color-warning))",
@@ -72,6 +91,7 @@ const config: Config = {
         lg: "var(--radius)",                      // 8px
         md: "calc(var(--radius) - 2px)",          // 6px
         sm: "calc(var(--radius) - 4px)",          // 4px
+        card: "var(--radius-card)",               // 14px — 신규 디자인 카드
       },
       fontFamily: {
         // 헤드라인·KPI 큰 숫자 (DESIGN.md §3)

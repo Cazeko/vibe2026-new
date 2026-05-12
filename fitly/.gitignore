@@ -54,3 +54,4 @@ env-backup.zip
 # 헌법 v3.0 부칙 제2조 — 외부 자산
 /kice_pdfs/*
 !/kice_pdfs/README.md
+/image/

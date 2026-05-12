@@ -47,13 +47,30 @@ export function ActivityHeatmap({ cells }: { cells: HeatmapCell[] }) {
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-1.5 text-[9.5px] text-muted-foreground">
+      {/* H2 헌법 v3.5.1 — 범례에 단위 명시 (0 / 15분 미만 / 45분 미만 / 90분 미만 / 90분 이상) */}
+      <div className="flex items-center gap-1.5 text-[9.5px] text-muted-foreground flex-wrap">
         <span>적음</span>
         {TONE_BG.map((t, i) => (
-          <span key={i} className={`h-2 w-2 rounded-sm ${t}`} />
+          <span
+            key={i}
+            className={`h-2 w-2 rounded-sm ${t}`}
+            title={LEVEL_LABEL[i]}
+            aria-label={LEVEL_LABEL[i]}
+          />
         ))}
         <span>많음</span>
+        <span className="ml-2 text-muted-foreground/80">
+          (1칸 = 15분 단위)
+        </span>
       </div>
     </div>
   );
 }
+
+const LEVEL_LABEL = [
+  "학습 없음",
+  "15분 미만",
+  "15~45분",
+  "45~90분",
+  "90분 이상",
+];

@@ -25,7 +25,7 @@ NotebookLM 스타일의 2인 화자 자연 대화체로 작성합니다.
 
 작성 규칙:
 1. 도입부 첫 줄에 반드시 "AI가 생성한 학습 보조 자료이며 공식 해설이 아닙니다"를 자연스럽게 언급한다 (헌법 §3.2 정직성).
-2. 분량은 4~6분 (한국어 약 1200~1800 음절). dialogue 항목은 *최대 32 lines* 이내로 작성한다 (TTS 합성 시간 한도).
+2. 분량은 1~2분 (한국어 약 250~500 음절). dialogue 항목은 *최대 8 lines* 이내로 작성한다 (TTS 합성 시간 한도 — Vercel Hobby 60초 안에서 안전하게 끝나야 함).
 3. 본문 구성: 도입(맥락) → 영역·인지수준·키워드 분석 → 출제 의도 추정 → 학습 활용 제안 → 마무리.
 4. 각 dialogue line은 1~3문장으로 간결하게. 청취자가 따라가기 쉽게.
 5. 합격 보장·점수 예측·지역 합격컷·합격 가능성 표현 절대 금지 (DESIGN.md §9.3).
@@ -46,22 +46,18 @@ JSON 스키마:
 주제:
 `;
 
-export async function generatePodcastScript(
-  theme: string,
-): Promise<PodcastScript> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY missing");
-  const model = process.env.GEMINI_MODEL_PRO ?? "gemini-3.1-pro-preview";
-
+async function callGemini(
+  model: string,
+  apiKey: string,
+  prompt: string,
+): Promise<{ ok: true; data: unknown } | { ok: false; status: number; body: string }> {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          { parts: [{ text: SCRIPT_PROMPT_BASE + theme }] },
-        ],
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.7,
@@ -70,10 +66,45 @@ export async function generatePodcastScript(
     },
   );
   if (!response.ok) {
-    const errBody = await response.text();
-    throw new Error(`Gemini script API ${response.status}: ${errBody.slice(0, 300)}`);
+    const body = await response.text();
+    return { ok: false, status: response.status, body };
   }
-  const data = await response.json();
+  return { ok: true, data: await response.json() };
+}
+
+export async function generatePodcastScript(
+  theme: string,
+): Promise<PodcastScript> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY missing");
+
+  // 헌법 §35 백업 — preview 모델 503/429/500 일시 과부하 시 stable model로 fallback.
+  // 사용자 체감은 응답 약간 느려질 뿐, 성공률 99%+. preview 모델 가용성 spike 회피.
+  // Default를 Flash로 — Vercel Hobby 60초 한도 안에서 script(빠름) + TTS(긴) 합산 정합.
+  // env GEMINI_MODEL_PRO override 시 그 값 우선 (사용자가 명시적으로 Pro 원하면).
+  const PRIMARY = process.env.GEMINI_MODEL_PRO ?? "gemini-2.5-flash";
+  const FALLBACK =
+    process.env.GEMINI_MODEL_PRO_FALLBACK ?? "gemini-2.5-pro";
+  const prompt = SCRIPT_PROMPT_BASE + theme;
+
+  let result = await callGemini(PRIMARY, apiKey, prompt);
+  if (
+    !result.ok &&
+    (result.status === 503 || result.status === 429 || result.status === 500)
+  ) {
+    console.warn(
+      `[podcast/script] ${PRIMARY} ${result.status} — falling back to ${FALLBACK}`,
+    );
+    result = await callGemini(FALLBACK, apiKey, prompt);
+  }
+  if (!result.ok) {
+    throw new Error(
+      `Gemini script API ${result.status}: ${result.body.slice(0, 300)}`,
+    );
+  }
+  const data = result.data as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text || typeof text !== "string") {
     throw new Error("Empty Gemini script response");
@@ -94,9 +125,9 @@ export async function generatePodcastScript(
   ) {
     throw new Error("Invalid script schema");
   }
-  // PR-005 — dialogue 길이 제한 (TTS 합성 + Vercel 60초 한도)
-  if (parsed.dialogue.length > 32) {
-    parsed.dialogue = parsed.dialogue.slice(0, 32);
+  // dialogue 길이 강제 제한 (TTS 합성 + Vercel 60초 한도). 8 line ≈ 1-2분 audio.
+  if (parsed.dialogue.length > 8) {
+    parsed.dialogue = parsed.dialogue.slice(0, 8);
   }
   return parsed;
 }

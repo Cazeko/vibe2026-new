@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Save, LogOut, Sun, Moon, Monitor, Info } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -31,10 +31,19 @@ const THEME_OPTIONS = [
   { value: "system", label: "시스템", Icon: Monitor },
 ] as const;
 
+// 헌법 §16의2 정합 — focus-visible은 evergreen tint(40%)로 통일 (CTA 정합).
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background";
+
 export default function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [profile, setProfile] = useState<Profile>({
+    targetRegion: null,
+    examDate: null,
+  });
+  // I3 dirty state 추적 — 초기 로드값 보관 후 변경 비교.
+  const [initialProfile, setInitialProfile] = useState<Profile>({
     targetRegion: null,
     examDate: null,
   });
@@ -45,6 +54,8 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // C2 자동 dismiss 타이머 — unmount/재트리거 시 cleanup.
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -58,17 +69,43 @@ export default function SettingsPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "조회 실패");
         if (data.profile) {
-          setProfile({
+          const loaded: Profile = {
             targetRegion: (data.profile.targetUniversity ?? null) as
               | RegionName
               | null,
             examDate: data.profile.examDate ?? null,
-          });
+          };
+          setProfile(loaded);
+          setInitialProfile(loaded);
         }
       })
-      .catch((err) => setError(err instanceof Error ? err.message : "오류"))
+      .catch(() => {
+        // C3 raw 에러 노출 금지 — 사용자 친화 메시지로 변환.
+        setError("네트워크 오류입니다. 잠시 후 다시 시도해 주세요.");
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  // C2 success/error 3초 후 자동 dismiss (S2 aria-live 정합).
+  useEffect(() => {
+    if (!success && !error) return;
+    if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+    dismissTimerRef.current = setTimeout(() => {
+      setSuccess(false);
+      setError(null);
+    }, 3000);
+    return () => {
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+    };
+  }, [success, error]);
+
+  // I3 dirty state — 변경 없을 시 저장 버튼 비활성.
+  const isDirty = useMemo(
+    () =>
+      profile.targetRegion !== initialProfile.targetRegion ||
+      profile.examDate !== initialProfile.examDate,
+    [profile, initialProfile],
+  );
 
   async function save() {
     setSaving(true);
@@ -87,9 +124,11 @@ export default function SettingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "저장 실패");
       setSuccess(true);
+      setInitialProfile(profile);
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "오류");
+    } catch {
+      // C3 raw 에러 노출 금지.
+      setError("저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setSaving(false);
     }
@@ -108,7 +147,8 @@ export default function SettingsPage() {
     <div className="min-h-screen pb-10">
       <PageHeader
         title="설정"
-        subtitle="지역 교육청·테마·계정을 관리합니다."
+        // B1 subtitle 명료화 — 무엇을 관리하는지 단번에 전달.
+        subtitle="지역 교육청·시험일 설정 + 테마·계정 관리"
       />
       <div className="px-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
         {/* 목표 설정 */}
@@ -134,7 +174,11 @@ export default function SettingsPage() {
                       }))
                     }
                   >
-                    <SelectTrigger id="target-region" aria-label="지역 교육청 선택">
+                    <SelectTrigger
+                      id="target-region"
+                      aria-label="지역 교육청 선택"
+                      className={FOCUS_RING}
+                    >
                       <SelectValue placeholder="지역 교육청을 선택하세요" />
                     </SelectTrigger>
                     <SelectContent>
@@ -146,7 +190,10 @@ export default function SettingsPage() {
                     </SelectContent>
                   </Select>
                   <p className="text-[11px] text-muted-foreground">
-                    17개 지역 교육청 중 선택 (선택 입력). 합격 컷은 공개되지 않습니다.
+                    {/* B2 모호 표현 정리 — "선택 사항입니다." */}
+                    17개 지역 교육청 중 선택. 선택 사항입니다.
+                    <br />
+                    합격 컷은 공개되지 않습니다.
                   </p>
                 </div>
 
@@ -162,16 +209,19 @@ export default function SettingsPage() {
                         examDate: e.target.value || null,
                       }))
                     }
+                    className={FOCUS_RING}
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    설정 시 대시보드의 D-day가 활성화됩니다.
+                    {/* B3 헌법 §31 금기어 "D-day" 위반 → 한글 재표현. */}
+                    설정 시 대시보드에 시험까지 남은 날짜가 표시됩니다.
                   </p>
                 </div>
 
                 <Button
                   type="button"
                   onClick={save}
-                  disabled={saving}
+                  // I3 변경 없을 시 비활성 + saving 중 비활성.
+                  disabled={saving || !isDirty}
                   className="w-full"
                 >
                   {saving ? (
@@ -187,16 +237,25 @@ export default function SettingsPage() {
                   )}
                 </Button>
 
-                {success && (
-                  <p role="status" className="text-sm text-primary">
-                    저장되었습니다.
-                  </p>
-                )}
-                {error && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {error}
-                  </p>
-                )}
+                {/* C2·D2·S2 — 메시지 박스 강조 배경 + aria-live 정합. */}
+                <div aria-live="polite" aria-atomic="true">
+                  {success && (
+                    <p
+                      role="status"
+                      className="rounded-md bg-primary/10 px-3 py-2 text-sm text-primary"
+                    >
+                      저장되었습니다.
+                    </p>
+                  )}
+                  {error && (
+                    <p
+                      role="alert"
+                      className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                    >
+                      {error}
+                    </p>
+                  )}
+                </div>
               </>
             )}
           </CardContent>
@@ -218,7 +277,8 @@ export default function SettingsPage() {
                       key={value}
                       type="button"
                       onClick={() => setTheme(value)}
-                      className={`flex flex-col items-center gap-1.5 rounded-lg border px-3 py-3 text-[11px] transition-colors ${
+                      // G2 focus-visible ring + hover bg.
+                      className={`flex flex-col items-center gap-1.5 rounded-lg border px-3 py-3 text-[11px] transition-colors ${FOCUS_RING} ${
                         active
                           ? "border-primary bg-primary/5 text-primary"
                           : "border-rule hover:bg-secondary/40"
@@ -244,9 +304,18 @@ export default function SettingsPage() {
               <CardTitle className="text-sm">계정</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="rounded-lg border border-rule bg-background px-3 py-2.5">
-                <p className="text-[11px] text-muted-foreground">로그인 이메일</p>
-                <p className="mt-0.5 text-[13px] font-medium truncate">
+              {/* D3 readonly 시각 명시 (bg-muted) + A2 title 속성으로 truncate 풀 노출. */}
+              <div className="rounded-lg border border-rule bg-muted/40 px-3 py-2.5">
+                <p className="text-[11px] text-muted-foreground">
+                  로그인 이메일{" "}
+                  <span className="ml-1 text-[10px] uppercase tracking-[0.1em]">
+                    읽기 전용
+                  </span>
+                </p>
+                <p
+                  className="mt-0.5 text-[13px] font-medium truncate"
+                  title={email ?? undefined}
+                >
                   {email ?? "—"}
                 </p>
               </div>

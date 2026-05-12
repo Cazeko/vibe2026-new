@@ -41,7 +41,7 @@ const TABS: { key: TabKey; label: string; icon: typeof Layers }[] = [
 export default async function ExamAnalysisPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; showAll?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -54,6 +54,8 @@ export default async function ExamAnalysisPage({
   const tab: TabKey = TABS.some((t) => t.key === requestedTab)
     ? (requestedTab as TabKey)
     : "papers";
+  // 분석 탭 토글 — 최근 5년 출제 0회 행을 노출/숨김
+  const showAll = params.showAll === "1";
 
   const profile = await safeRun(
     "exam-analysis profile",
@@ -117,8 +119,9 @@ export default async function ExamAnalysisPage({
         subtitle="24년치 공개 기출의 영역·인지수준·문항형식·키워드 분포를 한눈에 확인합니다."
       />
 
-      <div className="px-6 mx-auto max-w-7xl space-y-8">
-        {/* 정직성 안내 + 메타 — 12-col, 위쪽 헤더 라인 */}
+      <div className="px-6 mx-auto max-w-7xl space-y-6">
+        {/* 정직성 안내 (컴팩트) + 내 지역 교육청 — 12-col grid.
+            정직성 박스는 헤드라인 한 줄 + 펼치기 토글로 축소(헌법 v3.5.1 제4의3 줄바꿈 정합). */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <HonestyCard className="lg:col-span-8" />
           <RegionCard
@@ -130,19 +133,24 @@ export default async function ExamAnalysisPage({
 
         <SectionRule />
 
-        {/* KPI 줄 — 시드 카운트 */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="시험지" value={paperStats?.paperCount ?? 0} unit="회분" />
+        {/* KPI 줄 — 시드 카운트. 값 0 또는 null 인 stat 은 '—' 로 폴백하여
+            '단독 0' 노출 회피 (사용자 보고 2026-05-12). */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard
+            label="시험지"
+            value={paperStats?.paperCount ? paperStats.paperCount : "—"}
+            unit={paperStats?.paperCount ? "회분" : ""}
+          />
           <StatCard
             label="문항"
-            value={itemStats?.itemCount ?? 0}
-            unit="개"
+            value={itemStats?.itemCount ? itemStats.itemCount : "—"}
+            unit={itemStats?.itemCount ? "개" : ""}
           />
           <StatCard
             label="학년도 범위"
             value={
               paperStats?.yearMin && paperStats?.yearMax
-                ? `${paperStats.yearMin}~${paperStats.yearMax}`
+                ? `${paperStats.yearMin}–${paperStats.yearMax}`
                 : "—"
             }
             unit=""
@@ -185,7 +193,7 @@ export default async function ExamAnalysisPage({
         {/* 탭 컨텐츠 */}
         <section>
           {tab === "papers" && <PapersTab />}
-          {tab === "analysis" && <AnalysisTab />}
+          {tab === "analysis" && <AnalysisTab showAll={showAll} />}
           {tab === "topic" && <TopicTab />}
           {tab === "roadmap" && <RoadmapTab />}
         </section>
@@ -201,27 +209,48 @@ function SectionRule() {
 }
 
 function HonestyCard({ className = "" }: { className?: string }) {
+  // 컴팩트 디스클로저 — 헤드라인 한 줄만 노출, 펼치기 시 상세 표시.
+  // 첫 화면 점유를 줄여 분석 콘텐츠가 즉시 보이도록 설계 (사용자 보고 2026-05-12).
   return (
-    <Card className={`${className} border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30`}>
-      <CardContent className="p-6 flex gap-3">
-        <ShieldAlert
-          className="h-5 w-5 text-warning shrink-0 mt-0.5"
-          aria-hidden
-        />
-        <div className="text-[13px] text-foreground/85 leading-relaxed">
-          <p className="font-serif text-base font-medium text-foreground">
-            정직성 원칙 — 표시하는 것과 만들지 않는 것
-          </p>
-          <p className="mt-1.5">
-            <strong>표시</strong>: 시도교육청이 공개한 1차 합격선·경쟁률·모집
-            인원, 24년치 공개 기출의 영역·인지수준·키워드 분포.
-          </p>
-          <p className="mt-1.5">
-            <strong>만들지 않음</strong>: 합격 가능성·점수 예측·임의 추정값.
-            본인 학습의 방향과 페이스 결정에 도움이 되는 사실 데이터만 보여
-            드립니다.
-          </p>
-        </div>
+    <Card
+      className={`${className} border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30`}
+    >
+      <CardContent className="p-0">
+        <details className="group">
+          <summary className="cursor-pointer list-none px-5 py-4 flex items-center gap-3 select-none hover:bg-secondary/50 transition-colors">
+            <ShieldAlert
+              className="h-4 w-4 text-warning shrink-0"
+              aria-hidden
+            />
+            <p className="font-serif text-[14.5px] font-medium tracking-tight text-foreground flex-1">
+              정직성 원칙 — 표시하는 것과 만들지 않는 것
+            </p>
+            <span
+              aria-hidden
+              className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground group-open:hidden"
+            >
+              펼치기
+            </span>
+            <span
+              aria-hidden
+              className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground hidden group-open:inline"
+            >
+              접기
+            </span>
+          </summary>
+          <div className="px-5 pb-4 pt-1 text-[12.5px] text-foreground/85 leading-relaxed border-t border-rule/60">
+            <p className="mt-2.5">
+              <strong>표시</strong>: 시도교육청이 공개한
+              <br className="hidden sm:inline" /> 1차 합격선·경쟁률·모집 인원,
+              24년치 공개 기출의 영역·인지수준·키워드 분포.
+            </p>
+            <p className="mt-1.5">
+              <strong>만들지 않음</strong>: 합격 가능성·점수 예측·임의 추정값.
+              본인 학습의 방향과 페이스 결정에 도움이 되는
+              <br className="hidden sm:inline" /> 사실 데이터만 보여 드립니다.
+            </p>
+          </div>
+        </details>
       </CardContent>
     </Card>
   );
@@ -240,23 +269,25 @@ function RegionCard({
   const recent = cutScores.slice(0, 3);
   const anyVerified = cutScores.some((c) => c.verified);
 
+  // 내부 행은 min-w-0 + overflow-hidden 으로 좁은 lg:col-span-4 안에서도
+  // 잘리지 않고 wrap 되도록 보호 (사용자 보고 2026-05-12).
   return (
-    <Card className={`${className} border-rule`}>
-      <CardContent className="p-6 h-full flex flex-col">
+    <Card className={`${className} border-rule overflow-hidden`}>
+      <CardContent className="p-5 h-full flex flex-col min-w-0">
         <div className="flex items-center gap-2 text-muted-foreground">
-          <Calendar className="h-4 w-4" aria-hidden />
-          <span className="text-[11px] uppercase tracking-[0.12em]">
+          <Calendar className="h-4 w-4 shrink-0" aria-hidden />
+          <span className="text-[11px] uppercase tracking-[0.12em] truncate">
             내 지역 교육청
           </span>
         </div>
         {region ? (
           <>
-            <p className="mt-3 font-serif text-2xl font-medium tracking-tight">
+            <p className="mt-2.5 font-serif text-xl font-medium tracking-tight truncate">
               {region}
             </p>
 
             {recent.length > 0 ? (
-              <div className="mt-4">
+              <div className="mt-3 min-w-0">
                 <p className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
                   1차 합격선 추이
                 </p>
@@ -264,15 +295,15 @@ function RegionCard({
                   {recent.map((c) => (
                     <li
                       key={c.year}
-                      className="flex items-baseline justify-between gap-2 text-[12.5px]"
+                      className="flex items-baseline justify-between gap-2 text-[12px] min-w-0"
                     >
-                      <span className="text-muted-foreground tabular-nums">
-                        {c.year}학년도
+                      <span className="text-muted-foreground tabular-nums shrink-0">
+                        {c.year}
                       </span>
-                      <span className="flex items-baseline gap-1.5 tabular-nums">
+                      <span className="flex items-baseline gap-1.5 tabular-nums min-w-0 justify-end">
                         {c.firstRoundCutScore != null ? (
                           <>
-                            <span className="font-serif text-base font-medium">
+                            <span className="font-serif text-[15px] font-medium">
                               {c.firstRoundCutScore.toFixed(2)}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
@@ -283,8 +314,8 @@ function RegionCard({
                           <span className="text-muted-foreground">—</span>
                         )}
                         {c.competitionRatio != null && (
-                          <span className="text-[10px] text-muted-foreground">
-                            · 경쟁률 {c.competitionRatio.toFixed(2)}
+                          <span className="text-[10px] text-muted-foreground shrink-0">
+                            · {c.competitionRatio.toFixed(2)}:1
                           </span>
                         )}
                       </span>
@@ -293,8 +324,7 @@ function RegionCard({
                 </ul>
                 {!anyVerified && (
                   <p className="mt-2 text-[10px] text-warning leading-relaxed">
-                    ※ 운영자 검수 대기 — 자동 추출 데이터로 정확성 확인
-                    중입니다.
+                    ※ 운영자 검수 대기 — 자동 추출 데이터.
                   </p>
                 )}
               </div>
@@ -305,14 +335,13 @@ function RegionCard({
             )}
           </>
         ) : (
-          <p className="mt-3 text-[12.5px] text-muted-foreground leading-relaxed">
-            설정에서 지역 교육청을 등록하시면 1차 합격선 추이가 표시됩니다
-            (선택 입력).
+          <p className="mt-3 text-[12px] text-muted-foreground leading-relaxed">
+            설정에서 지역 교육청을 등록하시면
+            <br />1차 합격선 추이가 표시됩니다.
           </p>
         )}
-        <p className="mt-auto pt-3 text-[10px] text-muted-foreground leading-relaxed">
-          공개된 시도교육청 발표 자료만 표시. 합격 가능성·점수 예측은
-          만들지 않습니다.
+        <p className="mt-auto pt-3 text-[10px] text-muted-foreground leading-snug">
+          공개 자료만 표시. 합격 가능성·점수 예측 없음.
         </p>
       </CardContent>
     </Card>
@@ -330,22 +359,27 @@ function StatCard({
   unit: string;
   accent?: boolean;
 }) {
+  // 값이 긴 문자열(예: 2002–2026)일 때도 KPI 카드 폭(좁은 뷰포트 ~140px) 안에
+  // 자동 축소되도록 clamp + min-w-0 적용. 사용자 보고 2026-05-12.
+  const isLongValue = typeof value === "string" && value.length > 4;
   return (
-    <Card className="border-rule">
-      <CardContent className="p-5">
-        <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+    <Card className="border-rule overflow-hidden">
+      <CardContent className="p-4 min-w-0">
+        <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground truncate">
           {label}
         </div>
-        <div className="mt-2 flex items-baseline gap-1.5">
+        <div className="mt-2 flex items-baseline gap-1 min-w-0">
           <span
-            className={`font-serif text-3xl font-medium tabular-nums tracking-tight ${
+            className={`font-serif font-medium tabular-nums tracking-tight whitespace-nowrap ${
               accent ? "text-evergreen" : "text-foreground"
-            }`}
+            } ${isLongValue ? "text-[clamp(18px,3.2vw,24px)]" : "text-[clamp(22px,3.6vw,30px)]"}`}
           >
             {value}
           </span>
           {unit && (
-            <span className="text-[12px] text-muted-foreground">{unit}</span>
+            <span className="text-[11.5px] text-muted-foreground shrink-0">
+              {unit}
+            </span>
           )}
         </div>
       </CardContent>

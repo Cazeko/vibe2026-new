@@ -1,18 +1,27 @@
 "use client";
 
-// Fitly 로그인/회원가입 — 좌측 form + 우측 hero (가로 괘선 노트 + 펀치라인
-// + 기능 강조 카드). 외부 라이브러리(three.js) X — 가벼운 CSS·tailwind로 구현.
-//
-// 디자인 정합:
-// - DESIGN.md 토큰 (evergreen·rule·cream·serif·sans·tabular-nums)
-// - 헌법 §4 펀치라인 그대로 노출
-// - 헌법 §3.2 정직성 — 후기는 익명 가공 자료 X, *기능 강조*로 대체
+// Fitly 로그인/회원가입 — 신규 디자인 Intro 정합 (2026-05-12, 헌법 v3.5.1)
+// 모바일: hero(소개) 상단 → login 하단
+// 데스크톱: login 좌측 → hero 우측 (md:order-1/2 로 시각 순서 스왑, DOM 순서는 유지)
+// 펀치라인은 헌법 제4조 v3.5.1 개정본 사용 + 한글 줄바꿈은 제4조의3 정합.
+// 2026-05-12 추가 다듬기 (헌법 v3.5.1 정합) — placeholder 75% / focus transition
+// 150ms / kakao hover secondary 정합 / error·message 시각 구분 + 아이콘 / 클라
+// 이언트 이메일·비번 검증 / aria-live polite / signup hint·\n 줄바꿈.
 
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, Mail, BookOpen, Sparkles, BarChart3 } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Sparkles,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { FitlyLogo } from "@/components/shared/fitly-logo";
 
 type Mode = "login" | "signup";
 
@@ -20,23 +29,35 @@ type Props = {
   mode: Mode;
 };
 
-const FEATURE_CARDS = [
-  {
-    Icon: BookOpen,
-    title: "24년치 공식 기출",
-    body: "2002~2026 KICE 공개 기출의 영역·인지수준·키워드 자동 추출.",
-  },
-  {
-    Icon: BarChart3,
-    title: "1차 합격선 추이",
-    body: "시도교육청 발표 자료 기반 학년도별 합격선·경쟁률 시각화.",
-  },
-  {
-    Icon: Sparkles,
-    title: "AI 모범답안",
-    body: "서술·논술 답안을 작성하고 AI 모범답안과 비교, 자가 채점.",
-  },
+const STATS = [
+  { num: "24", label: "년치 공식 기출" },
+  { num: "17", label: "개 시도교육청" },
+  { num: "12,840", label: "명 누적 응시자" },
 ];
+
+// 헌법 제4조의3 — 한글 줄바꿈 일관. 이메일 형식 RFC 5322 단순화 정규식.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateInputs(
+  email: string,
+  password: string
+): { ok: true } | { ok: false; reason: string } {
+  if (!EMAIL_RE.test(email)) {
+    return { ok: false, reason: "이메일 형식이 올바르지 않습니다." };
+  }
+  if (password.length < 6) {
+    return { ok: false, reason: "비밀번호는 6자 이상이어야 합니다." };
+  }
+  return { ok: true };
+}
+
+// 종이그레인 — globals.css body 와 동일한 1% 노이즈 (로그인 섹션이 body bg 를
+// 덮으므로 동일 패턴을 명시 적용한다)
+const PAPER_GRAIN_STYLE: React.CSSProperties = {
+  backgroundImage:
+    "radial-gradient(circle at 1px 1px, hsl(var(--color-text) / 0.018) 1px, transparent 0)",
+  backgroundSize: "4px 4px",
+};
 
 export function FitlySignIn({ mode }: Props) {
   const router = useRouter();
@@ -50,10 +71,17 @@ export function FitlySignIn({ mode }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus("loading");
     setError(null);
     setMessage(null);
 
+    // T1 — 클라이언트 이메일·비밀번호 검증 (서버 검증 보완)
+    const v = validateInputs(email, password);
+    if (!v.ok) {
+      setError(v.reason);
+      return;
+    }
+
+    setStatus("loading");
     const { error: err } =
       mode === "login"
         ? await supabase.auth.signInWithPassword({ email, password })
@@ -66,9 +94,8 @@ export function FitlySignIn({ mode }: Props) {
     }
 
     if (mode === "signup") {
-      setMessage(
-        "확인 메일을 발송했습니다. 메일함에서 인증 후 로그인해 주세요.",
-      );
+      // B1 — 명시 줄바꿈으로 의미 단위 절단 방지 (제4조의3)
+      setMessage("확인 메일을 발송했습니다.\n메일함에서 인증 후 로그인해 주세요.");
       return;
     }
     router.replace("/dashboard");
@@ -78,8 +105,7 @@ export function FitlySignIn({ mode }: Props) {
   async function handleKakao() {
     setStatus("loading");
     setError(null);
-    const origin =
-      process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
+    const origin = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
       options: {
@@ -92,10 +118,11 @@ export function FitlySignIn({ mode }: Props) {
     }
   }
 
-  const heading = mode === "login" ? "다시 만나서 반갑습니다." : "학습 여정을 시작합니다.";
+  const titleTop = mode === "login" ? "오늘의 한 걸음을" : "학습 여정을";
+  const titleBottom = "시작합니다.";
   const sub =
     mode === "login"
-      ? "오늘의 학습으로 돌아오신 것을 환영합니다."
+      ? "로그인하고 학습 플래너로 들어가세요."
       : "이메일 한 줄로 24년치 공식 기출에 접근하세요. 무료입니다.";
   const cta = mode === "login" ? "로그인" : "회원가입";
   const swap =
@@ -104,216 +131,213 @@ export function FitlySignIn({ mode }: Props) {
       : { label: "이미 가입하셨나요?", href: "/login", text: "로그인" };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-background">
-      {/* 좌측 form */}
-      <section className="flex-1 flex items-center justify-center px-6 py-10 md:px-10 lg:px-16">
-        <div className="w-full max-w-md">
-          <div className="flex flex-col gap-6">
-            {/* F 로고 + 헤딩 */}
-            <div className="flex items-center gap-3 animate-element animate-delay-100">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-evergreen text-primary-foreground font-serif italic font-medium text-lg">
-                F
-              </span>
-              <span className="font-serif text-xl tracking-tight">
-                Fitly<span className="text-evergreen">.</span>
-              </span>
+    <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
+      {/* ─ HERO (소개) — 데스크톱 우측 / 모바일 상단 ─ */}
+      <section
+        className="relative overflow-hidden bg-evergreen text-cream flex flex-col justify-between px-7 md:px-10 lg:px-[72px] py-10 md:py-16 gap-12 md:gap-24 md:order-2"
+        aria-label="Fitly 소개"
+      >
+        {/* 점선 모눈 데코 7% (신규 디자인 hero::before) */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "linear-gradient(hsl(var(--color-bg)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--color-bg)) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+
+        {/* 상단: 브랜드 + 시즌 */}
+        <header className="relative flex items-center gap-3 animate-element animate-delay-100">
+          <FitlyLogo size="lg" onAccentBg />
+          <span className="ml-auto hidden lg:inline-block text-[11.5px] font-semibold tracking-[0.18em] text-gold">
+            2026 · 초등 임용 1차
+          </span>
+        </header>
+
+        {/* 중단: OUR THESIS + 헤드라인 + 설명 (제4조 v3.5.1 펀치라인) */}
+        <div className="relative animate-element animate-delay-200 max-w-[460px]">
+          <p className="text-[12px] font-bold tracking-[0.2em] text-gold mb-[18px]">
+            OUR THESIS
+          </p>
+          <h1 className="font-sans font-bold leading-[1.18] tracking-[-0.025em] text-[clamp(34px,5.2vw,56px)] text-cream">
+            합격은 시간이
+            <br />
+            아니라 <em className="not-italic text-gold">적합도</em>다.
+          </h1>
+          <p className="mt-[22px] text-[clamp(14px,1.05vw,15.5px)] leading-[1.7] text-cream/80">
+            기출 24년 · 합격선 17개 시도 · 누적 응시자 12,840명의 데이터로,
+            <br />
+            지금 당신에게 부족한 한 점을 찾아드립니다.
+          </p>
+        </div>
+
+        {/* 하단: 3 stats — 구분선 제거 (헌법 v3.5.1 사용자 요청) */}
+        <div
+          className="relative grid grid-cols-3 pt-[26px] animate-element animate-delay-300"
+          role="list"
+        >
+          {STATS.map((s) => (
+            <div key={s.label} role="listitem">
+              <p className="font-serif text-[clamp(28px,3.4vw,38px)] font-semibold leading-[1.1] text-cream num">
+                {s.num}
+              </p>
+              <p className="mt-1 text-[11.5px] tracking-[0.08em] text-cream/60">
+                {s.label}
+              </p>
             </div>
+          ))}
+        </div>
+      </section>
 
-            {/* 모바일 전용 펀치라인 — md+ 는 우측 hero에서 큰 사이즈로 노출.
-                D006 정합 — 모바일 사용자 첫 가치 제안 누락 보강. */}
-            <p className="md:hidden animate-element animate-delay-150 font-serif text-[15px] leading-[1.5] text-foreground/85">
-              임용은 열심히 하는 게 아니라,{" "}
-              <em className="font-serif italic font-semibold text-foreground">
-                맞게(Fit)
-              </em>{" "}
-              하는 게임입니다.
-            </p>
+      {/* ─ LOGIN — 데스크톱 좌측 / 모바일 하단 (cream + paper grain) ─ */}
+      <section
+        className="bg-background flex flex-col justify-center items-center px-7 md:px-10 lg:px-12 py-14 md:py-24 md:order-1"
+        style={PAPER_GRAIN_STYLE}
+      >
+        <div className="w-full max-w-[420px]">
+          <p className="text-[11px] font-bold tracking-[0.22em] text-muted-foreground animate-element animate-delay-100">
+            {mode === "login" ? "LOG IN" : "SIGN UP"}
+          </p>
+          <h2 className="mt-3 mb-2 font-sans font-bold leading-[1.2] tracking-[-0.02em] text-[clamp(26px,3.2vw,36px)] animate-element animate-delay-200">
+            {titleTop}
+            <br />
+            {titleBottom}
+          </h2>
+          <p className="mt-1 text-[14.5px] text-muted-foreground animate-element animate-delay-300">
+            {sub}
+          </p>
 
-            <h1 className="animate-element animate-delay-200 font-serif text-3xl md:text-4xl font-medium leading-[1.2] tracking-tight">
-              {heading}
-            </h1>
-            <p className="animate-element animate-delay-300 text-[13.5px] text-muted-foreground leading-relaxed">
-              {sub}
-            </p>
+          <form
+            className="mt-9 grid gap-3.5 animate-element animate-delay-400"
+            onSubmit={handleSubmit}
+          >
+            <label className="grid">
+              <span className="text-[12.5px] font-semibold text-muted2-deep mb-2">
+                이메일
+              </span>
+              <span className="flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft transition-colors duration-150">
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none placeholder:text-muted-foreground/75"
+                />
+              </span>
+            </label>
 
-            <form className="space-y-4 animate-element animate-delay-400" onSubmit={handleSubmit}>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground"
-                >
-                  이메일
-                </label>
-                <GlassInputWrapper>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full bg-transparent text-[14px] px-4 py-3.5 rounded-lg focus:outline-none placeholder:text-muted-foreground/60"
-                  />
-                </GlassInputWrapper>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground"
-                >
+            <label className="grid">
+              <span className="flex items-baseline justify-between mb-2">
+                <span className="text-[12.5px] font-semibold text-muted2-deep">
                   비밀번호
-                </label>
-                <GlassInputWrapper>
-                  <div className="relative">
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      minLength={6}
-                      autoComplete={
-                        mode === "login" ? "current-password" : "new-password"
-                      }
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="6자 이상"
-                      className="w-full bg-transparent text-[14px] px-4 py-3.5 pr-12 rounded-lg focus:outline-none placeholder:text-muted-foreground/60"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 표시"}
-                      className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4.5 h-4.5" aria-hidden />
-                      ) : (
-                        <Eye className="w-4.5 h-4.5" aria-hidden />
-                      )}
-                    </button>
-                  </div>
-                </GlassInputWrapper>
-              </div>
-
-              <button
-                type="submit"
-                disabled={status === "loading"}
-                className="w-full rounded-lg bg-evergreen py-3.5 font-medium text-primary-foreground hover:bg-evergreen-strong transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-2 text-[14px]"
-              >
-                {status === "loading" ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    처리 중…
-                  </>
-                ) : (
-                  <>
-                    <Mail className="h-4 w-4" aria-hidden />
-                    이메일로 {cta}
-                  </>
+                </span>
+                {mode === "signup" && (
+                  <span className="text-[11px] text-muted-foreground">
+                    6자 이상
+                  </span>
                 )}
-              </button>
-            </form>
+              </span>
+              <span className="relative flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft transition-colors duration-150">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  autoComplete={
+                    mode === "login" ? "current-password" : "new-password"
+                  }
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none pr-10 placeholder:text-muted-foreground/75"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 표시"}
+                  className="absolute right-3 inline-flex items-center justify-center rounded p-1 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-[18px] w-[18px]" aria-hidden />
+                  ) : (
+                    <Eye className="h-[18px] w-[18px]" aria-hidden />
+                  )}
+                </button>
+              </span>
+            </label>
 
-            <div className="animate-element animate-delay-500 relative flex items-center justify-center text-[12px] text-muted-foreground py-1">
-              <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-rule" />
-              <span className="relative z-10 bg-background px-3">또는</span>
-            </div>
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="mt-1.5 inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-evergreen px-4 text-[15px] font-semibold text-white hover:bg-evergreen-strong active:translate-y-px transition-all disabled:opacity-60"
+            >
+              {status === "loading" ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  처리 중…
+                </>
+              ) : (
+                <>
+                  이메일로 {cta}
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                </>
+              )}
+            </button>
 
             <button
               type="button"
               onClick={handleKakao}
               disabled={status === "loading"}
-              className="animate-element animate-delay-600 w-full rounded-lg border border-rule-strong py-3.5 hover:bg-secondary/50 transition-colors disabled:opacity-60 text-[14px] font-medium"
+              className="inline-flex h-[52px] items-center justify-center rounded-md border border-rule-strong bg-transparent text-[14.5px] font-semibold text-foreground hover:bg-secondary/60 hover:border-rule-strong transition-colors disabled:opacity-60"
             >
-              카카오로 {cta}
+              카카오로 계속하기
             </button>
+          </form>
 
-            {error && (
-              <p role="alert" className="text-[13px] text-destructive">
-                {error}
-              </p>
-            )}
-            {message && (
-              <p role="status" className="text-[13px] text-muted-foreground">
-                {message}
-              </p>
-            )}
-
-            <p className="animate-element animate-delay-700 text-center text-[13px] text-muted-foreground">
-              {swap.label}{" "}
-              <Link
-                href={swap.href}
-                className="font-medium text-foreground underline underline-offset-2 hover:text-evergreen"
-              >
-                {swap.text}
-              </Link>
+          {/* ─ 시즌 안내 카드 ─ */}
+          <aside className="mt-9 flex items-center gap-3.5 rounded-lg border border-rule bg-cream-soft px-[18px] py-4 animate-element animate-delay-500">
+            <Sparkles className="h-[18px] w-[18px] shrink-0 text-evergreen" aria-hidden />
+            <p className="text-[12.5px] leading-[1.55] text-muted2-deep">
+              <strong className="font-bold text-foreground">2026학년도 시즌 오픈</strong>
+              {" · "}6월 모의 · 7월 핵심 단권화 · 9월 실전
             </p>
-          </div>
+          </aside>
+
+          {error && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="mt-4 flex items-start gap-2 rounded-lg bg-destructive/5 border border-destructive/30 px-3.5 py-2.5 text-[13px] text-destructive"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden />
+              <span className="leading-[1.55]">{error}</span>
+            </div>
+          )}
+          {message && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mt-4 flex items-start gap-2 rounded-lg bg-info/5 border border-info/30 px-3.5 py-2.5 text-[13px] text-info"
+            >
+              <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" aria-hidden />
+              <span className="leading-[1.55] whitespace-pre-line">{message}</span>
+            </div>
+          )}
+
+          <p className="mt-7 text-center text-[13px] text-muted-foreground animate-element animate-delay-600">
+            {swap.label}{" "}
+            <Link
+              href={swap.href}
+              className="font-bold text-evergreen border-b border-evergreen hover:text-evergreen-strong hover:border-evergreen-strong"
+            >
+              {swap.text}
+            </Link>
+          </p>
         </div>
       </section>
-
-      {/* 우측 hero — 가로 괘선 노트 + 펀치라인 + 기능 강조 카드 */}
-      <aside
-        className="hidden md:flex flex-1 relative bg-secondary/30 overflow-hidden"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(to bottom, transparent 0, transparent 35px, hsl(var(--color-rule)) 35px, hsl(var(--color-rule)) 36px)",
-        }}
-        aria-hidden
-      >
-        <div className="relative z-10 flex flex-col justify-between w-full p-10 lg:p-14">
-          {/* 상단: 펀치라인 */}
-          <div className="animate-slide-right animate-delay-300 max-w-xl pt-10 lg:pt-20">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-5">
-              Fitly · 초등 임용 1차 학습 플래너
-            </p>
-            <p className="font-serif text-3xl lg:text-4xl leading-[1.35] tracking-tight text-foreground/95">
-              임용은 열심히 하는 게 아니라,
-              <br />
-              <em className="font-serif italic font-semibold text-foreground">
-                맞게(Fit)
-              </em>{" "}
-              하는 게임입니다.
-            </p>
-          </div>
-
-          {/* 하단: 기능 강조 카드 3장 — 카드 제목은 sans Small (§3 스케일) */}
-          <ul className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 mt-10">
-            {FEATURE_CARDS.map((card, idx) => (
-              <li
-                key={card.title}
-                className={`animate-testimonial animate-delay-${
-                  1000 + idx * 200
-                } rounded-lg bg-card border border-rule p-4 lg:p-5`}
-              >
-                <card.Icon
-                  className="h-4 w-4 text-muted-foreground mb-2"
-                  aria-hidden
-                />
-                <p className="font-sans text-sm font-semibold tracking-tight text-foreground">
-                  {card.title}
-                </p>
-                <p className="mt-1 text-[11.5px] text-muted-foreground leading-relaxed">
-                  {card.body}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </aside>
-    </div>
-  );
-}
-
-function GlassInputWrapper({ children }: { children: React.ReactNode }) {
-  // DESIGN.md §8.3 — 보더 1px rule-strong, 배경 cream(=bg), focus 시 보더 evergreen +
-  // 3px accent-soft 박스 섀도 (D005 정합).
-  return (
-    <div className="mt-1.5 rounded-lg border border-rule-strong bg-background transition-[box-shadow,border-color] focus-within:border-evergreen focus-within:shadow-[0_0_0_3px_hsl(var(--color-accent)/0.18)]">
-      {children}
-    </div>
+    </main>
   );
 }

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Activity, Target, Layers } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
@@ -13,7 +14,18 @@ import {
   getLibraryCounts,
 } from "@/lib/dashboard/analytics";
 
+// O3 (헌법 제19조 정합) — recharts 번들 큼. learning-trend.tsx 자체가 `"use client"`
+// 이므로 Next.js 15 가 자동 코드 분할한다. `next/dynamic` + `ssr:false` 는 서버
+// 컴포넌트에서 허용되지 않으므로 (Vercel 빌드 실패) 직접 import 한다. 클라이언트
+// 측 hydration 만 발생하여 동일 효과를 얻는다.
+
 export const dynamic = "force-dynamic";
+
+// N1 metadata — SEO/PWA 정합 (헌법 제19조의2)
+export const metadata: Metadata = {
+  title: "학습 분석 | Fitly",
+  description: "본인 학습 기록의 추이·취약점·활동량을 한눈에 분석합니다.",
+};
 
 function fmtMinutes(min: number): string {
   if (!min) return "0분";
@@ -40,23 +52,30 @@ export default async function StudyAnalysisPage() {
   ]);
 
   // 헌법 v2.1 — KPI tone 통일 (회색). 액센트는 진척도 KPI 만.
+  // B1 (헌법 §3.2 정직성) — null/0 폴백 "—" 명시. 0 세션을 "0회"로 표기하면 사용자 혼란.
   const kpiCards = [
     {
       label: "전체 학습 시간",
-      value: fmtMinutes(stats.totalMinutes),
-      sub: `${stats.sessions}회 세션`,
+      value: stats.totalMinutes > 0 ? fmtMinutes(stats.totalMinutes) : "—",
+      sub: stats.sessions > 0 ? `${stats.sessions}회 세션` : "세션 기록 없음",
       Icon: Activity,
     },
     {
       label: "평균 정답률",
-      value: `${stats.avgAccuracy}%`,
-      sub: "전체 세션 누적",
+      value: stats.sessions > 0 ? `${stats.avgAccuracy}%` : "—",
+      sub:
+        stats.sessions > 0
+          ? "전체 세션 누적"
+          : "풀이 시작 시 자동 산출",
       Icon: Target,
     },
     {
       label: "학습 카드",
-      value: `${stats.totalCards}장`,
-      sub: `풀이 ${lib.quiz} · 키워드 ${lib.keyword} · 오답 ${lib.mistake}`,
+      value: stats.totalCards > 0 ? `${stats.totalCards}장` : "—",
+      sub:
+        stats.totalCards > 0
+          ? `풀이 ${lib.quiz} · 키워드 ${lib.keyword} · 오답 ${lib.mistake}`
+          : "학습 시작 시 누적",
       Icon: Layers,
     },
   ];
@@ -94,11 +113,12 @@ export default async function StudyAnalysisPage() {
           ))}
         </section>
 
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
-          <div className="xl:col-span-2">
+        {/* A1 (헌법 제16조의2 디자인 시스템) — md stack + lg:grid-cols-3 (xl 단독 분기 → lg부터 적용) */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="lg:col-span-2 min-w-0">
             <LearningTrend data={summary.trend} />
           </div>
-          <div>
+          <div className="min-w-0">
             <WeakTypes items={summary.weakTypes} />
           </div>
         </section>
