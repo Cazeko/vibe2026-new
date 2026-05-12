@@ -48,9 +48,12 @@ export function ExamHeatmap({
 
   return (
     <div className="space-y-2">
-      <div className="relative overflow-x-auto">
+      {/* 사용자 보고 2026-05-12 — 표가 좌측에 기울어져서 시각적 균형 깨짐.
+          inner-flex 로 중앙 정렬. 표 폭이 컨테이너보다 크면 자연스럽게 가로
+          스크롤 (overflow-x-auto)로 fallback. */}
+      <div className="relative overflow-x-auto flex justify-center">
         <table
-          className="text-[10.5px] border-separate min-w-full"
+          className="text-[10.5px] border-separate mx-auto"
           style={{ borderSpacing: "2px" }}
         >
           <thead>

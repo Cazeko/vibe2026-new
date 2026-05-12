@@ -220,10 +220,10 @@ function RegionCard({
   // 잘리지 않고 wrap 되도록 보호 (사용자 보고 2026-05-12).
   return (
     <Card className={`${className} border-rule overflow-hidden`}>
-      <CardContent className="p-5 h-full flex flex-col min-w-0">
+      <CardContent className="px-3 py-2.5 h-full flex flex-col min-w-0">
         <div className="flex items-center gap-2 text-muted-foreground">
-          <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-          <span className="text-[11px] uppercase tracking-[0.12em] truncate">
+          <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span className="text-[10px] uppercase tracking-[0.12em] truncate">
             내 지역 교육청
           </span>
         </div>
@@ -310,23 +310,24 @@ function StatCard({
 }) {
   // 값이 긴 문자열(예: 2002–2026)일 때도 KPI 카드 폭(좁은 뷰포트 ~140px) 안에
   // 자동 축소되도록 clamp + min-w-0 적용. 사용자 보고 2026-05-12.
+  // 추가 보고 2026-05-12 — padding/폰트/spacing 일괄 컴팩트화 (여백 과다).
   const isLongValue = typeof value === "string" && value.length > 4;
   return (
     <Card className={`border-rule overflow-hidden ${className}`}>
-      <CardContent className="p-4 min-w-0">
-        <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground truncate">
+      <CardContent className="px-3 py-2.5 min-w-0">
+        <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
           {label}
         </div>
-        <div className="mt-2 flex items-baseline gap-1 min-w-0">
+        <div className="mt-1 flex items-baseline gap-1 min-w-0">
           <span
-            className={`font-serif font-medium tabular-nums tracking-tight whitespace-nowrap ${
+            className={`font-serif font-medium tabular-nums tracking-tight whitespace-nowrap leading-none ${
               accent ? "text-evergreen" : "text-foreground"
-            } ${isLongValue ? "text-[clamp(18px,3.2vw,24px)]" : "text-[clamp(22px,3.6vw,30px)]"}`}
+            } ${isLongValue ? "text-[clamp(15px,2.6vw,20px)]" : "text-[clamp(18px,3vw,24px)]"}`}
           >
             {value}
           </span>
           {unit && (
-            <span className="text-[11.5px] text-muted-foreground shrink-0">
+            <span className="text-[10.5px] text-muted-foreground shrink-0">
               {unit}
             </span>
           )}

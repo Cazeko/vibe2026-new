@@ -4,24 +4,25 @@ import type { WeakType } from "@/lib/dashboard/types";
 
 export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
   // viewport fit (lg+) — compact padding + flex-col 로 buttons 하단 정착.
+  // 사용자 보고 2026-05-12 — 카드 대비 여백 과다 → 전반 축소 (F 배지·헤더·본문·footer).
   return (
-    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 h-full flex flex-col">
-      {/* 헤더 — F 배지 + eyebrow + 제목 */}
-      <div className="flex items-center gap-3 mb-3">
+    <article className="rounded-card border border-rule bg-cream-soft px-4 pt-3.5 pb-3 h-full flex flex-col">
+      {/* 헤더 — F 배지 + eyebrow + 제목 (컴팩트) */}
+      <div className="flex items-center gap-2.5 mb-2 shrink-0">
         <span
           aria-hidden
-          className="grid h-[34px] w-[34px] place-items-center rounded-[9px] bg-evergreen text-gold font-extrabold text-[15px] tracking-[-0.02em]"
+          className="grid h-7 w-7 place-items-center rounded-[7px] bg-evergreen text-gold font-extrabold text-[13px] tracking-[-0.02em] shrink-0"
         >
           F
         </span>
         <div className="min-w-0">
-          <p className="text-[10.5px] font-bold tracking-[0.22em] text-muted-foreground">
+          <p className="text-[10px] font-bold tracking-[0.22em] text-muted-foreground">
             FITLY · AI 추천
           </p>
-          <h3 className="mt-1 font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground leading-tight">
+          <h3 className="mt-0.5 font-sans text-[15px] font-bold tracking-[-0.02em] text-foreground leading-tight truncate">
             {weakest ? (
               <>
-                취약 유형이 보입니다 —{" "}
+                취약 유형 —{" "}
                 <em className="not-italic text-evergreen">{weakest.label}</em>
               </>
             ) : (
@@ -31,7 +32,7 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
         </div>
       </div>
 
-      <p className="text-[13.5px] leading-[1.65] tracking-[-0.01em] text-muted2-deep mb-3.5">
+      <p className="text-[12.5px] leading-[1.55] tracking-[-0.005em] text-muted2-deep mb-2.5 flex-1 min-h-0">
         {weakest ? (
           <>
             <strong className="font-bold text-foreground">{weakest.label}</strong>{" "}
@@ -48,24 +49,23 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
         )}
       </p>
 
-      <p className="text-[11.5px] leading-[1.55] text-muted-foreground border-t border-rule pt-3 mb-4">
-        ※ 본인의 학습 이력에서 집계한 추천입니다. 학습 결정 시 참고로 활용해
-        주세요.
+      <p className="text-[10.5px] leading-[1.45] text-muted-foreground border-t border-rule pt-2 mb-2.5 shrink-0">
+        ※ 본인의 학습 이력 기반 추천. 참고로만 활용해 주세요.
       </p>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-1.5 flex-wrap shrink-0">
         <Link
           href="/study/quiz"
-          className="inline-flex h-[38px] items-center gap-2 rounded-lg bg-evergreen px-4 text-[13px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
+          className="inline-flex h-[34px] items-center gap-1.5 rounded-md bg-evergreen px-3 text-[12.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
         >
           추천 풀이 시작
           <ArrowRight className="h-3 w-3" aria-hidden />
         </Link>
         <Link
           href="/study-analysis"
-          className="inline-flex h-[38px] items-center rounded-lg border border-rule-strong px-4 text-[13px] font-semibold text-muted2-deep hover:border-evergreen hover:text-evergreen transition-colors"
+          className="inline-flex h-[34px] items-center rounded-md border border-rule-strong px-3 text-[12.5px] font-semibold text-muted2-deep hover:border-evergreen hover:text-evergreen transition-colors"
         >
-          분석 방법 살펴보기
+          분석 방법
         </Link>
       </div>
     </article>
