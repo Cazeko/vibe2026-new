@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { ArrowLeft, ShieldCheck, AlertCircle, ChevronDown } from "lucide-react";
+import {
+  ArrowLeft,
+  ShieldCheck,
+  AlertCircle,
+  ChevronDown,
+  Maximize2,
+} from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +21,12 @@ import { getExamPageUrl } from "@/lib/supabase/storage";
 import { Markdown } from "@/components/shared/markdown";
 
 export const dynamic = "force-dynamic";
+
+// 헌법 v3.5 제13조의2·제18조의2 정합 — 시험지 상세 페이지.
+// 사용자 보고 2026-05-12 반영:
+// - 이미지 우측 잘림 → max-w-full + 가로 스크롤 fallback + 클릭 시 새 탭 전체보기
+// - "답안 검증 필요" 반복 → 미검증 다수 시 상단 일괄 안내로 통합, 개별 배지는 톤다운
+// - 본문 미리보기 vs 이미지 관계 명확화 (보조 자료 라벨)
 
 export default async function PaperDetailPage({
   params,
@@ -49,6 +61,12 @@ export default async function PaperDetailPage({
   const totalPoints = items.reduce((s, i) => s + (i.points ?? 0), 0);
   const sessionLabel = getSessionLabel(paper.session);
 
+  // 답안 검증 미통과 문항 비율 — 절반 이상이면 상단에 일괄 안내하고
+  // 개별 카드 배지는 톤다운하여 시각 노이즈를 줄인다 (사용자 보고 2026-05-12).
+  const unverifiedCount = items.filter((i) => !i.verifiedAnswer).length;
+  const unverifiedRatio = items.length > 0 ? unverifiedCount / items.length : 0;
+  const showBulkVerifyNotice = unverifiedRatio >= 0.5 && items.length > 0;
+
   return (
     <div className="min-h-screen pb-12">
       <PageHeader
@@ -65,13 +83,38 @@ export default async function PaperDetailPage({
       />
 
       <div className="px-6 mx-auto max-w-4xl space-y-4">
+        {/* 답안 검증 일괄 안내 — 미검증 다수일 때만 노출 */}
+        {showBulkVerifyNotice && (
+          <aside className="rounded-md border border-warning/40 bg-warning/5 px-4 py-3 flex items-start gap-2.5">
+            <AlertCircle
+              className="h-4 w-4 text-warning shrink-0 mt-0.5"
+              aria-hidden
+            />
+            <div className="text-[12.5px] text-foreground/85 leading-relaxed">
+              <p>
+                <strong>답안·해설 검수 진행 중</strong> — 본 시험지의{" "}
+                <span className="tabular-nums">{unverifiedCount}/{items.length}</span>
+                문항이 운영자 검수 대기 상태입니다.
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                AI 자동 생성 답안이며 학습 참고용으로 활용하세요. 본문(stem)은
+                공개 PDF 원본 직접 추출본으로 100% 정확성이 보장됩니다
+                (헌법 제13조의2 9항).
+              </p>
+            </div>
+          </aside>
+        )}
+
         {items.length === 0 ? (
           <EmptyItems />
         ) : (
           <ol className="space-y-4">
             {items.map((item) => (
               <li key={item.id}>
-                <ItemCard item={item} />
+                <ItemCard
+                  item={item}
+                  suppressIndividualBadge={showBulkVerifyNotice}
+                />
               </li>
             ))}
           </ol>
@@ -88,8 +131,10 @@ export default async function PaperDetailPage({
 
 function ItemCard({
   item,
+  suppressIndividualBadge,
 }: {
   item: Awaited<ReturnType<typeof getPaperItems>>[number];
+  suppressIndividualBadge: boolean;
 }) {
   const imageUrl = getExamPageUrl(item.stemImagePath);
 
@@ -99,7 +144,7 @@ function ItemCard({
         <details className="group">
           {/* 헤더 — 항상 노출. 클릭 시 본문·답안 토글. */}
           <summary className="cursor-pointer list-none p-5 flex items-baseline justify-between flex-wrap gap-2 hover:bg-secondary/30 transition-colors select-none">
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-baseline gap-2 min-w-0">
               <ChevronDown
                 className="h-4 w-4 shrink-0 self-center text-muted-foreground -rotate-90 group-open:rotate-0 transition-transform"
                 aria-hidden
@@ -122,21 +167,29 @@ function ItemCard({
                   {item.bloom}
                 </span>
               )}
-              {/* 부제는 본문 미리보기 X — 영역·키워드 첫 2개로. */}
               {(item.domains.length > 0 || item.keywords.length > 0) && (
                 <span className="hidden md:inline text-[11.5px] text-muted-foreground/80 truncate max-w-[320px] group-open:hidden">
                   · {[...item.domains.slice(0, 1), ...item.keywords.slice(0, 2)].join(" · ")}
                 </span>
               )}
             </div>
+            {/* 개별 검증 배지 — 미검증 다수일 때는 상단 일괄 안내로 갈음하고 톤다운 */}
             {item.verifiedAnswer ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-info/10 px-1.5 py-0.5 text-[10px] text-info">
-                <ShieldCheck className="h-2.5 w-2.5" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-info/10 px-1.5 py-0.5 text-[10px] text-info shrink-0">
+                <ShieldCheck className="h-2.5 w-2.5" aria-hidden />
                 답안 검증
               </span>
+            ) : suppressIndividualBadge ? (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-muted/30 px-1.5 py-0.5 text-[10px] text-muted-foreground/70 shrink-0"
+                title="답안 검수 진행 중 (상단 일괄 안내 참조)"
+              >
+                <AlertCircle className="h-2.5 w-2.5" aria-hidden />
+                검수 중
+              </span>
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning">
-                <AlertCircle className="h-2.5 w-2.5" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning shrink-0">
+                <AlertCircle className="h-2.5 w-2.5" aria-hidden />
                 답안 검증 필요
               </span>
             )}
@@ -157,31 +210,25 @@ function ItemCard({
               </div>
             )}
 
-            {imageUrl && (
-              <div className="mt-4 overflow-hidden rounded-md border border-rule">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt={`${item.itemNo}번 본문 이미지`}
-                  className="w-full"
-                  loading="lazy"
-                />
-              </div>
-            )}
+            {imageUrl && <StemImageBlock imageUrl={imageUrl} itemNo={item.itemNo} />}
 
             {item.stemTextPreview && (
               <div className="mt-3 border-l-4 border-rule pl-3 py-1">
                 <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                  본문 미리보기
+                  본문 미리보기 (텍스트 추출본 — 이미지 보조)
                 </span>
                 <p className="mt-1 text-[12.5px] text-foreground/80 leading-relaxed line-clamp-3">
                   {item.stemTextPreview}
                   {item.stemTextPreview.length >= 80 && "…"}
                 </p>
+                <p className="mt-1 text-[10px] text-muted-foreground/80 leading-snug">
+                  본문 원본은 위 이미지를 참고하세요. 미리보기는 검색·키워드
+                  태깅용 텍스트 추출본입니다.
+                </p>
               </div>
             )}
 
-            {/* 답안·해설 — 중첩 토글. cleanMarkdown으로 ###·*** marker 제거. */}
+            {/* 답안·해설 — 중첩 토글. */}
             {(item.answerMd || item.explanationMd) && (
               <details className="mt-4 group/answer">
                 <summary className="cursor-pointer list-none flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground transition-colors select-none">
@@ -211,7 +258,7 @@ function ItemCard({
                       </CardContent>
                     </Card>
                   )}
-                  {!item.verifiedAnswer && (
+                  {!item.verifiedAnswer && !suppressIndividualBadge && (
                     <p className="text-[10.5px] text-warning leading-relaxed">
                       ※ 운영자 검수 전 — AI 자동 생성 답안입니다. 학습 참고용으로 활용하세요.
                     </p>
@@ -242,6 +289,40 @@ function ItemCard({
         </details>
       </CardContent>
     </Card>
+  );
+}
+
+// 원본 시험지 이미지 — max-w-full 보호 + 클릭 시 새 탭 전체보기.
+// 이미지가 컨테이너보다 클 경우 가로 스크롤로 자연스럽게 fallback 한다.
+function StemImageBlock({
+  imageUrl,
+  itemNo,
+}: {
+  imageUrl: string;
+  itemNo: number;
+}) {
+  return (
+    <div className="mt-4 rounded-md border border-rule overflow-hidden bg-paper relative group/img">
+      <a
+        href={imageUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${itemNo}번 본문 이미지 전체보기 (새 탭)`}
+        className="block overflow-x-auto"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={`${itemNo}번 본문 이미지`}
+          className="block max-w-full h-auto mx-auto"
+          loading="lazy"
+        />
+      </a>
+      <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-ink/70 px-2 py-1 text-[10px] text-cream backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-none">
+        <Maximize2 className="h-3 w-3" aria-hidden />
+        클릭 → 새 탭 전체보기
+      </span>
+    </div>
   );
 }
 
