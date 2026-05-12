@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/shared/app-sidebar";
 import { TabletGate } from "@/components/shared/tablet-gate";
+import { PageTransition } from "@/components/shared/page-transition";
 
 // 헌법 v3.5 제35조의2 정합 — Vercel function 한도.
 // statement_timeout 8s + safeRun fallback과 함께 SSR 전체 한도를 30s로 확장하여
@@ -20,7 +21,11 @@ export default function MainLayout({
           이전 회귀가 재현된다. 따라서 색을 명시하지 아니한다. */}
       <div className="hidden lg:block min-h-screen">
         <AppSidebar />
-        <main className="ml-[248px] min-h-screen">{children}</main>
+        {/* P2-02 (외부 리뷰 2026-05-12) — 페이지 전환 fade-up 트랜지션.
+            DESIGN §7.1 진입 200ms ease-out 정합, prefers-reduced-motion 존중. */}
+        <main className="ml-[248px] min-h-screen">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
     </>
   );
