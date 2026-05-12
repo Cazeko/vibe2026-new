@@ -290,104 +290,108 @@ export default async function StudyPlanPage() {
           ))}
         </ul>
 
-        {/* 오늘의 플랜 진행도 */}
-        <Card className="border-rule">
-          <CardContent className="p-5">
-            <h2 className="font-serif text-lg font-medium tracking-tight">
-              오늘의 플랜 진행도
-            </h2>
-            <ul className="mt-3 -mx-5 divide-y divide-rule border-y border-rule">
-              {summary.plan.map((item) => {
-                const Icon = STATE_ICON[item.state];
-                const tone = STATE_TONE[item.state];
-                const isLocked = item.state === "locked";
-                return (
-                  <li key={item.id}>
-                    <Link
-                      href={isLocked ? "#" : item.href}
-                      aria-disabled={isLocked}
-                      className={`flex items-center gap-3 px-5 py-3 transition-colors ${
-                        isLocked
-                          ? "opacity-60 cursor-not-allowed"
-                          : "hover:bg-secondary/40"
-                      }`}
-                    >
-                      <Icon className={`h-5 w-5 shrink-0 ${tone}`} aria-hidden />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium">{item.title}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          {item.subtitle}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 text-[11px]">
-                        <div className="hidden sm:block w-28 h-1.5 overflow-hidden rounded-full bg-rule">
-                          <div
-                            className="h-full bg-evergreen gauge-fill"
-                            style={{ width: `${item.progress}%` }}
-                          />
+        {/* 사용자 보고 2026-05-12 — 오늘의 플랜 진행도 카드를 반쪽으로 줄이고
+            나머지 반쪽을 학습 가이드로 채워 한 화면 꽉 차게 배치 (lg+ 좌우 2열). */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {/* 오늘의 플랜 진행도 */}
+          <Card className="border-rule">
+            <CardContent className="p-5">
+              <h2 className="font-serif text-lg font-medium tracking-tight">
+                오늘의 플랜 진행도
+              </h2>
+              <ul className="mt-3 -mx-5 divide-y divide-rule border-y border-rule">
+                {summary.plan.map((item) => {
+                  const Icon = STATE_ICON[item.state];
+                  const tone = STATE_TONE[item.state];
+                  const isLocked = item.state === "locked";
+                  return (
+                    <li key={item.id}>
+                      <Link
+                        href={isLocked ? "#" : item.href}
+                        aria-disabled={isLocked}
+                        className={`flex items-center gap-3 px-5 py-3 transition-colors ${
+                          isLocked
+                            ? "opacity-60 cursor-not-allowed"
+                            : "hover:bg-secondary/40"
+                        }`}
+                      >
+                        <Icon className={`h-5 w-5 shrink-0 ${tone}`} aria-hidden />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-medium">{item.title}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {item.subtitle}
+                          </p>
                         </div>
-                        <span className="num text-muted-foreground w-9 text-right">
-                          {item.progress}%
-                        </span>
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </CardContent>
-        </Card>
+                        <div className="flex items-center gap-2 text-[11px] shrink-0">
+                          <div className="hidden md:block w-16 lg:w-20 h-1.5 overflow-hidden rounded-full bg-rule">
+                            <div
+                              className="h-full bg-evergreen gauge-fill"
+                              style={{ width: `${item.progress}%` }}
+                            />
+                          </div>
+                          <span className="num text-muted-foreground w-9 text-right">
+                            {item.progress}%
+                          </span>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+          </Card>
 
-        {/* 학습 가이드 — v3.0 · I3 (헌법 제24조의2 정합): 실제 due 카운트 동적 연결 */}
-        <Card className="border-rule">
-          <CardContent className="p-5">
-            <h2 className="font-serif text-lg font-medium tracking-tight">
-              학습 가이드
-            </h2>
-            <ol className="mt-2 space-y-1.5 text-[12px] text-foreground/80 leading-relaxed list-decimal pl-4">
-              <li>
-                <strong>풀이 트랙</strong>
-                {lib.quizDue > 0 && (
-                  <span className="ml-1 text-evergreen font-medium num">
-                    (오늘 {lib.quizDue}장 추천)
-                  </span>
-                )}{" "}
-                — 서술형 기출에 답안을 작성하고 AI 모범답안과 비교, 자가 채점합니다.
-              </li>
-              <li>
-                <strong>키워드 트랙</strong>
-                {lib.keywordDue > 0 && (
-                  <span className="ml-1 text-evergreen font-medium num">
-                    (오늘 {lib.keywordDue}장 추천)
-                  </span>
-                )}{" "}
-                — 개념 정리 노트로 정의·핵심 요소를 반복 학습합니다
-                (객관식 시대 데이터 포함).
-              </li>
-              <li>
-                <strong>오답 트랙</strong>
-                {lib.mistakeDue > 0 && (
-                  <span className="ml-1 text-evergreen font-medium num">
-                    (오늘 {lib.mistakeDue}장 추천)
-                  </span>
-                )}{" "}
-                — 풀이를 다시/어렵으로 평가하면 자동 합류, 마스터될 때까지 반복합니다.
-              </li>
-              <li>
-                <strong>
-                  <Link
-                    href="/podcast"
-                    className="text-info underline underline-offset-2 hover:text-foreground"
-                  >
-                    팟캐스트 →
-                  </Link>
-                </strong>{" "}
-                영역·연도·주제 선택 후 2인 화자 대화체 팟캐스트로 자동 생성,
-                이동 중에도 청취 학습.
-              </li>
-            </ol>
-          </CardContent>
-        </Card>
+          {/* 학습 가이드 — v3.0 · I3 (헌법 제24조의2 정합): 실제 due 카운트 동적 연결 */}
+          <Card className="border-rule">
+            <CardContent className="p-5">
+              <h2 className="font-serif text-lg font-medium tracking-tight">
+                학습 가이드
+              </h2>
+              <ol className="mt-2 space-y-1.5 text-[12px] text-foreground/80 leading-relaxed list-decimal pl-4">
+                <li>
+                  <strong>풀이 트랙</strong>
+                  {lib.quizDue > 0 && (
+                    <span className="ml-1 text-evergreen font-medium num">
+                      (오늘 {lib.quizDue}장 추천)
+                    </span>
+                  )}{" "}
+                  — 서술형 기출에 답안을 작성하고 AI 모범답안과 비교, 자가 채점합니다.
+                </li>
+                <li>
+                  <strong>키워드 트랙</strong>
+                  {lib.keywordDue > 0 && (
+                    <span className="ml-1 text-evergreen font-medium num">
+                      (오늘 {lib.keywordDue}장 추천)
+                    </span>
+                  )}{" "}
+                  — 개념 정리 노트로 정의·핵심 요소를 반복 학습합니다
+                  (객관식 시대 데이터 포함).
+                </li>
+                <li>
+                  <strong>오답 트랙</strong>
+                  {lib.mistakeDue > 0 && (
+                    <span className="ml-1 text-evergreen font-medium num">
+                      (오늘 {lib.mistakeDue}장 추천)
+                    </span>
+                  )}{" "}
+                  — 풀이를 다시/어려움으로 평가하면 자동 합류, 마스터될 때까지 반복합니다.
+                </li>
+                <li>
+                  <strong>
+                    <Link
+                      href="/podcast"
+                      className="text-info underline underline-offset-2 hover:text-foreground"
+                    >
+                      팟캐스트 →
+                    </Link>
+                  </strong>{" "}
+                  영역·연도·주제 선택 후 2인 화자 대화체 팟캐스트로 자동 생성,
+                  이동 중에도 청취 학습.
+                </li>
+              </ol>
+            </CardContent>
+          </Card>
+        </section>
       </div>
     </div>
   );

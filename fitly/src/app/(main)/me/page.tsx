@@ -20,13 +20,11 @@ import {
   Headphones,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
-import { ActivityHeatmap } from "@/components/feature/analysis/activity-heatmap";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { userProfiles } from "@/lib/db/schema";
 import { getDashboardSummary } from "@/lib/dashboard/queries";
 import {
-  getActivityHeatmap,
   getSessionStats,
   getLibraryCounts,
   getRecentActivity,
@@ -155,16 +153,16 @@ export default async function MePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // O2 (헌법 제24조의2 정합) — 프로필 + 분석 5종을 단일 Promise.all로 병렬 fetch
+  // O2 (헌법 제24조의2 정합) — 프로필 + 분석 4종 병렬 fetch.
+  // 사용자 보고 2026-05-12 — heatmap 카드 제거로 getActivityHeatmap fetch 도 제거.
   const db = getDb();
-  const [profileRows, summary, heatmap, stats, lib, recent] = await Promise.all([
+  const [profileRows, summary, stats, lib, recent] = await Promise.all([
     db
       .select()
       .from(userProfiles)
       .where(eq(userProfiles.userId, user.id))
       .limit(1),
     getDashboardSummary(user.id),
-    getActivityHeatmap(user.id),
     getSessionStats(user.id),
     getLibraryCounts(user.id),
     getRecentActivity(user.id, 5),
@@ -234,14 +232,17 @@ export default async function MePage() {
   ];
 
   return (
-    <div className="min-h-screen pb-12">
+    // 사용자 보고 2026-05-12 — 마이페이지 viewport fit. 학습 활동 히트맵 카드는
+    // 마이페이지에서 제거 (학습 분석 페이지에서 1년 단위로 확인 가능 — 중복 회피).
+    // lg+ 에서 h-screen + flex column 으로 한 화면 fit, 모바일은 기존 자연 스크롤.
+    <div className="min-h-screen pb-12 lg:h-screen lg:pb-0 lg:overflow-hidden lg:flex lg:flex-col">
       <PageHeader
         title="마이 페이지"
         subtitle="프로필과 학습 기록을 한 페이지에 모았습니다."
       />
-      <div className="grid gap-[22px] px-10 py-7">
+      <div className="grid gap-[22px] px-10 py-7 lg:flex lg:flex-col lg:gap-3 lg:px-8 lg:py-4 lg:flex-1 lg:min-h-0">
         {/* ─ 프로필 카드 ─ */}
-        <article className="rounded-card border border-rule bg-cream-soft px-6 py-[22px] flex items-center gap-5 flex-wrap">
+        <article className="rounded-card border border-rule bg-cream-soft px-6 py-[22px] lg:px-5 lg:py-3 flex items-center gap-5 lg:gap-4 flex-wrap shrink-0">
           <span
             aria-hidden
             className="grid h-16 w-16 shrink-0 place-items-center rounded-[14px] bg-evergreen text-gold"
@@ -298,11 +299,11 @@ export default async function MePage() {
         </article>
 
         {/* ─ 3 트랙 통계 ─ A1 (헌법 제24조의2 정합): md:2 lg:3 단계화 */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 shrink-0">
           {features.map((f) => (
             <article
               key={f.title}
-              className="rounded-card border border-rule bg-cream-soft px-[22px] py-5"
+              className="rounded-card border border-rule bg-cream-soft px-[22px] py-5 lg:px-4 lg:py-3"
             >
               <div className="flex items-center justify-between mb-3.5">
                 <span className="text-[14.5px] font-bold tracking-[-0.02em] text-foreground">
@@ -334,54 +335,13 @@ export default async function MePage() {
           ))}
         </section>
 
-        {/* ─ 활동 히트맵 + 최근 활동 ─ */}
-        <section className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-[22px]">
-          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5">
-            <div className="flex items-center gap-2.5">
-              <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
-                학습 활동
-              </h2>
-              <span className="ml-auto text-[11.5px] text-muted-foreground">
-                <b className="font-bold text-foreground">
-                  {fmtMinutes(stats.totalMinutes)}
-                </b>
-                {" · 최근 7일"}
-              </span>
-            </div>
-            {/* K1 (헌법 제4조의3 정합) — 의미 단위 줄바꿈. 사용자 보고 2026-05-12 — 13주 → 1년 확장 */}
-            <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
-              최근 1년간 일별 학습 시간.
-              <br className="hidden sm:inline" />
-              짙을수록 오래 학습한 날입니다.
-            </p>
-            {/* E1 (헌법 제24조의2 정합) — overflow-x-auto 보장 + max-w 안전 */}
-            <div className="overflow-x-auto max-w-full">
-              <ActivityHeatmap cells={heatmap} />
-            </div>
-            {/* H3 (헌법 제24조의2 정합) — 범례 sticky-bottom (카드 하단 고정) */}
-            <div className="mt-3.5 sticky bottom-0 bg-cream-soft/95 backdrop-blur-sm flex items-center gap-1.5 text-[11.5px] text-muted-foreground flex-wrap">
-              <span>적음</span>
-              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-cream-deep" />
-              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-[#d8e4dc] dark:bg-evergreen/30" />
-              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-[#9bbaa6] dark:bg-evergreen/50" />
-              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-[#5a8b71] dark:bg-evergreen/70" />
-              <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-evergreen" />
-              <span>많음</span>
-              <span className="ml-auto">
-                연속 학습{" "}
-                <b className="font-bold text-foreground num">
-                  {summary.kpi.streakDays}일
-                </b>
-                {summary.kpi.streakBest > 0 && (
-                  <> · 최장 {summary.kpi.streakBest}일</>
-                )}
-              </span>
-            </div>
-          </article>
-
-          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5">
-            <div className="flex items-center gap-2.5">
-              <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
+        {/* ─ 최근 활동 + 학습 배지 ─ 좌우 분배 (lg+ 에서 viewport fit 시 잔여 공간 차지)
+            사용자 보고 2026-05-12 — 학습 활동 히트맵 카드 제거 (학습 분석 페이지의
+            1년 히트맵으로 일원화, 중복 회피). 그 자리를 최근 활동 + 배지가 차지. */}
+        <section className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-3 lg:flex-1 lg:min-h-0">
+          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 flex flex-col">
+            <div className="flex items-center gap-2.5 shrink-0">
+              <h2 className="font-sans text-[15px] font-bold tracking-[-0.02em] text-foreground">
                 최근 활동
               </h2>
               <Link
@@ -391,36 +351,42 @@ export default async function MePage() {
                 전체 ›
               </Link>
             </div>
-            <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em]">
-              최근 학습 이력 {recent.length}건
+            <p className="mt-0.5 mb-2 text-[11.5px] text-muted-foreground leading-[1.45] tracking-[-0.005em] shrink-0">
+              최근 학습 이력 {recent.length}건 · 연속 학습{" "}
+              <b className="font-bold text-foreground num">
+                {summary.kpi.streakDays}일
+              </b>
+              {summary.kpi.streakBest > 0 && (
+                <> · 최장 {summary.kpi.streakBest}일</>
+              )}
             </p>
             {recent.length === 0 ? (
-              <p className="mt-3 text-[12.5px] text-muted-foreground">
+              <p className="mt-1 text-[12.5px] text-muted-foreground">
                 학습 세션이 누적되면 여기에 표시됩니다.
               </p>
             ) : (
-              <ul className="grid gap-2">
+              <ul className="grid gap-1.5 flex-1 min-h-0 overflow-y-auto">
                 {recent.map((r) => {
                   const Icon =
                     MODE_ICON[r.mode as keyof typeof MODE_ICON] ?? Activity;
                   return (
                     <li
                       key={r.id}
-                      className="grid grid-cols-[32px_1fr_auto] items-center gap-3 rounded-[10px] border border-rule bg-cream px-3.5 py-3"
+                      className="grid grid-cols-[28px_1fr_auto] items-center gap-2.5 rounded-[10px] border border-rule bg-cream px-3 py-2"
                     >
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-cream-deep text-evergreen">
-                        <Icon className="h-[15px] w-[15px]" aria-hidden />
+                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-cream-deep text-evergreen">
+                        <Icon className="h-[14px] w-[14px]" aria-hidden />
                       </span>
                       <div className="min-w-0">
-                        <p className="text-[13.5px] font-semibold tracking-[-0.02em] truncate text-foreground">
+                        <p className="text-[12.5px] font-semibold tracking-[-0.02em] truncate text-foreground">
                           {MODE_LABEL[r.mode] ?? r.mode}
                         </p>
-                        <p className="text-[11.5px] text-muted-foreground mt-px">
+                        <p className="text-[11px] text-muted-foreground mt-px">
                           {fmtMinutes(r.durationMinutes)} · {r.cards}장
                           {r.accuracy != null && ` · 정답률 ${r.accuracy}%`}
                         </p>
                       </div>
-                      <span className="text-[11.5px] text-muted-foreground whitespace-nowrap num">
+                      <span className="text-[11px] text-muted-foreground whitespace-nowrap num">
                         {timeAgo(r.startedAt)}
                       </span>
                     </li>
@@ -429,73 +395,69 @@ export default async function MePage() {
               </ul>
             )}
           </article>
-        </section>
 
-        {/* ─ 학습 배지 ─ */}
-        <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5">
-          <div className="flex items-center gap-2.5">
-            <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
-              학습 배지
-            </h2>
-            <span className="ml-auto text-[12px] font-semibold text-muted-foreground num">
-              {earnedCount} / {badges.length} 획득
-            </span>
-          </div>
-          {/* K1 (헌법 제4조의3 정합) — 의미 단위 줄바꿈 */}
-          <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
-            꾸준한 학습으로 배지를 모아 보세요.
-            <br className="hidden sm:inline" />
-            모든 배지는 본인 활동 기록을 기반으로 자동 지급됩니다.
-          </p>
+          {/* ─ 학습 배지 ─ 최근 활동 옆 (lg+ 좌우 grid 두번째 셀) */}
+          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 flex flex-col">
+            <div className="flex items-center gap-2.5 shrink-0">
+              <h2 className="font-sans text-[15px] font-bold tracking-[-0.02em] text-foreground">
+                학습 배지
+              </h2>
+              <span className="ml-auto text-[11.5px] font-semibold text-muted-foreground num">
+                {earnedCount} / {badges.length} 획득
+              </span>
+            </div>
+            <p className="mt-0.5 mb-2.5 text-[11.5px] text-muted-foreground leading-[1.45] tracking-[-0.005em] break-keep shrink-0">
+              꾸준한 학습으로 배지를 모아 보세요.
+            </p>
 
-          {/* A1 (헌법 제24조의2 정합) — 배지 grid 단계화: 2→3→4→6 */}
-          <ul
-            aria-live="polite"
-            aria-label={`학습 배지: ${earnedCount} / ${badges.length} 획득`}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
-          >
-            {/* E2 (헌법 제24조의2 정합) — 미획득 명도 차 강화: opacity-60 + grayscale */}
-            {badges.map((b) => (
-              <li
-                key={b.id}
-                className={`rounded-[12px] border px-3 pt-[18px] pb-3.5 text-center transition-all ${
-                  b.earned
-                    ? "border-gold bg-cream-soft hover:-translate-y-0.5"
-                    : "border-rule bg-cream opacity-60 grayscale"
-                }`}
-              >
-                <span
-                  aria-hidden
-                  className={`mx-auto grid h-9 w-9 place-items-center rounded-full mb-2.5 ${
+            {/* A1 (헌법 제24조의2 정합) — 배지 grid 단계화: 2→3→4→6 */}
+            <ul
+              aria-live="polite"
+              aria-label={`학습 배지: ${earnedCount} / ${badges.length} 획득`}
+              className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 flex-1 min-h-0 overflow-y-auto"
+            >
+              {/* E2 (헌법 제24조의2 정합) — 미획득 명도 차 강화: opacity-60 + grayscale */}
+              {badges.map((b) => (
+                <li
+                  key={b.id}
+                  className={`rounded-[10px] border px-2 pt-2.5 pb-2 text-center transition-all ${
                     b.earned
-                      ? "bg-gold-soft text-gold"
-                      : "bg-cream-deep text-muted-foreground"
+                      ? "border-gold bg-cream-soft hover:-translate-y-0.5"
+                      : "border-rule bg-cream opacity-60 grayscale"
                   }`}
                 >
-                  <b.Icon className="h-[18px] w-[18px]" />
-                </span>
-                <p
-                  className={`text-[13px] font-bold tracking-[-0.02em] ${b.earned ? "text-foreground" : "text-muted2-deep"}`}
-                >
-                  {b.title}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-1 leading-[1.4] tracking-[-0.005em]">
-                  {b.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </article>
+                  <span
+                    aria-hidden
+                    className={`mx-auto grid h-7 w-7 place-items-center rounded-full mb-1.5 ${
+                      b.earned
+                        ? "bg-gold-soft text-gold"
+                        : "bg-cream-deep text-muted-foreground"
+                    }`}
+                  >
+                    <b.Icon className="h-[14px] w-[14px]" />
+                  </span>
+                  <p
+                    className={`text-[11.5px] font-bold tracking-[-0.02em] truncate ${b.earned ? "text-foreground" : "text-muted2-deep"}`}
+                  >
+                    {b.title}
+                  </p>
+                  <p className="text-[9.5px] text-muted-foreground mt-0.5 leading-[1.3] tracking-[-0.005em] truncate">
+                    {b.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </article>
+        </section>
 
-        {/* K1 (헌법 제4조의3·제3조의2 정합) — 정직성 안내, 의미 단위 줄바꿈 */}
-        <p className="pt-2 max-w-[920px] text-[11.5px] text-muted-foreground leading-[1.6] break-keep">
+        {/* K1 (헌법 제4조의3·제3조의2 정합) — 정직성 안내, 한 줄로 컴팩트 */}
+        <p className="text-[10.5px] text-muted-foreground leading-[1.4] break-keep shrink-0 lg:pt-0">
           본 마이 페이지의 통계·배지·활동 기록은{" "}
           <strong className="font-semibold text-muted2-deep">
             본인 계정의 실제 학습 데이터
           </strong>
           만으로 산출됩니다.
-          <br className="hidden sm:inline" />
-          합격 컷·타사용자 평균 같은 외부 비교 지표는 사용하지 않습니다.
+          외부 비교 지표는 사용하지 않습니다.
         </p>
       </div>
     </div>

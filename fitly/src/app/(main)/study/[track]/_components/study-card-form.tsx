@@ -183,17 +183,18 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </div>
       )}
 
-      {/* 사용자 보고 2026-05-12 — 키워드 트랙은 답안 입력 없음. 본문 카드 +
-          정리 노트를 좌우 2열로 배치하여 가로 viewport 활용. quiz/mistake 는
-          기존 vertical 흐름(본문 → 답안 입력 → 비교). */}
+      {/* 사용자 보고 2026-05-12 — 키워드 트랙은 답안 입력 + 본문 시험지 출처가
+          무의미하므로(개념 정리 노트가 핵심) 출처 카드 숨기고 정리 노트만 중앙
+          배치. quiz/mistake 는 본문 카드 + 답안 입력 + 비교 흐름 유지. */}
       <div
         className={
           card.type === "keyword"
-            ? "grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"
+            ? "max-w-3xl mx-auto"
             : ""
         }
       >
-        {/* 출처 메타 + 본문 */}
+        {/* 출처 메타 + 본문 — 키워드 트랙에서는 숨김 */}
+        {card.type !== "keyword" && (
         <Card className="border-rule">
           <CardContent className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -286,9 +287,10 @@ export function StudyCardForm({ card }: { card: CardData }) {
           )}
         </CardContent>
       </Card>
+        )}
 
-        {/* 키워드 트랙: 정리 노트는 본문 카드 오른쪽 칸으로 (grid 두번째 셀).
-            +/- 버튼으로 글자 크기 확대·축소 가능 (사용자 보고 2026-05-12). */}
+        {/* 키워드 트랙: 정리 노트만 중앙 배치 (출처 카드 제거).
+            A−/A+ 버튼으로 글자 크기 확대·축소 가능 (사용자 보고 2026-05-12). */}
         {card.type === "keyword" && revealed && card.backMd && (
           <AnswerBox
             label="정리 노트"
@@ -502,10 +504,17 @@ function AnswerBox({
           )}
         </div>
         {/* F1 — markdown 답안 폰트 메트릭 정렬 (tabular-nums + variant-numeric).
-            unicode(ⓑ·㉠) 폭 불일치 완화 + 숫자 lining 정합. */}
+            unicode(ⓑ·㉠) 폭 불일치 완화 + 숫자 lining 정합.
+            사용자 보고 2026-05-12 — zoomable 시 Markdown 자식 모든 fontSize 가
+            상속받도록 강제([&_*]:![font-size:inherit]). Markdown 컴포넌트의 자식
+            elements(h1·h2·p·li 등) 가 명시 px size 를 가져서 부모 inline fontSize
+            를 무시하던 문제 해결. */}
         <div
-          className="mt-3 [font-variant-numeric:tabular-nums] tabular-nums origin-top-left"
-          style={zoomable ? { fontSize: `${zoom}em` } : undefined}
+          className={
+            "mt-3 [font-variant-numeric:tabular-nums] tabular-nums origin-top-left" +
+            (zoomable ? " [&_*]:![font-size:inherit] [&_*]:![line-height:1.65]" : "")
+          }
+          style={zoomable ? { fontSize: `${Math.round(zoom * 14)}px` } : undefined}
         >
           {markdown ? (
             <Markdown serif>{markdown}</Markdown>
