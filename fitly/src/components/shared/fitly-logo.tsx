@@ -48,7 +48,7 @@ export function FitlyLogo({
             MARK_BOX[size]
           )}
         >
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="h-[55%] w-[55%]">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="h-[72%] w-[72%]">
             <g fill="hsl(var(--color-bg))">
               <rect x="22" y="28" width="56" height="7" rx="1" />
               <rect x="33" y="35" width="7" height="30" rx="1" />

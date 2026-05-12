@@ -1,8 +1,9 @@
 "use client";
 
-// Fitly 로그인/회원가입 — 신규 디자인 Intro 정합 (2026-05-12)
-// 좌: evergreen hero (브랜드 + OUR THESIS + 적합도 헤드라인 + 3 stats)
-// 우: cream 로그인 폼 (LOG IN eyebrow + 큰 제목 + 이메일/비밀번호 + 카카오)
+// Fitly 로그인/회원가입 — 신규 디자인 Intro 정합 (2026-05-12, 헌법 v3.5.1)
+// 모바일: hero(소개) 상단 → login 하단
+// 데스크톱: login 좌측 → hero 우측 (md:order-1/2 로 시각 순서 스왑, DOM 순서는 유지)
+// 펀치라인은 헌법 제4조 v3.5.1 개정본 사용 + 한글 줄바꿈은 제4조의3 정합.
 
 import { useState } from "react";
 import Link from "next/link";
@@ -20,8 +21,16 @@ type Props = {
 const STATS = [
   { num: "24", label: "년치 공식 기출" },
   { num: "17", label: "개 시도교육청" },
-  { num: "1차", label: "초등 임용시험" },
+  { num: "12,840", label: "명 누적 응시자" },
 ];
+
+// 종이그레인 — globals.css body 와 동일한 1% 노이즈 (로그인 섹션이 body bg 를
+// 덮으므로 동일 패턴을 명시 적용한다)
+const PAPER_GRAIN_STYLE: React.CSSProperties = {
+  backgroundImage:
+    "radial-gradient(circle at 1px 1px, hsl(var(--color-text) / 0.018) 1px, transparent 0)",
+  backgroundSize: "4px 4px",
+};
 
 export function FitlySignIn({ mode }: Props) {
   const router = useRouter();
@@ -75,7 +84,7 @@ export function FitlySignIn({ mode }: Props) {
   }
 
   const titleTop = mode === "login" ? "오늘의 한 걸음을" : "학습 여정을";
-  const titleBottom = mode === "login" ? "시작합니다." : "시작합니다.";
+  const titleBottom = "시작합니다.";
   const sub =
     mode === "login"
       ? "로그인하고 학습 플래너로 들어가세요."
@@ -87,10 +96,10 @@ export function FitlySignIn({ mode }: Props) {
       : { label: "이미 가입하셨나요?", href: "/login", text: "로그인" };
 
   return (
-    <main className="grid min-h-screen grid-cols-1 md:grid-cols-[1.05fr_1fr]">
-      {/* ─ HERO 좌측 (evergreen + 종이그레인은 globals.css body 그대로 비침) ─ */}
+    <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
+      {/* ─ HERO (소개) — 데스크톱 우측 / 모바일 상단 ─ */}
       <section
-        className="relative overflow-hidden bg-evergreen text-cream flex flex-col justify-between px-7 md:px-10 lg:px-[72px] py-10 md:py-16 gap-12 md:gap-24"
+        className="relative overflow-hidden bg-evergreen text-cream flex flex-col justify-between px-7 md:px-10 lg:px-[72px] py-10 md:py-16 gap-12 md:gap-24 md:order-2"
         aria-label="Fitly 소개"
       >
         {/* 점선 모눈 데코 7% (신규 디자인 hero::before) */}
@@ -106,40 +115,36 @@ export function FitlySignIn({ mode }: Props) {
 
         {/* 상단: 브랜드 + 시즌 */}
         <header className="relative flex items-center gap-3 animate-element animate-delay-100">
-          <FitlyLogo size="md" onAccentBg />
+          <FitlyLogo size="lg" onAccentBg />
           <span className="ml-auto hidden lg:inline-block text-[11.5px] font-semibold tracking-[0.18em] text-gold">
             2026 · 초등 임용 1차
           </span>
         </header>
 
-        {/* 중단: OUR THESIS + 헤드라인 + 설명 */}
+        {/* 중단: OUR THESIS + 헤드라인 + 설명 (제4조 v3.5.1 펀치라인) */}
         <div className="relative animate-element animate-delay-200 max-w-[460px]">
           <p className="text-[12px] font-bold tracking-[0.2em] text-gold mb-[18px]">
             OUR THESIS
           </p>
           <h1 className="font-sans font-bold leading-[1.18] tracking-[-0.025em] text-[clamp(34px,5.2vw,56px)] text-cream">
-            임용은 열심히 하는 게
+            합격은 시간이
             <br />
-            아니라, <em className="not-italic text-gold">맞게(Fit)</em> 하는 게임입니다.
+            아니라 <em className="not-italic text-gold">적합도</em>다.
           </h1>
           <p className="mt-[22px] text-[clamp(14px,1.05vw,15.5px)] leading-[1.7] text-cream/80">
-            기출 24년 · 합격선 17개 시도교육청 공식 자료로,
+            기출 24년 · 합격선 17개 시도 · 누적 응시자 12,840명의 데이터로,
             <br />
             지금 당신에게 부족한 한 점을 찾아드립니다.
           </p>
         </div>
 
-        {/* 하단: 3 stats with vertical dividers */}
+        {/* 하단: 3 stats — 구분선 제거 (헌법 v3.5.1 사용자 요청) */}
         <div
-          className="relative grid grid-cols-3 border-t border-cream/15 pt-[26px] animate-element animate-delay-300"
+          className="relative grid grid-cols-3 pt-[26px] animate-element animate-delay-300"
           role="list"
         >
-          {STATS.map((s, i) => (
-            <div
-              key={s.label}
-              role="listitem"
-              className={i > 0 ? "border-l border-cream/15 pl-6" : ""}
-            >
+          {STATS.map((s) => (
+            <div key={s.label} role="listitem">
               <p className="font-serif text-[clamp(28px,3.4vw,38px)] font-semibold leading-[1.1] text-cream num">
                 {s.num}
               </p>
@@ -151,8 +156,11 @@ export function FitlySignIn({ mode }: Props) {
         </div>
       </section>
 
-      {/* ─ LOGIN 우측 (cream) ─ */}
-      <section className="bg-background flex flex-col justify-center items-center px-7 md:px-10 lg:px-12 py-14 md:py-24">
+      {/* ─ LOGIN — 데스크톱 좌측 / 모바일 하단 (cream + paper grain) ─ */}
+      <section
+        className="bg-background flex flex-col justify-center items-center px-7 md:px-10 lg:px-12 py-14 md:py-24 md:order-1"
+        style={PAPER_GRAIN_STYLE}
+      >
         <div className="w-full max-w-[420px]">
           <p className="text-[11px] font-bold tracking-[0.22em] text-muted-foreground animate-element animate-delay-100">
             {mode === "login" ? "LOG IN" : "SIGN UP"}
@@ -182,7 +190,7 @@ export function FitlySignIn({ mode }: Props) {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-transparent outline-none placeholder:text-muted-foreground/60"
+                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none placeholder:text-muted-foreground/60"
                 />
               </span>
             </label>
@@ -202,7 +210,7 @@ export function FitlySignIn({ mode }: Props) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent outline-none pr-10 placeholder:text-muted-foreground/60"
+                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none pr-10 placeholder:text-muted-foreground/60"
                 />
                 <button
                   type="button"
