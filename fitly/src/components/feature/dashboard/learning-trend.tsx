@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { LazyMount } from "@/components/shared/lazy-mount";
 import type { TrendPoint } from "@/lib/dashboard/types";
 
 // 차트: 신규 디자인 정합 — 진척도(evergreen 라인) + 정답률(gold 면+라인)
@@ -84,9 +85,12 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
       </p>
 
       {/* H4 모바일 180px / md+ 240px (헌법 제24조의2)
-          viewport fit (lg+): flex-1 min-h-0 으로 잔여 vh 차지 */}
+          viewport fit (lg+): flex-1 min-h-0 으로 잔여 vh 차지.
+          Track 2.1 — Recharts ResponsiveContainer 는 mount 시 measure 트리거 비용
+          크므로 viewport 200px 진입까지 LazyMount. */}
       <div className="h-[180px] md:h-[240px] lg:h-auto lg:flex-1 lg:min-h-0">
         {hasData ? (
+          <LazyMount minHeight="180px" rootMargin="240px 0px" className="h-full">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={data}
@@ -174,6 +178,7 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
               />
             </ComposedChart>
           </ResponsiveContainer>
+          </LazyMount>
         ) : (
           <div className="grid h-full place-items-center text-center text-[12px] text-muted-foreground break-keep">
             학습을 시작하면 매일 진척도·정답률 추이가 그려집니다.

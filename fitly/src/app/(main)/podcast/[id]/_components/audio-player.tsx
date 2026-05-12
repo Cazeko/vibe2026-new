@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { Play, Pause, Volume2, Loader2 } from "lucide-react";
+import { usePodcastPlayer } from "@/components/shared/podcast-player-provider";
 
 // 헌법 v3.0 §13의3 4항 — 청취 진척 저장 (재개 가능).
-// 5초 throttle로 /api/podcast/progress 호출. 종료 시 completed=true.
-// v3.5.1 — E1/E3 로딩 상태 + G1 focus ring + H1 모바일 터치 hit box + S2 aria-live + Q1 44×44 (헌법 제16조의2).
+// Track 1.2 (v3.5.4) — 전역 PlayerProvider 의 audio element 를 공유.
+// 페이지 진입 시 setEpisode 로 등록 → 라우트 이동에도 재생 지속.
+// 본 컴포넌트는 페이지 내 큰 컨트롤 (재생 버튼 + seek bar) 만 제공.
 
 type Props = {
   episodeId: string;
+  episodeTitle: string;
   audioUrl: string;
   durationSec: number | null;
   initialCurrentSec: number;
@@ -24,127 +27,72 @@ function fmtTime(s: number): string {
 
 export function AudioPlayer({
   episodeId,
+  episodeTitle,
   audioUrl,
   durationSec,
   initialCurrentSec,
   initialCompleted,
 }: Props) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const [current, setCurrent] = useState(initialCurrentSec);
-  const [duration, setDuration] = useState(durationSec ?? 0);
-  const [completed, setCompleted] = useState(initialCompleted);
-  // E1/E3 — 오디오 로딩 / 버퍼링 상태 노출
-  const [loading, setLoading] = useState(true);
-  const lastSavedRef = useRef(initialCurrentSec);
-  const lastSaveTsRef = useRef(0);
+  const {
+    episode,
+    playing,
+    loading,
+    currentSec,
+    durationSec: ctxDuration,
+    completed,
+    playError,
+    setEpisode,
+    togglePlay,
+    seek,
+  } = usePodcastPlayer();
 
-  // 시작 시 재개 위치로 seek (1회)
+  // 페이지 진입 시 컨텍스트에 등록. 같은 id 이면 Provider 가 no-op.
   useEffect(() => {
-    const el = audioRef.current;
-    if (!el || initialCurrentSec <= 0) return;
-    const onLoaded = () => {
-      // duration 까지 도달했으면 처음부터
-      if (initialCurrentSec < (el.duration || Infinity) - 2) {
-        el.currentTime = initialCurrentSec;
-      }
-    };
-    el.addEventListener("loadedmetadata", onLoaded, { once: true });
-    return () => el.removeEventListener("loadedmetadata", onLoaded);
-  }, [initialCurrentSec]);
+    setEpisode({
+      id: episodeId,
+      title: episodeTitle,
+      audioUrl,
+      durationSec,
+      initialCurrentSec,
+      initialCompleted,
+    });
+  }, [
+    episodeId,
+    episodeTitle,
+    audioUrl,
+    durationSec,
+    initialCurrentSec,
+    initialCompleted,
+    setEpisode,
+  ]);
 
-  function saveProgress(sec: number, isCompleted: boolean) {
-    fetch("/api/podcast/progress", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        episodeId,
-        currentSec: Math.max(0, Math.floor(sec)),
-        completed: isCompleted,
-      }),
-    }).catch(() => undefined);
-  }
+  // 활성 에피소드와 본 페이지 id 가 다르면 (이전 에피소드 재생 중에 새 페이지 진입
+  // 직후 한 프레임 동안) 안전을 위해 0/0 으로 표시. setEpisode effect 가 즉시
+  // 전환하므로 통상 1프레임.
+  const isActive = episode?.id === episodeId;
+  const cur = isActive ? currentSec : initialCurrentSec;
+  const dur = isActive ? ctxDuration : (durationSec ?? 0);
+  const isCompleted = isActive ? completed : initialCompleted;
+  const isLoading = isActive ? loading : true;
+  const isPlaying = isActive ? playing : false;
 
-  function onTimeUpdate() {
-    const el = audioRef.current;
-    if (!el) return;
-    const now = Date.now();
-    setCurrent(el.currentTime);
-    if (!duration && el.duration) setDuration(el.duration);
-    // 5초 throttle 또는 1초 이상 jump
-    const dt = now - lastSaveTsRef.current;
-    const ds = Math.abs(el.currentTime - lastSavedRef.current);
-    if (dt > 5000 || ds > 8) {
-      saveProgress(el.currentTime, false);
-      lastSaveTsRef.current = now;
-      lastSavedRef.current = el.currentTime;
-    }
-  }
-
-  function onEnded() {
-    setPlaying(false);
-    setCompleted(true);
-    saveProgress(duration || current, true);
-  }
-
-  function togglePlay() {
-    const el = audioRef.current;
-    if (!el) return;
-    if (el.paused) {
-      el.play().catch(() => undefined);
-      setPlaying(true);
-    } else {
-      el.pause();
-      setPlaying(false);
-      saveProgress(el.currentTime, false);
-    }
-  }
-
-  function onSeek(e: React.ChangeEvent<HTMLInputElement>) {
-    const el = audioRef.current;
-    if (!el) return;
-    const sec = Number(e.target.value);
-    el.currentTime = sec;
-    setCurrent(sec);
-    saveProgress(sec, false);
-  }
-
-  const progressPct =
-    duration > 0 ? Math.min(100, (current / duration) * 100) : 0;
-
-  const playLabel = playing ? "일시정지" : "재생";
+  const progressPct = dur > 0 ? Math.min(100, (cur / dur) * 100) : 0;
+  const playLabel = isPlaying ? "일시정지" : "재생";
 
   return (
     <div className="rounded-lg border border-rule bg-card p-5 space-y-3">
-      <audio
-        ref={audioRef}
-        src={audioUrl}
-        preload="metadata"
-        onTimeUpdate={onTimeUpdate}
-        onEnded={onEnded}
-        onLoadStart={() => setLoading(true)}
-        onWaiting={() => setLoading(true)}
-        onCanPlay={() => setLoading(false)}
-        onPlaying={() => setLoading(false)}
-        onError={() => setLoading(false)}
-        onLoadedMetadata={() => {
-          const el = audioRef.current;
-          if (el?.duration) setDuration(el.duration);
-        }}
-      />
       <div className="flex items-center gap-3">
-        {/* G1 focus-visible outline (헌법 제16조의2 활성 메뉴 정합) + Q1 44×44 보장 (h-11 w-11) */}
         <button
           type="button"
           onClick={togglePlay}
           aria-label={playLabel}
-          aria-pressed={playing}
-          disabled={loading}
+          aria-pressed={isPlaying}
+          disabled={isLoading || !isActive}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-evergreen text-primary-foreground transition-colors hover:bg-evergreen-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen focus-visible:ring-offset-2 disabled:opacity-70"
         >
-          {loading ? (
+          {isLoading ? (
             <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-          ) : playing ? (
+          ) : isPlaying ? (
             <Pause className="h-5 w-5" aria-hidden />
           ) : (
             <Play className="h-5 w-5 ml-0.5" aria-hidden />
@@ -152,43 +100,44 @@ export function AudioPlayer({
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 text-[11.5px] text-muted-foreground tabular-nums">
-            <span>{fmtTime(current)}</span>
+            <span>{fmtTime(cur)}</span>
             <span className="opacity-50">/</span>
-            <span>{fmtTime(duration)}</span>
-            {completed && (
+            <span>{fmtTime(dur)}</span>
+            {isCompleted && (
               <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-evergreen/10 px-2 py-0.5 text-[10.5px] font-medium text-evergreen">
                 완청
               </span>
             )}
-            {loading && (
+            {isLoading && (
               <span className="ml-1 text-[10.5px] text-muted-foreground/80">
                 준비 중…
               </span>
             )}
           </div>
-          {/* H1 모바일 터치 hit box 확대 — py-2.5로 최소 ~30px 패딩 영역 확보. thumb 크게.
-              accent 토큰 사용으로 dark mode 자동 정합 (R1) */}
           <div className="mt-1 py-2.5">
+            {/* 리뷰 M5 fix — progressPct 를 CSS 변수로 분리 (audio-range-bar). */}
             <input
               type="range"
               min={0}
-              max={Math.max(duration, 1)}
+              max={Math.max(dur, 1)}
               step={1}
-              value={current}
-              onChange={onSeek}
+              value={cur}
+              onChange={(e) => seek(Number(e.target.value))}
               aria-label="재생 위치"
               aria-valuemin={0}
-              aria-valuemax={Math.max(duration, 1)}
-              aria-valuenow={Math.floor(current)}
-              aria-valuetext={`${fmtTime(current)} / ${fmtTime(duration)}`}
-              disabled={loading}
-              className="audio-range w-full accent-evergreen cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen focus-visible:ring-offset-2 rounded-full"
-              style={{
-                background: `linear-gradient(to right, hsl(var(--color-accent)) 0%, hsl(var(--color-accent)) ${progressPct}%, hsl(var(--color-rule)) ${progressPct}%, hsl(var(--color-rule)) 100%)`,
-                height: "6px",
-                borderRadius: "999px",
-                appearance: "none",
-              }}
+              aria-valuemax={Math.max(dur, 1)}
+              aria-valuenow={Math.floor(cur)}
+              aria-valuetext={`${fmtTime(cur)} / ${fmtTime(dur)}`}
+              disabled={isLoading || !isActive}
+              className="audio-range audio-range-bar w-full accent-evergreen cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen focus-visible:ring-offset-2 rounded-full"
+              style={
+                {
+                  "--progress": `${progressPct}%`,
+                  height: "6px",
+                  borderRadius: "999px",
+                  appearance: "none",
+                } as React.CSSProperties
+              }
             />
           </div>
         </div>
@@ -197,15 +146,26 @@ export function AudioPlayer({
           aria-hidden
         />
       </div>
-      {/* S2 재생 상태 변경 SR 공지 (aria-live polite) */}
       <p className="sr-only" aria-live="polite">
-        {loading
+        {isLoading
           ? "오디오 준비 중"
-          : playing
+          : isPlaying
             ? "재생 중"
-            : completed
+            : isCompleted
               ? "완청 — 일시정지"
               : "일시정지"}
+      </p>
+      {/* 리뷰 M2 fix — play() rejection 시 사용자 인지 가능한 메시지 노출. */}
+      {playError && isActive && (
+        <p
+          role="alert"
+          className="text-[11px] text-warning-text leading-relaxed break-keep"
+        >
+          재생을 시작할 수 없습니다. 재생 버튼을 한 번 더 눌러 주세요.
+        </p>
+      )}
+      <p className="text-[10.5px] text-muted-foreground/80 leading-relaxed break-keep">
+        하단 미니플레이어로 다른 페이지를 보는 동안에도 재생이 유지됩니다.
       </p>
     </div>
   );

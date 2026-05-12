@@ -18,9 +18,10 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   good: "양호",
 };
 
+// 리뷰 H6 fix — warn 배지의 text-warning(#c9a55b on cream ≈2.2:1) → text-warning-text(≈5.1:1).
 const SEVERITY_BADGE: Record<Severity, string> = {
   weak: "bg-error/10 text-error",
-  warn: "bg-warning/10 text-warning",
+  warn: "bg-warning/10 text-warning-text",
   ok: "bg-info/10 text-info",
   good: "bg-evergreen/10 text-evergreen",
 };

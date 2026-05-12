@@ -270,7 +270,7 @@ function RegionCard({
                   ))}
                 </ul>
                 {!anyVerified && (
-                  <p className="mt-2 text-[10px] text-warning leading-relaxed">
+                  <p className="mt-2 text-[10px] text-warning-text leading-relaxed">
                     ※ 운영자 검수 대기 — 자동 추출 데이터.
                   </p>
                 )}

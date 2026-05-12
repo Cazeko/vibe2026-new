@@ -126,8 +126,15 @@ function YearCard({ year, sessions }: { year: number; sessions: PaperRow[] }) {
   // 카드 클릭가능성 강화 — 보더 강조 + shadow 만으로 cue. evergreen 은
   // DESIGN.md §4.3 5곳 액센트(Progress·CTA·델타·활성 메뉴·AI 추천)에 한해
   // 사용해야 하므로 단순 hover 상태에는 적용하지 아니한다.
+  // Track 3 (v3.5.4 — DESIGN §4.4.1 단서) — 학년도 mod 7 hue 좌측 보더로
+  // 연도 간 시각 분류. 채도 ≤30% 토큰으로 cream bg 와 정합.
+  const subjectIdx = (year % 7) + 1;
+  const subjectVar = `--subject-${subjectIdx}`;
   return (
-    <Card className="border-rule transition-all hover:border-rule-strong hover:shadow-sm overflow-hidden">
+    <Card
+      className="border-rule transition-all hover:border-rule-strong hover:shadow-sm overflow-hidden border-l-[3px]"
+      style={{ borderLeftColor: `hsl(var(${subjectVar}))` }}
+    >
       <CardContent className="p-5 flex flex-col gap-3 min-w-0">
         <div className="flex items-baseline justify-between min-w-0">
           <span className="font-serif text-2xl font-medium tracking-tight tabular-nums">
@@ -181,7 +188,7 @@ function YearCard({ year, sessions }: { year: number; sessions: PaperRow[] }) {
           ) : (
             // C-10 (외부 리뷰 2026-05-12) — 검증 상태 안내 툴팁 추가.
             <span
-              className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning"
+              className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning-text"
               title="아직 운영자 검수가 완료되지 않은 문항이 포함되어 있습니다. 본문/답안은 정확하지만 일부 메타데이터는 검토 대기 중입니다."
             >
               <AlertCircle className="h-2.5 w-2.5" aria-hidden />

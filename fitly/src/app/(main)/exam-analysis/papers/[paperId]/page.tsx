@@ -188,7 +188,7 @@ function ItemCard({
                 검수 중
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning shrink-0">
+              <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning-text shrink-0">
                 <AlertCircle className="h-2.5 w-2.5" aria-hidden />
                 답안 검증 필요
               </span>
@@ -259,7 +259,7 @@ function ItemCard({
                     </Card>
                   )}
                   {!item.verifiedAnswer && !suppressIndividualBadge && (
-                    <p className="text-[10.5px] text-warning leading-relaxed">
+                    <p className="text-[10.5px] text-warning-text leading-relaxed">
                       ※ 운영자 검수 전 — AI 자동 생성 답안입니다. 학습 참고용으로 활용하세요.
                     </p>
                   )}

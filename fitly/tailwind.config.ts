@@ -76,9 +76,23 @@ const config: Config = {
           soft: "hsl(var(--color-rule-soft))",
           strong: "hsl(var(--color-rule-strong))",
         },
-        warning: "hsl(var(--color-warning))",
+        warning: {
+          DEFAULT: "hsl(var(--color-warning))",
+          // Track 2.2 (v3.5.4 WCAG) — text-warning-text 으로 본문 텍스트 ≥4.5:1.
+          text: "hsl(var(--color-warning-text))",
+        },
         error: "hsl(var(--color-error))",
         info: "hsl(var(--color-info))",
+
+        // Track 3 (v3.5.4 — DESIGN §4.4.1) — 영역 분류용 좌측 보더 hue.
+        // 사용 예: `border-l-[3px] border-l-subject-1`. 8과목 이상은 mod 7 순환.
+        "subject-1": "hsl(var(--subject-1))",
+        "subject-2": "hsl(var(--subject-2))",
+        "subject-3": "hsl(var(--subject-3))",
+        "subject-4": "hsl(var(--subject-4))",
+        "subject-5": "hsl(var(--subject-5))",
+        "subject-6": "hsl(var(--subject-6))",
+        "subject-7": "hsl(var(--subject-7))",
 
         // ── 헌법 v1.9 데시보드 캔버스/사이드바 토큰 (호환 유지) ──
         "app-bg": "hsl(var(--app-bg))",
