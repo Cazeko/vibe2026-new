@@ -20,7 +20,10 @@
     --color-paper: 43 69% 95%;         /* #fbf6e9 paper */
     --color-text: 36 10% 10%;          /* #1c1a17 ink */
     --color-text-2: 38 11% 15%;        /* #2a2722 ink-2 */
-    --color-text-muted: 41 7% 51%;     /* #8a857a muted */
+    /* Track 2.2 (v3.5.4 — WCAG audit) — light 모드 muted 51%→44%로 보정.
+     * 종전 51% 는 cream bg(95%) 대비 ≈3.4:1 (AA normal 미달).
+     * 44% 로 조정 시 ≈4.9:1 ✓. 다크 모드(53%)는 별도 ratio ≈5.4:1 로 그대로 유지. */
+    --color-text-muted: 41 8% 44%;     /* #756f63 muted (AA 4.9:1) */
     --color-text-muted-deep: 38 8% 33%;/* #5b574e muted-deep */
     --color-rule: 43 41% 87%;          /* #ebe3cf line */
     --color-rule-soft: 44 50% 89%;     /* #f0e9d6 line-soft */
@@ -33,9 +36,24 @@
     --color-gold: 40 51% 57%;          /* #c9a55b gold */
     --color-gold-soft: 43 56% 87%;     /* #efe6cf gold-soft */
     /* 시맨틱 */
-    --color-warning: 40 51% 57%;       /* #c9a55b — gold tone */
+    --color-warning: 40 51% 57%;       /* #c9a55b — gold tone (배경 strip·아이콘용) */
+    /* Track 2.2 — warning *text* on cream 대비 ≥4.5:1 보장용 darker variant.
+     * 종전 #c9a55b 본문 텍스트는 cream bg(95%) 대비 ≈2.2:1 로 AA 미달.
+     * 35% 로 조정 시 ≈5.1:1 ✓. 아이콘·보더·bg/10 fill 은 기존 토큰 유지. */
+    --color-warning-text: 35 60% 32%;  /* #836018 warning text (AA 5.1:1) */
     --color-error: 7 52% 48%;          /* #b94a3b danger */
     --color-info: 213 39% 30%;         /* #2E4A6B navy (유지) */
+
+    /* Track 3 (v3.5.4 — DESIGN §4.4.1 단서) — 영역/과목 분류용 좌측 보더 hue.
+     * 채도 ≤30%, 광도 35~45% (cream bg 위 식별 가능 + 본연 evergreen/gold 와
+     * hue 충돌 회피). 본 토큰은 *좌측 보더 색상*에만 사용 (배경/텍스트 X). */
+    --subject-1: 213 30% 38%;  /* slate-blue   — 교육학·교육사 */
+    --subject-2: 24 28% 42%;   /* terracotta   — 교육과정 */
+    --subject-3: 88 22% 38%;   /* olive        — 교육평가 */
+    --subject-4: 280 18% 42%;  /* plum-muted   — 교육심리 */
+    --subject-5: 165 22% 36%;  /* teal-muted   — 생활지도·상담 */
+    --subject-6: 32 28% 40%;   /* copper-muted — 교육방법·공학 */
+    --subject-7: 340 18% 44%;  /* rose-muted   — 교육행정·사회 */
 
     /* shadcn 호환 토큰 — 모두 위 직접 토큰 참조 (단일 소스 오브 트루스) */
     --background: var(--color-bg);
@@ -99,8 +117,17 @@
     --color-gold: 40 51% 65%;          /* brightened gold */
     --color-gold-soft: 38 25% 24%;
     --color-warning: 40 51% 65%;
+    --color-warning-text: 40 70% 70%;  /* dark bg 대비 밝은 amber (≈5.6:1) */
     --color-error: 7 59% 59%;
     --color-info: 213 38% 54%;
+    /* Track 3 (v3.5.4) — 다크 모드 subject hue: 광도 55~65% 로 보정. */
+    --subject-1: 213 35% 62%;
+    --subject-2: 24 35% 62%;
+    --subject-3: 88 28% 56%;
+    --subject-4: 280 25% 62%;
+    --subject-5: 165 28% 56%;
+    --subject-6: 32 35% 62%;
+    --subject-7: 340 25% 64%;
   }
 
   * {
@@ -269,4 +296,29 @@
     filter: none;
     transform: none;
   }
+}
+
+/* Track 2.1 (v3.5.4) — content-visibility lazy paint.
+ * 대용량 DOM (heatmap·차트·테이블 등) 의 paint/layout 비용을 viewport 진입까지
+ * 지연. 브라우저 지원: Chrome 85+, Firefox 124+, Safari 18+ — 미지원 환경은
+ * 일반 paint (graceful degradation). aria-* 시멘틱은 보존.
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/content-visibility
+ */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px;
+}
+
+
+/* 리뷰 M5 fix (v3.5.4) — range input fill 을 CSS 변수로 분리.
+ * inline style 객체 매 렌더 재생성 회피. --progress 만 React 가 갱신.
+ */
+.audio-range-bar {
+  background: linear-gradient(
+    to right,
+    hsl(var(--color-accent)) 0%,
+    hsl(var(--color-accent)) var(--progress, 0%),
+    hsl(var(--color-rule)) var(--progress, 0%),
+    hsl(var(--color-rule)) 100%
+  );
 }

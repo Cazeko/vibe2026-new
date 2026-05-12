@@ -116,6 +116,7 @@ export default async function PodcastEpisodePage({
         {ep.audioUrl ? (
           <AudioPlayer
             episodeId={ep.id}
+            episodeTitle={ep.theme}
             audioUrl={ep.audioUrl}
             durationSec={ep.durationSec}
             initialCurrentSec={prog?.currentSec ?? 0}

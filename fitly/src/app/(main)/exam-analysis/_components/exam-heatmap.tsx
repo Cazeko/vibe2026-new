@@ -47,7 +47,8 @@ export function ExamHeatmap({
   const palette = TONE_CLASS[tone];
 
   return (
-    <div className="space-y-2">
+    // Track 2.1 — content-visibility: auto 로 viewport 밖 셀 paint 스킵.
+    <div className="space-y-2 cv-auto">
       {/* C-11 (외부 리뷰 2026-05-12) — 범례를 표 상단으로 이동. 셀의 색이
           무엇을 의미하는지 표를 보기 전에 알 수 있도록 시선 흐름 정합. */}
       <div className="flex items-center justify-between gap-3 text-[10px] text-muted-foreground flex-wrap">

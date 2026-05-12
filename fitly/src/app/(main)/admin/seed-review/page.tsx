@@ -115,7 +115,7 @@ function StatCard({
   })();
   const numCls =
     tone === "warning"
-      ? "text-warning"
+      ? "text-warning-text"
       : tone === "evergreen"
         ? "text-evergreen"
         : "text-foreground";

@@ -67,7 +67,8 @@ export function ActivityHeatmap({ cells }: { cells: HeatmapCell[] }) {
   }
 
   return (
-    <div className="space-y-2">
+    // Track 2.1 — content-visibility: auto 로 viewport 밖에서는 paint/layout 스킵.
+    <div className="space-y-2 cv-auto">
       <div className="relative pt-4">
         <div className="flex items-end gap-[2px] min-w-max">
           {weeks.map((week, wi) => {

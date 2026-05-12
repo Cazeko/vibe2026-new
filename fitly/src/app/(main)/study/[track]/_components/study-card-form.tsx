@@ -18,6 +18,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/shared/markdown";
+import { SplitView } from "@/components/shared/split-view";
 import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 import type { CardType } from "@/types";
@@ -74,8 +75,6 @@ const GRADES: {
   },
 ];
 
-// P0-06 (외부 평가 2026-05-12) — 답안 LocalStorage 자동 저장 키 prefix.
-// 카드 id 별로 별도 키. 채점 완료(handleGrade) 시 삭제.
 const DRAFT_KEY_PREFIX = "fitly:draft:";
 
 export function StudyCardForm({ card }: { card: CardData }) {
@@ -87,21 +86,11 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const [sessionCount, setSessionCount] = useState(0);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
-  // I1 — 답안 보기 후 비교 영역으로 스크롤하기 위한 ref.
   const answerCompareRef = useRef<HTMLDivElement | null>(null);
-  // 외부 리뷰 H2 fix — draft 복원 effect 완료 전까지 setItem 보호 플래그.
-  // 마운트 직후 [answer] effect가 빈 값으로 removeItem/setItem 호출하는 race 방지.
   const draftRestoredRef = useRef(false);
-  // 외부 리뷰 M1 fix — 첫 mount scrollTo 스킵. 페이지 anchor 진입·뒤로가기
-  // 복원 시 사용자 의도 스크롤을 강제 리셋하지 않음.
   const firstMountRef = useRef(true);
 
   const imageUrl = getExamPageUrl(card.frontImagePath);
-  // 본문은 PDF unpdf 추출본이라 줄바꿈·공백이 raw하게 들어 있다. whitespace-pre-wrap
-  // 으로 표시하되 너무 길면(800자 이상) 기본 접힘 + "본문 펼쳐보기" 토글.
-  // C-8 (외부 리뷰 2026-05-12) — raw 줄바꿈·공백 정제. 3+ 빈 줄 → 2, 다중 공백
-  // → 1, 라인 trim. unpdf 폼피드(\f)·캐리지(\r) 도 제거. 본문 의미는 보존하되
-  // 시각 가독성 보강.
   const cleanedFrontText = card.frontText
     .replace(/[\f\r]/g, "")
     .replace(/\n{3,}/g, "\n\n")
@@ -129,7 +118,6 @@ export function StudyCardForm({ card }: { card: CardData }) {
     const isCorrect = grade !== "again";
     recordCard(isCorrect);
     setSessionCount((c) => c + 1);
-    // P0-06 — 채점 완료 시 draft 삭제. 다음 카드 진입 시 빈 textarea 시작.
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(draftKey);
     }
@@ -146,7 +134,6 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const showAnswerInput =
     !revealed && (card.type === "quiz" || card.type === "mistake");
 
-  // I1 — 답안 공개 시 비교 영역으로 부드럽게 스크롤.
   useEffect(() => {
     if (revealed && answerCompareRef.current) {
       answerCompareRef.current.scrollIntoView({
@@ -156,9 +143,6 @@ export function StudyCardForm({ card }: { card: CardData }) {
     }
   }, [revealed]);
 
-  // P0-14 (외부 평가 2026-05-12) — 다음 문제로 넘어갈 때(card.id 변경)
-  // 페이지 상단으로 자동 스크롤. 긴 본문 학습 후 다음 카드도 상단부터 읽도록.
-  // 외부 리뷰 M1 fix — 첫 mount 는 사용자 진입 스크롤 위치 존중, 두번째 변경부터.
   useEffect(() => {
     if (firstMountRef.current) {
       firstMountRef.current = false;
@@ -168,10 +152,6 @@ export function StudyCardForm({ card }: { card: CardData }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [card.id]);
 
-  // P0-06 (외부 평가 2026-05-12) — 마운트 시 LocalStorage draft 복원.
-  // 키워드 트랙은 답안 입력 없으므로 제외. card.id 변경 시 새 카드의 draft 로드.
-  // 외부 리뷰 H2 fix — 복원 완료 플래그를 세팅하여 [answer] effect가
-  // 복원 직전 빈 값으로 setItem 하는 race 회피.
   useEffect(() => {
     draftRestoredRef.current = false;
     if (!supportsDraft) {
@@ -191,8 +171,6 @@ export function StudyCardForm({ card }: { card: CardData }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [card.id]);
 
-  // P0-06 — 답안 변경 시 1초 debounce LocalStorage 저장. 빈 값이면 키 삭제.
-  // 외부 리뷰 H2 fix — 복원 완료 전 (mount 직후) 은 skip.
   useEffect(() => {
     if (!supportsDraft) return;
     if (!draftRestoredRef.current) return;
@@ -210,7 +188,6 @@ export function StudyCardForm({ card }: { card: CardData }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answer]);
 
-  // S1 — 키보드 단축키 1/2/3/4 자가 채점 (revealed 상태에서만, textarea/input 포커스 제외).
   useEffect(() => {
     if (!revealed) return;
     function onKey(e: KeyboardEvent) {
@@ -235,12 +212,155 @@ export function StudyCardForm({ card }: { card: CardData }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealed, pending]);
 
-  // C1 — sessionCount 진행바 100% clamp 명확화 (12+ 카드 시 동일 폭 유지).
   const sessionProgressPct = Math.min(100, sessionCount * 8);
+
+  // Track 1.1 (v3.5.4) — 본문 카드 (quiz/mistake 용).
+  const stemCard = (
+    <Card className="border-rule">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+            출처{" "}
+            <span className="ml-2 normal-case tracking-normal text-foreground/85 font-sans">
+              {card.paperLabel ?? "—"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px]">
+            {card.itemFormat && <Tag>{card.itemFormat}</Tag>}
+            {card.itemPoints != null && (
+              <Tag>
+                <span className="tabular-nums">{card.itemPoints}</span>점
+              </Tag>
+            )}
+          </div>
+        </div>
+
+        {imageUrl && <PdfImage src={imageUrl} />}
+
+        {card.frontText && (
+          <div className="mt-5">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+                본문 텍스트{imageUrl && " (검색·낭독 보조)"}
+              </span>
+              {isLongStem && (
+                <button
+                  type="button"
+                  onClick={() => setStemExpanded((v) => !v)}
+                  className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {stemExpanded ? (
+                    <>
+                      <EyeOff className="h-3 w-3" aria-hidden />
+                      접기
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-3 w-3" aria-hidden />
+                      펼치기
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+            <div
+              className={`border-l-4 border-rule pl-4 pr-1 py-1 ${
+                isLongStem && !stemExpanded
+                  ? "max-h-[180px] overflow-hidden relative"
+                  : ""
+              }`}
+            >
+              <p className="font-serif text-[14px] leading-[1.7] whitespace-pre-wrap text-foreground/85">
+                {cleanedFrontText}
+              </p>
+              {isLongStem && !stemExpanded && (
+                <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-card via-card/90 to-transparent pointer-events-none" />
+              )}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // 답안 입력 + 비교 + 경고 (quiz/mistake).
+  // Track 1.1 — SplitView 우측에서는 단일 컬럼이 자연스러우므로 grid-cols 제거.
+  const answerArea = (
+    <div className="space-y-5">
+      {showAnswerInput && (
+        <Card className="border-rule">
+          <CardContent className="p-6">
+            <div className="flex items-baseline justify-between gap-2">
+              <label
+                htmlFor="answer-input"
+                className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground cursor-pointer"
+              >
+                내 답안
+              </label>
+              <span
+                className="inline-flex items-center gap-2 text-[10.5px] text-muted-foreground tabular-nums"
+                aria-live="polite"
+              >
+                {savedAt ? (
+                  <span className="inline-flex items-center gap-1 text-evergreen/80">
+                    <CheckCircle2 className="h-3 w-3" aria-hidden /> 자동 저장됨
+                  </span>
+                ) : answer ? (
+                  <span className="opacity-70">자동 저장 중…</span>
+                ) : null}
+                <span>{answer.length}자</span>
+              </span>
+            </div>
+            <textarea
+              id="answer-input"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              rows={9}
+              className="mt-2 w-full rounded-md border border-rule-strong bg-background px-3.5 py-3 text-[13.5px] leading-[1.7] resize-y focus:border-evergreen focus:outline-none focus:ring-2 focus:ring-evergreen/40 transition-colors"
+              placeholder={"답안을 작성해 주세요.\n비워두고 채점도 가능합니다."}
+            />
+            <div className="mt-4 flex justify-end">
+              <Button onClick={handleReveal} disabled={pending}>
+                {pending ? "처리 중…" : "채점하기 — 답안 보기"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {revealed && card.backMd && (
+        <div ref={answerCompareRef} className="scroll-mt-4 space-y-4">
+          {answer.trim().length > 0 && (
+            <AnswerBox label="내 답안" tone="muted" plainText={answer} />
+          )}
+          <AnswerBox
+            label="AI 모범답안"
+            tone="evergreen"
+            markdown={card.backMd}
+            verified={card.verifiedAnswer}
+          />
+        </div>
+      )}
+
+      {revealed && !card.backMd && (
+        <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
+          <CardContent className="p-6 flex gap-3">
+            <AlertCircle
+              className="h-5 w-5 text-warning shrink-0 mt-0.5"
+              aria-hidden
+            />
+            <p className="text-[12.5px] text-foreground/80 leading-relaxed">
+              본 카드의 답안·해설이 아직 시드되지 않았습니다. 운영자 시드 후 자동
+              표시됩니다.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-5">
-      {/* 세션 진행 — 학습한 카드 수를 시각적으로 누적 표시. S1 aria-live 정합. */}
       {sessionCount > 0 && (
         <div
           className="flex items-center gap-3 text-[11px] text-muted-foreground"
@@ -266,210 +386,58 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </div>
       )}
 
-      {/* 사용자 보고 2026-05-12 — 키워드 트랙은 답안 입력 + 본문 시험지 출처가
-          무의미하므로(개념 정리 노트가 핵심) 출처 카드 숨기고 정리 노트만 중앙
-          배치. quiz/mistake 는 본문 카드 + 답안 입력 + 비교 흐름 유지. */}
-      <div
-        className={
-          card.type === "keyword"
-            ? "max-w-3xl mx-auto"
-            : ""
-        }
-      >
-        {/* 출처 메타 + 본문 — 키워드 트랙에서는 숨김 */}
-        {card.type !== "keyword" && (
-        <Card className="border-rule">
-          <CardContent className="p-6">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              출처{" "}
-              <span className="ml-2 normal-case tracking-normal text-foreground/85 font-sans">
-                {card.paperLabel ?? "—"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-[11px]">
-              {card.itemFormat && <Tag>{card.itemFormat}</Tag>}
-              {card.itemPoints != null && (
-                <Tag>
-                  <span className="tabular-nums">{card.itemPoints}</span>점
-                </Tag>
-              )}
-            </div>
-          </div>
-
-          {/* E-2 (외부 리뷰 2026-05-12, 헌법 v3.5.3 §16 단서 — 인터랙션 패턴 보완) —
-              PDF 이미지 인라인 zoom 컨트롤러 + 새 탭 전체보기 병행.
-              transform scale + overflow-auto 로 패닝 가능. lazy load 유지.
-              헌법 §16 v3.5.3 단서 정합으로 "기존 기능 다듬기" 분류. */}
-          {imageUrl && (
-            <PdfImage src={imageUrl} />
-          )}
-
-          {/* 텍스트 본문 — 길면 접힘. unpdf 추출본은 raw text라 검색·낭독 보조 목적. */}
-          {card.frontText && (
-            <div className="mt-5">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
-                  본문 텍스트{imageUrl && " (검색·낭독 보조)"}
-                </span>
-                {isLongStem && (
-                  <button
-                    type="button"
-                    onClick={() => setStemExpanded((v) => !v)}
-                    className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {stemExpanded ? (
-                      <>
-                        <EyeOff className="h-3 w-3" aria-hidden />
-                        접기
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-3 w-3" aria-hidden />
-                        펼치기
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-              <div
-                className={`border-l-4 border-rule pl-4 pr-1 py-1 ${
-                  isLongStem && !stemExpanded
-                    ? "max-h-[180px] overflow-hidden relative"
-                    : ""
-                }`}
-              >
-                <p className="font-serif text-[14px] leading-[1.7] whitespace-pre-wrap text-foreground/85">
-                  {cleanedFrontText}
-                </p>
-                {/* A1 — fade height 50px 이상으로 확장, 텍스트 겹침 방지. */}
-                {isLongStem && !stemExpanded && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-card via-card/90 to-transparent pointer-events-none" />
-                )}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-        )}
-
-        {/* 키워드 트랙: 정리 노트만 중앙 배치 (출처 카드 제거).
-            A−/A+ 버튼으로 글자 크기 확대·축소 가능 (사용자 보고 2026-05-12). */}
-        {card.type === "keyword" && revealed && card.backMd && (
-          <AnswerBox
-            label="정리 노트"
-            tone="evergreen"
-            markdown={card.backMd}
-            verified={card.verifiedAnswer}
-            zoomable
-          />
-        )}
-        {card.type === "keyword" && revealed && !card.backMd && (
-          <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
-            <CardContent className="p-6 flex gap-3">
-              <AlertCircle
-                className="h-5 w-5 text-warning shrink-0 mt-0.5"
-                aria-hidden
-              />
-              <p className="text-[12.5px] text-foreground/80 leading-relaxed">
-                본 카드의 정리 노트가 아직 시드되지 않았습니다.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* 답안 입력 (풀이/오답 트랙만) — J2 label htmlFor 연결 OK, J1 focus ring 강화. */}
-      {showAnswerInput && (
-        <Card className="border-rule">
-          <CardContent className="p-6">
-            <div className="flex items-baseline justify-between gap-2">
-              <label
-                htmlFor="answer-input"
-                className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground cursor-pointer"
-              >
-                내 답안
-              </label>
-              {/* P0-06 (외부 평가 2026-05-12) — autosave 피드백 + 글자 수 카운터.
-                  brave 뒤로가기/재진입 시 draft 복원되므로 사용자 안심 시그널. */}
-              <span
-                className="inline-flex items-center gap-2 text-[10.5px] text-muted-foreground tabular-nums"
-                aria-live="polite"
-              >
-                {savedAt ? (
-                  <span className="inline-flex items-center gap-1 text-evergreen/80">
-                    <CheckCircle2 className="h-3 w-3" aria-hidden /> 자동 저장됨
-                  </span>
-                ) : answer ? (
-                  <span className="opacity-70">자동 저장 중…</span>
-                ) : null}
-                <span>{answer.length}자</span>
-              </span>
-            </div>
-            <textarea
-              id="answer-input"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={9}
-              // J1 focus ring 강화 + K1 placeholder 50자 이내 단축 + 의미 단위 \n.
-              className="mt-2 w-full rounded-md border border-rule-strong bg-background px-3.5 py-3 text-[13.5px] leading-[1.7] resize-y focus:border-evergreen focus:outline-none focus:ring-2 focus:ring-evergreen/40 transition-colors"
-              placeholder={"답안을 작성해 주세요.\n비워두고 채점도 가능합니다."}
-            />
-            <div className="mt-4 flex justify-end">
-              <Button onClick={handleReveal} disabled={pending}>
-                {pending ? "처리 중…" : "채점하기 — 답안 보기"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Track 1.1 (v3.5.4, 헌법 v3.5.3 §16 단서) — 본문↔답안 좌우 분할.
+          xl(≥1280px) 이상에서 활성, 미만은 vertical stack fallback. localStorage 비율 저장. */}
+      {card.type !== "keyword" && (
+        <SplitView
+          storageKey={`study-${card.type}`}
+          left={stemCard}
+          right={answerArea}
+          stickyLeft
+          stickyTop="top-[96px]"
+          defaultRatio={0.5}
+          minRatio={0.35}
+          maxRatio={0.65}
+          ariaLabel="본문 / 답안 분할 비율"
+        />
       )}
 
-      {/* 답안 비교 — quiz/mistake 만 (keyword 는 위 grid 안에서 처리 완료) */}
-      {(card.type === "quiz" || card.type === "mistake") && revealed && card.backMd && (
-        <div ref={answerCompareRef} className="scroll-mt-4">
-          {answer.trim().length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <AnswerBox label="내 답안" tone="muted" plainText={answer} />
-              <AnswerBox
-                label="AI 모범답안"
-                tone="evergreen"
-                markdown={card.backMd}
-                verified={card.verifiedAnswer}
-              />
-            </div>
-          ) : (
+      {/* 키워드 트랙 — 정리 노트만 중앙 배치. */}
+      {card.type === "keyword" && (
+        <div className="max-w-3xl mx-auto">
+          {revealed && card.backMd && (
             <AnswerBox
-              label="AI 모범답안"
+              label="정리 노트"
               tone="evergreen"
               markdown={card.backMd}
               verified={card.verifiedAnswer}
+              zoomable
             />
+          )}
+          {revealed && !card.backMd && (
+            <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
+              <CardContent className="p-6 flex gap-3">
+                <AlertCircle
+                  className="h-5 w-5 text-warning shrink-0 mt-0.5"
+                  aria-hidden
+                />
+                <p className="text-[12.5px] text-foreground/80 leading-relaxed">
+                  본 카드의 정리 노트가 아직 시드되지 않았습니다.
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
 
-      {/* quiz/mistake 의 답안 없음 warning — keyword 는 위 grid 안에서 이미 처리 */}
-      {(card.type === "quiz" || card.type === "mistake") && revealed && !card.backMd && (
-        <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
-          <CardContent className="p-6 flex gap-3">
-            <AlertCircle
-              className="h-5 w-5 text-warning shrink-0 mt-0.5"
-              aria-hidden
-            />
-            <p className="text-[12.5px] text-foreground/80 leading-relaxed">
-              본 카드의 답안·해설이 아직 시드되지 않았습니다. 운영자 시드 후 자동
-              표시됩니다.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 등급 버튼 — G1 톤별 hover bg, Q1 44px 보장, S1 키보드 단축키 1/2/3/4.
-          P0-07 (외부 평가 2026-05-12) — sticky bottom 적용. 본문이 길어도 스크롤
-          중 어디서든 즉시 채점 가능. PageHeader top-0 sticky 와 자연 공존.
-          P0-08 — 단축키 배지를 키캡 모양으로 강화 (kbd 시멘틱 + 음각 box-shadow). */}
+      {/* 등급 버튼 — sticky bottom. SplitView 외부, 전체 폭 유지.
+          리뷰 H1 fix — 미니플레이어 활성 시 자동으로 위로 끌어올림.
+          `--mini-player-h` 가 0(비활성)·76px(활성) 토글되며 등급 카드와 자연 공존. */}
       {revealed && (
-        <Card className="sticky bottom-3 z-20 border-rule shadow-[0_-6px_18px_rgba(26,32,39,0.06)] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
+        <Card
+          className="sticky z-20 border-rule shadow-[0_-6px_18px_rgba(26,32,39,0.06)] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90"
+          style={{ bottom: "calc(var(--mini-player-h, 0px) + 12px)" }}
+        >
           <CardContent className="p-5">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
@@ -492,8 +460,6 @@ export function StudyCardForm({ card }: { card: CardData }) {
                   <Icon className="h-4 w-4" aria-hidden />
                   <span className="flex items-center gap-1.5">
                     {label}
-                    {/* 외부 리뷰 M2 fix — 키캡 보더를 등급 톤(border-current)에서
-                        muted-foreground/30 으로 통일. §4.3 단일 액센트 정합. */}
                     <kbd className="hidden sm:inline-flex items-center justify-center h-[20px] min-w-[20px] rounded-[4px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[10.5px] font-bold leading-none tabular-nums px-1 shadow-[inset_0_-1.5px_0_rgba(0,0,0,0.08)] font-sans">
                       {idx + 1}
                     </kbd>
@@ -514,8 +480,6 @@ export function StudyCardForm({ card }: { card: CardData }) {
   );
 }
 
-// E-2 (외부 리뷰 2026-05-12) — PDF 이미지 인라인 zoom + 새 탭 전체보기.
-// transform scale + overflow-auto 부모로 패닝, 4 단계 줌 (100/150/200/300%).
 function PdfImage({ src }: { src: string }) {
   const ZOOM_STEPS = [1, 1.5, 2, 3];
   const [zoom, setZoom] = useState(1);
@@ -524,8 +488,6 @@ function PdfImage({ src }: { src: string }) {
   const canZoomOut = idx > 0;
   return (
     <div className="mt-5 relative rounded-md border border-rule overflow-hidden bg-cream-soft">
-      {/* 리뷰 M3 fix — 모든 zoom level 에 max-h 일관 적용.
-          긴 PDF(2~3페이지)도 fold 처리, zoom>1 패닝과 1x 스크롤 동일 UX. */}
       <div
         className="overflow-auto max-h-[70vh]"
         aria-label="시험 본문 이미지 영역"
@@ -541,7 +503,6 @@ function PdfImage({ src }: { src: string }) {
           style={{ transform: `scale(${zoom})`, width: `${100 / zoom}%` }}
         />
       </div>
-      {/* zoom 컨트롤러 + 새 탭 보기 (sticky 우측 상단). */}
       <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-card/95 backdrop-blur px-1 py-1 border border-rule shadow-sm">
         <button
           type="button"
@@ -594,9 +555,6 @@ function AnswerBox({
   verified?: boolean;
   zoomable?: boolean;
 }) {
-  // 단단한 bg-card로 body 종이 그레인을 가린다. 차별화 시그널은 좌측 4px
-  // 보더 + uppercase 라벨로 충분 (alpha tone은 가독성 저하).
-  // 사용자 보고 2026-05-12 — 키워드 트랙 정리 노트에 글자 확대·축소 토글.
   const toneClass =
     tone === "evergreen"
       ? "border-l-4 border-evergreen"
@@ -604,7 +562,6 @@ function AnswerBox({
   const labelClass =
     tone === "evergreen" ? "text-evergreen" : "text-muted-foreground";
 
-  // zoomable: 글자 배율 0.85 / 1.0 / 1.15 / 1.30 4 단계
   const [zoom, setZoom] = useState(1);
   const ZOOM_STEPS = [0.85, 1, 1.15, 1.3];
   function adjustZoom(direction: -1 | 1) {
@@ -652,12 +609,6 @@ function AnswerBox({
             </span>
           )}
         </div>
-        {/* F1 — markdown 답안 폰트 메트릭 정렬 (tabular-nums + variant-numeric).
-            unicode(ⓑ·㉠) 폭 불일치 완화 + 숫자 lining 정합.
-            사용자 보고 2026-05-12 — zoomable 시 Markdown 자식 모든 fontSize 가
-            상속받도록 강제([&_*]:![font-size:inherit]). Markdown 컴포넌트의 자식
-            elements(h1·h2·p·li 등) 가 명시 px size 를 가져서 부모 inline fontSize
-            를 무시하던 문제 해결. */}
         <div
           className={
             "mt-3 [font-variant-numeric:tabular-nums] tabular-nums origin-top-left" +
@@ -696,7 +647,7 @@ function SourceBadge({ verified }: { verified: boolean }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[10.5px] text-warning">
+    <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[10.5px] text-warning-text">
       <ShieldCheck className="h-3 w-3" />
       검증 필요
     </span>

@@ -23,7 +23,9 @@ const GRADE_META: Record<
   },
   B: {
     label: "주 1회 회독",
-    tone: "text-warning",
+    // Track 2.2 — 24px 큰 카드 숫자에서 text-warning(#c9a55b, 2.16:1)은
+    // WCAG large text 3:1도 미달. warning-text 토큰 (5.1:1) 으로 정합.
+    tone: "text-warning-text",
     toneSoft: "bg-warning/10",
     rule: "border-warning/40",
   },
