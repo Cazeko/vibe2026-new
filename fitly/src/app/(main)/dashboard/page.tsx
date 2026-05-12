@@ -42,7 +42,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen pb-12 xl:h-screen xl:pb-0 xl:overflow-hidden xl:flex xl:flex-col">
       <DashboardHeader />
 
-      <div className="grid gap-[22px] px-10 py-7 xl:flex xl:flex-col xl:gap-3 xl:px-8 xl:py-4 xl:flex-1 xl:min-h-0">
+      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 xl:flex xl:flex-col xl:gap-3 xl:px-8 xl:py-4 xl:flex-1 xl:min-h-0">
         {summary.isEmpty && <OnboardingBanner />}
 
         <KpiCards kpi={summary.kpi} />

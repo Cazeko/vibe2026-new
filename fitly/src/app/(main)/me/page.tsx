@@ -64,6 +64,19 @@ const MODE_ICON = {
   analysis: TrendingUp,
 } as const;
 
+// C-13 (외부 리뷰 2026-05-12) — 활동 피드 아이콘 mode 별 색상 차별화.
+// §4.3 evergreen 6 사용처 외 이므로 토큰 외 일반 색 + warning·info 시맨틱 활용.
+// §4.4 시맨틱 운영 정합 — 라벨+아이콘+(좌측 보더) 3축에서 아이콘 활용.
+const MODE_TONE: Record<string, string> = {
+  quiz: "text-foreground/70",
+  keyword: "text-foreground/70",
+  mistake: "text-warning",
+  exam: "text-foreground/70",
+  review: "text-warning",
+  podcast: "text-info",
+  analysis: "text-foreground/70",
+};
+
 function fmtMinutes(min: number): string {
   if (!min) return "0분";
   const h = Math.floor(min / 60);
@@ -242,7 +255,7 @@ export default async function MePage() {
         title="마이 페이지"
         subtitle="프로필과 학습 기록을 한 페이지에 모았습니다."
       />
-      <div className="grid gap-[22px] px-10 py-7 xl:flex xl:flex-col xl:gap-3 xl:px-8 xl:py-4 xl:flex-1 xl:min-h-0">
+      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 xl:flex xl:flex-col xl:gap-3 xl:px-8 xl:py-4 xl:flex-1 xl:min-h-0">
         {/* ─ 프로필 카드 ─ */}
         <article className="rounded-card border border-rule bg-cream-soft px-6 py-[22px] xl:px-5 xl:py-3 flex items-center gap-5 xl:gap-4 flex-wrap shrink-0">
           <span
@@ -375,12 +388,15 @@ export default async function MePage() {
                 {recent.map((r) => {
                   const Icon =
                     MODE_ICON[r.mode as keyof typeof MODE_ICON] ?? Activity;
+                  const tone = MODE_TONE[r.mode] ?? "text-foreground/70";
                   return (
                     <li
                       key={r.id}
                       className="grid grid-cols-[28px_1fr_auto] items-center gap-2.5 rounded-[10px] border border-rule bg-cream px-3 py-2"
                     >
-                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-cream-deep text-evergreen">
+                      <span
+                        className={`grid h-7 w-7 place-items-center rounded-lg bg-cream-deep ${tone}`}
+                      >
                         <Icon className="h-[14px] w-[14px]" aria-hidden />
                       </span>
                       <div className="min-w-0">

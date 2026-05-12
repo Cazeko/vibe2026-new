@@ -4,7 +4,7 @@ export default function MeLoading() {
   return (
     <div className="min-h-screen pb-12">
       <header
-        className="flex flex-wrap items-end justify-between gap-3 px-10 pt-6 pb-3"
+        className="flex flex-wrap items-end justify-between gap-3 px-4 sm:px-6 lg:px-10 pt-5 lg:pt-6 pb-3"
         aria-hidden
       >
         <div>
@@ -15,7 +15,7 @@ export default function MeLoading() {
         </div>
       </header>
 
-      <div className="grid gap-[22px] px-10 py-7">
+      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7">
         {/* 프로필 카드 */}
         <div
           aria-hidden

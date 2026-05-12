@@ -94,11 +94,14 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
             className={cn(
               // G2 — focus-visible ring (evergreen은 진척도/CTA/AI 추천에만, 일반은 rule-strong)
               // viewport fit — lg+ 컴팩트 padding (px-22→px-4, py-5→py-3)
-              "rounded-card border min-h-[132px] lg:min-h-[110px] px-[22px] py-5 lg:px-4 lg:py-3 flex flex-col transition-colors overflow-hidden min-w-0",
+              // D-19 (외부 리뷰 2026-05-12) — 카드 hover 어포던스. §7 모션 절제 정합으로
+              // Y-이동 없이 보더+shadow 만 변화. 리뷰 M5 fix — transition-all 즉각성
+              // 저하 회피, colors/shadow/border 만 transition (150ms).
+              "rounded-card border min-h-[132px] lg:min-h-[110px] px-[22px] py-5 lg:px-4 lg:py-3 flex flex-col [transition:border-color_150ms_ease,box-shadow_150ms_ease,background-color_150ms_ease] overflow-hidden min-w-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               isGoal
-                ? "bg-evergreen border-evergreen text-cream focus-visible:ring-evergreen/40"
-                : "bg-cream-soft border-rule hover:border-rule-strong focus-visible:ring-rule-strong/60"
+                ? "bg-evergreen border-evergreen text-cream focus-visible:ring-evergreen/40 hover:bg-evergreen-strong"
+                : "bg-cream-soft border-rule hover:border-rule-strong hover:shadow-sm dark:hover:bg-cream-soft/80 focus-visible:ring-rule-strong/60"
             )}
           >
             <div className="flex items-center justify-between mb-3.5 lg:mb-2">
@@ -157,7 +160,10 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
               {sub}
             </p>
             {kind === "progress" && progressPct != null && (
-              <div className="mt-auto pt-3 lg:pt-2 h-1 overflow-hidden rounded-full bg-cream-deep">
+              // C-5 (외부 리뷰 2026-05-12) — 진척도 바 가독성 보강.
+              // 종전 h-1(4px) + bg-cream-deep 트랙은 명도 차가 작아 진척이 작을 때
+              // 시각 인지 약함. h-1.5(6px) + bg-rule 트랙으로 대비 강화.
+              <div className="mt-auto pt-3 lg:pt-2 h-1.5 overflow-hidden rounded-full bg-rule">
                 <span
                   className="block h-full bg-evergreen rounded-full gauge-fill"
                   style={{ width: `${Math.max(0, Math.min(100, progressPct))}%` }}

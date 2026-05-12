@@ -8,7 +8,7 @@
 // 150ms / kakao hover secondary 정합 / error·message 시각 구분 + 아이콘 / 클라
 // 이언트 이메일·비번 검증 / aria-live polite / signup hint·\n 줄바꿈.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -79,15 +79,32 @@ function KakaoSymbol({ className = "" }: { className?: string }) {
   );
 }
 
+// C-2 (외부 리뷰 2026-05-12) — "로그인 상태 유지" UI 체크박스 (login 모드 한정).
+// Supabase 는 기본적으로 localStorage session persistence 사용 → 체크박스는 사용자에게
+// 명시적 안내 + 이메일 prefill (localStorage) 시그널. 미체크 시 이메일도 비우는 정책.
+const REMEMBER_KEY = "fitly:remember-email";
+
 export function FitlySignIn({ mode }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // C-2 — mount 시 localStorage 에서 이메일 prefill (로그인 모드 한정).
+  useEffect(() => {
+    if (mode !== "login") return;
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem(REMEMBER_KEY);
+    if (saved) {
+      setEmail(saved);
+      setRemember(true);
+    }
+  }, [mode]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -111,6 +128,15 @@ export function FitlySignIn({ mode }: Props) {
     if (err) {
       setError(err.message);
       return;
+    }
+
+    // C-2 — login 성공 시 remember 정책 적용. 미체크 시 prefill 삭제.
+    if (mode === "login" && typeof window !== "undefined") {
+      if (remember) {
+        window.localStorage.setItem(REMEMBER_KEY, email);
+      } else {
+        window.localStorage.removeItem(REMEMBER_KEY);
+      }
     }
 
     if (mode === "signup") {
@@ -299,6 +325,22 @@ export function FitlySignIn({ mode }: Props) {
                 </button>
               </span>
             </label>
+
+            {/* C-2 (외부 리뷰 2026-05-12) — login 모드 한정 "로그인 상태 유지" 체크박스. */}
+            {mode === "login" && (
+              <label className="-mt-0.5 mb-0.5 flex items-center gap-2 text-[12.5px] text-muted2-deep cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="h-4 w-4 rounded border border-rule-strong text-evergreen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 cursor-pointer"
+                />
+                로그인 상태 유지
+                <span className="text-muted-foreground text-[11px]">
+                  (다음 접속 시 이메일이 자동 입력됩니다)
+                </span>
+              </label>
+            )}
 
             {/* P0-05 (외부 평가) — 이메일·비번 유효성 미통과 시 disabled +
                 아이콘 변화. aria-disabled 로 스크린리더 안내 보강. */}

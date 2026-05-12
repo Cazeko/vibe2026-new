@@ -32,8 +32,10 @@ const THEME_OPTIONS = [
 ] as const;
 
 // 헌법 §16의2 정합 — focus-visible은 evergreen tint(40%)로 통일 (CTA 정합).
+// C-14 (외부 리뷰 2026-05-12) — Select chevron·Input 우측 아이콘 18px 로 확대.
+// [&_svg]:h-4.5 [&_svg]:w-4.5 로 trigger 내부 svg 일괄 보정 (hitbox 어포던스).
 const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background [&_svg]:h-[18px] [&_svg]:w-[18px]";
 
 export default function SettingsPage() {
   const router = useRouter();

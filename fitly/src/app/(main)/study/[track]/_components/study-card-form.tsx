@@ -12,6 +12,8 @@ import {
   Eye,
   EyeOff,
   Maximize2,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -97,7 +99,16 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const imageUrl = getExamPageUrl(card.frontImagePath);
   // 본문은 PDF unpdf 추출본이라 줄바꿈·공백이 raw하게 들어 있다. whitespace-pre-wrap
   // 으로 표시하되 너무 길면(800자 이상) 기본 접힘 + "본문 펼쳐보기" 토글.
-  const isLongStem = card.frontText.length > 800;
+  // C-8 (외부 리뷰 2026-05-12) — raw 줄바꿈·공백 정제. 3+ 빈 줄 → 2, 다중 공백
+  // → 1, 라인 trim. unpdf 폼피드(\f)·캐리지(\r) 도 제거. 본문 의미는 보존하되
+  // 시각 가독성 보강.
+  const cleanedFrontText = card.frontText
+    .replace(/[\f\r]/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/^[ \t]+|[ \t]+$/gm, "")
+    .trim();
+  const isLongStem = cleanedFrontText.length > 800;
   const draftKey = `${DRAFT_KEY_PREFIX}${card.id}`;
   const supportsDraft = card.type === "quiz" || card.type === "mistake";
 
@@ -286,31 +297,12 @@ export function StudyCardForm({ card }: { card: CardData }) {
             </div>
           </div>
 
-          {/* E2 — PDF 이미지 클릭 시 새 탭 전체보기 (exam-analysis 패턴 정합).
-              헌법 §16 스코프 보호 — lightbox modal 신규 도입 보류, 새 탭으로 대체.
-              O1 — width/height 명시(CLS 방지) + lazy loading. */}
+          {/* E-2 (외부 리뷰 2026-05-12, 헌법 v3.5.3 §16 단서 — 인터랙션 패턴 보완) —
+              PDF 이미지 인라인 zoom 컨트롤러 + 새 탭 전체보기 병행.
+              transform scale + overflow-auto 로 패닝 가능. lazy load 유지.
+              헌법 §16 v3.5.3 단서 정합으로 "기존 기능 다듬기" 분류. */}
           {imageUrl && (
-            <a
-              href={imageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="시험 본문 이미지 새 탭에서 전체 크기로 보기"
-              className="mt-5 group relative block overflow-hidden rounded-md border border-rule focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imageUrl}
-                alt="시험 본문 (PDF 페이지)"
-                className="w-full"
-                loading="lazy"
-                width={1240}
-                height={1754}
-              />
-              <span className="pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-[10.5px] text-foreground/80 border border-rule opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
-                <Maximize2 className="h-3 w-3" aria-hidden />
-                전체보기
-              </span>
-            </a>
+            <PdfImage src={imageUrl} />
           )}
 
           {/* 텍스트 본문 — 길면 접힘. unpdf 추출본은 raw text라 검색·낭독 보조 목적. */}
@@ -348,7 +340,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
                 }`}
               >
                 <p className="font-serif text-[14px] leading-[1.7] whitespace-pre-wrap text-foreground/85">
-                  {card.frontText}
+                  {cleanedFrontText}
                 </p>
                 {/* A1 — fade height 50px 이상으로 확장, 텍스트 겹침 방지. */}
                 {isLongStem && !stemExpanded && (
@@ -518,6 +510,71 @@ export function StudyCardForm({ card }: { card: CardData }) {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+// E-2 (외부 리뷰 2026-05-12) — PDF 이미지 인라인 zoom + 새 탭 전체보기.
+// transform scale + overflow-auto 부모로 패닝, 4 단계 줌 (100/150/200/300%).
+function PdfImage({ src }: { src: string }) {
+  const ZOOM_STEPS = [1, 1.5, 2, 3];
+  const [zoom, setZoom] = useState(1);
+  const idx = ZOOM_STEPS.findIndex((z) => Math.abs(z - zoom) < 0.01);
+  const canZoomIn = idx < ZOOM_STEPS.length - 1;
+  const canZoomOut = idx > 0;
+  return (
+    <div className="mt-5 relative rounded-md border border-rule overflow-hidden bg-cream-soft">
+      {/* 리뷰 M3 fix — 모든 zoom level 에 max-h 일관 적용.
+          긴 PDF(2~3페이지)도 fold 처리, zoom>1 패닝과 1x 스크롤 동일 UX. */}
+      <div
+        className="overflow-auto max-h-[70vh]"
+        aria-label="시험 본문 이미지 영역"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt="시험 본문 (PDF 페이지)"
+          className="block w-full origin-top-left transition-transform duration-150"
+          loading="lazy"
+          width={1240}
+          height={1754}
+          style={{ transform: `scale(${zoom})`, width: `${100 / zoom}%` }}
+        />
+      </div>
+      {/* zoom 컨트롤러 + 새 탭 보기 (sticky 우측 상단). */}
+      <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-card/95 backdrop-blur px-1 py-1 border border-rule shadow-sm">
+        <button
+          type="button"
+          onClick={() => canZoomOut && setZoom(ZOOM_STEPS[idx - 1])}
+          disabled={!canZoomOut}
+          aria-label="축소"
+          className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+        >
+          <ZoomOut className="h-3.5 w-3.5" aria-hidden />
+        </button>
+        <span className="text-[10.5px] text-muted-foreground tabular-nums w-9 text-center">
+          {Math.round(zoom * 100)}%
+        </span>
+        <button
+          type="button"
+          onClick={() => canZoomIn && setZoom(ZOOM_STEPS[idx + 1])}
+          disabled={!canZoomIn}
+          aria-label="확대"
+          className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+        >
+          <ZoomIn className="h-3.5 w-3.5" aria-hidden />
+        </button>
+        <span className="mx-1 inline-block h-4 w-px bg-rule" aria-hidden />
+        <a
+          href={src}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="새 탭에서 전체 크기로 보기"
+          className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+        >
+          <Maximize2 className="h-3.5 w-3.5" aria-hidden />
+        </a>
+      </div>
     </div>
   );
 }

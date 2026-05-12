@@ -179,7 +179,11 @@ function YearCard({ year, sessions }: { year: number; sessions: PaperRow[] }) {
               본문 검증
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning">
+            // C-10 (외부 리뷰 2026-05-12) — 검증 상태 안내 툴팁 추가.
+            <span
+              className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning"
+              title="아직 운영자 검수가 완료되지 않은 문항이 포함되어 있습니다. 본문/답안은 정확하지만 일부 메타데이터는 검토 대기 중입니다."
+            >
               <AlertCircle className="h-2.5 w-2.5" aria-hidden />
               일부 미검증
             </span>
