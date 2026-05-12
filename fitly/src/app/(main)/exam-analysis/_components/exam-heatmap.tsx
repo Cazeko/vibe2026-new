@@ -3,7 +3,7 @@
 // 사용하지 아니하고 desaturated info(navy) 1색의 alpha 단계로 표현한다.
 //
 // 사용자 보고 2026-05-12 반영:
-// - 셀에 임계값(≥ max/3) 이상 시 카운트 노출 (셀 색만으로는 정확한 개수 판별 어려움)
+// - 모든 v > 0 셀에 카운트 숫자 노출 (임계값 제거 — 가독성 우선)
 // - 색단계 alpha 0.18~0.85 → 0.12~1.0 으로 확장하여 적음~많음 구분 직관화
 // - 행 라벨 sticky-left + 합계 컬럼 sticky-right (가로 스크롤 중에도 컨텍스트 유지)
 // - 가로 스크롤 hint 안내 (모바일/태블릿 가시성)
@@ -45,10 +45,6 @@ export function ExamHeatmap({
   }
 
   const palette = TONE_CLASS[tone];
-
-  // 셀에 숫자 노출 임계값 — 최댓값의 1/3 이상일 때 노출. 작은 값은
-  // hover/title 로만 노출되어 시각 노이즈를 줄인다.
-  const labelThreshold = Math.max(2, Math.ceil(max / 3));
 
   return (
     <div className="space-y-2">
@@ -102,12 +98,11 @@ export function ExamHeatmap({
                   const bg = filled
                     ? `hsl(${palette.color} / ${0.12 + intensity * 0.88})`
                     : palette.faintBg;
-                  const showNum = v >= labelThreshold;
                   // 진한 셀(intensity ≥ 0.6) 위 텍스트는 cream 으로 대비 확보
                   const numColor =
                     intensity >= 0.6
                       ? "hsl(var(--color-bg))"
-                      : "hsl(var(--color-text) / 0.78)";
+                      : "hsl(var(--color-text) / 0.85)";
                   return (
                     <td
                       key={y}
@@ -122,10 +117,10 @@ export function ExamHeatmap({
                           backgroundColor: bg,
                           fontSize: "9.5px",
                           color: numColor,
-                          fontWeight: showNum ? 600 : 400,
+                          fontWeight: filled ? 600 : 400,
                         }}
                       >
-                        {showNum ? v : ""}
+                        {filled ? v : ""}
                       </div>
                     </td>
                   );
@@ -153,12 +148,7 @@ export function ExamHeatmap({
           <span>많음</span>
           <span className="ml-2 tabular-nums">최대 {max}문항/셀</span>
         </div>
-        <span className="tabular-nums hidden sm:inline">
-          ≥ {labelThreshold}문항 셀에 수치 표시 · ← 좌우 스크롤 →
-        </span>
-        <span className="tabular-nums sm:hidden">
-          ← 좌우 스크롤 →
-        </span>
+        <span className="tabular-nums">← 좌우 스크롤 →</span>
       </div>
     </div>
   );

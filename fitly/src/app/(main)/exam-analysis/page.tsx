@@ -41,7 +41,7 @@ const TABS: { key: TabKey; label: string; icon: typeof Layers }[] = [
 export default async function ExamAnalysisPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; showAll?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -54,6 +54,8 @@ export default async function ExamAnalysisPage({
   const tab: TabKey = TABS.some((t) => t.key === requestedTab)
     ? (requestedTab as TabKey)
     : "papers";
+  // 분석 탭 토글 — 최근 5년 출제 0회 행을 노출/숨김
+  const showAll = params.showAll === "1";
 
   const profile = await safeRun(
     "exam-analysis profile",
@@ -191,7 +193,7 @@ export default async function ExamAnalysisPage({
         {/* 탭 컨텐츠 */}
         <section>
           {tab === "papers" && <PapersTab />}
-          {tab === "analysis" && <AnalysisTab />}
+          {tab === "analysis" && <AnalysisTab showAll={showAll} />}
           {tab === "topic" && <TopicTab />}
           {tab === "roadmap" && <RoadmapTab />}
         </section>
