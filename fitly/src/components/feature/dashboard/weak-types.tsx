@@ -26,10 +26,11 @@ const SEVERITY_BADGE: Record<Severity, string> = {
 };
 
 export function WeakTypes({ items }: { items: WeakType[] }) {
+  // viewport fit (lg+) — article flex-col + content 영역 flex-1 overflow.
   return (
-    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 h-full">
-      <div className="flex items-center gap-2.5">
-        <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
+    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 h-full flex flex-col">
+      <div className="flex items-center gap-2.5 shrink-0">
+        <h2 className="font-sans text-[17px] lg:text-[15px] font-bold tracking-[-0.02em] text-foreground">
           취약 유형 분석
         </h2>
         <Link
@@ -39,7 +40,7 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
           자세히 ›
         </Link>
       </div>
-      <p className="mt-[2px] mb-[18px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em]">
+      <p className="mt-[2px] mb-[18px] lg:mb-2.5 text-[13px] lg:text-[11.5px] text-muted-foreground leading-[1.5] tracking-[-0.005em] shrink-0">
         풀이 50개 이상 누적되면 자동 산출됩니다.
       </p>
 
@@ -63,7 +64,7 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
           </Link>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-3 lg:space-y-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
           {items.map((w) => {
             const sev = severityOf(w.accuracy);
             return (

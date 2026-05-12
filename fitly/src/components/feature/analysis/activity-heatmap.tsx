@@ -23,24 +23,26 @@ function level(minutes: number): number {
 }
 
 export function ActivityHeatmap({ cells }: { cells: HeatmapCell[] }) {
-  // 12 weeks × 7 days
+  // 사용자 보고 2026-05-12 — GitHub style 52주 × 7일 1년 표시.
+  // 좁은 컨테이너 시 부모에서 overflow-x-auto 로 가로 스크롤 처리.
+  const weekCount = Math.ceil(cells.length / 7);
   const weeks: HeatmapCell[][] = [];
-  for (let i = 0; i < 12; i += 1) {
+  for (let i = 0; i < weekCount; i += 1) {
     weeks.push(cells.slice(i * 7, i * 7 + 7));
   }
 
   return (
     <div className="space-y-2">
-      <div className="flex items-end gap-1">
+      <div className="flex items-end gap-[2px] min-w-max">
         {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-1">
+          <div key={wi} className="flex flex-col gap-[2px]">
             {week.map((c, di) => {
               const lv = level(c.minutes);
               return (
                 <span
                   key={`${wi}-${di}`}
                   title={`${c.date} · ${c.minutes}분`}
-                  className={`h-2.5 w-2.5 rounded-sm ${TONE_BG[lv]}`}
+                  className={`h-[11px] w-[11px] rounded-[2px] ${TONE_BG[lv]}`}
                 />
               );
             })}

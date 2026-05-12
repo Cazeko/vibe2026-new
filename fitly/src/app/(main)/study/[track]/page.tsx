@@ -100,7 +100,14 @@ export default async function StudyTrackPage({
         }
       />
 
-      <div className="px-6 mx-auto max-w-3xl space-y-6">
+      {/* 사용자 보고 2026-05-12 — 키워드 트랙은 답안 입력이 없어 가로 활용이
+          가능하므로 max-w 를 확장하여 본문 + 정리 노트를 좌우로 배치. quiz/
+          mistake 는 답안 입력 흐름상 max-w-3xl 유지. */}
+      <div
+        className={`px-6 mx-auto space-y-6 ${
+          track === "keyword" ? "max-w-7xl" : "max-w-3xl"
+        }`}
+      >
         {/* D2 — 진행 헤더 flex-wrap + 모바일 stack. S2 큐 상태 변화 aria-live. */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div

@@ -9,12 +9,16 @@ import { getCardCounts, getDueCardCounts, safeRun } from "@/lib/db/queries";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+// 사용자 보고 2026-05-12 — 12주(84일) → 52주(364일) GitHub-style 1년 확장.
+// 칸 사이즈 대비 정보량 부족 해소.
+const HEATMAP_DAYS = 52 * 7; // 364일
+
 export async function getActivityHeatmap(userId: string): Promise<HeatmapCell[]> {
   return safeRun(
     "getActivityHeatmap",
     async () => {
       const db = getDb();
-      const since = new Date(Date.now() - 84 * DAY_MS); // 12주
+      const since = new Date(Date.now() - HEATMAP_DAYS * DAY_MS); // 52주
 
       const rows = await db
         .select({
@@ -34,7 +38,7 @@ export async function getActivityHeatmap(userId: string): Promise<HeatmapCell[]>
       for (const r of rows) byDay.set(r.day, Math.round(Number(r.sec) / 60));
 
       const cells: HeatmapCell[] = [];
-      for (let i = 83; i >= 0; i -= 1) {
+      for (let i = HEATMAP_DAYS - 1; i >= 0; i -= 1) {
         const d = new Date(Date.now() - i * DAY_MS);
         const key = d.toISOString().slice(0, 10);
         cells.push({ date: key, minutes: byDay.get(key) ?? 0 });
