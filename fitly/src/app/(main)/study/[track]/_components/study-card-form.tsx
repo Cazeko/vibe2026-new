@@ -51,7 +51,7 @@ const GRADES: {
   },
   {
     key: "hard",
-    label: "어렵",
+    label: "어려움",
     hint: "10분 후",
     tone: "border-warning/40 hover:bg-warning/5 text-warning",
     Icon: AlertCircle,
@@ -183,9 +183,19 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </div>
       )}
 
-      {/* 출처 메타 + 본문 */}
-      <Card className="border-rule">
-        <CardContent className="p-6">
+      {/* 사용자 보고 2026-05-12 — 키워드 트랙은 답안 입력 없음. 본문 카드 +
+          정리 노트를 좌우 2열로 배치하여 가로 viewport 활용. quiz/mistake 는
+          기존 vertical 흐름(본문 → 답안 입력 → 비교). */}
+      <div
+        className={
+          card.type === "keyword"
+            ? "grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"
+            : ""
+        }
+      >
+        {/* 출처 메타 + 본문 */}
+        <Card className="border-rule">
+          <CardContent className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
               출처{" "}
@@ -277,6 +287,32 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </CardContent>
       </Card>
 
+        {/* 키워드 트랙: 정리 노트는 본문 카드 오른쪽 칸으로 (grid 두번째 셀).
+            +/- 버튼으로 글자 크기 확대·축소 가능 (사용자 보고 2026-05-12). */}
+        {card.type === "keyword" && revealed && card.backMd && (
+          <AnswerBox
+            label="정리 노트"
+            tone="evergreen"
+            markdown={card.backMd}
+            verified={card.verifiedAnswer}
+            zoomable
+          />
+        )}
+        {card.type === "keyword" && revealed && !card.backMd && (
+          <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
+            <CardContent className="p-6 flex gap-3">
+              <AlertCircle
+                className="h-5 w-5 text-warning shrink-0 mt-0.5"
+                aria-hidden
+              />
+              <p className="text-[12.5px] text-foreground/80 leading-relaxed">
+                본 카드의 정리 노트가 아직 시드되지 않았습니다.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       {/* 답안 입력 (풀이/오답 트랙만) — J2 label htmlFor 연결 OK, J1 focus ring 강화. */}
       {showAnswerInput && (
         <Card className="border-rule">
@@ -305,10 +341,10 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </Card>
       )}
 
-      {/* 답안 비교 — quiz/mistake은 좌우, keyword은 단독. I1 auto-scroll target. */}
-      {revealed && card.backMd && (
+      {/* 답안 비교 — quiz/mistake 만 (keyword 는 위 grid 안에서 처리 완료) */}
+      {(card.type === "quiz" || card.type === "mistake") && revealed && card.backMd && (
         <div ref={answerCompareRef} className="scroll-mt-4">
-          {(card.type === "quiz" || card.type === "mistake") && answer.trim().length > 0 ? (
+          {answer.trim().length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <AnswerBox label="내 답안" tone="muted" plainText={answer} />
               <AnswerBox
@@ -320,7 +356,7 @@ export function StudyCardForm({ card }: { card: CardData }) {
             </div>
           ) : (
             <AnswerBox
-              label={card.type === "keyword" ? "정리 노트" : "AI 모범답안"}
+              label="AI 모범답안"
               tone="evergreen"
               markdown={card.backMd}
               verified={card.verifiedAnswer}
@@ -329,7 +365,8 @@ export function StudyCardForm({ card }: { card: CardData }) {
         </div>
       )}
 
-      {revealed && !card.backMd && (
+      {/* quiz/mistake 의 답안 없음 warning — keyword 는 위 grid 안에서 이미 처리 */}
+      {(card.type === "quiz" || card.type === "mistake") && revealed && !card.backMd && (
         <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
           <CardContent className="p-6 flex gap-3">
             <AlertCircle
@@ -380,9 +417,9 @@ export function StudyCardForm({ card }: { card: CardData }) {
               ))}
             </div>
             <p className="mt-4 text-[10.5px] text-muted-foreground leading-relaxed">
-              {`"다시"·"어렵"는 다음 학습 시 다시 등장합니다.`}
+              {`"다시" · "어려움"은 다음 학습 시 다시 등장합니다.`}
               <br />
-              {`풀이 트랙에서 "다시"로 평가하면 오답 트랙에 자동 합류합니다.`}
+              {`풀이 · 키워드 트랙에서 "다시" 또는 "어려움"으로 평가하면 오답 트랙에 자동 합류합니다.`}
             </p>
           </CardContent>
         </Card>
@@ -397,21 +434,36 @@ function AnswerBox({
   markdown,
   plainText,
   verified,
+  zoomable = false,
 }: {
   label: string;
   tone: "evergreen" | "muted";
   markdown?: string | null;
   plainText?: string;
   verified?: boolean;
+  zoomable?: boolean;
 }) {
   // 단단한 bg-card로 body 종이 그레인을 가린다. 차별화 시그널은 좌측 4px
   // 보더 + uppercase 라벨로 충분 (alpha tone은 가독성 저하).
+  // 사용자 보고 2026-05-12 — 키워드 트랙 정리 노트에 글자 확대·축소 토글.
   const toneClass =
     tone === "evergreen"
       ? "border-l-4 border-evergreen"
       : "border-l-4 border-rule-strong";
   const labelClass =
     tone === "evergreen" ? "text-evergreen" : "text-muted-foreground";
+
+  // zoomable: 글자 배율 0.85 / 1.0 / 1.15 / 1.30 4 단계
+  const [zoom, setZoom] = useState(1);
+  const ZOOM_STEPS = [0.85, 1, 1.15, 1.3];
+  function adjustZoom(direction: -1 | 1) {
+    const idx = ZOOM_STEPS.findIndex((z) => Math.abs(z - zoom) < 0.01);
+    const next = Math.min(
+      ZOOM_STEPS.length - 1,
+      Math.max(0, (idx === -1 ? 1 : idx) + direction),
+    );
+    setZoom(ZOOM_STEPS[next]);
+  }
 
   return (
     <Card className={`${toneClass} border-y border-r border-rule bg-card`}>
@@ -423,10 +475,38 @@ function AnswerBox({
             {label}
           </span>
           {verified !== undefined && <SourceBadge verified={verified} />}
+          {zoomable && (
+            <span className="ml-auto inline-flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => adjustZoom(-1)}
+                disabled={zoom <= ZOOM_STEPS[0]}
+                aria-label="글자 작게"
+                className="inline-flex h-6 w-6 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <span className="text-[11px] leading-none">A−</span>
+              </button>
+              <span className="text-[10px] text-muted-foreground tabular-nums w-9 text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button
+                type="button"
+                onClick={() => adjustZoom(1)}
+                disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
+                aria-label="글자 크게"
+                className="inline-flex h-6 w-6 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <span className="text-[11px] leading-none">A+</span>
+              </button>
+            </span>
+          )}
         </div>
         {/* F1 — markdown 답안 폰트 메트릭 정렬 (tabular-nums + variant-numeric).
             unicode(ⓑ·㉠) 폭 불일치 완화 + 숫자 lining 정합. */}
-        <div className="mt-3 [font-variant-numeric:tabular-nums] tabular-nums">
+        <div
+          className="mt-3 [font-variant-numeric:tabular-nums] tabular-nums origin-top-left"
+          style={zoomable ? { fontSize: `${zoom}em` } : undefined}
+        >
           {markdown ? (
             <Markdown serif>{markdown}</Markdown>
           ) : (

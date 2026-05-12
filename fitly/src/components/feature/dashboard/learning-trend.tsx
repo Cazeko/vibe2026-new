@@ -66,9 +66,11 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
   const isAnimationActive = !reducedMotion;
 
   return (
-    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 h-full">
-      <div className="flex items-center gap-2.5 flex-wrap">
-        <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
+    // viewport fit (lg+) — article 을 flex column 으로 변경하여 차트가 잔여
+    // 공간 차지. 헤더·subtitle 은 자기 높이, 차트 div 가 flex-1 흡수.
+    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 h-full flex flex-col">
+      <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+        <h2 className="font-sans text-[17px] lg:text-[15px] font-bold tracking-[-0.02em] text-foreground">
           학습 성과 추이
         </h2>
         <div className="ml-auto flex items-center gap-3.5 text-[11.5px] text-muted-foreground">
@@ -77,12 +79,13 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
           <Legend color={colors.accuracy} label="정답률(%)" />
         </div>
       </div>
-      <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
+      <p className="mt-[2px] mb-[10px] lg:mb-2 text-[13px] lg:text-[11.5px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep shrink-0">
         최근 14일간의 일일 진척도와 정답률 흐름.
       </p>
 
-      {/* H4 모바일 180px / md+ 240px (헌법 제24조의2) */}
-      <div className="h-[180px] md:h-[240px]">
+      {/* H4 모바일 180px / md+ 240px (헌법 제24조의2)
+          viewport fit (lg+): flex-1 min-h-0 으로 잔여 vh 차지 */}
+      <div className="h-[180px] md:h-[240px] lg:h-auto lg:flex-1 lg:min-h-0">
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart

@@ -80,9 +80,10 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
 
   return (
     // 헌법 제24조의2 정합 — A1 lg 잘림 fix: md:3 lg:4 단계화 + gap-3 + min-w-0
+    // viewport fit (lg+): shrink-0 으로 자기 높이 유지, padding·min-h 축소
     <section
       aria-label="요약 지표"
-      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:shrink-0"
     >
       {cards.map(({ kind, label, value, unit, denom, sub, Icon, progressPct }) => {
         const isGoal = kind === "goal";
@@ -92,17 +93,18 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
             tabIndex={0}
             className={cn(
               // G2 — focus-visible ring (evergreen은 진척도/CTA/AI 추천에만, 일반은 rule-strong)
-              "rounded-card border min-h-[132px] px-[22px] py-5 flex flex-col transition-colors overflow-hidden min-w-0",
+              // viewport fit — lg+ 컴팩트 padding (px-22→px-4, py-5→py-3)
+              "rounded-card border min-h-[132px] lg:min-h-[110px] px-[22px] py-5 lg:px-4 lg:py-3 flex flex-col transition-colors overflow-hidden min-w-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               isGoal
                 ? "bg-evergreen border-evergreen text-cream focus-visible:ring-evergreen/40"
                 : "bg-cream-soft border-rule hover:border-rule-strong focus-visible:ring-rule-strong/60"
             )}
           >
-            <div className="flex items-center justify-between mb-3.5">
+            <div className="flex items-center justify-between mb-3.5 lg:mb-2">
               <p
                 className={cn(
-                  "text-[11.5px] font-bold uppercase tracking-[0.18em]",
+                  "text-[11.5px] lg:text-[10.5px] font-bold uppercase tracking-[0.18em]",
                   isGoal ? "text-gold" : "text-muted-foreground"
                 )}
               >
@@ -111,31 +113,33 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
               <span
                 aria-hidden
                 className={cn(
-                  "grid h-[30px] w-[30px] place-items-center rounded-[7px]",
+                  "grid h-[30px] w-[30px] lg:h-[26px] lg:w-[26px] place-items-center rounded-[7px]",
                   isGoal
                     ? "bg-white/[0.07] text-gold"
                     : "bg-cream-deep text-evergreen"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </span>
             </div>
             <p
               className={cn(
                 "font-bold leading-[1.05] tracking-[-0.03em] num flex items-baseline gap-1.5",
-                isGoal ? "text-[28px] text-cream" : "text-[34px] text-foreground"
+                isGoal
+                  ? "text-[28px] lg:text-[22px] text-cream"
+                  : "text-[34px] lg:text-[28px] text-foreground"
               )}
             >
               <span className="truncate">{value}</span>
               {denom && (
-                <span className="text-[17px] font-medium text-muted-foreground tracking-[-0.01em]">
+                <span className="text-[17px] lg:text-[14px] font-medium text-muted-foreground tracking-[-0.01em]">
                   {denom}
                 </span>
               )}
               {unit && (
                 <span
                   className={cn(
-                    "text-sm font-medium tracking-normal",
+                    "text-sm lg:text-[12px] font-medium tracking-normal",
                     isGoal ? "text-cream/70" : "text-muted-foreground"
                   )}
                 >
@@ -146,14 +150,14 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
             {/* A2 — progressBreakdown 등 긴 서브텍스트 line-clamp-2 + max-w-full */}
             <p
               className={cn(
-                "mt-2 text-[12px] leading-[1.5] line-clamp-2 max-w-full",
+                "mt-2 lg:mt-1 text-[12px] lg:text-[11px] leading-[1.5] lg:leading-[1.4] line-clamp-2 max-w-full",
                 isGoal ? "text-cream/75" : "text-muted-foreground"
               )}
             >
               {sub}
             </p>
             {kind === "progress" && progressPct != null && (
-              <div className="mt-auto pt-3 h-1 overflow-hidden rounded-full bg-cream-deep">
+              <div className="mt-auto pt-3 lg:pt-2 h-1 overflow-hidden rounded-full bg-cream-deep">
                 <span
                   className="block h-full bg-evergreen rounded-full gauge-fill"
                   style={{ width: `${Math.max(0, Math.min(100, progressPct))}%` }}

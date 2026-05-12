@@ -37,7 +37,7 @@ export function DashboardHeader() {
     : "오늘의 풀이·키워드·오답 트랙이 자동으로 채워지고, 추천 팟캐스트가 생성됩니다.";
 
   return (
-    <header className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b border-rule bg-cream/95 backdrop-blur px-10 py-[22px]">
+    <header className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b border-rule bg-cream/95 backdrop-blur px-10 py-[22px] mb-5 lg:mb-0">
       <div className="min-w-0">
         <h1 className="font-sans text-[22px] font-bold tracking-[-0.025em] leading-tight">
           안녕하세요, <em className="not-italic font-extrabold text-evergreen px-[0.02em]">{greetingName}</em>님.
@@ -54,16 +54,17 @@ export function DashboardHeader() {
           <Play className="h-3.5 w-3.5 text-gold" aria-hidden />
           <span>오늘 학습 시작</span>
         </Link>
+        {/* 사용자 보고 2026-05-12 — 종 모양 알림 클릭 무반응. 헌법 제16조 스코프
+            보호로 알림 기능 신규 도입은 별도 작업. 현 단계는 "준비 중" 안내. */}
         <button
           type="button"
-          aria-label="알림"
-          className="relative inline-flex h-[38px] w-[38px] items-center justify-center rounded-lg border border-transparent text-muted2-deep hover:bg-cream-soft hover:border-rule transition-colors"
+          aria-label="알림 (준비 중)"
+          title="알림 기능은 준비 중입니다."
+          aria-disabled="true"
+          disabled
+          className="relative inline-flex h-[38px] w-[38px] items-center justify-center rounded-lg border border-transparent text-muted2-deep/60 cursor-not-allowed"
         >
           <Bell className="h-[18px] w-[18px]" aria-hidden />
-          <span
-            aria-hidden
-            className="absolute top-[9px] right-[10px] h-1.5 w-1.5 rounded-full bg-error ring-[1.5px] ring-cream"
-          />
         </button>
         <ThemeToggle />
         <Link

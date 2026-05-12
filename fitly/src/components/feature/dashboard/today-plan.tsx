@@ -4,10 +4,11 @@ import { cn } from "@/lib/utils";
 import type { PlanItem } from "@/lib/dashboard/types";
 
 export function TodayPlan({ items }: { items: PlanItem[] }) {
+  // viewport fit (lg+) — article flex-col + ul flex-1 overflow-y-auto.
   return (
-    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 h-full">
-      <div className="flex items-center gap-2.5">
-        <h2 className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground">
+    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 h-full flex flex-col">
+      <div className="flex items-center gap-2.5 shrink-0">
+        <h2 className="font-sans text-[17px] lg:text-[15px] font-bold tracking-[-0.02em] text-foreground">
           오늘의 학습 플랜
         </h2>
         <Link
@@ -17,11 +18,11 @@ export function TodayPlan({ items }: { items: PlanItem[] }) {
           전체 ›
         </Link>
       </div>
-      <p className="mt-[2px] mb-[18px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em]">
+      <p className="mt-[2px] mb-[18px] lg:mb-2.5 text-[13px] lg:text-[11.5px] text-muted-foreground leading-[1.5] tracking-[-0.005em] shrink-0">
         3개 트랙 · 오늘 마감
       </p>
 
-      <ul className="grid gap-2.5">
+      <ul className="grid gap-2.5 lg:gap-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
         {items.map((item) => {
           const completed = item.state === "completed";
           const locked = item.state === "locked";

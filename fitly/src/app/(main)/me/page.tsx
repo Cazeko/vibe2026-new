@@ -348,9 +348,9 @@ export default async function MePage() {
                 {" · 최근 7일"}
               </span>
             </div>
-            {/* K1 (헌법 제4조의3 정합) — 의미 단위 줄바꿈 */}
+            {/* K1 (헌법 제4조의3 정합) — 의미 단위 줄바꿈. 사용자 보고 2026-05-12 — 13주 → 1년 확장 */}
             <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
-              최근 13주간 일별 학습 시간.
+              최근 1년간 일별 학습 시간.
               <br className="hidden sm:inline" />
               짙을수록 오래 학습한 날입니다.
             </p>

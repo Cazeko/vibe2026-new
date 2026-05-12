@@ -126,7 +126,7 @@ export default async function StudyAnalysisPage() {
         <Card className="border-rule">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-lg font-medium tracking-tight">활동량 (최근 12주)</h2>
+              <h2 className="font-serif text-lg font-medium tracking-tight">활동량 (최근 1년)</h2>
               <span className="text-[11px] text-muted-foreground">
                 매일 학습 시간(분) 기준
               </span>

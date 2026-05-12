@@ -3,8 +3,9 @@ import { ArrowRight } from "lucide-react";
 import type { WeakType } from "@/lib/dashboard/types";
 
 export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
+  // viewport fit (lg+) — compact padding + flex-col 로 buttons 하단 정착.
   return (
-    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 h-full">
+    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 h-full flex flex-col">
       {/* 헤더 — F 배지 + eyebrow + 제목 */}
       <div className="flex items-center gap-3 mb-3">
         <span

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { eq, sql } from "drizzle-orm";
 import {
   Calendar,
-  ShieldAlert,
   Layers,
   Activity,
   Network,
@@ -120,31 +119,22 @@ export default async function ExamAnalysisPage({
       />
 
       <div className="px-6 mx-auto max-w-7xl space-y-6">
-        {/* 정직성 안내 (컴팩트) + 내 지역 교육청 — 12-col grid.
-            정직성 박스는 헤드라인 한 줄 + 펼치기 토글로 축소(헌법 v3.5.1 제4의3 줄바꿈 정합). */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <HonestyCard className="lg:col-span-8" />
-          <RegionCard
-            region={targetRegion}
-            cutScores={cutScores}
-            className="lg:col-span-4"
-          />
-        </section>
-
-        <SectionRule />
-
-        {/* KPI 줄 — 시드 카운트. 값 0 또는 null 인 stat 은 '—' 로 폴백하여
-            '단독 0' 노출 회피 (사용자 보고 2026-05-12). */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* 사용자 요청 2026-05-12 — HonestyCard 제거, 그 자리(lg:col-span-8)에
+            4 KPI 카드(시험지·문항·학년도범위·시드상태)를 col-span-2 씩 배치.
+            RegionCard 는 col-span-4 유지하여 12-grid 정합.
+            정직성 원칙은 페이지 하단 disclaimer + 각 stat 자체로 자연 노출됨. */}
+        <section className="grid grid-cols-2 lg:grid-cols-12 gap-3">
           <StatCard
             label="시험지"
             value={paperStats?.paperCount ? paperStats.paperCount : "—"}
             unit={paperStats?.paperCount ? "회분" : ""}
+            className="lg:col-span-2"
           />
           <StatCard
             label="문항"
             value={itemStats?.itemCount ? itemStats.itemCount : "—"}
             unit={itemStats?.itemCount ? "개" : ""}
+            className="lg:col-span-2"
           />
           <StatCard
             label="학년도 범위"
@@ -154,12 +144,19 @@ export default async function ExamAnalysisPage({
                 : "—"
             }
             unit=""
+            className="lg:col-span-2"
           />
           <StatCard
             label="시드 상태"
             value={seedReady ? "활성" : "대기"}
             unit=""
             accent={seedReady}
+            className="lg:col-span-2"
+          />
+          <RegionCard
+            region={targetRegion}
+            cutScores={cutScores}
+            className="col-span-2 lg:col-span-4 row-span-1"
           />
         </section>
 
@@ -203,58 +200,8 @@ export default async function ExamAnalysisPage({
 }
 
 // --- presentation parts -----------------------------------------------------
-
-function SectionRule() {
-  return <div className="h-px bg-rule" aria-hidden />;
-}
-
-function HonestyCard({ className = "" }: { className?: string }) {
-  // 컴팩트 디스클로저 — 헤드라인 한 줄만 노출, 펼치기 시 상세 표시.
-  // 첫 화면 점유를 줄여 분석 콘텐츠가 즉시 보이도록 설계 (사용자 보고 2026-05-12).
-  return (
-    <Card
-      className={`${className} border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30`}
-    >
-      <CardContent className="p-0">
-        <details className="group">
-          <summary className="cursor-pointer list-none px-5 py-4 flex items-center gap-3 select-none hover:bg-secondary/50 transition-colors">
-            <ShieldAlert
-              className="h-4 w-4 text-warning shrink-0"
-              aria-hidden
-            />
-            <p className="font-serif text-[14.5px] font-medium tracking-tight text-foreground flex-1">
-              정직성 원칙 — 표시하는 것과 만들지 않는 것
-            </p>
-            <span
-              aria-hidden
-              className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground group-open:hidden"
-            >
-              펼치기
-            </span>
-            <span
-              aria-hidden
-              className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground hidden group-open:inline"
-            >
-              접기
-            </span>
-          </summary>
-          <div className="px-5 pb-4 pt-1 text-[12.5px] text-foreground/85 leading-relaxed border-t border-rule/60">
-            <p className="mt-2.5">
-              <strong>표시</strong>: 시도교육청이 공개한
-              <br className="hidden sm:inline" /> 1차 합격선·경쟁률·모집 인원,
-              24년치 공개 기출의 영역·인지수준·키워드 분포.
-            </p>
-            <p className="mt-1.5">
-              <strong>만들지 않음</strong>: 합격 가능성·점수 예측·임의 추정값.
-              본인 학습의 방향과 페이스 결정에 도움이 되는
-              <br className="hidden sm:inline" /> 사실 데이터만 보여 드립니다.
-            </p>
-          </div>
-        </details>
-      </CardContent>
-    </Card>
-  );
-}
+// HonestyCard, SectionRule 제거 — 사용자 요청 2026-05-12 (자리를 KPI 가 대체).
+// 정직성 원칙 본문은 페이지 하단 disclaimer + 각 stat 의 사실 데이터 자체로 노출됨.
 
 function RegionCard({
   region,
@@ -353,17 +300,19 @@ function StatCard({
   value,
   unit,
   accent = false,
+  className = "",
 }: {
   label: string;
   value: string | number;
   unit: string;
   accent?: boolean;
+  className?: string;
 }) {
   // 값이 긴 문자열(예: 2002–2026)일 때도 KPI 카드 폭(좁은 뷰포트 ~140px) 안에
   // 자동 축소되도록 clamp + min-w-0 적용. 사용자 보고 2026-05-12.
   const isLongValue = typeof value === "string" && value.length > 4;
   return (
-    <Card className="border-rule overflow-hidden">
+    <Card className={`border-rule overflow-hidden ${className}`}>
       <CardContent className="p-4 min-w-0">
         <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground truncate">
           {label}
