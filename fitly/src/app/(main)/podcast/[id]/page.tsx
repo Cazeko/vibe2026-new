@@ -1,14 +1,22 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { eq, and } from "drizzle-orm";
-import { ArrowLeft, ShieldAlert } from "lucide-react";
+import { ArrowLeft, ShieldAlert, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { Markdown } from "@/components/shared/markdown";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { podcastEpisodes, podcastProgress } from "@/lib/db/schema";
 import type { PodcastScript } from "@/lib/podcast/script";
 import { AudioPlayer } from "./_components/audio-player";
+
+// N1 metadata — 동적 라우트 정합 (헌법 제19조의2 PWA 정합)
+export const metadata: Metadata = {
+  title: "팟캐스트 에피소드 | Fitly",
+  description: "AI 자동 생성 학습 청취 — 2인 화자 대화체 스크립트.",
+};
 
 // HIGH-003 — UUID 형식 검증 (eq에 잘못된 string 전달 시 PostgreSQL 5xx)
 const UUID_RE =
@@ -74,16 +82,32 @@ export default async function PodcastEpisodePage({
           팟캐스트 목록으로
         </Link>
 
-        {!ep.verified && (
+        {/* K1 warning 배지 의미 단위 br + C1 verified 시 검증 완료 배지 (헌법 제3조의2 정직성 + 제4조의3 한글 줄바꿈) */}
+        {ep.verified ? (
+          <Card className="border-l-[3px] border-l-evergreen border-y border-r border-rule bg-evergreen/[0.05]">
+            <CardContent className="p-4 flex gap-2.5">
+              <ShieldCheck
+                className="h-4 w-4 text-evergreen shrink-0 mt-0.5"
+                aria-hidden
+              />
+              <p className="text-[12.5px] text-foreground/85 leading-relaxed break-keep">
+                검증 완료된 에피소드입니다.
+                <br className="hidden md:inline" />{" "}
+                운영자 검토를 통과한 학습 자료입니다.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
           <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
             <CardContent className="p-4 flex gap-2.5">
               <ShieldAlert
                 className="h-4 w-4 text-warning shrink-0 mt-0.5"
                 aria-hidden
               />
-              <p className="text-[12.5px] text-foreground/85 leading-relaxed">
-                AI가 생성한 학습 보조 자료입니다. 공식 해설이 아니며, 학습 결정
-                시 참고 자료로 활용해 주세요.
+              <p className="text-[12.5px] text-foreground/85 leading-relaxed break-keep">
+                AI가 생성한 학습 보조 자료입니다.
+                <br className="hidden md:inline" />{" "}
+                공식 해설이 아니며, 학습 결정 시 참고 자료로 활용해 주세요.
               </p>
             </CardContent>
           </Card>
@@ -99,8 +123,10 @@ export default async function PodcastEpisodePage({
           />
         ) : (
           <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
-            <CardContent className="p-4 text-[12.5px] text-foreground/85">
-              오디오 파일이 아직 업로드되지 않았습니다. 잠시 후 새로고침해 주세요.
+            <CardContent className="p-4 text-[12.5px] text-foreground/85 leading-relaxed break-keep">
+              오디오 파일이 아직 업로드되지 않았습니다.
+              <br className="hidden md:inline" />{" "}
+              잠시 후 새로고침해 주세요.
             </CardContent>
           </Card>
         )}
@@ -112,26 +138,30 @@ export default async function PodcastEpisodePage({
             </h2>
             <Card className="border-rule">
               <CardContent className="p-5 space-y-2.5">
+                {/* A1 speaker shrink-0 min-w + truncate, F1 dialogue mini-markdown (Markdown 컴포넌트 — sanitized) */}
                 {script.dialogue.map((line, idx) => (
-                  <div key={idx} className="flex gap-3">
+                  <div key={idx} className="flex gap-3 min-w-0">
                     <span
-                      className={`shrink-0 w-12 text-[11px] font-medium tabular-nums ${
+                      className={`shrink-0 min-w-10 max-w-[80px] truncate text-[11px] font-medium tabular-nums ${
                         line.speaker === script.speakers[0]
                           ? "text-foreground"
                           : "text-muted-foreground"
                       }`}
+                      title={line.speaker}
                     >
                       {line.speaker}
                     </span>
-                    <p className="text-[13px] leading-[1.7] text-foreground/85">
-                      {line.text}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <Markdown className="text-[13px] leading-[1.7] text-foreground/85">
+                        {line.text}
+                      </Markdown>
+                    </div>
                   </div>
                 ))}
               </CardContent>
             </Card>
             {script.summary && (
-              <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+              <p className="text-[11.5px] text-muted-foreground leading-relaxed break-keep">
                 요약: {script.summary}
               </p>
             )}

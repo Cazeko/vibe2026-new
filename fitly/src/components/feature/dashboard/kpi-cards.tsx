@@ -28,6 +28,7 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
     kpi.daysToExam != null
       ? `D−${kpi.daysToExam} · 2026학년도 1차`
       : "설정에서 시험일·지역 등록";
+  // 헌법 제3조의2 정합 — studyDeltaMinutes === 0 시 친화 폴백 (C3)
   const minutesSub =
     kpi.studyDeltaMinutes > 0 ? (
       <>
@@ -36,8 +37,10 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
           +{formatHourMin(kpi.studyDeltaMinutes)}
         </span>
       </>
-    ) : (
+    ) : kpi.studyMinutes > 0 ? (
       <>이번 주 첫 학습 시작 권장</>
+    ) : (
+      <>아직 학습 기록 없음</>
     );
 
   const cards: Card[] = [
@@ -76,20 +79,24 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
   ];
 
   return (
+    // 헌법 제24조의2 정합 — A1 lg 잘림 fix: md:3 lg:4 단계화 + gap-3 + min-w-0
     <section
       aria-label="요약 지표"
-      className="grid grid-cols-2 xl:grid-cols-4 gap-4"
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
     >
       {cards.map(({ kind, label, value, unit, denom, sub, Icon, progressPct }) => {
         const isGoal = kind === "goal";
         return (
           <article
             key={label}
+            tabIndex={0}
             className={cn(
-              "rounded-card border min-h-[132px] px-[22px] py-5 flex flex-col transition-colors",
+              // G2 — focus-visible ring (evergreen은 진척도/CTA/AI 추천에만, 일반은 rule-strong)
+              "rounded-card border min-h-[132px] px-[22px] py-5 flex flex-col transition-colors overflow-hidden min-w-0",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               isGoal
-                ? "bg-evergreen border-evergreen text-cream"
-                : "bg-cream-soft border-rule hover:border-rule-strong"
+                ? "bg-evergreen border-evergreen text-cream focus-visible:ring-evergreen/40"
+                : "bg-cream-soft border-rule hover:border-rule-strong focus-visible:ring-rule-strong/60"
             )}
           >
             <div className="flex items-center justify-between mb-3.5">
@@ -136,9 +143,10 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
                 </span>
               )}
             </p>
+            {/* A2 — progressBreakdown 등 긴 서브텍스트 line-clamp-2 + max-w-full */}
             <p
               className={cn(
-                "mt-2 text-[12px] leading-[1.5]",
+                "mt-2 text-[12px] leading-[1.5] line-clamp-2 max-w-full",
                 isGoal ? "text-cream/75" : "text-muted-foreground"
               )}
             >

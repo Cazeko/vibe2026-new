@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { desc, eq, or, sql } from "drizzle-orm";
@@ -12,13 +13,21 @@ import { safeRun } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
+// 헌법 v3.5.1 — N1 metadata. SEO/PWA 정합 (제19조의2 PWA 헌법 정합).
+export const metadata: Metadata = {
+  title: "팟캐스트 | Fitly",
+  description:
+    "2인 화자 대화체 팟캐스트로 자동 생성된 학습 청취 — 이동 중에도 학습.",
+};
+
 // 헌법 v3.0 제13조의3 — NotebookLM 스타일 자동 생성 팟캐스트.
 // 헌법 제36조 우선순위 5 — 첫 가치 마법 지점 2 (TTS 통합 어려우면 Phase 2 보류).
 // 본 페이지는 시드 미적재 + TTS 미통합 시점의 셸. Gemini multi-speaker TTS
 // 통합 후 자동 생성 + 사용자 즉석 생성 동선 활성화 (제18조 1항 A 매트릭스).
 
 function fmtDuration(sec: number | null): string {
-  if (!sec) return "—";
+  // B1 헌법 §3.2 정직성 — null/0 시 "—" 폴백 명시 (라벨 정합).
+  if (sec == null || sec <= 0) return "—";
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${m}분 ${String(s).padStart(2, "0")}초`;
@@ -110,9 +119,10 @@ export default async function PodcastPage() {
 
         <SectionRule />
 
-        {/* 즉석 생성 진입점 — DESIGN.md §8.5 AI Recommend Card 정합 */}
+        {/* 즉석 생성 진입점 — DESIGN.md §8.5 AI Recommend Card 정합
+            D1 모바일 축소 (p-4 → md:p-6), K1 안내문 br 의미 단위 (헌법 제4조의3) */}
         <Card className="border-evergreen bg-evergreen/[0.04]">
-          <CardContent className="p-6 flex items-start gap-4 flex-wrap">
+          <CardContent className="p-4 md:p-6 flex items-start gap-3 md:gap-4 flex-wrap">
             <span
               aria-hidden
               className="grid h-8 w-8 place-items-center rounded-full bg-evergreen text-primary-foreground font-serif italic font-medium text-sm shrink-0"
@@ -121,13 +131,14 @@ export default async function PodcastPage() {
             </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 flex-wrap">
-                <div>
-                  <p className="font-serif text-lg font-medium tracking-tight">
+                <div className="min-w-0">
+                  <p className="font-serif text-base md:text-lg font-medium tracking-tight">
                     내 약점 영역 즉석 청취
                   </p>
-                  <p className="mt-1 text-[12.5px] text-muted-foreground leading-relaxed max-w-lg">
-                    학습 분석에서 추출한 약점 영역·연도·주제를 선택하시면 2인 화자
-                    대화체 1~2분 청취 학습이 즉석 생성됩니다.
+                  <p className="mt-1 text-[12.5px] text-muted-foreground leading-relaxed max-w-lg break-keep">
+                    학습 분석에서 추출한 약점 영역·연도·주제를 선택하시면
+                    <br className="hidden md:inline" />{" "}
+                    2인 화자 대화체 1~2분 청취 학습이 즉석 생성됩니다.
                   </p>
                 </div>
                 <InstantGenerate />
@@ -275,11 +286,17 @@ function EpisodeGrid({
     );
   }
   return (
-    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    // A1 1024-1280 대역 카드 폭 좁음 해소 — lg는 2열, xl부터 3열 (헌법 제16조의2 디자인 시스템)
+    // S3 prefers-reduced-motion 호환 — transition-colors 만 (motion-safe 가드)
+    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
       {episodes.map((e) => (
-        <li key={e.id}>
-          <Link href={`/podcast/${e.id}`} className="block group">
-            <Card className="border-rule transition-colors group-hover:border-rule-strong h-full">
+        <li key={e.id} className="min-w-0">
+          <Link
+            href={`/podcast/${e.id}`}
+            className="block group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen focus-visible:ring-offset-2"
+          >
+            {/* G1 hover shadow + border-rule-strong (evergreen 미사용 — 카드는 CTA 카테고리 아님) */}
+            <Card className="border-rule overflow-hidden min-w-0 transition-[box-shadow,border-color] motion-safe:group-hover:shadow-sm group-hover:border-rule-strong h-full">
               <CardContent className="p-5 flex flex-col h-full">
                 <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
                   <span>
@@ -291,7 +308,8 @@ function EpisodeGrid({
                     </span>
                   )}
                 </div>
-                <p className="mt-2 font-serif text-base font-medium tracking-tight line-clamp-2">
+                {/* A2 한글 자모 분리 차단 — break-keep + line-clamp-2 */}
+                <p className="mt-2 font-serif text-base font-medium tracking-tight line-clamp-2 break-keep">
                   {e.theme}
                 </p>
                 <div className="mt-auto pt-4 flex items-center gap-2 text-[11.5px] text-muted-foreground">

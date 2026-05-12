@@ -4,11 +4,22 @@
 // 모바일: hero(소개) 상단 → login 하단
 // 데스크톱: login 좌측 → hero 우측 (md:order-1/2 로 시각 순서 스왑, DOM 순서는 유지)
 // 펀치라인은 헌법 제4조 v3.5.1 개정본 사용 + 한글 줄바꿈은 제4조의3 정합.
+// 2026-05-12 추가 다듬기 (헌법 v3.5.1 정합) — placeholder 75% / focus transition
+// 150ms / kakao hover secondary 정합 / error·message 시각 구분 + 아이콘 / 클라
+// 이언트 이메일·비번 검증 / aria-live polite / signup hint·\n 줄바꿈.
 
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, Sparkles, ArrowRight } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Sparkles,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { FitlyLogo } from "@/components/shared/fitly-logo";
 
@@ -23,6 +34,22 @@ const STATS = [
   { num: "17", label: "개 시도교육청" },
   { num: "12,840", label: "명 누적 응시자" },
 ];
+
+// 헌법 제4조의3 — 한글 줄바꿈 일관. 이메일 형식 RFC 5322 단순화 정규식.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateInputs(
+  email: string,
+  password: string
+): { ok: true } | { ok: false; reason: string } {
+  if (!EMAIL_RE.test(email)) {
+    return { ok: false, reason: "이메일 형식이 올바르지 않습니다." };
+  }
+  if (password.length < 6) {
+    return { ok: false, reason: "비밀번호는 6자 이상이어야 합니다." };
+  }
+  return { ok: true };
+}
 
 // 종이그레인 — globals.css body 와 동일한 1% 노이즈 (로그인 섹션이 body bg 를
 // 덮으므로 동일 패턴을 명시 적용한다)
@@ -44,10 +71,17 @@ export function FitlySignIn({ mode }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus("loading");
     setError(null);
     setMessage(null);
 
+    // T1 — 클라이언트 이메일·비밀번호 검증 (서버 검증 보완)
+    const v = validateInputs(email, password);
+    if (!v.ok) {
+      setError(v.reason);
+      return;
+    }
+
+    setStatus("loading");
     const { error: err } =
       mode === "login"
         ? await supabase.auth.signInWithPassword({ email, password })
@@ -60,7 +94,8 @@ export function FitlySignIn({ mode }: Props) {
     }
 
     if (mode === "signup") {
-      setMessage("확인 메일을 발송했습니다. 메일함에서 인증 후 로그인해 주세요.");
+      // B1 — 명시 줄바꿈으로 의미 단위 절단 방지 (제4조의3)
+      setMessage("확인 메일을 발송했습니다.\n메일함에서 인증 후 로그인해 주세요.");
       return;
     }
     router.replace("/dashboard");
@@ -182,7 +217,7 @@ export function FitlySignIn({ mode }: Props) {
               <span className="text-[12.5px] font-semibold text-muted2-deep mb-2">
                 이메일
               </span>
-              <span className="flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft transition-all">
+              <span className="flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft transition-colors duration-150">
                 <input
                   type="email"
                   required
@@ -190,16 +225,23 @@ export function FitlySignIn({ mode }: Props) {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none placeholder:text-muted-foreground/60"
+                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none placeholder:text-muted-foreground/75"
                 />
               </span>
             </label>
 
             <label className="grid">
-              <span className="text-[12.5px] font-semibold text-muted2-deep mb-2">
-                비밀번호
+              <span className="flex items-baseline justify-between mb-2">
+                <span className="text-[12.5px] font-semibold text-muted2-deep">
+                  비밀번호
+                </span>
+                {mode === "signup" && (
+                  <span className="text-[11px] text-muted-foreground">
+                    6자 이상
+                  </span>
+                )}
               </span>
-              <span className="relative flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft transition-all">
+              <span className="relative flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft transition-colors duration-150">
                 <input
                   type={showPassword ? "text" : "password"}
                   required
@@ -210,7 +252,7 @@ export function FitlySignIn({ mode }: Props) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none pr-10 placeholder:text-muted-foreground/60"
+                  className="w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus-visible:shadow-none pr-10 placeholder:text-muted-foreground/75"
                 />
                 <button
                   type="button"
@@ -249,7 +291,7 @@ export function FitlySignIn({ mode }: Props) {
               type="button"
               onClick={handleKakao}
               disabled={status === "loading"}
-              className="inline-flex h-[52px] items-center justify-center rounded-md border border-rule-strong bg-transparent text-[14.5px] font-semibold text-foreground hover:bg-cream-soft hover:border-rule-strong/80 transition-colors disabled:opacity-60"
+              className="inline-flex h-[52px] items-center justify-center rounded-md border border-rule-strong bg-transparent text-[14.5px] font-semibold text-foreground hover:bg-secondary/60 hover:border-rule-strong transition-colors disabled:opacity-60"
             >
               카카오로 계속하기
             </button>
@@ -265,14 +307,24 @@ export function FitlySignIn({ mode }: Props) {
           </aside>
 
           {error && (
-            <p role="alert" className="mt-4 text-[13px] text-destructive">
-              {error}
-            </p>
+            <div
+              role="alert"
+              aria-live="polite"
+              className="mt-4 flex items-start gap-2 rounded-lg bg-destructive/5 border border-destructive/30 px-3.5 py-2.5 text-[13px] text-destructive"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden />
+              <span className="leading-[1.55]">{error}</span>
+            </div>
           )}
           {message && (
-            <p role="status" className="mt-4 text-[13px] text-muted-foreground">
-              {message}
-            </p>
+            <div
+              role="status"
+              aria-live="polite"
+              className="mt-4 flex items-start gap-2 rounded-lg bg-info/5 border border-info/30 px-3.5 py-2.5 text-[13px] text-info"
+            >
+              <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" aria-hidden />
+              <span className="leading-[1.55] whitespace-pre-line">{message}</span>
+            </div>
           )}
 
           <p className="mt-7 text-center text-[13px] text-muted-foreground animate-element animate-delay-600">

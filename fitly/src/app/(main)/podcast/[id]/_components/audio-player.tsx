@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Volume2 } from "lucide-react";
+import { Play, Pause, Volume2, Loader2 } from "lucide-react";
 
 // 헌법 v3.0 §13의3 4항 — 청취 진척 저장 (재개 가능).
 // 5초 throttle로 /api/podcast/progress 호출. 종료 시 completed=true.
+// v3.5.1 — E1/E3 로딩 상태 + G1 focus ring + H1 모바일 터치 hit box + S2 aria-live + Q1 44×44 (헌법 제16조의2).
 
 type Props = {
   episodeId: string;
@@ -33,6 +34,8 @@ export function AudioPlayer({
   const [current, setCurrent] = useState(initialCurrentSec);
   const [duration, setDuration] = useState(durationSec ?? 0);
   const [completed, setCompleted] = useState(initialCompleted);
+  // E1/E3 — 오디오 로딩 / 버퍼링 상태 노출
+  const [loading, setLoading] = useState(true);
   const lastSavedRef = useRef(initialCurrentSec);
   const lastSaveTsRef = useRef(0);
 
@@ -109,6 +112,8 @@ export function AudioPlayer({
   const progressPct =
     duration > 0 ? Math.min(100, (current / duration) * 100) : 0;
 
+  const playLabel = playing ? "일시정지" : "재생";
+
   return (
     <div className="rounded-lg border border-rule bg-card p-5 space-y-3">
       <audio
@@ -117,19 +122,29 @@ export function AudioPlayer({
         preload="metadata"
         onTimeUpdate={onTimeUpdate}
         onEnded={onEnded}
+        onLoadStart={() => setLoading(true)}
+        onWaiting={() => setLoading(true)}
+        onCanPlay={() => setLoading(false)}
+        onPlaying={() => setLoading(false)}
+        onError={() => setLoading(false)}
         onLoadedMetadata={() => {
           const el = audioRef.current;
           if (el?.duration) setDuration(el.duration);
         }}
       />
       <div className="flex items-center gap-3">
+        {/* G1 focus-visible outline (헌법 제16조의2 활성 메뉴 정합) + Q1 44×44 보장 (h-11 w-11) */}
         <button
           type="button"
           onClick={togglePlay}
-          aria-label={playing ? "일시정지" : "재생"}
-          className="grid h-11 w-11 place-items-center rounded-full bg-evergreen text-primary-foreground transition-colors hover:bg-evergreen-strong"
+          aria-label={playLabel}
+          aria-pressed={playing}
+          disabled={loading}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-evergreen text-primary-foreground transition-colors hover:bg-evergreen-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen focus-visible:ring-offset-2 disabled:opacity-70"
         >
-          {playing ? (
+          {loading ? (
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+          ) : playing ? (
             <Pause className="h-5 w-5" aria-hidden />
           ) : (
             <Play className="h-5 w-5 ml-0.5" aria-hidden />
@@ -145,29 +160,53 @@ export function AudioPlayer({
                 완청
               </span>
             )}
+            {loading && (
+              <span className="ml-1 text-[10.5px] text-muted-foreground/80">
+                준비 중…
+              </span>
+            )}
           </div>
-          <input
-            type="range"
-            min={0}
-            max={Math.max(duration, 1)}
-            step={1}
-            value={current}
-            onChange={onSeek}
-            aria-label="재생 위치"
-            className="mt-2 w-full accent-evergreen cursor-pointer"
-            style={{
-              background: `linear-gradient(to right, hsl(var(--color-accent)) 0%, hsl(var(--color-accent)) ${progressPct}%, hsl(var(--color-rule)) ${progressPct}%, hsl(var(--color-rule)) 100%)`,
-              height: "4px",
-              borderRadius: "999px",
-              appearance: "none",
-            }}
-          />
+          {/* H1 모바일 터치 hit box 확대 — py-2.5로 최소 ~30px 패딩 영역 확보. thumb 크게.
+              accent 토큰 사용으로 dark mode 자동 정합 (R1) */}
+          <div className="mt-1 py-2.5">
+            <input
+              type="range"
+              min={0}
+              max={Math.max(duration, 1)}
+              step={1}
+              value={current}
+              onChange={onSeek}
+              aria-label="재생 위치"
+              aria-valuemin={0}
+              aria-valuemax={Math.max(duration, 1)}
+              aria-valuenow={Math.floor(current)}
+              aria-valuetext={`${fmtTime(current)} / ${fmtTime(duration)}`}
+              disabled={loading}
+              className="audio-range w-full accent-evergreen cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen focus-visible:ring-offset-2 rounded-full"
+              style={{
+                background: `linear-gradient(to right, hsl(var(--color-accent)) 0%, hsl(var(--color-accent)) ${progressPct}%, hsl(var(--color-rule)) ${progressPct}%, hsl(var(--color-rule)) 100%)`,
+                height: "6px",
+                borderRadius: "999px",
+                appearance: "none",
+              }}
+            />
+          </div>
         </div>
         <Volume2
           className="h-4 w-4 text-muted-foreground shrink-0"
           aria-hidden
         />
       </div>
+      {/* S2 재생 상태 변경 SR 공지 (aria-live polite) */}
+      <p className="sr-only" aria-live="polite">
+        {loading
+          ? "오디오 준비 중"
+          : playing
+            ? "재생 중"
+            : completed
+              ? "완청 — 일시정지"
+              : "일시정지"}
+      </p>
     </div>
   );
 }

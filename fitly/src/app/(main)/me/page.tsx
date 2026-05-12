@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
@@ -32,6 +33,13 @@ import {
 } from "@/lib/dashboard/analytics";
 
 export const dynamic = "force-dynamic";
+
+// N1 (헌법 제24조의2 정합) — 마이 페이지 메타데이터
+export const metadata: Metadata = {
+  title: "마이 페이지 · Fitly",
+  description:
+    "프로필·3 트랙 통계·학습 활동 히트맵·배지 등 본인 학습 기록을 한 페이지에 모았습니다.",
+};
 
 const REGION_SHORT: Record<string, string> = {
   서울: "서울", 경기: "경기", 인천: "인천", 부산: "부산", 대구: "대구",
@@ -147,20 +155,21 @@ export default async function MePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // O2 (헌법 제24조의2 정합) — 프로필 + 분석 5종을 단일 Promise.all로 병렬 fetch
   const db = getDb();
-  const [profileRow] = await db
-    .select()
-    .from(userProfiles)
-    .where(eq(userProfiles.userId, user.id))
-    .limit(1);
-
-  const [summary, heatmap, stats, lib, recent] = await Promise.all([
+  const [profileRows, summary, heatmap, stats, lib, recent] = await Promise.all([
+    db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, user.id))
+      .limit(1),
     getDashboardSummary(user.id),
     getActivityHeatmap(user.id),
     getSessionStats(user.id),
     getLibraryCounts(user.id),
     getRecentActivity(user.id, 5),
   ]);
+  const profileRow = profileRows[0];
 
   const target = profileRow?.targetUniversity ?? null;
   const targetShort = target ? (REGION_SHORT[target] ?? target) : null;
@@ -240,7 +249,11 @@ export default async function MePage() {
             <UserCircle className="h-7 w-7" />
           </span>
           <div className="flex-1 min-w-[200px]">
-            <p className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground break-all">
+            {/* B2 (헌법 제24조의2 정합) — 긴 이메일 truncate 시 title로 hover 표시 */}
+            <p
+              className="font-sans text-[17px] font-bold tracking-[-0.02em] text-foreground break-all"
+              title={user.email ?? undefined}
+            >
               {user.email ?? "Fitly 학습자"}
             </p>
             <p className="mt-1 text-[13px] text-muted-foreground tracking-[-0.005em]">
@@ -265,17 +278,18 @@ export default async function MePage() {
               )}
             </p>
           </div>
+          {/* G2 (헌법 제24조의2 정합) — focus-visible ring 추가. evergreen은 CTA(계정 설정)에만, 일반은 rule-strong */}
           <div className="inline-flex gap-2.5 flex-wrap">
             <Link
               href="/settings"
-              className="inline-flex h-10 items-center gap-2 rounded-lg border border-rule-strong px-4 text-[13px] font-semibold text-ink-2 hover:border-evergreen hover:text-evergreen transition-colors"
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-rule-strong px-4 text-[13px] font-semibold text-ink-2 hover:border-evergreen hover:text-evergreen transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule-strong/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Pencil className="h-3.5 w-3.5" aria-hidden />
               프로필 편집
             </Link>
             <Link
               href="/settings"
-              className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-[18px] text-[13px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
+              className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-[18px] text-[13px] font-semibold text-white hover:bg-evergreen-strong transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Settings className="h-3.5 w-3.5" aria-hidden />
               계정 설정
@@ -283,8 +297,8 @@ export default async function MePage() {
           </div>
         </article>
 
-        {/* ─ 3 트랙 통계 ─ */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* ─ 3 트랙 통계 ─ A1 (헌법 제24조의2 정합): md:2 lg:3 단계화 */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f) => (
             <article
               key={f.title}
@@ -301,13 +315,16 @@ export default async function MePage() {
                   기록 ›
                 </Link>
               </div>
+              {/* C2 (헌법 제24조의2·제3조의2 정합) — lib===0 시 단독 "0" 대신 "—" 노출 */}
               <p
                 className={`font-extrabold text-[38px] leading-none tracking-[-0.03em] num inline-flex items-baseline gap-1.5 ${f.isZero ? "text-muted2-deep" : "text-foreground"}`}
               >
-                {f.value}
-                <span className="text-base font-medium text-muted-foreground tracking-normal">
-                  {f.unit}
-                </span>
+                {f.isZero ? "—" : f.value}
+                {!f.isZero && (
+                  <span className="text-base font-medium text-muted-foreground tracking-normal">
+                    {f.unit}
+                  </span>
+                )}
               </p>
               <div className="flex items-center justify-between mt-4 text-[12px] text-muted-foreground tracking-[-0.005em]">
                 <span>{f.footL}</span>
@@ -331,13 +348,18 @@ export default async function MePage() {
                 {" · 최근 7일"}
               </span>
             </div>
-            <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em]">
-              최근 13주간 일별 학습 시간. 짙을수록 오래 학습한 날입니다.
+            {/* K1 (헌법 제4조의3 정합) — 의미 단위 줄바꿈 */}
+            <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
+              최근 13주간 일별 학습 시간.
+              <br className="hidden sm:inline" />
+              짙을수록 오래 학습한 날입니다.
             </p>
-            <div className="overflow-x-auto">
+            {/* E1 (헌법 제24조의2 정합) — overflow-x-auto 보장 + max-w 안전 */}
+            <div className="overflow-x-auto max-w-full">
               <ActivityHeatmap cells={heatmap} />
             </div>
-            <div className="mt-3.5 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+            {/* H3 (헌법 제24조의2 정합) — 범례 sticky-bottom (카드 하단 고정) */}
+            <div className="mt-3.5 sticky bottom-0 bg-cream-soft/95 backdrop-blur-sm flex items-center gap-1.5 text-[11.5px] text-muted-foreground flex-wrap">
               <span>적음</span>
               <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-cream-deep" />
               <i className="inline-block h-[11px] w-[11px] rounded-[3px] bg-[#d8e4dc] dark:bg-evergreen/30" />
@@ -419,19 +441,27 @@ export default async function MePage() {
               {earnedCount} / {badges.length} 획득
             </span>
           </div>
-          <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em]">
-            꾸준한 학습으로 배지를 모아 보세요. 모든 배지는 본인 활동 기록을
-            기반으로 자동 지급됩니다.
+          {/* K1 (헌법 제4조의3 정합) — 의미 단위 줄바꿈 */}
+          <p className="mt-[2px] mb-[10px] text-[13px] text-muted-foreground leading-[1.5] tracking-[-0.005em] break-keep">
+            꾸준한 학습으로 배지를 모아 보세요.
+            <br className="hidden sm:inline" />
+            모든 배지는 본인 활동 기록을 기반으로 자동 지급됩니다.
           </p>
 
-          <ul className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          {/* A1 (헌법 제24조의2 정합) — 배지 grid 단계화: 2→3→4→6 */}
+          <ul
+            aria-live="polite"
+            aria-label={`학습 배지: ${earnedCount} / ${badges.length} 획득`}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
+          >
+            {/* E2 (헌법 제24조의2 정합) — 미획득 명도 차 강화: opacity-60 + grayscale */}
             {badges.map((b) => (
               <li
                 key={b.id}
                 className={`rounded-[12px] border px-3 pt-[18px] pb-3.5 text-center transition-all ${
                   b.earned
                     ? "border-gold bg-cream-soft hover:-translate-y-0.5"
-                    : "border-rule bg-cream opacity-90"
+                    : "border-rule bg-cream opacity-60 grayscale"
                 }`}
               >
                 <span
@@ -457,13 +487,15 @@ export default async function MePage() {
           </ul>
         </article>
 
-        <p className="pt-2 max-w-[920px] text-[11.5px] text-muted-foreground leading-[1.6]">
+        {/* K1 (헌법 제4조의3·제3조의2 정합) — 정직성 안내, 의미 단위 줄바꿈 */}
+        <p className="pt-2 max-w-[920px] text-[11.5px] text-muted-foreground leading-[1.6] break-keep">
           본 마이 페이지의 통계·배지·활동 기록은{" "}
           <strong className="font-semibold text-muted2-deep">
             본인 계정의 실제 학습 데이터
           </strong>
-          만으로 산출됩니다. 합격 컷·타사용자 평균 같은 외부 비교 지표는 사용하지
-          않습니다.
+          만으로 산출됩니다.
+          <br className="hidden sm:inline" />
+          합격 컷·타사용자 평균 같은 외부 비교 지표는 사용하지 않습니다.
         </p>
       </div>
     </div>

@@ -12,7 +12,10 @@ import type { CardType } from "@/types";
 export const dynamic = "force-dynamic";
 
 // 학습 활동 페이지 — 3 트랙(풀이·키워드·오답).
+// 헌법 §16의2 디자인 시스템 — 학습 본업의 active 표시는 evergreen 인정 범위.
 
+// B1 — "시드" 운영자 용어를 사용자 친화 표현으로 재정의.
+// emptyHint는 의미 단위 br(헌법 §4의3) 적용.
 const TRACK_META: Record<
   CardType,
   { title: string; description: string; emptyHint: string }
@@ -21,22 +24,43 @@ const TRACK_META: Record<
     title: "풀이 트랙",
     description:
       "서술형 기출 답안을 작성하고 AI 모범답안과 비교 후 자가 채점합니다.",
-    emptyHint: "새 풀이 카드는 시드가 적재되면 자동 채워집니다.",
+    emptyHint:
+      "오늘 복습할 풀이 카드가 없습니다.\n새 카드는 시드 일정에 따라 자동 추가됩니다.",
   },
   keyword: {
     title: "키워드 트랙",
     description: "개념 정리 노트로 정의·핵심 요소를 반복 학습합니다.",
-    emptyHint: "새 키워드 카드는 시드가 적재되면 자동 채워집니다.",
+    emptyHint:
+      "오늘 복습할 키워드 카드가 없습니다.\n새 카드는 시드 일정에 따라 자동 추가됩니다.",
   },
   mistake: {
     title: "오답 트랙",
     description:
-      "다시·어렵 평가로 자동 합류된 카드를 마스터까지 복습합니다.",
-    emptyHint: "풀이를 다시·어렵으로 평가하면 자동 합류됩니다.",
+      "다시·어렵 평가로 자동 합류된 카드를 마스터까지 반복 학습합니다.",
+    emptyHint:
+      "오답으로 합류된 카드가 없습니다.\n풀이 트랙에서 다시·어렵을 선택하면\n이 트랙에 자동 합류됩니다.",
   },
 };
 
 const VALID_TRACKS = ["quiz", "keyword", "mistake"] as const;
+
+// N1 metadata — 트랙별 동적 타이틀.
+// 헌법 §24의2 — 명시 근거: docs/audit/2026-05-12-pages-ux-audit.md 페이지 8.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ track: string }>;
+}) {
+  const { track } = await params;
+  if (!VALID_TRACKS.includes(track as CardType)) {
+    return { title: "학습 · Fitly" };
+  }
+  const meta = TRACK_META[track as CardType];
+  return {
+    title: `${meta.title} · Fitly`,
+    description: meta.description,
+  };
+}
 
 export default async function StudyTrackPage({
   params,
@@ -53,6 +77,7 @@ export default async function StudyTrackPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // O2 병렬 fetch — Promise.all 검증 OK (기존 유지).
   const [cards, dueCounts] = await Promise.all([
     getDueCards(user.id, track, 1),
     getDueCardCounts(user.id),
@@ -76,9 +101,12 @@ export default async function StudyTrackPage({
       />
 
       <div className="px-6 mx-auto max-w-3xl space-y-6">
-        {/* 진행 헤더 — 좌측 due 카운트, 우측 트랙 스위치 */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="text-[12px] text-muted-foreground tabular-nums">
+        {/* D2 — 진행 헤더 flex-wrap + 모바일 stack. S2 큐 상태 변화 aria-live. */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div
+            className="text-[12px] text-muted-foreground tabular-nums leading-relaxed"
+            aria-live="polite"
+          >
             오늘의 due {" — "}
             <span className="text-foreground font-medium">
               풀이 {dueCounts.quiz}장
@@ -92,24 +120,32 @@ export default async function StudyTrackPage({
               오답 {dueCounts.mistake}장
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          {/* G2 트랙 스위치 — active border-b-2 evergreen (활성 메뉴 정합). */}
+          <nav
+            aria-label="트랙 전환"
+            className="flex items-center gap-1 border-b border-rule"
+          >
             {VALID_TRACKS.map((t) => {
               const active = t === track;
               return (
                 <Link
                   key={t}
                   href={`/study/${t}`}
-                  className={`px-2.5 py-1 text-[11.5px] rounded-md transition-colors ${
+                  aria-current={active ? "page" : undefined}
+                  className={`px-3 py-1.5 text-[11.5px] -mb-px border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 rounded-t-sm ${
                     active
-                      ? "bg-evergreen/10 text-evergreen font-medium"
-                      : "text-muted-foreground hover:bg-secondary"
+                      ? "border-evergreen text-evergreen font-medium"
+                      : "border-transparent text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
                   }`}
                 >
-                  {TRACK_META[t].title.replace(" 트랙", "")}
+                  {TRACK_META[t].title.replace(" 트랙", "")}{" "}
+                  <span className="tabular-nums text-[10.5px] opacity-80">
+                    {dueCounts[t]}
+                  </span>
                 </Link>
               );
             })}
-          </div>
+          </nav>
         </div>
 
         {card ? (
@@ -148,43 +184,53 @@ function EmptyQueue({
   const hint = TRACK_META[track].emptyHint;
 
   return (
-    <Card className="border-rule border-dashed">
-      <CardContent className="p-10 text-center">
-        <BookOpenCheck
-          className="h-6 w-6 mx-auto text-muted-foreground"
-          aria-hidden
-        />
-        <p className="mt-3 font-serif text-base font-medium tracking-tight">
-          오늘 복습할 카드가 없습니다
-        </p>
-        <p className="mt-2 text-[12.5px] text-muted-foreground leading-relaxed max-w-md mx-auto">
-          {hint}
-        </p>
-
-        {altTracks.length > 0 && (
-          <div className="mt-5 inline-flex flex-col items-center gap-2">
-            <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              다른 트랙
+    <div className="space-y-4">
+      {/* C3 — 다른 트랙에 due가 있으면 상단 강조 배경으로 우선 노출. */}
+      {altTracks.length > 0 && (
+        <Card className="border-l-[3px] border-l-evergreen border-y border-r border-rule bg-evergreen/5">
+          <CardContent className="p-5">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-evergreen">
+              지금 바로 학습 가능
             </p>
-            <div className="flex flex-wrap justify-center gap-2">
+            <p className="mt-1 text-[12.5px] text-foreground/85 leading-relaxed">
+              다른 트랙에 오늘의 복습 카드가 남아 있습니다.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
               {altTracks.map((t) => (
                 <Button key={t} asChild size="sm" variant="outline">
                   <Link href={`/study/${t}`} prefetch={false}>
-                    {TRACK_META[t].title.replace(" 트랙", "")} {dueCounts[t]}장
+                    {TRACK_META[t].title.replace(" 트랙", "")}{" "}
+                    <span className="tabular-nums ml-1">{dueCounts[t]}장</span>
                     <ArrowRight className="h-3 w-3 ml-1" aria-hidden />
                   </Link>
                 </Button>
               ))}
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        <div className="mt-6">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/study-plan">학습 계획으로</Link>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <Card className="border-rule border-dashed">
+        <CardContent className="p-10 text-center">
+          <BookOpenCheck
+            className="h-6 w-6 mx-auto text-muted-foreground"
+            aria-hidden
+          />
+          <p className="mt-3 font-serif text-base font-medium tracking-tight">
+            오늘 복습할 카드가 없습니다
+          </p>
+          {/* K1 — emptyHint는 \n으로 의미 단위 분리(헌법 §4의3). whitespace-pre-line으로 렌더. */}
+          <p className="mt-2 text-[12.5px] text-muted-foreground leading-relaxed max-w-md mx-auto whitespace-pre-line">
+            {hint}
+          </p>
+
+          <div className="mt-6">
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/study-plan">학습 계획으로</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
