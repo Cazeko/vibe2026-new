@@ -182,6 +182,15 @@
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
+/* P0-11 (외부 평가 2026-05-12, DESIGN §10.2 정합) — prefers-reduced-motion
+   존중. shimmer 끄고 단색 muted 만 표시. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: hsl(var(--muted));
+  }
+}
+
 /* ── Auth landing animations (FitlySignIn) ─────────────────────────────
    요소가 살짝 아래·블러에서 fade in. delay class로 단계별 노출. */
 @keyframes fadeSlideIn {

@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/shared/app-sidebar";
-import { TabletGate } from "@/components/shared/tablet-gate";
+import { PageTransition } from "@/components/shared/page-transition";
+import { MobileMenuProvider } from "@/components/shared/mobile-menu-provider";
 
 // 헌법 v3.5 제35조의2 정합 — Vercel function 한도.
 // statement_timeout 8s + safeRun fallback과 함께 SSR 전체 한도를 30s로 확장하여
@@ -8,20 +9,21 @@ import { TabletGate } from "@/components/shared/tablet-gate";
 export const maxDuration = 30;
 export const preferredRegion = "icn1";
 
-// 헌법 v1.9 제13조 — 태블릿 가로 사이드바 + 콘텐츠 그리드.
+// 헌법 v3.5.3 제2조 — 모바일 1차 지원. AppSidebar 가 lg 미만에서는 drawer 로
+// 동작하며 (MobileMenuProvider 컨텍스트), TabletGate 는 폐지됨.
 export default function MainLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <>
-      <TabletGate />
-      {/* DESIGN.md §4.5 정합 — body 자체의 cream + 1% radial grain 이 그대로 비친다.
-          이 div 에 bg-app-bg 를 두면 그레인이 가려져 로그인 페이지에만 노출되는
-          이전 회귀가 재현된다. 따라서 색을 명시하지 아니한다. */}
-      <div className="hidden lg:block min-h-screen">
+    <MobileMenuProvider>
+      <div className="min-h-screen">
         <AppSidebar />
-        <main className="ml-[248px] min-h-screen">{children}</main>
+        {/* lg+ 에서는 사이드바 폭 248px offset, 모바일에서는 fullwidth.
+            DESIGN.md §4.5 — body cream + 1% grain 그대로. */}
+        <main className="lg:ml-[248px] min-h-screen">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
-    </>
+    </MobileMenuProvider>
   );
 }

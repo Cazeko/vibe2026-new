@@ -36,7 +36,20 @@ export async function GET() {
     .where(eq(userProfiles.userId, user.id))
     .limit(1);
 
-  return NextResponse.json({ profile: rows[0] ?? null });
+  // P0-01 fix (외부 리뷰 H1 — 2026-05-12) — userProfiles 스키마에는 displayName
+  // 컬럼이 없으므로 UI 호칭({이름} 선생님)을 위해 user_metadata.full_name 또는
+  // 이메일 로컬파트를 fallback 으로 합성 반환. 헌법 §16 스코프 보호로 신규
+  // 컬럼 추가는 회피, 서버-측 합성으로 처리.
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const metaFull = typeof meta.full_name === "string" ? meta.full_name.trim() : "";
+  const metaName = typeof meta.name === "string" ? meta.name.trim() : "";
+  const emailLocal = user.email ? user.email.split("@")[0] : "";
+  const displayName = metaFull || metaName || emailLocal || null;
+
+  const base = rows[0] ?? null;
+  return NextResponse.json({
+    profile: base ? { ...base, displayName } : { displayName },
+  });
 }
 
 export async function POST(request: NextRequest) {

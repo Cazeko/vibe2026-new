@@ -49,7 +49,13 @@ export async function TopicTab() {
               시드 적재 후 채워집니다.
             </p>
           ) : (
-            <KeywordCloud cloud={cloud} />
+            <>
+              <KeywordCloud cloud={cloud} />
+              {/* P1-09 (외부 리뷰 2026-05-12) — 워드클라우드만으로는 빈도 정확 비교가
+                  어려움. 상위 10개를 막대그래프로 보조 노출하여 직관성 보강.
+                  §4.3 evergreen 보호 — bar 색은 muted-foreground/45 (시맨틱 외 중성). */}
+              <KeywordTopBar cloud={cloud} />
+            </>
           )}
         </CardContent>
       </Card>
@@ -125,6 +131,53 @@ export async function TopicTab() {
           </p>
         </div>
       </aside>
+    </div>
+  );
+}
+
+function KeywordTopBar({
+  cloud,
+}: {
+  cloud: { keyword: string; count: number }[];
+}) {
+  const top = cloud.slice(0, 10);
+  if (top.length === 0) return null;
+  const max = Math.max(...top.map((k) => k.count));
+  return (
+    <div className="mt-5 pt-4 border-t border-rule">
+      <p className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground mb-2.5">
+        상위 10개 빈도 비교
+      </p>
+      <ul className="space-y-1.5">
+        {top.map((k, idx) => {
+          const pct = max > 0 ? (k.count / max) * 100 : 0;
+          return (
+            <li
+              key={k.keyword}
+              className="flex items-center gap-2.5 text-[12px]"
+            >
+              <span className="w-4 text-right text-[10px] text-muted-foreground tabular-nums shrink-0">
+                {idx + 1}
+              </span>
+              <span className="w-28 truncate font-medium shrink-0">
+                {k.keyword}
+              </span>
+              {/* P1 코드 리뷰 M2 fix — 다크모드 트랙 명도 보정. bg-rule 다크는
+                  L 21% 로 매우 어두워 0% 막대가 검은 띠처럼 보임. dark:bg-rule-soft
+                  + bar 색 foreground/30 으로 다크·라이트 모두 일관 명도. */}
+              <span className="flex-1 h-2 bg-rule dark:bg-rule-soft rounded-full overflow-hidden">
+                <span
+                  className="block h-full bg-foreground/30 rounded-full"
+                  style={{ width: `${pct}%` }}
+                />
+              </span>
+              <span className="w-12 text-right text-[10.5px] text-muted-foreground tabular-nums shrink-0">
+                {k.count}회
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

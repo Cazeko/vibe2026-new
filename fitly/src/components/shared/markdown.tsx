@@ -41,10 +41,19 @@ export function Markdown({
             <h4 className="font-medium text-foreground mt-3 mb-1.5 first:mt-0">{children}</h4>
           ),
           p: ({ children }) => <p className="my-2 first:mt-0 last:mb-0">{children}</p>,
+          // P1-05 (외부 리뷰 2026-05-12) — AI 모범답안 키워드 시각 위계 강화.
+          // 노트 메타포(DESIGN §0)·학술 노트 underline 강조 정합. 형광펜식 배경
+          // 색은 §4 컬러 토큰 보호 (warning·info 시맨틱 침범) 회피.
+          // P1 코드 리뷰 M1 fix — 다크모드 rule-strong(L 29%) 위 foreground/90
+          // (거의 흰색) underline 가독성 부족. 다크 전용 decoration 강화.
           strong: ({ children }) => (
-            <strong className="font-semibold text-foreground">{children}</strong>
+            <strong className="font-bold text-foreground underline decoration-rule-strong dark:decoration-muted-foreground/60 decoration-2 underline-offset-[3px]">
+              {children}
+            </strong>
           ),
-          em: ({ children }) => <em className="italic">{children}</em>,
+          em: ({ children }) => (
+            <em className="italic font-medium text-foreground/95">{children}</em>
+          ),
           ul: ({ children }) => (
             <ul className="list-disc list-outside pl-5 space-y-1 my-2">{children}</ul>
           ),

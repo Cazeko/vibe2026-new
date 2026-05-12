@@ -272,14 +272,14 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
       "plan-keyword",
       "키워드 트랙 — 개념 정리 노트",
       "keyword",
-      "/study?track=keyword",
+      "/study/keyword",
       "오늘의 due 없음 — 새 카드 학습",
     ),
     planRow(
       "plan-mistake",
       "오답 트랙",
       "mistake",
-      "/study?track=mistake",
+      "/study/mistake",
       "풀이를 again/hard 로 평가하면 자동 합류",
     ),
   ];

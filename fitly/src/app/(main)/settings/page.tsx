@@ -32,8 +32,10 @@ const THEME_OPTIONS = [
 ] as const;
 
 // 헌법 §16의2 정합 — focus-visible은 evergreen tint(40%)로 통일 (CTA 정합).
+// C-14 (외부 리뷰 2026-05-12) — Select chevron·Input 우측 아이콘 18px 로 확대.
+// [&_svg]:h-4.5 [&_svg]:w-4.5 로 trigger 내부 svg 일괄 보정 (hitbox 어포던스).
 const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background [&_svg]:h-[18px] [&_svg]:w-[18px]";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -150,7 +152,10 @@ export default function SettingsPage() {
         // B1 subtitle 명료화 — 무엇을 관리하는지 단번에 전달.
         subtitle="지역 교육청·시험일 설정 + 테마·계정 관리"
       />
-      <div className="px-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
+      {/* P1-03 (외부 리뷰 2026-05-12) — 폼 max-width 제약. 종전 wrapper 가 페이지
+          전체 폭이라 xl(1280+) 에서 폼 카드가 800px+ 로 늘어남. 폼 가독성 위해
+          페이지를 max-w-5xl(1024) 로 제한하여 좌측 ~640·우측 ~320 컬럼 정돈. */}
+      <div className="px-6 mx-auto max-w-5xl grid grid-cols-1 xl:grid-cols-3 gap-3">
         {/* 목표 설정 */}
         <Card className="xl:col-span-2 border-rule">
           <CardHeader>

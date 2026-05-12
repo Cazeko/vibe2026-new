@@ -48,6 +48,23 @@ export function ExamHeatmap({
 
   return (
     <div className="space-y-2">
+      {/* C-11 (외부 리뷰 2026-05-12) — 범례를 표 상단으로 이동. 셀의 색이
+          무엇을 의미하는지 표를 보기 전에 알 수 있도록 시선 흐름 정합. */}
+      <div className="flex items-center justify-between gap-3 text-[10px] text-muted-foreground flex-wrap">
+        <div className="flex items-center gap-1.5">
+          <span>적음</span>
+          {[0.12, 0.3, 0.5, 0.7, 0.9].map((alpha) => (
+            <span
+              key={alpha}
+              className="h-2.5 w-2.5 rounded-[2px]"
+              style={{ backgroundColor: `hsl(${palette.color} / ${alpha})` }}
+            />
+          ))}
+          <span>많음</span>
+          <span className="ml-2 tabular-nums">최대 {max}문항/셀</span>
+        </div>
+        <span className="tabular-nums">← 좌우 스크롤 →</span>
+      </div>
       {/* 사용자 보고 2026-05-12 — 표가 좌측에 기울어져서 시각적 균형 깨짐.
           inner-flex 로 중앙 정렬. 표 폭이 컨테이너보다 크면 자연스럽게 가로
           스크롤 (overflow-x-auto)로 fallback. */}
@@ -101,11 +118,15 @@ export function ExamHeatmap({
                   const bg = filled
                     ? `hsl(${palette.color} / ${0.12 + intensity * 0.88})`
                     : palette.faintBg;
-                  // 진한 셀(intensity ≥ 0.6) 위 텍스트는 cream 으로 대비 확보
+                  // P0-09 (외부 평가 2026-05-12) — 진한 셀 위 텍스트 자동 반전.
+                  // 종전 0.6 임계 + cream 톤은 0.45~0.60 구간에서 대비가 모자라
+                  // 가독성 저하. 임계 0.45 로 낮추고 순수 흰색으로 명확화.
+                  // WCAG AA 4.5:1 정합 — info(navy)·warning(mustard) 모두 alpha
+                  // 0.45 부터 흰색이 본문보다 가독성 우위.
                   const numColor =
-                    intensity >= 0.6
-                      ? "hsl(var(--color-bg))"
-                      : "hsl(var(--color-text) / 0.85)";
+                    intensity >= 0.45
+                      ? "#FFFFFF"
+                      : "hsl(var(--color-text) / 0.88)";
                   return (
                     <td
                       key={y}
@@ -137,22 +158,7 @@ export function ExamHeatmap({
         </table>
       </div>
 
-      {/* 범례 + 스크롤 hint */}
-      <div className="flex items-center justify-between gap-3 text-[10px] text-muted-foreground flex-wrap">
-        <div className="flex items-center gap-1.5">
-          <span>적음</span>
-          {[0.12, 0.3, 0.5, 0.7, 0.9].map((alpha) => (
-            <span
-              key={alpha}
-              className="h-2.5 w-2.5 rounded-[2px]"
-              style={{ backgroundColor: `hsl(${palette.color} / ${alpha})` }}
-            />
-          ))}
-          <span>많음</span>
-          <span className="ml-2 tabular-nums">최대 {max}문항/셀</span>
-        </div>
-        <span className="tabular-nums">← 좌우 스크롤 →</span>
-      </div>
+      {/* C-11 — 범례는 상단으로 이동했으므로 하단 중복 제거. */}
     </div>
   );
 }
