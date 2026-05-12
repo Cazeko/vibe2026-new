@@ -117,15 +117,32 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
                 ticks={[0, 25, 50, 75, 100]}
                 width={36}
               />
-              {/* H3 cursor=false — 모바일 hit box 35px 큼 해소 */}
+              {/* P1-01 (외부 리뷰 2026-05-12) — Tooltip 가독성 보강:
+                  - cursor 점선 라인 추가 (호버 위치 시각 어포던스, hit box 회피 위해 strokeDasharray)
+                  - labelFormatter 로 일자 명확화 (MM/DD → "X월 X일")
+                  - itemStyle 로 값 weight 강화 */}
               <Tooltip
-                cursor={false}
+                cursor={{
+                  stroke: colors.axis,
+                  strokeDasharray: "2 3",
+                  strokeWidth: 1,
+                }}
                 contentStyle={{
                   borderRadius: 8,
                   border: `1px solid ${colors.tooltipBorder}`,
                   background: colors.tooltipBg,
                   fontSize: 11,
                   padding: "6px 10px",
+                }}
+                labelStyle={{
+                  fontSize: 10.5,
+                  color: colors.axis,
+                  marginBottom: 2,
+                }}
+                itemStyle={{ fontWeight: 600 }}
+                labelFormatter={(label: string) => {
+                  const [m, d] = label.split("/");
+                  return m && d ? `${Number(m)}월 ${Number(d)}일` : label;
                 }}
                 formatter={(value: number, name: string) => [
                   `${value}%`,

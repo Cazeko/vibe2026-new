@@ -150,7 +150,10 @@ export default function SettingsPage() {
         // B1 subtitle 명료화 — 무엇을 관리하는지 단번에 전달.
         subtitle="지역 교육청·시험일 설정 + 테마·계정 관리"
       />
-      <div className="px-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
+      {/* P1-03 (외부 리뷰 2026-05-12) — 폼 max-width 제약. 종전 wrapper 가 페이지
+          전체 폭이라 xl(1280+) 에서 폼 카드가 800px+ 로 늘어남. 폼 가독성 위해
+          페이지를 max-w-5xl(1024) 로 제한하여 좌측 ~640·우측 ~320 컬럼 정돈. */}
+      <div className="px-6 mx-auto max-w-5xl grid grid-cols-1 xl:grid-cols-3 gap-3">
         {/* 목표 설정 */}
         <Card className="xl:col-span-2 border-rule">
           <CardHeader>

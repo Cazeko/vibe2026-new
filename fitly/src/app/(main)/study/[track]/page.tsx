@@ -219,11 +219,16 @@ function EmptyQueue({
 
       <Card className="border-rule border-dashed">
         <CardContent className="p-10 text-center">
-          <BookOpenCheck
-            className="h-6 w-6 mx-auto text-muted-foreground"
+          {/* P1-04 (외부 리뷰 2026-05-12) — empty state 아이콘을 원형 토큰
+              배경으로 시각 강도 증대. 종전 단순 BookOpenCheck 아이콘은 광활한
+              empty 카드 중앙에서 시각 무게가 부족. */}
+          <span
             aria-hidden
-          />
-          <p className="mt-3 font-serif text-base font-medium tracking-tight">
+            className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-cream-deep text-muted-foreground"
+          >
+            <BookOpenCheck className="h-6 w-6" />
+          </span>
+          <p className="font-serif text-base font-medium tracking-tight">
             오늘 복습할 카드가 없습니다
           </p>
           {/* K1 — emptyHint는 \n으로 의미 단위 분리(헌법 §4의3). whitespace-pre-line으로 렌더. */}
@@ -231,9 +236,14 @@ function EmptyQueue({
             {hint}
           </p>
 
+          {/* P1-04 — CTA 격상: ghost → outline. ArrowLeft 아이콘으로
+              "돌아가기" 시각 어포던스. ghost 는 텍스트만 같아 버튼 인지 약함. */}
           <div className="mt-6">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/study-plan">학습 계획으로</Link>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/study-plan">
+                <ArrowLeft className="h-3.5 w-3.5 mr-1" aria-hidden />
+                학습 계획으로 돌아가기
+              </Link>
             </Button>
           </div>
         </CardContent>

@@ -130,21 +130,25 @@ export function AppSidebar() {
           })}
         </ul>
 
-        {/* ─ D-day 칩 (시험 카운트다운) ─ */}
+        {/* ─ D-day 칩 (시험 카운트다운) ─
+            P1-07 (외부 리뷰 2026-05-12) — 대시보드 KPI "목표" 카드와 D-day 중복.
+            큰 evergreen 박스를 작은 인라인 칩으로 축소하여 정보 밀도 분산.
+            P1 코드 리뷰 H1 fix — text-evergreen 은 §4.3 6 사용처 외이므로
+            font weight + tabular-nums 로만 강조. 배경도 secondary tint 로 전환. */}
         {dDay && (
-          <div className="mt-4 mx-1 rounded-[10px] bg-evergreen px-3.5 py-3 text-cream relative overflow-hidden">
-            <p className="text-[10px] font-bold tracking-[0.2em] text-gold mb-2">
-              2026 · 1차
-            </p>
-            <p className="font-extrabold text-[30px] leading-none tracking-[-0.02em] num">
+          <div className="mt-4 mx-3 flex items-center gap-1.5 rounded-md bg-secondary/60 px-2.5 py-1.5 text-[12px]">
+            <span className="font-bold text-foreground tabular-nums tracking-tight">
               {dDay}
-            </p>
-            {(examDateLabel || target.region) && (
-              <p className="mt-1.5 text-[11.5px] text-cream/75">
-                {examDateLabel && <>{examDateLabel}</>}
-                {examDateLabel && target.region && " · "}
-                {target.region && <>{target.region} 시험 대비</>}
-              </p>
+            </span>
+            {target.region && (
+              <span className="text-muted-foreground">
+                · {target.region}
+              </span>
+            )}
+            {examDateLabel && (
+              <span className="ml-auto text-[10.5px] text-muted-foreground tabular-nums">
+                {examDateLabel}
+              </span>
             )}
           </div>
         )}
