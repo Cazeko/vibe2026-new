@@ -224,10 +224,19 @@ export function SplitView({
           stickyLeft && "self-stretch",
         )}
       >
+        {/* v3.6 외부 평가 #3.1 — drag 어포던스 강화: 세로 막대 + 중앙 세 개의 점
+            (⋮) 그립. col-resize cursor 는 wrapping div 에 이미 적용. */}
         <span
           aria-hidden
-          className="block h-12 w-[3px] rounded-full bg-rule-strong group-hover:bg-evergreen/60 group-focus-visible:bg-evergreen transition-colors pointer-events-none"
-        />
+          className="relative flex flex-col items-center justify-center gap-1 h-14 w-3 pointer-events-none"
+        >
+          <span className="block h-12 w-[3px] rounded-full bg-rule-strong group-hover:bg-evergreen/60 group-focus-visible:bg-evergreen transition-colors" />
+          <span className="absolute inset-0 flex flex-col items-center justify-center gap-[3px] opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+            <span className="block h-[3px] w-[3px] rounded-full bg-white/95" />
+            <span className="block h-[3px] w-[3px] rounded-full bg-white/95" />
+            <span className="block h-[3px] w-[3px] rounded-full bg-white/95" />
+          </span>
+        </span>
       </div>
 
       {/* 우측 */}

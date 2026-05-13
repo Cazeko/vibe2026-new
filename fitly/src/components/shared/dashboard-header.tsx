@@ -83,9 +83,11 @@ export function DashboardHeader() {
         </p>
       </div>
       <div className="ml-auto flex items-center gap-2.5">
+        {/* v3.6 외부 평가 #2.4 — 핵심 CTA 펄스 강조. §7 모션 절제는
+            globals.css 의 fitly-pulse 가 prefers-reduced-motion 정합으로 비활성. */}
         <Link
           href="/study/quiz"
-          className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-4 text-[13.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
+          className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-4 text-[13.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors fitly-pulse"
         >
           <Play className="h-3.5 w-3.5 text-gold" aria-hidden />
           <span>오늘 학습 시작</span>

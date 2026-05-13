@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, BookOpenCheck, ArrowRight } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, ArrowRight, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,16 +87,30 @@ export default async function StudyTrackPage({
 
   return (
     <div className="min-h-screen pb-12">
+      {/* v3.6 외부 평가 #3.15 — 브레드크럼 강화 (학습 계획 > 트랙). 현재 트랙
+          위치를 명확히 표시하여 사용자가 컨텍스트를 잃지 않도록 한다. */}
       <PageHeader
         title={meta.title}
         subtitle={meta.description}
         actions={
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/study-plan">
-              <ArrowLeft className="h-3.5 w-3.5 mr-1" />
-              학습 계획
-            </Link>
-          </Button>
+          <nav
+            aria-label="현재 위치"
+            className="flex items-center gap-1.5 text-[12px] text-muted-foreground"
+          >
+            <Button asChild variant="ghost" size="sm" className="px-2">
+              <Link href="/study-plan">
+                <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+                학습 계획
+              </Link>
+            </Button>
+            <ChevronRight
+              className="h-3 w-3 text-muted-foreground/60"
+              aria-hidden
+            />
+            <span className="font-semibold text-foreground tracking-[-0.01em]">
+              {meta.title}
+            </span>
+          </nav>
         }
       />
 
@@ -127,7 +141,9 @@ export default async function StudyTrackPage({
               오답 {dueCounts.mistake}장
             </span>
           </div>
-          {/* G2 트랙 스위치 — active border-b-2 evergreen (활성 메뉴 정합). */}
+          {/* G2 트랙 스위치 — active border-b-2 evergreen (활성 메뉴 정합).
+              v3.6 외부 평가 #3.13 — active indicator 굵기/명도 보강.
+              border-b-2 → border-b-[3px], font-medium → font-bold. */}
           <nav
             aria-label="트랙 전환"
             className="flex items-center gap-1 border-b border-rule"
@@ -139,9 +155,9 @@ export default async function StudyTrackPage({
                   key={t}
                   href={`/study/${t}`}
                   aria-current={active ? "page" : undefined}
-                  className={`px-3 py-1.5 text-[11.5px] -mb-px border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 rounded-t-sm ${
+                  className={`px-3 py-1.5 text-[11.5px] -mb-px border-b-[3px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 rounded-t-sm ${
                     active
-                      ? "border-evergreen text-evergreen font-medium"
+                      ? "border-evergreen text-evergreen font-bold"
                       : "border-transparent text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
                   }`}
                 >

@@ -24,10 +24,19 @@ type Card = {
 };
 
 export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
-  const goalSub =
-    kpi.daysToExam != null
-      ? `D−${kpi.daysToExam} · 2026학년도 1차`
-      : "설정에서 시험일·지역 등록";
+  // v3.6 외부 평가 #2.2 — D-Day 폰트 강조 (심리적 압박감 = 동기부여).
+  // sub 영역의 D-XX 부분만 별도 노드로 분리하여 굵게 + 큰 폰트 사이즈.
+  const goalSub: React.ReactNode =
+    kpi.daysToExam != null ? (
+      <span className="inline-flex items-baseline gap-1.5">
+        <span className="font-extrabold text-[15px] tabular-nums tracking-[-0.02em] text-gold">
+          D−{kpi.daysToExam}
+        </span>
+        <span className="text-cream/70">· 2026학년도 1차</span>
+      </span>
+    ) : (
+      "설정에서 시험일·지역 등록"
+    );
   // 헌법 제3조의2 정합 — studyDeltaMinutes === 0 시 친화 폴백 (C3)
   const minutesSub =
     kpi.studyDeltaMinutes > 0 ? (
@@ -97,7 +106,10 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
               // D-19 (외부 리뷰 2026-05-12) — 카드 hover 어포던스. §7 모션 절제 정합으로
               // Y-이동 없이 보더+shadow 만 변화. 리뷰 M5 fix — transition-all 즉각성
               // 저하 회피, colors/shadow/border 만 transition (150ms).
-              "rounded-card border min-h-[132px] lg:min-h-[110px] px-[22px] py-5 lg:px-4 lg:py-3 flex flex-col [transition:border-color_150ms_ease,box-shadow_150ms_ease,background-color_150ms_ease] overflow-hidden min-w-0",
+              // v3.6 외부 평가 #2.6 — 카드 hover translateY (-2px) 재도입.
+              // 사용자 명시 발화 §38 7항 우선 — v3.5.4 M5 fix 의 절제 결정 위에
+              // 외부 평가의 어포던스 요구를 적용. translate + 색·shadow 동시 transition.
+              "rounded-card border min-h-[132px] lg:min-h-[110px] px-[22px] py-5 lg:px-4 lg:py-3 flex flex-col [transition:transform_150ms_ease,border-color_150ms_ease,box-shadow_150ms_ease,background-color_150ms_ease] hover:-translate-y-0.5 overflow-hidden min-w-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               isGoal
                 ? "bg-evergreen border-evergreen text-cream focus-visible:ring-evergreen/40 hover:bg-evergreen-strong"

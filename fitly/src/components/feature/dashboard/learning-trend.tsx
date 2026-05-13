@@ -125,6 +125,10 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
                   - cursor 점선 라인 추가 (호버 위치 시각 어포던스, hit box 회피 위해 strokeDasharray)
                   - labelFormatter 로 일자 명확화 (MM/DD → "X월 X일")
                   - itemStyle 로 값 weight 강화 */}
+              {/* v3.6 외부 평가 #2.1 — Tooltip drop-shadow 강화로 그리드 위 '붕 떠
+                  보이는' 시각 분리. boxShadow 0 8px 24px rgb(0,0,0,0.12).
+                  v3.6 외부 평가 #2.11 — X축 (5/6) 과 Tooltip 날짜 포맷 통일.
+                  Tooltip 도 5/6 형태로 변경 → 시각 일관성. */}
               <Tooltip
                 cursor={{
                   stroke: colors.axis,
@@ -137,17 +141,16 @@ export function LearningTrend({ data }: { data: TrendPoint[] }) {
                   background: colors.tooltipBg,
                   fontSize: 11,
                   padding: "6px 10px",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
                 }}
                 labelStyle={{
                   fontSize: 10.5,
                   color: colors.axis,
                   marginBottom: 2,
+                  fontVariantNumeric: "tabular-nums",
                 }}
-                itemStyle={{ fontWeight: 600 }}
-                labelFormatter={(label: string) => {
-                  const [m, d] = label.split("/");
-                  return m && d ? `${Number(m)}월 ${Number(d)}일` : label;
-                }}
+                itemStyle={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}
+                labelFormatter={(label: string) => label}
                 formatter={(value: number, name: string) => [
                   `${value}%`,
                   name === "progress" ? "학습 진척도" : "정답률",

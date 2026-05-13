@@ -453,7 +453,9 @@ export function StudyCardForm({ card }: { card: CardData }) {
                   disabled={pending}
                   onClick={() => handleGrade(key)}
                   aria-keyshortcuts={String(idx + 1)}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-card px-3 py-3.5 min-h-[56px] text-[13px] font-medium transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${tone}`}
+                  /* v3.6 외부 평가 #3.6 — click 시 scale 0.96 으로 압축 피드백.
+                     §7 모션 절제 — transition-all 100ms 짧게. */
+                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-card px-3 py-3.5 min-h-[56px] text-[13px] font-medium transition-[colors,transform] duration-100 active:scale-[0.96] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${tone}`}
                 >
                   <Icon className="h-4 w-4" aria-hidden />
                   <span className="flex items-center gap-1.5">
@@ -491,17 +493,20 @@ function PdfImage({ src }: { src: string }) {
         aria-label="시험 본문 이미지 영역"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
+        {/* v3.6 외부 평가 #3.11 — 다크모드 PDF 눈부심 방지: brightness(0.85) +
+            contrast(1.15). 라이트모드는 원본 유지 (filter: none). */}
         <img
           src={src}
           alt="시험 본문 (PDF 페이지)"
-          className="block w-full origin-top-left transition-transform duration-150"
+          className="block w-full origin-top-left transition-transform duration-150 dark:[filter:brightness(0.85)_contrast(1.15)]"
           loading="lazy"
           width={1240}
           height={1754}
           style={{ transform: `scale(${zoom})`, width: `${100 / zoom}%` }}
         />
       </div>
-      <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-card/95 backdrop-blur px-1 py-1 border border-rule shadow-sm">
+      {/* v3.6 외부 평가 #3.2 — 컨트롤러 박스 backdrop-filter blur 강화 (블러 8px). */}
+      <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-card/80 backdrop-blur-md supports-[backdrop-filter]:bg-card/70 px-1 py-1 border border-rule shadow-sm">
         <button
           type="button"
           onClick={() => canZoomOut && setZoom(ZOOM_STEPS[idx - 1])}
@@ -582,15 +587,17 @@ function AnswerBox({
           </span>
           {verified !== undefined && <SourceBadge verified={verified} />}
           {zoomable && (
-            <span className="ml-auto inline-flex items-center gap-0.5">
+            // v3.6 외부 평가 #3.10 — 모바일 오터치 회피. 버튼 hitbox h-8 w-8 +
+            // gap-1.5 로 확대. 시각 크기는 동일하나 터치 영역 ≥32×32 (모바일).
+            <span className="ml-auto inline-flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => adjustZoom(-1)}
                 disabled={zoom <= ZOOM_STEPS[0]}
                 aria-label="글자 작게"
-                className="inline-flex h-6 w-6 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                <span className="text-[11px] leading-none">A−</span>
+                <span className="text-[12px] leading-none">A−</span>
               </button>
               <span className="text-[10px] text-muted-foreground tabular-nums w-9 text-center">
                 {Math.round(zoom * 100)}%
@@ -600,9 +607,9 @@ function AnswerBox({
                 onClick={() => adjustZoom(1)}
                 disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
                 aria-label="글자 크게"
-                className="inline-flex h-6 w-6 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                <span className="text-[11px] leading-none">A+</span>
+                <span className="text-[12px] leading-none">A+</span>
               </button>
             </span>
           )}
