@@ -26,14 +26,55 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// v3.6 외부 평가 #5.15 — 파비콘·OG 메타태그 보강. Twitter Card·Open Graph·
+// canonical·robots 정합으로 외부 공유 시 프로페셔널한 미리보기.
 export const metadata: Metadata = {
-  title: "Fitly — 초등 임용 1차 학습 플래너",
-  description: "임용은 열심히 하는 게 아니라, 맞게(Fit) 하는 게임입니다.",
+  metadataBase: new URL("https://vibe2026-fitly.vercel.app"),
+  title: {
+    default: "Fitly — 초등 임용 1차 학습 플래너",
+    template: "%s · Fitly",
+  },
+  description:
+    "합격은 시간이 아니라 적합도다. 24년치 공식 기출·17개 시도 합격선·역산 학습 플래너로 임용 1차를 준비하세요.",
+  keywords: [
+    "초등 임용",
+    "임용고시",
+    "학습 플래너",
+    "기출 분석",
+    "교직논술",
+    "교육과정",
+    "Fitly",
+  ],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     title: "Fitly",
     statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    title: "Fitly — 초등 임용 1차 학습 플래너",
+    description:
+      "합격은 시간이 아니라 적합도다. 24년치 공식 기출 데이터로 자기 진척도 분석.",
+    siteName: "Fitly",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Fitly — 초등 임용 1차 학습 플래너",
+    description:
+      "합격은 시간이 아니라 적합도다. 24년치 공식 기출 데이터로 자기 진척도 분석.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

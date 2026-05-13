@@ -68,8 +68,10 @@ export function ExamHeatmap({
       </div>
       {/* 사용자 보고 2026-05-12 — 표가 좌측에 기울어져서 시각적 균형 깨짐.
           inner-flex 로 중앙 정렬. 표 폭이 컨테이너보다 크면 자연스럽게 가로
-          스크롤 (overflow-x-auto)로 fallback. */}
-      <div className="relative overflow-x-auto flex justify-center">
+          스크롤 (overflow-x-auto)로 fallback.
+          v3.6 외부 평가 #4.3 — scroll-snap-x mandatory 추가로 셀 단위 안착.
+          x축 자식인 학년도 컬럼(td)에 scroll-snap-align: start 적용. */}
+      <div className="relative overflow-x-auto flex justify-center [scroll-snap-type:x_mandatory]">
         <table
           className="text-[10.5px] border-separate mx-auto"
           style={{ borderSpacing: "2px" }}
@@ -131,7 +133,7 @@ export function ExamHeatmap({
                   return (
                     <td
                       key={y}
-                      className="p-0"
+                      className="p-0 [scroll-snap-align:start]"
                       style={{ width: CELL, minWidth: CELL }}
                     >
                       <div

@@ -74,7 +74,9 @@
 ## 5. AI 모범답안 키워드 형광펜 효과
 
 ### 결정
-**NoChange** — 형광펜 효과 미적용 (현재 markdown 의 `**bold**` + serif underline 으로 강조).
+~~**NoChange** — 형광펜 효과 미적용 (현재 markdown 의 `**bold**` + serif underline 으로 강조).~~
+
+> **2026-05-13 갱신 (v3.6 채택)** — 본 NoChange 결정은 v3.6 발의서 (`2026-05-13-v3.6-comprehensive-amendment.md`) 의 B 조항으로 *대체*. 주관자 명시 위임 발화 정합으로 `<strong>` 요소에 *옅은 gold-soft 형광펜 배경* (≤40%, 다크 ≤30%) 채택. DESIGN §1 만년필 메타포는 기조로 유지하되 학술 노트 형광 강조 보조 도구 허용.
 
 ### 근거
 - 외부 평가 의도: 모범답안 안의 핵심 키워드에 노란 형광펜(highlighter) 시각 효과.

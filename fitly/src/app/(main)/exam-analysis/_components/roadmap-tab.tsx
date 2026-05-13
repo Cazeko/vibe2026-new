@@ -90,11 +90,14 @@ export async function RoadmapTab() {
         })}
       </section>
 
-      {/* 영역별 상세 */}
-      <Card className="border-rule">
-        <CardContent className="p-0">
+      {/* 영역별 상세
+          v3.6 외부 평가 #4.15 — sticky thead. 긴 표 스크롤 시 헤더 고정.
+          parent (CardContent p-0) 가 scroll 컨테이너가 아니므로 thead top-0
+          sticky 는 viewport 기준 동작. 페이지 스크롤에서도 표 헤더 유지. */}
+      <Card className="border-rule overflow-hidden">
+        <CardContent className="p-0 overflow-x-auto">
           <table className="w-full text-[12.5px]">
-            <thead className="bg-secondary/40 text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+            <thead className="sticky top-0 z-10 bg-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-secondary/80 text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground shadow-[0_1px_0_0_hsl(var(--color-rule))]">
               <tr>
                 <th className="text-left px-5 py-2.5 w-16">등급</th>
                 <th className="text-left px-5 py-2.5">영역</th>

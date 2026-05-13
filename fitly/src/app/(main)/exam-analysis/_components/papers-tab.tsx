@@ -131,8 +131,9 @@ function YearCard({ year, sessions }: { year: number; sessions: PaperRow[] }) {
   const subjectIdx = (year % 7) + 1;
   const subjectVar = `--subject-${subjectIdx}`;
   return (
+    /* v3.6 외부 평가 #4.10 — 연도 카드 hover translateY (-2px) + 보더 강조. */
     <Card
-      className="border-rule transition-all hover:border-rule-strong hover:shadow-sm overflow-hidden border-l-[3px]"
+      className="border-rule transition-all hover:border-rule-strong hover:shadow-sm hover:-translate-y-0.5 overflow-hidden border-l-[3px]"
       style={{ borderLeftColor: `hsl(var(${subjectVar}))` }}
     >
       <CardContent className="p-5 flex flex-col gap-3 min-w-0">

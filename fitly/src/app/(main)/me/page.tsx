@@ -203,10 +203,13 @@ export default async function MePage() {
   const earnedCount = badges.filter((b) => b.earned).length;
 
   const accuracy = stats.avgAccuracy;
+  // v3.6 외부 평가 #5.7 — features 카드에 트랙별 아이콘 추가 (시각 재미).
+  // §4.3 evergreen 보호 — 아이콘 색은 evergreen-soft + muted-foreground 의 ghost.
   const features = [
     {
       title: "풀이 트랙",
       href: "/study/quiz",
+      Icon: Layers,
       value: lib.quiz,
       unit: "문항",
       footL: (
@@ -220,6 +223,7 @@ export default async function MePage() {
     {
       title: "키워드 트랙",
       href: "/study/keyword",
+      Icon: BookOpen,
       value: lib.keyword,
       unit: "개념",
       footL: (
@@ -233,6 +237,7 @@ export default async function MePage() {
     {
       title: "오답 노트",
       href: "/study/mistake",
+      Icon: RefreshCw,
       value: lib.mistake,
       unit: "문항",
       footL: (
@@ -323,7 +328,18 @@ export default async function MePage() {
               className="rounded-card border border-rule bg-cream-soft px-[22px] py-5 xl:px-4 xl:py-3"
             >
               <div className="flex items-center justify-between mb-3.5">
-                <span className="text-[14.5px] font-bold tracking-[-0.02em] text-foreground">
+                <span className="inline-flex items-center gap-2 text-[14.5px] font-bold tracking-[-0.02em] text-foreground">
+                  {/* v3.6 외부 평가 #5.7 — 트랙별 아이콘 (시각 재미). */}
+                  <span
+                    aria-hidden
+                    className={`grid h-6 w-6 place-items-center rounded-[7px] ${
+                      f.isZero
+                        ? "bg-cream-deep text-muted-foreground"
+                        : "bg-evergreen/[0.08] text-evergreen"
+                    }`}
+                  >
+                    <f.Icon className="h-3.5 w-3.5" />
+                  </span>
                   {f.title}
                 </span>
                 <Link

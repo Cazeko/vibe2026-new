@@ -102,7 +102,10 @@
     --font-noto-serif-kr: "Noto Serif KR";
   }
 
-  /* 다크 — 깊은 잉크 + 밝게 보정한 evergreen + gold */
+  /* 다크 — 깊은 잉크 + 밝게 보정한 evergreen + gold.
+   * v3.6 외부 평가 #5.11 — 카드 외곽 보더 명도 down (#333 이하 톤).
+   * 종전 rule 다크 38 14% 21% (≈#3f372d) 가 다크 bg(#1b1815) 위 너무 밝아
+   * 시각 거슬림. 38 12% 17% (≈#312c25 = #2e2820 류) 로 한 단계 down. */
   .dark {
     --color-bg: 36 12% 9%;             /* deep warm ink */
     --color-surface: 36 11% 13%;
@@ -112,9 +115,9 @@
     --color-text-2: 42 24% 88%;
     --color-text-muted: 38 12% 53%;
     --color-text-muted-deep: 38 16% 68%;
-    --color-rule: 38 14% 21%;
-    --color-rule-soft: 38 12% 24%;
-    --color-rule-strong: 38 11% 29%;
+    --color-rule: 38 12% 17%;          /* v3.6 — #2e2820 (was 21%) */
+    --color-rule-soft: 38 12% 20%;     /* v3.6 — (was 24%) */
+    --color-rule-strong: 38 11% 24%;   /* v3.6 — (was 29%) */
     --color-accent: 158 41% 38%;       /* brightened primary */
     --color-accent-strong: 158 39% 50%;
     --color-accent-2: 158 39% 28%;
@@ -342,6 +345,20 @@
 * {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--color-rule-strong) / 0.6) transparent;
+}
+
+/* v3.6 — 오디오 wave 애니메이션 (외부 평가 #5.6 팟캐스트 생성 중).
+ * 3개 bar 가 순차로 늘었다 줄었다 — "오디오 파동" 메타포. §7 모션 절제 —
+ * 1.4s · ease-in-out · prefers-reduced-motion 시 자동 비활성. */
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[wave"] {
+    animation: none !important;
+    transform: scaleY(0.7) !important;
+  }
 }
 
 /* v3.6 — 펄스 애니메이션 (외부 평가 #2.4 CTA 강화). evergreen 단색 박스 그림자
