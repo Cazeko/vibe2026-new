@@ -16,6 +16,7 @@ import {
   Columns2,
   FileText,
 } from "lucide-react";
+import { formatExamStem } from "@/lib/exam/format-stem";
 
 // 백승환 피드백 #5+#6 (2026-05-13) — 학습 Lightbox 뷰어.
 //
@@ -376,12 +377,9 @@ function ImagePanel({
 }
 
 function TextPanel({ stemText }: { stemText: string }) {
-  const cleaned = stemText
-    .replace(/[\f\r]/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/[ \t]+/g, " ")
-    .replace(/^[ \t]+|[ \t]+$/gm, "")
-    .trim();
+  // 백승환 추가 보고 (2026-05-13) — PDF 추출본 raw 노출 → formatExamStem 으로
+  // 자료 블록·발문 번호 인식 + 공백·줄바꿈 정리. 시드 데이터는 보존, 표시만 가공.
+  const cleaned = formatExamStem(stemText);
   return (
     <div className="h-full overflow-auto p-6 bg-paper/30">
       <p className="font-serif text-[14px] leading-[1.8] text-foreground/90 whitespace-pre-wrap break-keep max-w-prose">

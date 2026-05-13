@@ -21,6 +21,7 @@ import { Markdown } from "@/components/shared/markdown";
 import { SplitView } from "@/components/shared/split-view";
 import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
+import { formatExamStem } from "@/lib/exam/format-stem";
 import type { CardType } from "@/types";
 import { submitAnswer, gradeCard } from "../actions";
 
@@ -91,12 +92,9 @@ export function StudyCardForm({ card }: { card: CardData }) {
   const firstMountRef = useRef(true);
 
   const imageUrl = getExamPageUrl(card.frontImagePath);
-  const cleanedFrontText = card.frontText
-    .replace(/[\f\r]/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/[ \t]+/g, " ")
-    .replace(/^[ \t]+|[ \t]+$/gm, "")
-    .trim();
+  // 백승환 추가 보고 (2026-05-13) — 본문 raw 노출 → formatExamStem 으로
+  // 자료 블록·발문·답란 인식. 본문은 SplitView 좌측에 자연스럽게 정합.
+  const cleanedFrontText = formatExamStem(card.frontText);
   const isLongStem = cleanedFrontText.length > 800;
   const draftKey = `${DRAFT_KEY_PREFIX}${card.id}`;
   const supportsDraft = card.type === "quiz" || card.type === "mistake";
