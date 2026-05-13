@@ -6,6 +6,14 @@ import { createClient } from "@/lib/supabase/server";
 // 는 middleware matcher 의 public 경로로 통과되므로 본 서버 컴포넌트에서 한 번
 // 더 분기한다. 분기 실패 시 (Supabase 일시 장애 등) /login 으로 안전 폴백.
 // M2 fix — 헌법 제37조 정합 (장애 시 사용자 보고 + 안전 우회).
+
+// `cookies()` 호출이 있어 본 라우트는 매 요청 dynamic 렌더 필수. 명시 선언이
+// 없으면 Next.js 가 static prerender 를 시도하면서 `DYNAMIC_SERVER_USAGE`
+// digest 를 throw, 아래 catch 가 *인증 실패* 로 오분류하여 Vercel runtime 에
+// "[root page] auth check failed" 빨간줄 + 무조건 /login redirect 회귀.
+// (main)/dashboard·me·study-analysis 등 다른 인증 페이지와 정합.
+export const dynamic = "force-dynamic";
+
 export default async function RootPage() {
   try {
     const supabase = await createClient();
