@@ -100,8 +100,10 @@ export function DashboardHeader() {
           disabled
           className="relative inline-flex h-[38px] w-[38px] items-center justify-center rounded-lg border border-transparent text-muted2-deep/60 cursor-not-allowed"
         >
-          {/* C-4 (외부 리뷰 2026-05-12) — stroke 두께 1.8 로 강화하여 배경 대비. */}
-          <Bell className="h-[18px] w-[18px]" strokeWidth={1.8} aria-hidden />
+          {/* v3.5.6 외부 리뷰 #2.7 — stroke 두께 1.8 → 2.0 으로 한 단계 증강.
+              종전 1.8 은 cream/95 배경 위에서 여전히 가는 인상. 2.0 으로 라인
+              두께 균일화하여 ThemeToggle 의 Sun/Moon (default 2) 과 시각 정합. */}
+          <Bell className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
         </button>
         <ThemeToggle />
         <Link

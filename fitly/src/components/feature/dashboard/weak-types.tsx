@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, SearchX } from "lucide-react";
 import type { WeakType } from "@/lib/dashboard/types";
 
 type Severity = "weak" | "warn" | "ok" | "good";
@@ -47,13 +47,27 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
       </p>
 
       {items.length === 0 ? (
+        // v3.5.6 외부 리뷰 #2.5 — empty state 원형 토큰 일러스트 보강.
+        // 종전 텍스트 + CTA 만으로는 광활한 카드 안에서 시각 무게 부족.
+        // SearchX 아이콘 + cream-deep 원형 배경으로 "분석할 거리가 없다" 메타포 강조.
+        // §4.3 evergreen 6 사용처 보호 — 아이콘 색은 muted-foreground (액센트 외).
         <div className="flex-1 min-h-0 rounded-[10px] border border-dashed border-rule-strong bg-cream-deep/40 px-4 py-4 flex flex-col items-center justify-center text-center gap-1.5">
+          <span
+            aria-hidden
+            className="grid h-9 w-9 place-items-center rounded-full bg-cream text-muted-foreground mb-0.5"
+          >
+            <SearchX className="h-[18px] w-[18px]" strokeWidth={1.8} />
+          </span>
           <p className="text-[12.5px] font-semibold text-muted2-deep m-0">
             아직 분석할 데이터가 없어요.
           </p>
+          <p className="text-[11px] text-muted-foreground leading-[1.4] break-keep max-w-[16rem]">
+            풀이 트랙을 5회 이상 진행하시면
+            AI 가 영역별 취약 유형을 자동 분석해 드립니다.
+          </p>
           <Link
             href="/study/quiz"
-            className="inline-flex items-center gap-1 text-[12px] font-semibold text-evergreen border-b border-evergreen pb-px hover:text-evergreen-strong"
+            className="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-evergreen border-b border-evergreen pb-px hover:text-evergreen-strong"
           >
             풀이 트랙 시작
             <ArrowRight className="h-3 w-3" aria-hidden />

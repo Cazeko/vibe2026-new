@@ -18,6 +18,7 @@ import {
   Calendar,
   TrendingUp,
   Headphones,
+  Lock,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { createClient } from "@/lib/supabase/server";
@@ -438,16 +439,28 @@ export default async function MePage() {
               aria-label={`학습 배지: ${earnedCount} / ${badges.length} 획득`}
               className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 flex-1 min-h-0 overflow-y-auto"
             >
-              {/* E2 (헌법 제24조의2 정합) — 미획득 명도 차 강화: opacity-60 + grayscale */}
+              {/* E2 (헌법 제24조의2 정합) — 미획득 명도 차 강화: opacity-60 + grayscale.
+                  v3.5.6 외부 리뷰 #5.5 — 추가로 우상단 자물쇠 오버레이를 노출하여
+                  "해제하고 싶은 욕구" 시각 단서 강화. §4.3 evergreen 보호 정합으로
+                  자물쇠 색은 rule-strong (액센트 외 일반 토큰). */}
               {badges.map((b) => (
                 <li
                   key={b.id}
-                  className={`rounded-[10px] border px-2 pt-2.5 pb-2 text-center transition-all ${
+                  className={`relative rounded-[10px] border px-2 pt-2.5 pb-2 text-center transition-all ${
                     b.earned
                       ? "border-gold bg-cream-soft hover:-translate-y-0.5"
                       : "border-rule bg-cream opacity-60 grayscale"
                   }`}
                 >
+                  {!b.earned && (
+                    <span
+                      aria-hidden
+                      className="absolute top-1.5 right-1.5 grid h-4 w-4 place-items-center rounded-full bg-cream-deep text-muted2-deep"
+                      title="아직 획득하지 않은 배지"
+                    >
+                      <Lock className="h-2.5 w-2.5" strokeWidth={2.2} />
+                    </span>
+                  )}
                   <span
                     aria-hidden
                     className={`mx-auto grid h-7 w-7 place-items-center rounded-full mb-1.5 ${
