@@ -6,7 +6,10 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
   // viewport fit (lg+) — compact padding + flex-col 로 buttons 하단 정착.
   // 사용자 보고 2026-05-12 — 카드 대비 여백 과다 → 전반 축소 (F 배지·헤더·본문·footer).
   return (
-    <article className="rounded-card border border-rule bg-cream-soft px-4 pt-3.5 pb-3 h-full flex flex-col">
+    // v3.6 외부 평가 #2.13 — AI 추천 카드 그라데이션 보더 (gold→evergreen 옅게).
+    // §4.3 evergreen 6 사용처 내 — AI 추천은 evergreen 인정 위치, gradient-border
+    // 클래스가 *보더만* 색을 입혀 본문/배경은 cream-soft 그대로.
+    <article className="rounded-card gradient-border bg-cream-soft px-4 pt-3.5 pb-3 h-full flex flex-col">
       {/* 헤더 — F 배지 + eyebrow + 제목 (컴팩트) */}
       <div className="flex items-center gap-2.5 mb-2 shrink-0">
         <span
@@ -54,9 +57,12 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
       </p>
 
       <div className="flex gap-1.5 flex-wrap shrink-0">
+        {/* v3.6 외부 평가 #2.4 — AI 추천 메인 CTA 에 fitly-pulse (1.6s ease-out).
+            §7 모션 절제 정합 — prefers-reduced-motion 시 자동 비활성 (globals.css).
+            펄스는 시각 강조 1회성이라 §4.3 evergreen 6 사용처 보호 정합. */}
         <Link
           href="/study/quiz"
-          className="inline-flex h-[34px] items-center gap-1.5 rounded-md bg-evergreen px-3 text-[12.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
+          className="inline-flex h-[34px] items-center gap-1.5 rounded-md bg-evergreen px-3 text-[12.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors fitly-pulse"
         >
           추천 풀이 시작
           <ArrowRight className="h-3 w-3" aria-hidden />

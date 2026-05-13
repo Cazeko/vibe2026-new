@@ -324,12 +324,14 @@ export default function SettingsPage() {
                   {email ?? "—"}
                 </p>
               </div>
+              {/* v3.6 외부 평가 #5.10 — 로그아웃은 파괴적 액션이므로 destructive
+                  tone (붉은 보더 + 텍스트) 으로 분리감 강조. */}
               <Button
                 type="button"
                 variant="outline"
                 onClick={signOut}
                 disabled={signingOut}
-                className="w-full"
+                className="w-full border-destructive/40 text-destructive hover:bg-destructive/5 hover:text-destructive hover:border-destructive"
               >
                 {signingOut ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

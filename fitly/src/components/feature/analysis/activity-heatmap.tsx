@@ -11,12 +11,14 @@ export type HeatmapCell = {
 // P1 코드 리뷰 H2 fix — 다크모드 accent(L 38%) 가 라이트(L 21%) 대비 밝아
 // /15 alpha 가 어두운 배경 위에 거의 보이지 않고 /35 와 합쳐짐. 다크 전용
 // 단계를 별도 정의(/25·/50·/75·/100) 하여 시각 단계 보존.
+// v3.6 외부 평가 #4.8 — 최상위 단계(90분+) 를 evergreen-strong 으로 강화하여
+// 성취감 극대화. 단계 4 → 더 진한 brand 컬러 (라이트 #163a30 / 다크 #389a7c).
 const TONE_BG = [
   "bg-rule",
   "bg-evergreen/15 dark:bg-evergreen/25",
   "bg-evergreen/35 dark:bg-evergreen/50",
   "bg-evergreen/65 dark:bg-evergreen/75",
-  "bg-evergreen",
+  "bg-evergreen-strong shadow-[inset_0_0_0_1px_hsl(var(--color-gold)/0.25)]",
 ];
 
 function level(minutes: number): number {
@@ -76,9 +78,11 @@ export function ActivityHeatmap({ cells }: { cells: HeatmapCell[] }) {
             return (
               <div key={wi} className="flex flex-col gap-[2px] relative">
                 {labelMonth !== null && (
+                  /* v3.6 외부 평가 #4.7 — 월 라벨 색·weight 강화. 종전 muted-foreground
+                     는 잔디 위에서 묻힘. text-foreground/75 + font-semibold 로 또렷. */
                   <span
                     aria-hidden
-                    className="absolute -top-4 left-0 text-[9px] text-muted-foreground tabular-nums whitespace-nowrap"
+                    className="absolute -top-4 left-0 text-[10px] text-foreground/75 font-semibold tabular-nums whitespace-nowrap"
                   >
                     {labelMonth}월
                   </span>

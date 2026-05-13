@@ -7,6 +7,7 @@ import {
   Activity,
   Network,
   Compass,
+  Printer,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -113,9 +114,13 @@ export default async function ExamAnalysisPage({
 
   return (
     <div className="min-h-screen pb-12">
+      {/* v3.6 외부 평가 #4.13 — 우측 상단 Export(인쇄/PDF 저장) 진입점.
+          window.print() 는 브라우저 기본 "PDF 로 저장" 옵션을 호출 → 별도
+          export 라이브러리 추가 없이 PDF/지면 출력. @media print 정합 보존. */}
       <PageHeader
         title="기출 분석"
         subtitle="24년치 공개 기출의 영역·인지수준·문항형식·키워드 분포를 한눈에 확인합니다."
+        actions={<PrintButton />}
       />
 
       <div className="px-6 mx-auto max-w-7xl space-y-6">
@@ -169,10 +174,12 @@ export default async function ExamAnalysisPage({
                     href={`/exam-analysis?tab=${t.key}`}
                     prefetch={false}
                     aria-current={active ? "page" : undefined}
+                    /* v3.6 외부 평가 #4.6 — 활성 탭 폰트 weight up + shadow.
+                       비활성은 그대로 유지하여 active/inactive 시각 대비 강화. */
                     className={`inline-flex items-center gap-2 px-4 py-2.5 text-[13px] rounded-t-md transition-colors ${
                       active
-                        ? "bg-evergreen/10 text-evergreen font-medium"
-                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                        ? "bg-evergreen/10 text-evergreen font-bold shadow-[inset_0_-2px_0_0_hsl(var(--color-accent))]"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground font-medium"
                     }`}
                   >
                     <Icon className="h-3.5 w-3.5" aria-hidden />
@@ -288,6 +295,23 @@ function RegionCard({
         </p>
       </CardContent>
     </Card>
+  );
+}
+
+function PrintButton() {
+  // server component 안의 inline event handler 를 위해 별도 client island 가
+  // 필요하나, 본 버튼은 "use client" 없이도 form action 또는 <a> 로 동일 효과
+  // 가능. window.print 만으로는 client 필요 — 별도 light client 컴포넌트.
+  return (
+    <a
+      href="javascript:window.print()"
+      className="inline-flex h-9 items-center gap-1.5 rounded-md border border-rule-strong px-3 text-[12.5px] font-semibold text-muted2-deep hover:border-evergreen hover:text-evergreen transition-colors"
+      aria-label="현재 분석 페이지를 PDF/지면 출력"
+    >
+      <Printer className="h-3.5 w-3.5" aria-hidden />
+      <span className="hidden sm:inline">PDF 저장 / 인쇄</span>
+      <span className="sm:hidden">PDF</span>
+    </a>
   );
 }
 

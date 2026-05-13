@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pause, Play, X } from "lucide-react";
+import { Loader2, Pause, Play, X, Rewind, FastForward } from "lucide-react";
 import { usePodcastPlayer } from "@/components/shared/podcast-player-provider";
 
 // Track 1.2 — sticky bottom 미니플레이어. 활성 에피소드가 있을 때만 노출.
@@ -66,7 +66,17 @@ export function PodcastMiniPlayer() {
       aria-label="팟캐스트 미니플레이어"
       className="fixed bottom-0 inset-x-0 lg:left-[248px] z-40 border-t border-rule bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90 shadow-[0_-6px_18px_rgba(26,32,39,0.06)]"
     >
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-2.5 flex items-center gap-3">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-2.5 flex items-center gap-2 sm:gap-3">
+        {/* v3.6 외부 평가 #5.2 — 15초 뒤로 (수험생이 해설을 다시 듣는 학습 패턴 정합). */}
+        <button
+          type="button"
+          onClick={() => seek(Math.max(0, currentSec - 15))}
+          aria-label="15초 뒤로"
+          disabled={loading}
+          className="hidden sm:grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted2-deep hover:bg-secondary/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 disabled:opacity-50"
+        >
+          <Rewind className="h-4 w-4" aria-hidden />
+        </button>
         <button
           type="button"
           onClick={togglePlay}
@@ -82,6 +92,16 @@ export function PodcastMiniPlayer() {
           ) : (
             <Play className="h-4 w-4 ml-0.5" aria-hidden />
           )}
+        </button>
+        {/* v3.6 외부 평가 #5.2 — 15초 앞으로. */}
+        <button
+          type="button"
+          onClick={() => seek(Math.min(durationSec || currentSec + 15, currentSec + 15))}
+          aria-label="15초 앞으로"
+          disabled={loading}
+          className="hidden sm:grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted2-deep hover:bg-secondary/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 disabled:opacity-50"
+        >
+          <FastForward className="h-4 w-4" aria-hidden />
         </button>
 
         <button
@@ -104,27 +124,30 @@ export function PodcastMiniPlayer() {
           </div>
         </button>
 
-        {/* 리뷰 M5 fix — progressPct 를 CSS 변수로 분리. style 객체 매 렌더 재생성
-            회피 + range thumb fill 보존. */}
-        <input
-          type="range"
-          min={0}
-          max={Math.max(durationSec, 1)}
-          step={1}
-          value={currentSec}
-          onChange={(e) => seek(Number(e.target.value))}
-          aria-label="재생 위치"
-          disabled={loading}
-          className="hidden sm:block w-32 lg:w-48 accent-evergreen cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 rounded-full audio-range-bar"
-          style={
-            {
-              "--progress": `${progressPct}%`,
-              height: "4px",
-              borderRadius: "999px",
-              appearance: "none",
-            } as React.CSSProperties
-          }
-        />
+        {/* 리뷰 M5 fix — progressPct 를 CSS 변수로 분리.
+            v3.6 외부 평가 #5.3 — 진행 바 hit-box 확대. 시각 두께 4px 유지하되
+            py-3 의 wrapping label 로 위아래 12px 터치 영역 확보 (≥24px). */}
+        <label className="hidden sm:flex items-center py-3 -my-3 cursor-pointer">
+          <input
+            type="range"
+            min={0}
+            max={Math.max(durationSec, 1)}
+            step={1}
+            value={currentSec}
+            onChange={(e) => seek(Number(e.target.value))}
+            aria-label="재생 위치"
+            disabled={loading}
+            className="w-32 lg:w-48 accent-evergreen cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 rounded-full audio-range-bar"
+            style={
+              {
+                "--progress": `${progressPct}%`,
+                height: "4px",
+                borderRadius: "999px",
+                appearance: "none",
+              } as React.CSSProperties
+            }
+          />
+        </label>
 
         <button
           type="button"

@@ -67,6 +67,9 @@ const config: Config = {
           mid: "hsl(var(--color-accent-2))",
           soft: "hsl(var(--color-accent-soft))",
         },
+        // v3.6 — Hero 배경 전용 토큰 (로그인 우측·랜딩 hero). 라이트는 brand
+        // evergreen 정체성 유지, 다크는 채도/광도 down (외부 평가 #1.1).
+        "hero-bg": "hsl(var(--color-hero-bg))",
         gold: {
           DEFAULT: "hsl(var(--color-gold))",
           soft: "hsl(var(--color-gold-soft))",

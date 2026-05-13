@@ -183,9 +183,12 @@ export function FitlySignIn({ mode }: Props) {
 
   return (
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      {/* ─ HERO (소개) — 데스크톱 우측 / 모바일 상단 ─ */}
+      {/* ─ HERO (소개) — 데스크톱 우측, 모바일 숨김 ─
+          v3.6 외부 평가 #1.1 — 다크 hero 채도/광도 down (bg-hero-bg).
+          v3.6 외부 평가 #1.12 — 모바일에서 hero 패널 hidden 처리하여
+          로그인 폼에 집중. 데스크톱(md+)에서만 hero 노출. */}
       <section
-        className="relative overflow-hidden bg-evergreen text-cream flex flex-col justify-between px-7 md:px-10 lg:px-[72px] py-10 md:py-16 gap-12 md:gap-24 md:order-2"
+        className="relative overflow-hidden bg-hero-bg text-cream hidden md:flex flex-col justify-between px-7 md:px-10 lg:px-[72px] py-10 md:py-16 gap-12 md:gap-24 md:order-2"
         aria-label="Fitly 소개"
       >
         {/* 점선 모눈 데코 7% (신규 디자인 hero::before) */}
@@ -199,8 +202,8 @@ export function FitlySignIn({ mode }: Props) {
           }}
         />
 
-        {/* 상단: 브랜드 + 시즌 */}
-        <header className="relative flex items-center gap-3 animate-element animate-delay-100">
+        {/* 상단: 브랜드 + 시즌. v3.6 외부 평가 #1.14 — 로고 좌측 padding 보강. */}
+        <header className="relative flex items-center gap-3 pl-1 animate-element animate-delay-100">
           <FitlyLogo size="lg" onAccentBg />
           <span className="ml-auto hidden lg:inline-block text-[11.5px] font-semibold tracking-[0.18em] text-gold">
             2026 · 초등 임용 1차
@@ -212,7 +215,8 @@ export function FitlySignIn({ mode }: Props) {
           <p className="text-[12px] font-bold tracking-[0.2em] text-gold mb-[18px]">
             OUR THESIS
           </p>
-          <h1 className="font-sans font-bold leading-[1.18] tracking-[-0.025em] text-[clamp(34px,5.2vw,56px)] text-cream">
+          {/* v3.6 외부 평가 #1.7 — H1 line-height 1.18 → 1.32 (가독성). */}
+          <h1 className="font-sans font-bold leading-[1.32] tracking-[-0.025em] text-[clamp(34px,5.2vw,56px)] text-cream">
             합격은 시간이
             <br />
             아니라 <em className="not-italic text-gold">적합도</em>다.
@@ -251,7 +255,8 @@ export function FitlySignIn({ mode }: Props) {
           <p className="text-[11px] font-bold tracking-[0.22em] text-muted-foreground animate-element animate-delay-100">
             {mode === "login" ? "LOG IN" : "SIGN UP"}
           </p>
-          <h2 className="mt-3 mb-2 font-sans font-bold leading-[1.2] tracking-[-0.02em] text-[clamp(26px,3.2vw,36px)] animate-element animate-delay-200">
+          {/* v3.6 외부 평가 #1.7 — H2 line-height 1.20 → 1.35. */}
+          <h2 className="mt-3 mb-2 font-sans font-bold leading-[1.35] tracking-[-0.02em] text-[clamp(26px,3.2vw,36px)] animate-element animate-delay-200">
             {titleTop}
             <br />
             {titleBottom}
@@ -268,13 +273,22 @@ export function FitlySignIn({ mode }: Props) {
               <span className="text-[12.5px] font-semibold text-muted2-deep mb-2">
                 이메일
               </span>
-              {/* P0-03 (외부 평가, DESIGN §10.2 정합) — focus-within 시 ring 강화 */}
-              <span className="flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft focus-within:ring-2 focus-within:ring-evergreen/30 focus-within:ring-offset-0 transition-all duration-150">
+              {/* v3.6 외부 평가 #1.5·1.6·1.10 — Focus ring evergreen 2px / 다크 보더
+                  명시 / 에러 시 빨간 보더 + aria-invalid. */}
+              <span
+                className={`flex h-[52px] items-center rounded-lg border bg-cream-deep dark:bg-cream-deep dark:border-rule-strong px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft focus-within:ring-2 focus-within:ring-evergreen/40 focus-within:ring-offset-0 transition-all duration-150 ${
+                  error && !EMAIL_RE.test(email)
+                    ? "border-destructive ring-1 ring-destructive/40"
+                    : "border-transparent"
+                }`}
+              >
                 <input
                   type="email"
                   required
                   autoComplete="email"
                   inputMode="email"
+                  aria-label="이메일 주소 입력"
+                  aria-invalid={error && !EMAIL_RE.test(email) ? "true" : "false"}
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -294,14 +308,26 @@ export function FitlySignIn({ mode }: Props) {
                   </span>
                 )}
               </span>
-              {/* P0-03 (외부 평가, DESIGN §10.2 정합) — focus-within 시 ring 강화 */}
-              <span className="relative flex h-[52px] items-center rounded-lg border border-transparent bg-cream-deep px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft focus-within:ring-2 focus-within:ring-evergreen/30 focus-within:ring-offset-0 transition-all duration-150">
+              {/* v3.6 외부 평가 #1.5·1.6·1.10 — Focus ring 2px / 다크 보더 / 에러 빨간. */}
+              <span
+                className={`relative flex h-[52px] items-center rounded-lg border bg-cream-deep dark:bg-cream-deep dark:border-rule-strong px-4 text-[14px] focus-within:border-evergreen focus-within:bg-cream-soft focus-within:ring-2 focus-within:ring-evergreen/40 focus-within:ring-offset-0 transition-all duration-150 ${
+                  error && password.length > 0 && password.length < 6
+                    ? "border-destructive ring-1 ring-destructive/40"
+                    : "border-transparent"
+                }`}
+              >
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   minLength={6}
                   autoComplete={
                     mode === "login" ? "current-password" : "new-password"
+                  }
+                  aria-label="비밀번호 입력"
+                  aria-invalid={
+                    error && password.length > 0 && password.length < 6
+                      ? "true"
+                      : "false"
                   }
                   placeholder="••••••••"
                   value={password}
@@ -326,14 +352,16 @@ export function FitlySignIn({ mode }: Props) {
               </span>
             </label>
 
-            {/* C-2 (외부 리뷰 2026-05-12) — login 모드 한정 "로그인 상태 유지" 체크박스. */}
+            {/* C-2 (외부 리뷰 2026-05-12) — login 모드 한정 "로그인 상태 유지" 체크박스.
+                v3.6 외부 평가 #1.4 — accent-evergreen 으로 네이티브 파란색 → 브랜드 그린. */}
             {mode === "login" && (
               <label className="-mt-0.5 mb-0.5 flex items-center gap-2 text-[12.5px] text-muted2-deep cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
-                  className="h-4 w-4 rounded border border-rule-strong text-evergreen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 cursor-pointer"
+                  style={{ accentColor: "hsl(var(--color-accent))" }}
+                  className="h-4 w-4 rounded border border-rule-strong accent-evergreen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 cursor-pointer"
                 />
                 로그인 상태 유지
                 <span className="text-muted-foreground text-[11px]">
@@ -364,15 +392,17 @@ export function FitlySignIn({ mode }: Props) {
             </button>
 
             {/* P0-02 (외부 평가, 카카오 브랜드 가이드 정합) — #FEE500 배경 +
-                심볼 + rgba(0,0,0,0.85) 텍스트. */}
+                심볼 + rgba(0,0,0,0.85) 텍스트.
+                v3.6 외부 평가 #1.2·1.3 — font-bold (semibold→bold) + flex
+                items-center 명시로 아이콘 세로 중앙 정렬 보정. */}
             <button
               type="button"
               onClick={handleKakao}
               disabled={isLoading}
-              className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-[#FEE500] text-[14.5px] font-semibold text-[rgba(0,0,0,0.85)] hover:brightness-[0.96] active:translate-y-px transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FEE500] focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60 disabled:cursor-not-allowed disabled:active:translate-y-0"
+              className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-[#FEE500] text-[15px] font-bold text-[rgba(0,0,0,0.85)] hover:brightness-[0.96] active:translate-y-px transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FEE500] focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60 disabled:cursor-not-allowed disabled:active:translate-y-0"
             >
-              <KakaoSymbol className="text-[rgba(0,0,0,0.9)]" />
-              카카오로 계속하기
+              <KakaoSymbol className="text-[rgba(0,0,0,0.9)] shrink-0" />
+              <span className="leading-none">카카오로 계속하기</span>
             </button>
           </form>
 

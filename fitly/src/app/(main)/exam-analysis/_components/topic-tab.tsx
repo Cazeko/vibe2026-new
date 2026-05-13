@@ -153,23 +153,33 @@ function KeywordTopBar({
       <ul className="space-y-1.5">
         {top.map((k, idx) => {
           const pct = max > 0 ? (k.count / max) * 100 : 0;
+          // v3.6 외부 평가 #4.1 — 1~3위 evergreen 채움, 4~10위는 중성 회색.
+          // §4.3 evergreen 6 사용처 보호 안에서 *top-tier 강조* 단서로 인정.
+          const isTop3 = idx < 3;
           return (
             <li
               key={k.keyword}
               className="flex items-center gap-2.5 text-[12px]"
             >
-              <span className="w-4 text-right text-[10px] text-muted-foreground tabular-nums shrink-0">
+              <span
+                className={`w-4 text-right text-[10px] tabular-nums shrink-0 ${
+                  isTop3 ? "text-evergreen font-bold" : "text-muted-foreground"
+                }`}
+              >
                 {idx + 1}
               </span>
-              <span className="w-28 truncate font-medium shrink-0">
+              <span
+                className={`w-28 truncate shrink-0 ${
+                  isTop3 ? "font-bold text-foreground" : "font-medium"
+                }`}
+              >
                 {k.keyword}
               </span>
-              {/* P1 코드 리뷰 M2 fix — 다크모드 트랙 명도 보정. bg-rule 다크는
-                  L 21% 로 매우 어두워 0% 막대가 검은 띠처럼 보임. dark:bg-rule-soft
-                  + bar 색 foreground/30 으로 다크·라이트 모두 일관 명도. */}
               <span className="flex-1 h-2 bg-rule dark:bg-rule-soft rounded-full overflow-hidden">
                 <span
-                  className="block h-full bg-foreground/30 rounded-full"
+                  className={`block h-full rounded-full ${
+                    isTop3 ? "bg-evergreen" : "bg-foreground/30"
+                  }`}
                   style={{ width: `${pct}%` }}
                 />
               </span>
