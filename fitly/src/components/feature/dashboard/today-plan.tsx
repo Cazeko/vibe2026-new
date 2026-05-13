@@ -74,13 +74,38 @@ export function TodayPlan({ items }: { items: PlanItem[] }) {
                   </p>
                 </div>
                 {!locked && (
+                  /* v3.7 외부 평가 #2.3 — 원형 프로그레스 ring. conic-gradient 로
+                     evergreen 차오름. SVG 대신 CSS 만으로 구현 (light bundle).
+                     §7 모션 절제 정합 — transition 700ms ease-out (gauge-fill 정합). */
                   <span
-                    className={cn(
-                      "font-bold text-[14px] num tracking-[-0.01em]",
-                      item.progress > 0 ? "text-evergreen" : "text-muted-foreground"
-                    )}
+                    className="relative inline-flex h-9 w-9 items-center justify-center shrink-0"
+                    aria-label={`진척도 ${item.progress}%`}
+                    role="progressbar"
+                    aria-valuenow={item.progress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
                   >
-                    {item.progress}%
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 rounded-full transition-[background] duration-700"
+                      style={{
+                        background: `conic-gradient(hsl(var(--color-accent)) ${item.progress * 3.6}deg, hsl(var(--color-rule)) 0)`,
+                      }}
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute inset-[3px] rounded-full bg-cream-soft"
+                    />
+                    <span
+                      className={cn(
+                        "relative font-bold text-[10.5px] num tracking-[-0.01em] leading-none",
+                        item.progress > 0
+                          ? "text-evergreen"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {item.progress}
+                    </span>
                   </span>
                 )}
               </Link>
