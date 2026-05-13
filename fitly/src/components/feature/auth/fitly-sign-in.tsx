@@ -406,8 +406,14 @@ export function FitlySignIn({ mode }: Props) {
             </button>
           </form>
 
-          {/* ─ 시즌 안내 카드 ─ */}
-          <aside className="mt-9 flex items-center gap-3.5 rounded-lg border border-rule bg-cream-soft px-[18px] py-4 animate-element animate-delay-500">
+          {/* ─ 시즌 안내 카드 ─
+              v3.7 외부 평가 #1.11 — 본 영역은 단순 안내 (클릭 동작 없음).
+              chevron 추가 시 클릭 어포던스 오해 발생하므로 NoChange 정합으로
+              현행 유지. 단, `role="note"` 명시로 스크린리더에 *비-버튼* 안내. */}
+          <aside
+            role="note"
+            className="mt-9 flex items-center gap-3.5 rounded-lg border border-rule bg-cream-soft px-[18px] py-4 animate-element animate-delay-500"
+          >
             <Sparkles className="h-[18px] w-[18px] shrink-0 text-evergreen" aria-hidden />
             <p className="text-[12.5px] leading-[1.55] text-muted2-deep">
               <strong className="font-bold text-foreground">2026학년도 시즌 오픈</strong>

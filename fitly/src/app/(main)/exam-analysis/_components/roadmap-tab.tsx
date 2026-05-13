@@ -1,9 +1,81 @@
+import Link from "next/link";
+import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getRoadmap, type RoadmapEntry } from "@/lib/exam-analysis/queries";
 import { EmptySeedNotice } from "./empty-seed-notice";
 
 // 헌법 v3.5 제13조의2·제3조의2 정합 — 영역별 S/A/B/C 학습 우선순위 자동 분배.
 // 합격 컷·확률·점수 예측은 일체 표시하지 아니한다. 출제 빈도 + 최근 5년 가중치만.
+// v3.7 외부 평가 #4.14 — 정렬 가능 헤더 (URL searchParams 기반 server 정렬).
+
+type SortKey = "grade" | "domain" | "itemCount" | "recency";
+type SortDir = "asc" | "desc";
+
+const GRADE_ORDER: Record<RoadmapEntry["grade"], number> = {
+  S: 0,
+  A: 1,
+  B: 2,
+  C: 3,
+};
+
+function sortRows(
+  rows: RoadmapEntry[],
+  key: SortKey,
+  dir: SortDir,
+): RoadmapEntry[] {
+  const sign = dir === "asc" ? 1 : -1;
+  const copy = [...rows];
+  copy.sort((a, b) => {
+    if (key === "grade") return sign * (GRADE_ORDER[a.grade] - GRADE_ORDER[b.grade]);
+    if (key === "domain") return sign * a.domain.localeCompare(b.domain, "ko");
+    if (key === "itemCount") return sign * (a.itemCount - b.itemCount);
+    if (key === "recency") return sign * (a.recencyScore - b.recencyScore);
+    return 0;
+  });
+  return copy;
+}
+
+function nextDir(active: boolean, dir: SortDir): SortDir {
+  if (!active) return "asc";
+  return dir === "asc" ? "desc" : "asc";
+}
+
+function SortableTh({
+  label,
+  field,
+  current,
+  dir,
+  align,
+}: {
+  label: string;
+  field: SortKey;
+  current: SortKey;
+  dir: SortDir;
+  align?: "left" | "right";
+}) {
+  const active = field === current;
+  const targetDir = nextDir(active, dir);
+  const Icon = !active ? ArrowUpDown : dir === "asc" ? ArrowUp : ArrowDown;
+  const params = new URLSearchParams({
+    tab: "roadmap",
+    sort: field,
+    dir: targetDir,
+  });
+  return (
+    <Link
+      href={`/exam-analysis?${params.toString()}`}
+      scroll={false}
+      prefetch={false}
+      aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
+      className={`inline-flex items-center gap-1 hover:text-foreground transition-colors ${
+        active ? "text-foreground" : ""
+      } ${align === "right" ? "ml-auto" : ""}`}
+    >
+      {label}
+      <Icon className="h-3 w-3 opacity-70" aria-hidden />
+    </Link>
+  );
+}
 
 const GRADE_META: Record<
   RoadmapEntry["grade"],
@@ -37,8 +109,15 @@ const GRADE_META: Record<
   },
 };
 
-export async function RoadmapTab() {
-  const roadmap = await getRoadmap();
+export async function RoadmapTab({
+  sortKey = "grade",
+  sortDir = "asc",
+}: {
+  sortKey?: SortKey;
+  sortDir?: SortDir;
+} = {}) {
+  const raw = await getRoadmap();
+  const roadmap = sortRows(raw, sortKey, sortDir);
 
   if (roadmap.length === 0) {
     return (
@@ -99,13 +178,39 @@ export async function RoadmapTab() {
           <table className="w-full text-[12.5px]">
             <thead className="sticky top-0 z-10 bg-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-secondary/80 text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground shadow-[0_1px_0_0_hsl(var(--color-rule))]">
               <tr>
-                <th className="text-left px-5 py-2.5 w-16">등급</th>
-                <th className="text-left px-5 py-2.5">영역</th>
-                <th className="text-right px-5 py-2.5 tabular-nums w-20">
-                  누적 문항
+                <th className="text-left px-5 py-2.5 w-16">
+                  <SortableTh
+                    label="등급"
+                    field="grade"
+                    current={sortKey}
+                    dir={sortDir}
+                  />
+                </th>
+                <th className="text-left px-5 py-2.5">
+                  <SortableTh
+                    label="영역"
+                    field="domain"
+                    current={sortKey}
+                    dir={sortDir}
+                  />
                 </th>
                 <th className="text-right px-5 py-2.5 tabular-nums w-20">
-                  최근 5년
+                  <SortableTh
+                    label="누적 문항"
+                    field="itemCount"
+                    current={sortKey}
+                    dir={sortDir}
+                    align="right"
+                  />
+                </th>
+                <th className="text-right px-5 py-2.5 tabular-nums w-20">
+                  <SortableTh
+                    label="최근 5년"
+                    field="recency"
+                    current={sortKey}
+                    dir={sortDir}
+                    align="right"
+                  />
                 </th>
                 <th className="text-left px-5 py-2.5">학습 권장</th>
               </tr>

@@ -41,7 +41,12 @@ const TABS: { key: TabKey; label: string; icon: typeof Layers }[] = [
 export default async function ExamAnalysisPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; showAll?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    showAll?: string;
+    sort?: string;
+    dir?: string;
+  }>;
 }) {
   const supabase = await createClient();
   const {
@@ -56,6 +61,13 @@ export default async function ExamAnalysisPage({
     : "papers";
   // 분석 탭 토글 — 최근 5년 출제 0회 행을 노출/숨김
   const showAll = params.showAll === "1";
+  // v3.7 외부 평가 #4.14 — 로드맵 정렬 (서버 정렬, URL searchParams).
+  const sortKey = (
+    ["grade", "domain", "itemCount", "recency"].includes(params.sort ?? "")
+      ? params.sort
+      : "grade"
+  ) as "grade" | "domain" | "itemCount" | "recency";
+  const sortDir = params.dir === "desc" ? "desc" : "asc";
 
   const profile = await safeRun(
     "exam-analysis profile",
@@ -196,7 +208,7 @@ export default async function ExamAnalysisPage({
           {tab === "papers" && <PapersTab />}
           {tab === "analysis" && <AnalysisTab showAll={showAll} />}
           {tab === "topic" && <TopicTab />}
-          {tab === "roadmap" && <RoadmapTab />}
+          {tab === "roadmap" && <RoadmapTab sortKey={sortKey} sortDir={sortDir} />}
         </section>
       </div>
     </div>

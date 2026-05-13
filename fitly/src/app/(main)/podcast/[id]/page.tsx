@@ -5,12 +5,12 @@ import { eq, and } from "drizzle-orm";
 import { ArrowLeft, ShieldAlert, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Markdown } from "@/components/shared/markdown";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { podcastEpisodes, podcastProgress } from "@/lib/db/schema";
 import type { PodcastScript } from "@/lib/podcast/script";
 import { AudioPlayer } from "./_components/audio-player";
+import { KaraokeScript } from "./_components/karaoke-script";
 
 // N1 metadata — 동적 라우트 정합 (헌법 제19조의2 PWA 정합)
 export const metadata: Metadata = {
@@ -134,33 +134,17 @@ export default async function PodcastEpisodePage({
 
         {script && (
           <section className="space-y-3">
-            <h2 className="font-serif text-lg font-medium tracking-tight">
-              스크립트
-            </h2>
-            <Card className="border-rule">
-              <CardContent className="p-5 space-y-2.5">
-                {/* A1 speaker shrink-0 min-w + truncate, F1 dialogue mini-markdown (Markdown 컴포넌트 — sanitized) */}
-                {script.dialogue.map((line, idx) => (
-                  <div key={idx} className="flex gap-3 min-w-0">
-                    <span
-                      className={`shrink-0 min-w-10 max-w-[80px] truncate text-[11px] font-medium tabular-nums ${
-                        line.speaker === script.speakers[0]
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                      title={line.speaker}
-                    >
-                      {line.speaker}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <Markdown className="text-[13px] leading-[1.7] text-foreground/85">
-                        {line.text}
-                      </Markdown>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            <div className="flex items-baseline justify-between gap-3 flex-wrap">
+              <h2 className="font-serif text-lg font-medium tracking-tight">
+                스크립트
+              </h2>
+              <span className="text-[10.5px] text-muted-foreground">
+                재생 위치에 따라 현재 문장이 강조됩니다.
+              </span>
+            </div>
+            {/* v3.7 외부 평가 #5.4 — 카라오케 sync (재생 위치 기반 line 하이라이트).
+                client island 로 분리하여 server component page 와 정합 유지. */}
+            <KaraokeScript episodeId={id} script={script} />
             {script.summary && (
               <p className="text-[11.5px] text-muted-foreground leading-relaxed break-keep">
                 요약: {script.summary}
