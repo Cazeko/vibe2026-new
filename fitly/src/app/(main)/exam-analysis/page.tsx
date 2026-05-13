@@ -119,22 +119,20 @@ export default async function ExamAnalysisPage({
       />
 
       <div className="px-6 mx-auto max-w-7xl space-y-6">
-        {/* 사용자 요청 2026-05-12 — HonestyCard 제거, 그 자리(lg:col-span-8)에
-            4 KPI 카드(시험지·문항·학년도범위·시드상태)를 col-span-2 씩 배치.
-            RegionCard 는 col-span-4 유지하여 12-grid 정합.
-            정직성 원칙은 페이지 하단 disclaimer + 각 stat 자체로 자연 노출됨. */}
-        <section className="grid grid-cols-2 lg:grid-cols-12 gap-3">
+        {/* 백승환 피드백 #9 (2026-05-13) — KPI 와 RegionCard 가 한 grid row 에
+            5 items 로 배치되어 lg(1024px)에서 RegionCard col-span-4 폭이 너무
+            좁아 정보가 답답하게 잘리던 문제. 두 section 으로 분리하여 각자
+            자연스러운 폭 확보 + sm/md/lg/xl 각 breakpoint 균형 정합. */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard
             label="시험지"
             value={paperStats?.paperCount ? paperStats.paperCount : "—"}
             unit={paperStats?.paperCount ? "회분" : ""}
-            className="lg:col-span-2"
           />
           <StatCard
             label="문항"
             value={itemStats?.itemCount ? itemStats.itemCount : "—"}
             unit={itemStats?.itemCount ? "개" : ""}
-            className="lg:col-span-2"
           />
           <StatCard
             label="학년도 범위"
@@ -144,20 +142,19 @@ export default async function ExamAnalysisPage({
                 : "—"
             }
             unit=""
-            className="lg:col-span-2"
           />
           <StatCard
             label="시드 상태"
             value={seedReady ? "활성" : "대기"}
             unit=""
             accent={seedReady}
-            className="lg:col-span-2"
           />
-          <RegionCard
-            region={targetRegion}
-            cutScores={cutScores}
-            className="col-span-2 lg:col-span-4 row-span-1"
-          />
+        </section>
+
+        {/* RegionCard 별도 section — lg+ 에서는 max-w-md (≈28rem) 로 제한하여
+            합격선 추이 표시 영역이 답답해지지 않고 우측 여백 자연스럽게 정합. */}
+        <section className="lg:max-w-md">
+          <RegionCard region={targetRegion} cutScores={cutScores} />
         </section>
 
         {/* 탭 바 */}
@@ -206,12 +203,11 @@ export default async function ExamAnalysisPage({
 function RegionCard({
   region,
   cutScores,
-  className = "",
 }: {
   region: string | null;
   cutScores: CutScoreRow[];
-  className?: string;
 }) {
+  const className = ""; // 부모 section 에서 폭 제한 — 본 컴포넌트는 자기 폭 100% 차지.
   // 학년도 내림차순으로 최대 3개만 표시
   const recent = cutScores.slice(0, 3);
   const anyVerified = cutScores.some((c) => c.verified);

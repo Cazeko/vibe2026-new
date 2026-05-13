@@ -82,6 +82,8 @@ export async function TopicTab() {
                   <h4 className="font-serif text-[13px] font-medium tracking-tight truncate">
                     {row.domain}
                   </h4>
+                  {/* 백승환 피드백 #10 — truncate 제거. 긴 키워드는 wrap 으로 자연
+                      줄바꿈하여 잘림 회피. break-keep 으로 한국어 어절 단위 wrap. */}
                   <ol className="mt-1.5 space-y-1">
                     {row.keywords.map((k, idx) => (
                       <li
@@ -92,7 +94,7 @@ export async function TopicTab() {
                           <span className="text-[10px] text-muted-foreground tabular-nums w-3 text-right shrink-0">
                             {idx + 1}
                           </span>
-                          <span className="truncate">{k.keyword}</span>
+                          <span className="break-keep">{k.keyword}</span>
                         </span>
                         <span className="text-[10.5px] text-muted-foreground tabular-nums shrink-0">
                           {k.count}회
@@ -202,22 +204,26 @@ function KeywordCloud({
     return 0.55 + ratio * 0.45;
   };
 
-  // overflow-hidden + flex-wrap 강제 — 좁은 컨테이너에서 한 줄이 컨테이너를
-  // 넘어가는 현상 차단 (사용자 보고 2026-05-12)
+  // 백승환 피드백 #10 (2026-05-13) — 긴 키워드가 우측에서 답답하게 잘려 보임.
+  // 칩 스타일(border + padding) 로 시각 경계 명확화 + max-w-full + break-keep 으로
+  // 매우 긴 단어도 컨테이너 안에서 자연 줄바꿈. overflow-hidden 제거 (잘림 회피).
+  // 리뷰 M10 fix — opacity 를 칩 컨테이너 대신 텍스트 span 에만 적용. 빈도 낮은
+  // 키워드의 border 까지 함께 흐려져 "깨진 칩" 처럼 보이던 회귀 회피.
   return (
-    <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-2 leading-tight overflow-hidden max-w-full">
+    <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-2 leading-tight">
       {cloud.map((k) => (
         <span
           key={k.keyword}
-          className="font-serif tracking-tight text-foreground break-keep"
-          style={{
-            fontSize: sizeOf(k.count),
-            opacity: opacityOf(k.count),
-            wordBreak: "keep-all",
-          }}
+          className="inline-block max-w-full rounded-md border border-rule px-2 py-0.5 font-serif tracking-tight bg-card/50"
+          style={{ fontSize: sizeOf(k.count), wordBreak: "keep-all" }}
           title={`${k.keyword} · ${k.count}회 누적`}
         >
-          {k.keyword}
+          <span
+            className="text-foreground"
+            style={{ opacity: opacityOf(k.count) }}
+          >
+            {k.keyword}
+          </span>
         </span>
       ))}
     </div>
