@@ -32,6 +32,7 @@ export type ItemRow = {
   keywords: string[];
   stemImagePath: string | null;
   stemTextPreview: string;  // stem_text 첫 80자
+  stemTextFull: string;     // 백승환 #4 (2026-05-13) — 전체 본문 텍스트
   answerMd: string | null;
   explanationMd: string | null;
   verifiedAnswer: boolean;
@@ -130,6 +131,8 @@ export const getPaperItems = cache(async (paperId: string): Promise<ItemRow[]> =
     "exam-analysis getPaperItems",
     async () => {
       const db = getDb();
+      // 백승환 #4 (2026-05-13) — stem_text 전체 로드 (Lightbox 텍스트 병렬용).
+      // 시험지 평균 8문항 × stem 평균 1KB = ~8KB SSR 페이로드 증가. 안전 범위.
       const rows = await db.execute<{
         id: string;
         item_no: number;
@@ -140,6 +143,7 @@ export const getPaperItems = cache(async (paperId: string): Promise<ItemRow[]> =
         keywords: string[] | null;
         stem_image_path: string | null;
         stem_preview: string;
+        stem_text: string;
         answer_md: string | null;
         explanation_md: string | null;
         verified_answer: boolean;
@@ -154,6 +158,7 @@ export const getPaperItems = cache(async (paperId: string): Promise<ItemRow[]> =
           keywords,
           stem_image_path,
           left(stem_text, 80) as stem_preview,
+          stem_text,
           answer_md,
           explanation_md,
           verified_answer
@@ -171,6 +176,7 @@ export const getPaperItems = cache(async (paperId: string): Promise<ItemRow[]> =
         keywords: Array.isArray(r.keywords) ? r.keywords : [],
         stemImagePath: r.stem_image_path,
         stemTextPreview: r.stem_preview ?? "",
+        stemTextFull: r.stem_text ?? "",
         answerMd: r.answer_md,
         explanationMd: r.explanation_md,
         verifiedAnswer: r.verified_answer,
