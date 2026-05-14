@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { FitlyLogo } from "@/components/shared/fitly-logo";
 import { useMobileMenu } from "@/components/shared/mobile-menu-provider";
+import { useProfile } from "@/components/shared/profile-provider";
 
 type Item = {
   href: string;
@@ -56,10 +57,14 @@ export function AppSidebar() {
   // 리뷰 H2 fix — lg+ 데스크톱 임계점 클라이언트 측정.
   // SSR hydration mismatch 회피 위해 초기값 false, mount 후 정합.
   const [isLg, setIsLg] = useState(false);
-  const [target, setTarget] = useState<{
-    region: string | null;
-    examDate: string | null;
-  }>({ region: null, examDate: null });
+
+  // 코드리뷰 B.H2/H3 (2026-05-15 PR-8) — (main)/layout.tsx 가 SSR 1회 조회한
+  // profile 을 context 로 받아 사용. 종전 useEffect mount fetch 제거.
+  const profile = useProfile();
+  const target = {
+    region: profile?.targetRegion ?? null,
+    examDate: profile?.examDate ?? null,
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -68,20 +73,6 @@ export function AppSidebar() {
     const handler = (e: MediaQueryListEvent) => setIsLg(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/user/profile")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.profile) {
-          setTarget({
-            region: d.profile.targetUniversity ?? null,
-            examDate: d.profile.examDate ?? null,
-          });
-        }
-      })
-      .catch(() => undefined);
   }, []);
 
   // v3.5.3 — 라우트 변경 시 모바일 drawer 자동 닫기. lg+ 데스크탑은 본인 선택
