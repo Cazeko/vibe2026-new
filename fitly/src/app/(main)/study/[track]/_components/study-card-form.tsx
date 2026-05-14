@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ShieldCheck,
   AlertCircle,
   RefreshCw,
   ThumbsUp,
@@ -14,6 +13,7 @@ import {
   Maximize2,
   ZoomIn,
   ZoomOut,
+  ShieldCheck,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ import type { CardHighlight, CardTag } from "@/lib/db/queries";
 import { submitAnswer, gradeCard } from "../actions";
 import { HighlightLayer } from "./highlight-layer";
 import { CardTags } from "./card-tags";
+import { WorkspaceTopbar } from "./workspace-topbar";
+import { AnalysisPanel } from "./analysis-panel";
 
 type CardData = {
   id: string;
@@ -102,7 +104,7 @@ export function StudyCardForm({
   const [blindMode, setBlindMode] = useState(false);
   const toggleBlind = () => setBlindMode((v) => !v);
   const [pending, startTransition] = useTransition();
-  const answerCompareRef = useRef<HTMLDivElement | null>(null);
+  const analysisAnchorRef = useRef<HTMLDivElement | null>(null);
   const draftRestoredRef = useRef(false);
   const firstMountRef = useRef(true);
 
@@ -113,6 +115,7 @@ export function StudyCardForm({
   const isLongStem = cleanedFrontText.length > 800;
   const draftKey = `${DRAFT_KEY_PREFIX}${card.id}`;
   const supportsDraft = card.type === "quiz" || card.type === "mistake";
+  const isWorkspaceTrack = card.type === "quiz" || card.type === "mistake";
 
   function handleReveal() {
     if (card.type === "quiz" || card.type === "mistake") {
@@ -148,8 +151,8 @@ export function StudyCardForm({
     !revealed && (card.type === "quiz" || card.type === "mistake");
 
   useEffect(() => {
-    if (revealed && answerCompareRef.current) {
-      answerCompareRef.current.scrollIntoView({
+    if (revealed && analysisAnchorRef.current) {
+      analysisAnchorRef.current.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
@@ -237,9 +240,7 @@ export function StudyCardForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealed, pending]);
 
-  const sessionProgressPct = Math.min(100, sessionCount * 8);
-
-  // Track 1.1 (v3.5.4) — 본문 카드 (quiz/mistake 용).
+  // 본문 카드 (quiz/mistake 용) — SplitView 좌측 ProblemPane 의 상단.
   const stemCard = (
     <Card className="border-rule">
       <CardContent className="p-6">
@@ -315,13 +316,14 @@ export function StudyCardForm({
     </Card>
   );
 
-  // 답안 입력 + 비교 + 경고 (quiz/mistake).
-  // Track 1.1 — SplitView 우측에서는 단일 컬럼이 자연스러우므로 grid-cols 제거.
-  const answerArea = (
-    <div className="space-y-5">
+  // ProblemPane — 본문 + (작성 중) 답안 textarea + (채점 후) 내 답안 readonly.
+  const problemPane = (
+    <div className="space-y-4">
+      {stemCard}
+
       {showAnswerInput && (
         <Card className="border-rule">
-          <CardContent className="p-6">
+          <CardContent className="p-5">
             <div className="flex items-baseline justify-between gap-2">
               <label
                 htmlFor="answer-input"
@@ -360,98 +362,100 @@ export function StudyCardForm({
         </Card>
       )}
 
-      {revealed && card.backMd && (
-        <div ref={answerCompareRef} className="scroll-mt-4 space-y-4">
-          {answer.trim().length > 0 && (
-            <AnswerBox label="내 답안" tone="muted" plainText={answer} />
-          )}
-          <AnswerBox
-            label="AI 모범답안"
-            tone="evergreen"
-            markdown={card.backMd}
-            verified={card.verifiedAnswer}
-            cardId={card.id}
-            highlights={highlights}
-            blindMode={blindMode}
-            onToggleBlind={toggleBlind}
-          />
-        </div>
-      )}
-
-      {revealed && !card.backMd && (
-        <Card className="border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30">
-          <CardContent className="p-6 flex gap-3">
-            <AlertCircle
-              className="h-5 w-5 text-warning shrink-0 mt-0.5"
-              aria-hidden
-            />
-            <p className="text-[12.5px] text-foreground/80 leading-relaxed">
-              본 카드의 답안·해설이 아직 시드되지 않았습니다. 운영자 시드 후 자동
-              표시됩니다.
-            </p>
+      {/* 채점 후 — 사용자가 작성한 답안을 readonly 박스로 좌측에 보존.
+          AnalysisPanel(우측) 의 모범답안과 좌우 비교 가능. */}
+      {revealed && answer.trim().length > 0 && (
+        <Card className="border-l-4 border-rule-strong border-y border-r border-rule bg-card">
+          <CardContent className="p-5">
+            <span className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+              내 답안
+            </span>
+            <div className="mt-3 font-sans text-[13.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
+              {answer}
+            </div>
           </CardContent>
         </Card>
       )}
     </div>
   );
 
+  const sessionProgressPct = Math.min(100, sessionCount * 8);
+
   return (
-    <div className="space-y-5">
-      {/* 헌법 v3.5.1 제16조 — 카드 메타 영역. 사용자 커스텀 해시태그.
-          본 영역은 트랙(quiz/keyword/mistake) 무관 카드 단위 메타. */}
+    <div className="space-y-4">
+      {/* 헌법 v3.5.1 제16조 — 카드 메타 영역. 사용자 커스텀 해시태그. */}
       <CardTags cardId={card.id} initialTags={tags} />
 
-      {sessionCount > 0 && (
-        <div
-          className="flex items-center gap-3 text-[11px] text-muted-foreground"
-          aria-live="polite"
-        >
-          <span className="uppercase tracking-[0.12em]">세션 진행</span>
-          <span className="tabular-nums font-medium text-foreground">
-            {sessionCount}장 학습
-          </span>
-          <div
-            className="flex-1 h-1 bg-rule rounded-full overflow-hidden"
-            role="progressbar"
-            aria-valuenow={sessionProgressPct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="세션 진행률"
-          >
-            <div
-              className="h-full bg-evergreen transition-all duration-500"
-              style={{ width: `${sessionProgressPct}%` }}
+      {isWorkspaceTrack && (
+        <>
+          <WorkspaceTopbar
+            track={card.type}
+            paperLabel={card.paperLabel}
+            itemFormat={card.itemFormat}
+            itemPoints={card.itemPoints}
+            sessionCount={sessionCount}
+            revealed={revealed}
+          />
+
+          {/* SplitView — ProblemPane (좌) | AnalysisPanel (우).
+              xl(≥1280px) 이상에서 활성, 미만은 vertical stack fallback. */}
+          <div ref={analysisAnchorRef} className="scroll-mt-4">
+            <SplitView
+              storageKey={`study-${card.type}`}
+              left={problemPane}
+              right={
+                <AnalysisPanel
+                  revealed={revealed}
+                  cardId={card.id}
+                  backMd={card.backMd}
+                  verifiedAnswer={card.verifiedAnswer}
+                  highlights={highlights}
+                  blindMode={blindMode}
+                  onToggleBlind={toggleBlind}
+                />
+              }
+              stickyLeft
+              stickyTop="top-[96px]"
+              defaultRatio={0.5}
+              minRatio={0.35}
+              maxRatio={0.65}
+              ariaLabel="본문 / 분석 분할 비율"
             />
           </div>
-        </div>
+        </>
       )}
 
-      {/* Track 1.1 (v3.5.4, 헌법 v3.5.3 §16 단서) — 본문↔답안 좌우 분할.
-          xl(≥1280px) 이상에서 활성, 미만은 vertical stack fallback. localStorage 비율 저장. */}
-      {card.type !== "keyword" && (
-        <SplitView
-          storageKey={`study-${card.type}`}
-          left={stemCard}
-          right={answerArea}
-          stickyLeft
-          stickyTop="top-[96px]"
-          defaultRatio={0.5}
-          minRatio={0.35}
-          maxRatio={0.65}
-          ariaLabel="본문 / 답안 분할 비율"
-        />
-      )}
-
-      {/* 키워드 트랙 — 정리 노트만 중앙 배치. */}
+      {/* 키워드 트랙 — 정리 노트만 중앙 배치. 본 PR 1 스코프 외. */}
       {card.type === "keyword" && (
         <div className="max-w-3xl mx-auto">
+          {sessionCount > 0 && (
+            <div
+              className="mb-4 flex items-center gap-3 text-[11px] text-muted-foreground"
+              aria-live="polite"
+            >
+              <span className="uppercase tracking-[0.12em]">세션 진행</span>
+              <span className="tabular-nums font-medium text-foreground">
+                {sessionCount}장 학습
+              </span>
+              <div
+                className="flex-1 h-1 bg-rule rounded-full overflow-hidden"
+                role="progressbar"
+                aria-valuenow={sessionProgressPct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="세션 진행률"
+              >
+                <div
+                  className="h-full bg-evergreen transition-all duration-500"
+                  style={{ width: `${sessionProgressPct}%` }}
+                />
+              </div>
+            </div>
+          )}
           {revealed && card.backMd && (
-            <AnswerBox
-              label="정리 노트"
-              tone="evergreen"
+            <KeywordNoteBox
               markdown={card.backMd}
               verified={card.verifiedAnswer}
-              zoomable
               cardId={card.id}
               highlights={highlights}
               blindMode={blindMode}
@@ -474,9 +478,7 @@ export function StudyCardForm({
         </div>
       )}
 
-      {/* v3.5.2 (2026-05-14) — 자가 채점 sticky 슬림화.
-          종전 약 140px 높이 → ~52px. 헤더 라벨·안내 텍스트·세로 hint 제거하여
-          본문 가시성 우선. label + 단축키 kbd 만 단일 라인. */}
+      {/* v3.5.2 (2026-05-14) — 자가 채점 sticky 슬림화 (PR #36). */}
       {revealed && (
         <Card
           className="sticky z-20 border-rule shadow-[0_-4px_12px_rgba(26,32,39,0.05)] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90"
@@ -523,8 +525,7 @@ function PdfImage({ src }: { src: string }) {
         aria-label="시험 본문 이미지 영역"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {/* v3.6 외부 평가 #3.11 — 다크모드 PDF 눈부심 방지: brightness(0.85) +
-            contrast(1.15). 라이트모드는 원본 유지 (filter: none). */}
+        {/* v3.6 외부 평가 #3.11 — 다크모드 PDF 눈부심 방지. */}
         <img
           src={src}
           alt="시험 본문 (PDF 페이지)"
@@ -535,7 +536,6 @@ function PdfImage({ src }: { src: string }) {
           style={{ transform: `scale(${zoom})`, width: `${100 / zoom}%` }}
         />
       </div>
-      {/* v3.6 외부 평가 #3.2 — 컨트롤러 박스 backdrop-filter blur 강화 (블러 8px). */}
       <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-card/80 backdrop-blur-md supports-[backdrop-filter]:bg-card/70 px-1 py-1 border border-rule shadow-sm">
         <button
           type="button"
@@ -573,38 +573,23 @@ function PdfImage({ src }: { src: string }) {
   );
 }
 
-function AnswerBox({
-  label,
-  tone,
+// 키워드 트랙 전용 정리 노트 박스. 폰트 줌 + 형광펜 + 블라인드 보존.
+// quiz/mistake 트랙은 AnalysisPanel/ReferenceTab 으로 격상.
+function KeywordNoteBox({
   markdown,
-  plainText,
   verified,
-  zoomable = false,
   cardId,
   highlights,
-  blindMode = false,
+  blindMode,
   onToggleBlind,
 }: {
-  label: string;
-  tone: "evergreen" | "muted";
-  markdown?: string | null;
-  plainText?: string;
-  verified?: boolean;
-  zoomable?: boolean;
-  // 헌법 v3.5.1 제16조 — 사용자 형광펜 prop. plainText("내 답안") 에는 비전달.
-  cardId?: string;
-  highlights?: CardHighlight[];
-  // 헌법 v3.5.1 제16조 — 블라인드(가리기) 모드. plainText 박스에는 미적용.
-  blindMode?: boolean;
-  onToggleBlind?: () => void;
+  markdown: string;
+  verified: boolean;
+  cardId: string;
+  highlights: CardHighlight[];
+  blindMode: boolean;
+  onToggleBlind: () => void;
 }) {
-  const toneClass =
-    tone === "evergreen"
-      ? "border-l-4 border-evergreen"
-      : "border-l-4 border-rule-strong";
-  const labelClass =
-    tone === "evergreen" ? "text-evergreen" : "text-muted-foreground";
-
   const [zoom, setZoom] = useState(1);
   const ZOOM_STEPS = [0.85, 1, 1.15, 1.3];
   function adjustZoom(direction: -1 | 1) {
@@ -617,101 +602,72 @@ function AnswerBox({
   }
 
   return (
-    <Card className={`${toneClass} border-y border-r border-rule bg-card`}>
+    <Card className="border-l-4 border-evergreen border-y border-r border-rule bg-card">
       <CardContent className="p-5">
         <div className="flex items-center gap-2 flex-wrap">
-          <span
-            className={`text-[10.5px] uppercase tracking-[0.12em] ${labelClass}`}
-          >
-            {label}
+          <span className="text-[10.5px] uppercase tracking-[0.12em] text-evergreen">
+            정리 노트
           </span>
-          {verified !== undefined && <SourceBadge verified={verified} />}
-          {(onToggleBlind || zoomable) && (
-            <span className="ml-auto inline-flex items-center gap-1.5">
-              {/* 헌법 v3.5.1 제16조 — 블라인드 모드 토글. markdown 본문 의 strong
-                  (학습 핵심 마크업) 을 검정 박스로 가린다. 클릭 시 단어별 reveal. */}
-              {markdown && onToggleBlind && (
-                <button
-                  type="button"
-                  onClick={onToggleBlind}
-                  aria-pressed={blindMode}
-                  aria-label={
-                    blindMode
-                      ? "블라인드 모드 끄기"
-                      : "블라인드 모드 켜기 — 핵심 키워드 가리기"
-                  }
-                  className={`inline-flex items-center gap-1 h-8 px-2 rounded border text-[11px] transition-colors ${
-                    blindMode
-                      ? "border-foreground/60 bg-foreground/10 text-foreground"
-                      : "border-rule text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                  }`}
-                >
-                  {blindMode ? (
-                    <EyeOff className="h-3.5 w-3.5" aria-hidden />
-                  ) : (
-                    <Eye className="h-3.5 w-3.5" aria-hidden />
-                  )}
-                  <span>블라인드</span>
-                </button>
+          <SourceBadge verified={verified} />
+          <span className="ml-auto inline-flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={onToggleBlind}
+              aria-pressed={blindMode}
+              aria-label={
+                blindMode
+                  ? "블라인드 모드 끄기"
+                  : "블라인드 모드 켜기 — 핵심 키워드 가리기"
+              }
+              className={`inline-flex items-center gap-1 h-8 px-2 rounded border text-[11px] transition-colors ${
+                blindMode
+                  ? "border-foreground/60 bg-foreground/10 text-foreground"
+                  : "border-rule text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+              }`}
+            >
+              {blindMode ? (
+                <EyeOff className="h-3.5 w-3.5" aria-hidden />
+              ) : (
+                <Eye className="h-3.5 w-3.5" aria-hidden />
               )}
-              {zoomable && (
-                // v3.6 외부 평가 #3.10 — 모바일 오터치 회피. 버튼 hitbox h-8 w-8 +
-                // gap-1.5 로 확대. 시각 크기는 동일하나 터치 영역 ≥32×32 (모바일).
-                <>
-                  <button
-                    type="button"
-                    onClick={() => adjustZoom(-1)}
-                    disabled={zoom <= ZOOM_STEPS[0]}
-                    aria-label="글자 작게"
-                    className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <span className="text-[12px] leading-none">A−</span>
-                  </button>
-                  <span className="text-[10px] text-muted-foreground tabular-nums w-9 text-center">
-                    {Math.round(zoom * 100)}%
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => adjustZoom(1)}
-                    disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
-                    aria-label="글자 크게"
-                    className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <span className="text-[12px] leading-none">A+</span>
-                  </button>
-                </>
-              )}
+              <span>블라인드</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => adjustZoom(-1)}
+              disabled={zoom <= ZOOM_STEPS[0]}
+              aria-label="글자 작게"
+              className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <span className="text-[12px] leading-none">A−</span>
+            </button>
+            <span className="text-[10px] text-muted-foreground tabular-nums w-9 text-center">
+              {Math.round(zoom * 100)}%
             </span>
-          )}
+            <button
+              type="button"
+              onClick={() => adjustZoom(1)}
+              disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
+              aria-label="글자 크게"
+              className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <span className="text-[12px] leading-none">A+</span>
+            </button>
+          </span>
         </div>
         <div
-          className={
-            "mt-3 [font-variant-numeric:tabular-nums] tabular-nums origin-top-left" +
-            (zoomable ? " [&_*]:![font-size:inherit] [&_*]:![line-height:1.65]" : "")
-          }
-          style={zoomable ? { fontSize: `${Math.round(zoom * 14)}px` } : undefined}
+          className="mt-3 [font-variant-numeric:tabular-nums] tabular-nums origin-top-left [&_*]:![font-size:inherit] [&_*]:![line-height:1.65]"
+          style={{ fontSize: `${Math.round(zoom * 14)}px` }}
         >
-          {markdown ? (
-            cardId ? (
-              <HighlightLayer
-                cardId={cardId}
-                surface="back_md"
-                initialHighlights={highlights ?? []}
-              >
-                <Markdown serif blind={blindMode}>
-                  {markdown}
-                </Markdown>
-              </HighlightLayer>
-            ) : (
-              <Markdown serif blind={blindMode}>
-                {markdown}
-              </Markdown>
-            )
-          ) : (
-            <div className="font-sans text-[13.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
-              {plainText || "—"}
-            </div>
-          )}
+          <HighlightLayer
+            cardId={cardId}
+            surface="back_md"
+            initialHighlights={highlights}
+          >
+            <Markdown serif blind={blindMode}>
+              {markdown}
+            </Markdown>
+          </HighlightLayer>
         </div>
       </CardContent>
     </Card>
