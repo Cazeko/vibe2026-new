@@ -134,12 +134,13 @@ export default async function StudyTrackPage({
         }
       />
 
-      {/* 사용자 보고 2026-05-12 — 키워드 트랙은 답안 입력이 없어 가로 활용이
-          가능하므로 max-w 를 확장하여 본문 + 정리 노트를 좌우로 배치. quiz/
-          mistake 는 답안 입력 흐름상 max-w-3xl 유지. */}
+      {/* 사용자 발화 (2026-05-14) — quiz/mistake 트랙 가로 여백 과다. 답안 입력
+          flow 흐름이라 종전 max-w-3xl 였으나, SplitView 좌우 분할 시 각 영역
+          384px 만 확보되어 가로 여백 60%+ 발생. max-w-6xl(1152px) 로 확장하여
+          좌우 영역 ~ 560px 씩 확보. keyword 는 단일 컬럼이라 가독성 위해 7xl 유지. */}
       <div
-        className={`px-6 mx-auto space-y-6 ${
-          track === "keyword" ? "max-w-7xl" : "max-w-3xl"
+        className={`px-4 sm:px-6 mx-auto space-y-6 ${
+          track === "keyword" ? "max-w-7xl" : "max-w-6xl"
         }`}
       >
         {/* D2 — 진행 헤더 flex-wrap + 모바일 stack. S2 큐 상태 변화 aria-live. */}
