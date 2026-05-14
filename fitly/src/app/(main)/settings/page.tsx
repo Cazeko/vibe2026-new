@@ -57,6 +57,9 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // 코드리뷰 B.H5 (2026-05-15 PR-10) — Supabase 클라이언트 lazy init 일관성.
+  // signOut 핸들러에서 createClient() 매 클릭 호출하던 패턴을 통일.
+  const [supabase] = useState(() => createClient());
   // C2 자동 dismiss 타이머 — unmount/재트리거 시 cleanup.
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -120,7 +123,6 @@ export default function SettingsPage() {
       window.localStorage.setItem("fitly:logout-broadcast", String(Date.now()));
       window.localStorage.removeItem("fitly:logout-broadcast");
     }
-    const supabase = createClient();
     await supabase.auth.signOut();
     router.replace("/login");
     router.refresh();

@@ -57,6 +57,9 @@ export function AppSidebar() {
   // 리뷰 H2 fix — lg+ 데스크톱 임계점 클라이언트 측정.
   // SSR hydration mismatch 회피 위해 초기값 false, mount 후 정합.
   const [isLg, setIsLg] = useState(false);
+  // 코드리뷰 B.H5 (2026-05-15 PR-10) — Supabase 클라이언트 lazy init 일관성.
+  // handleLogout 에서 createClient() 매 클릭 호출하던 패턴을 FitlySignIn 정합.
+  const [supabase] = useState(() => createClient());
 
   // 코드리뷰 B.H2/H3 (2026-05-15 PR-8) — (main)/layout.tsx 가 SSR 1회 조회한
   // profile 을 context 로 받아 사용. 종전 useEffect mount fetch 제거.
@@ -126,7 +129,6 @@ export function AppSidebar() {
       window.localStorage.setItem("fitly:logout-broadcast", String(Date.now()));
       window.localStorage.removeItem("fitly:logout-broadcast");
     }
-    const supabase = createClient();
     await supabase.auth.signOut();
     router.replace("/login");
     router.refresh();
