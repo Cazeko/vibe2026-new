@@ -34,6 +34,8 @@ export default async function RootPage() {
       throw err;
     }
     console.error("[root page] auth check failed, fallback to /login", err);
-    redirect("/login");
+    // 코드리뷰 M12 (2026-05-15, 헌법 §37) — Supabase 일시 장애 시 사용자에게
+    // 명시 안내. FitlySignIn 이 `?error=transient` 를 받아 한국어 배지를 노출.
+    redirect("/login?error=transient");
   }
 }

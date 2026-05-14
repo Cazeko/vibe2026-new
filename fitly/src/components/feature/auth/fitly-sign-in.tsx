@@ -10,7 +10,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Eye,
   EyeOff,
@@ -86,7 +86,9 @@ const REMEMBER_KEY = "fitly:remember-email";
 
 export function FitlySignIn({ mode }: Props) {
   const router = useRouter();
-  const supabase = createClient();
+  // 코드리뷰 D.H5 (2026-05-15) — 매 렌더마다 새 SupabaseClient 인스턴스가
+  // 생성되어 GoTrue listener / storage subscription 누적을 막기 위해 lazy init.
+  const [supabase] = useState(() => createClient());
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -105,6 +107,17 @@ export function FitlySignIn({ mode }: Props) {
       setRemember(true);
     }
   }, [mode]);
+
+  // 코드리뷰 M12 (2026-05-15, 헌법 §37) — root `/` 라우트가 Supabase 일시 장애로
+  // `/login?error=transient` 폴백했을 때 사용자에게 명시 안내.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("error") === "transient") {
+      setError(
+        "일시적인 서버 지연으로 다시 로그인이 필요합니다. 잠시 후 다시 시도해 주세요.",
+      );
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
