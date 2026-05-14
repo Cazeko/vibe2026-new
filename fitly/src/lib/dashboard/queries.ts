@@ -8,6 +8,7 @@ import {
   studySessions,
   learningLogs,
   userProfiles,
+  userStreakFreezes,
 } from "@/lib/db/schema";
 import { computeProgress } from "@/lib/progress/score";
 import { getCardCounts, getDueCardCounts, safeRun } from "@/lib/db/queries";
@@ -35,7 +36,13 @@ const EMPTY_KPI: DashboardKpi = {
   streakDays: 0,
   streakBest: 0,
   daysToExam: null,
+  streakFreezesAvailable: 2,
+  canFreezeToday: true,
 };
+
+// 헌법 v3.5.1 제16조 — 잔디 얼리기 상한.
+const STREAK_FREEZE_WINDOW_DAYS = 30;
+const STREAK_FREEZE_MAX = 2;
 
 // 헌법 v3.0 제15조 — 지역 교육청 17개 라벨 (선택 입력).
 const REGION_SHORT: Record<string, string> = {
@@ -123,9 +130,44 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
     .orderBy(desc(studySessions.startedAt))
     .limit(120);
 
-  const dateSet = new Set(
-    recentSessions.map((r) => new Date(r.startedAt).toISOString().slice(0, 10)),
+  // 헌법 v3.5.1 제16조 — 잔디 얼리기 dateSet union. 학습 못한 날에 freeze 적용
+  // 시 streak 끊김 방지. 30일 윈도우 데이터까지 페치 (상한 검증 + dateSet 양쪽).
+  const since30Date = new Date(
+    Date.now() - STREAK_FREEZE_WINDOW_DAYS * DAY_MS,
   );
+  const since30Str = since30Date.toISOString().slice(0, 10);
+  const freezeRows = await db
+    .select({ frozenDate: userStreakFreezes.frozenDate })
+    .from(userStreakFreezes)
+    .where(
+      and(
+        eq(userStreakFreezes.userId, userId),
+        gte(userStreakFreezes.frozenDate, since30Str),
+      ),
+    );
+  const frozenDateStrs = freezeRows.map((r) =>
+    typeof r.frozenDate === "string"
+      ? r.frozenDate
+      : new Date(r.frozenDate as unknown as Date).toISOString().slice(0, 10),
+  );
+
+  const dateSet = new Set([
+    ...recentSessions.map((r) =>
+      new Date(r.startedAt).toISOString().slice(0, 10),
+    ),
+    ...frozenDateStrs,
+  ]);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const studiedToday = recentSessions.some(
+    (r) => new Date(r.startedAt).toISOString().slice(0, 10) === todayStr,
+  );
+  const frozenToday = frozenDateStrs.includes(todayStr);
+  const streakFreezesAvailable = Math.max(
+    0,
+    STREAK_FREEZE_MAX - frozenDateStrs.length,
+  );
+  const canFreezeToday =
+    !studiedToday && !frozenToday && streakFreezesAvailable > 0;
   const today = new Date();
   let streak = 0;
   for (let i = 0; i < 120; i += 1) {
@@ -193,6 +235,8 @@ async function computeKpi(userId: string): Promise<DashboardKpi> {
     streakDays: streak,
     streakBest,
     daysToExam,
+    streakFreezesAvailable,
+    canFreezeToday,
   };
 }
 
