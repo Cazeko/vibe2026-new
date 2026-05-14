@@ -1,11 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, count, eq, gte, isNull } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import {
+  cardReports,
   cards,
   examItems,
   examPapers,
@@ -15,6 +16,7 @@ import {
   userCardState,
   userCardTags,
 } from "@/lib/db/schema";
+import type { CardReportCategory } from "@/lib/db/schema";
 import type { SrsState } from "@/types";
 import {
   analyzeEssay,
@@ -583,5 +585,83 @@ export async function chatWithTutor(input: {
     const errMsg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
     console.error(`[chatWithTutor] LLM call failed. cause=${errMsg}`);
     return { ok: false, error: "LlmFailed" };
+  }
+}
+
+// 헌법 시행규칙 33 §35 백업 매트릭스 — 사용자 AI 답안 신고 server action.
+// 코드리뷰 C.H2 (2026-05-15) — 학습자가 모범답안·해설 오류를 직접 보고할 수 있게
+// 하여 정직성 §3의2 보강. 일일 캡으로 어뷰즈 방지.
+export const REPORT_CATEGORIES: ReadonlyArray<CardReportCategory> = [
+  "answer_wrong",
+  "explanation_unclear",
+  "irrelevant",
+  "other",
+];
+const MAX_REPORT_DETAIL_LEN = 1000;
+const MAX_REPORTS_PER_DAY = 20;
+
+export type ReportCardResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+export async function reportCardIssue(input: {
+  cardId: string;
+  category: CardReportCategory;
+  detail?: string;
+}): Promise<ReportCardResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Unauthorized" };
+
+  if (!REPORT_CATEGORIES.includes(input.category)) {
+    return { ok: false, error: "InvalidCategory" };
+  }
+
+  const detail = input.detail?.trim() || null;
+  if (detail && detail.length > MAX_REPORT_DETAIL_LEN) {
+    return { ok: false, error: "DetailTooLong" };
+  }
+  if (input.category === "other" && !detail) {
+    return { ok: false, error: "DetailRequired" };
+  }
+
+  const db = getDb();
+
+  const [card] = await db
+    .select({ id: cards.id })
+    .from(cards)
+    .where(eq(cards.id, input.cardId))
+    .limit(1);
+  if (!card) return { ok: false, error: "CardNotFound" };
+
+  // 일일 캡 — 어뷰즈 방지 (UTC 자정 기준).
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const [countRow] = await db
+    .select({ n: count() })
+    .from(cardReports)
+    .where(
+      and(
+        eq(cardReports.userId, user.id),
+        gte(cardReports.createdAt, startOfDay),
+      ),
+    );
+  if (Number(countRow?.n ?? 0) >= MAX_REPORTS_PER_DAY) {
+    return { ok: false, error: "DailyLimitExceeded" };
+  }
+
+  try {
+    await db.insert(cardReports).values({
+      cardId: input.cardId,
+      userId: user.id,
+      category: input.category,
+      detail,
+    });
+    return { ok: true };
+  } catch (e) {
+    console.error("[reportCardIssue] insert failed", e);
+    return { ok: false, error: "InsertFailed" };
   }
 }
