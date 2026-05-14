@@ -8,11 +8,17 @@ import { sql } from "drizzle-orm";
 import {
   cards,
   userAttempts,
+  userCardAiAnalysis,
   userCardHighlights,
   userCardState,
   userCardTags,
 } from "@/lib/db/schema";
 import type { SrsState } from "@/types";
+import {
+  analyzeEssay,
+  computeAttemptHash,
+} from "@/lib/ai/gemini-essay-analyze";
+import { getAiAnalysis, type AiAnalysis } from "@/lib/db/queries";
 
 // 헌법 v3.0 제13조의2 — 학습 활동 server actions.
 // 답안 저장 + 자가 채점 등급 처리 (현 시점은 단순 spaced repetition,
@@ -385,4 +391,102 @@ export async function removeCardTag(
       ),
     );
   return { ok: true };
+}
+
+// 헌법 v3.5.1 제16조 + 2026-05-14 brainstorming PR 2/6 — AI 서술형 분석 요청.
+// 캐시(user_card_ai_analysis) hit/miss 로직 → miss 시 Gemini Flash 호출 →
+// upsert 후 반환. UI(AnalysisPanel) 는 PR 3 부터 본 action 을 호출한다.
+//
+// 정책
+//   - 카드의 backMd 부재 시 분석 거부 (UI 에서 placeholder 처리).
+//   - 답안 빈 문자열도 허용 — "빈 답안" 으로 LLM 분석.
+//   - attempt_hash 는 정규화(normalizeAnswer) 후 SHA-1.
+
+export type RequestAiAnalysisResult =
+  | {
+      ok: true;
+      cached: boolean;
+      attemptHash: string;
+      overview: AiAnalysis["overview"];
+      keywords: AiAnalysis["keywords"];
+      diff: AiAnalysis["diff"];
+      model: string;
+    }
+  | { ok: false; error: string };
+
+export async function requestAiAnalysis(
+  cardId: string,
+  answerText: string,
+): Promise<RequestAiAnalysisResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Unauthorized" };
+
+  const db = getDb();
+  const [card] = await db
+    .select({ id: cards.id, backMd: cards.backMd, type: cards.type })
+    .from(cards)
+    .where(eq(cards.id, cardId))
+    .limit(1);
+  if (!card) return { ok: false, error: "CardNotFound" };
+  if (!card.backMd) return { ok: false, error: "NoReference" };
+
+  const attemptHash = computeAttemptHash(answerText);
+
+  // 캐시 hit?
+  const cached = await getAiAnalysis(user.id, cardId, attemptHash);
+  if (cached) {
+    return {
+      ok: true,
+      cached: true,
+      attemptHash,
+      overview: cached.overview,
+      keywords: cached.keywords,
+      diff: cached.diff,
+      model: cached.model,
+    };
+  }
+
+  // miss → LLM 호출.
+  try {
+    const result = await analyzeEssay({
+      referenceMd: card.backMd,
+      userAnswer: answerText,
+    });
+
+    await db
+      .insert(userCardAiAnalysis)
+      .values({
+        userId: user.id,
+        cardId,
+        attemptHash,
+        overviewJson: result.overview,
+        keywordsJson: result.keywords,
+        diffJson: result.diff,
+        model: result.model,
+      })
+      .onConflictDoNothing({
+        target: [
+          userCardAiAnalysis.userId,
+          userCardAiAnalysis.cardId,
+          userCardAiAnalysis.attemptHash,
+        ],
+      });
+
+    return {
+      ok: true,
+      cached: false,
+      attemptHash,
+      overview: result.overview,
+      keywords: result.keywords,
+      diff: result.diff,
+      model: result.model,
+    };
+  } catch (e) {
+    const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    console.error(`[requestAiAnalysis] LLM call failed. cause=${msg}`);
+    return { ok: false, error: "LlmFailed" };
+  }
 }

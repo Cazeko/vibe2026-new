@@ -29,12 +29,14 @@ export const env = {
     get apiKey() {
       return required("GEMINI_API_KEY");
     },
-    // 헌법 제18조 v1.5 — 성능 최우선 정책의 모델 매트릭스 fallback.
+    // 헌법 제18조 — 성능 최우선 정책의 모델 매트릭스 fallback.
+    // 2026-05-14 PR 2 — Flash 티어 fallback 을 신모델 자동 업그레이드 정합으로
+    // gemini-3.0-flash 갱신 (디자인 문서 §3 정합).
     get modelPro() {
       return optional("GEMINI_MODEL_PRO", "gemini-3.1-pro-preview");
     },
     get modelFlash() {
-      return optional("GEMINI_MODEL_FLASH", "gemini-3.1-pro-preview");
+      return optional("GEMINI_MODEL_FLASH", "gemini-3.0-flash");
     },
     get embeddingModel() {
       return optional("GEMINI_EMBEDDING_MODEL", "gemini-embedding-2");
