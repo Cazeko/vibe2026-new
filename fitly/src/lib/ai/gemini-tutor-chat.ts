@@ -107,21 +107,30 @@ export async function chatWithTutor(
   const systemInstruction = buildSystemInstruction(ctx);
   const contents = historyToContents(history, newMessage);
 
-  const response = await gemini.models.generateContent({
-    model,
-    contents,
-    config: {
-      systemInstruction,
-      temperature: 0.4,
-      maxOutputTokens: MAX_REPLY_TOKENS,
-    },
-  });
+  try {
+    const response = await gemini.models.generateContent({
+      model,
+      contents,
+      config: {
+        systemInstruction,
+        temperature: 0.4,
+        maxOutputTokens: MAX_REPLY_TOKENS,
+      },
+    });
 
-  const reply =
-    typeof response.text === "string"
-      ? response.text
-      : response.text != null
-        ? String(response.text)
-        : "";
-  return { reply: reply.trim(), model };
+    const reply =
+      typeof response.text === "string"
+        ? response.text
+        : response.text != null
+          ? String(response.text)
+          : "";
+    return { reply: reply.trim(), model };
+  } catch (e) {
+    // PR 6 이후 hotfix — LlmFailed 진단을 위해 모델 ID 동반 로깅.
+    console.error(
+      `[gemini-tutor-chat] generateContent failed. model=${model} historyTurns=${history.length} messageLen=${newMessage.length}`,
+      e,
+    );
+    throw e;
+  }
 }

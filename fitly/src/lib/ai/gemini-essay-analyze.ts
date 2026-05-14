@@ -167,24 +167,37 @@ export async function analyzeEssay(
   input: EssayAnalysisInput,
 ): Promise<EssayAnalysisResult> {
   const gemini = getGemini();
-  const model = GEMINI_MODELS.flash;
+  // 헌법 v3.6.2 (2026-05-14) — 서술형 첨삭/채점은 Pro 티어 사용. 추론 깊이
+  // 우선 (강점·보완점·키워드 매칭·diff 모두 정성 추론). 채팅은 Flash 유지.
+  const model = GEMINI_MODELS.pro;
 
-  const response = await gemini.models.generateContent({
-    model,
-    contents: buildPrompt(input),
-    config: {
-      temperature: 0.3,
-      responseMimeType: "application/json",
-    },
-  });
+  try {
+    const response = await gemini.models.generateContent({
+      model,
+      contents: buildPrompt(input),
+      config: {
+        temperature: 0.3,
+        responseMimeType: "application/json",
+      },
+    });
 
-  const text =
-    typeof response.text === "string"
-      ? response.text
-      : response.text != null
-        ? String(response.text)
-        : "";
+    const text =
+      typeof response.text === "string"
+        ? response.text
+        : response.text != null
+          ? String(response.text)
+          : "";
 
-  const parsed = safeParse(text);
-  return { ...parsed, model };
+    const parsed = safeParse(text);
+    return { ...parsed, model };
+  } catch (e) {
+    // PR 6 이후 hotfix — LlmFailed 진단을 위해 모델 ID + stack 동반 로깅.
+    // Vercel function logs 에서 모델 미존재(404)·키 누락(401) 등 정확한
+    // 원인을 식별할 수 있도록 한다.
+    console.error(
+      `[gemini-essay-analyze] generateContent failed. model=${model} input.userAnswer.length=${input.userAnswer.length}`,
+      e,
+    );
+    throw e;
+  }
 }
