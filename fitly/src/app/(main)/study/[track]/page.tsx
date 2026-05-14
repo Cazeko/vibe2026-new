@@ -209,6 +209,7 @@ export default async function StudyTrackPage({
               type: card.type,
               frontText: card.frontText,
               frontImagePath: card.frontImagePath,
+              frontImagePaths: card.frontImagePaths,
               backMd: card.backMd,
               verifiedAnswer: card.verifiedAnswer,
               paperLabel: card.paperLabel,
