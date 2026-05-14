@@ -6,6 +6,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { examItems } from "@/lib/db/schema/exam-items";
 import { examPapers } from "@/lib/db/schema/exam-papers";
+import type { AnswerSource } from "@/types";
 
 export type ReviewQueueRow = {
   id: string;
@@ -18,6 +19,8 @@ export type ReviewQueueRow = {
   bloom: string | null;
   answerPreview: string;
   verifiedAnswer: boolean;
+  // 헌법 §30의2 4계층 출처 (M4, PR-11).
+  answerSource: AnswerSource;
 };
 
 export async function getReviewQueue(limit = 100): Promise<ReviewQueueRow[]> {
@@ -34,6 +37,7 @@ export async function getReviewQueue(limit = 100): Promise<ReviewQueueRow[]> {
       bloom: examItems.bloom,
       answerMd: examItems.answerMd,
       verifiedAnswer: examItems.verifiedAnswer,
+      answerSource: examItems.answerSource,
     })
     .from(examItems)
     .innerJoin(examPapers, eq(examItems.paperId, examPapers.id))
@@ -52,6 +56,7 @@ export async function getReviewQueue(limit = 100): Promise<ReviewQueueRow[]> {
     bloom: r.bloom,
     answerPreview: previewOf(r.answerMd),
     verifiedAnswer: r.verifiedAnswer,
+    answerSource: r.answerSource as AnswerSource,
   }));
 }
 
@@ -72,6 +77,7 @@ export type ReviewItemDetail = {
   explanationMd: string | null;
   verifiedText: boolean;
   verifiedAnswer: boolean;
+  answerSource: AnswerSource;
 };
 
 export async function getReviewItemDetail(
@@ -96,6 +102,7 @@ export async function getReviewItemDetail(
       explanationMd: examItems.explanationMd,
       verifiedText: examItems.verifiedText,
       verifiedAnswer: examItems.verifiedAnswer,
+      answerSource: examItems.answerSource,
     })
     .from(examItems)
     .innerJoin(examPapers, eq(examItems.paperId, examPapers.id))
@@ -108,6 +115,7 @@ export async function getReviewItemDetail(
     ...r,
     domains: r.domains ?? [],
     keywords: r.keywords ?? [],
+    answerSource: r.answerSource as AnswerSource,
   };
 }
 

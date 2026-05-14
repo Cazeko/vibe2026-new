@@ -12,12 +12,19 @@ import { examItems } from "@/lib/db/schema/exam-items";
 import { cardReports } from "@/lib/db/schema/card-reports";
 import { requireAdmin } from "@/lib/auth/require-admin";
 
+// 코드리뷰 M4 (2026-05-15 PR-11) — verified_answer 토글 시 answer_source enum 도
+// 동반 갱신. true → 'official' (운영자 검수 완료), false → 'ai_estimate' 복귀.
+// user_self_corrected / crowd_verified 는 별도 Phase 의 사용자 정정 흐름에서 갱신.
 export async function markAnswerVerified(id: string): Promise<void> {
   await requireAdmin();
   const db = getDb();
   await db
     .update(examItems)
-    .set({ verifiedAnswer: true, updatedAt: new Date() })
+    .set({
+      verifiedAnswer: true,
+      answerSource: "official",
+      updatedAt: new Date(),
+    })
     .where(eq(examItems.id, id));
   revalidatePath("/admin/seed-review");
   revalidatePath(`/admin/seed-review/${id}`);
@@ -28,7 +35,11 @@ export async function unmarkAnswerVerified(id: string): Promise<void> {
   const db = getDb();
   await db
     .update(examItems)
-    .set({ verifiedAnswer: false, updatedAt: new Date() })
+    .set({
+      verifiedAnswer: false,
+      answerSource: "ai_estimate",
+      updatedAt: new Date(),
+    })
     .where(eq(examItems.id, id));
   revalidatePath("/admin/seed-review");
   revalidatePath(`/admin/seed-review/${id}`);

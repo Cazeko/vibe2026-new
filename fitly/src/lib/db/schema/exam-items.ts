@@ -11,6 +11,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { examPapers } from "./exam-papers";
+import type { AnswerSource } from "@/types";
 
 // 헌법 v3.3 제13조의2 — 시드 문항 (시험지에서 분리된 개별 문항).
 // 본 테이블도 모든 사용자에게 공유 (user_id 없음).
@@ -52,7 +53,13 @@ export const examItems = pgTable(
     explanationMd: text("explanation_md"), // 학습 보조 해설 (왜 그게 답인지)
     // 검증 — v3.3 분리
     verifiedText: boolean("verified_text").notNull().default(true), // PDF 직접 → 기본 true
-    verifiedAnswer: boolean("verified_answer").notNull().default(false), // LLM 생성 → 기본 false
+    verifiedAnswer: boolean("verified_answer").notNull().default(false), // LLM 생성 → 기본 false (backward compat)
+    // 헌법 v1.8 제30조의2 — 4계층 출처 모델 (마이그레이션 0019, 2026-05-15 PR-11).
+    // verified_answer=true → 'official', false → 'ai_estimate' 자동 매핑.
+    answerSource: varchar("answer_source", { length: 24 })
+      .$type<AnswerSource>()
+      .notNull()
+      .default("ai_estimate"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
