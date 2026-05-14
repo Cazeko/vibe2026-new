@@ -17,10 +17,16 @@ import {
   cards,
   examItems,
   examPapers,
+  userCardAiAnalysis,
   userCardHighlights,
   userCardState,
   userCardTags,
 } from "@/lib/db/schema";
+import type {
+  DiffJson,
+  KeywordsJson,
+  OverviewJson,
+} from "@/lib/db/schema/user-card-ai-analysis";
 import { getSessionLabel } from "@/lib/exam/sessions";
 import type { CardType } from "@/types";
 
@@ -456,5 +462,52 @@ export async function getMistakeCardsForPrint(
       }));
     },
     [],
+  );
+}
+
+// 헌법 v3.5.1 제16조 + 2026-05-14 brainstorming PR 2/6 — AI 서술형 분석 캐시
+// 조회. attempt_hash 단위로 unique 이므로 단일 row.
+// 누락 시 null 반환 (그래스풀 디그레이드 — safeRun fallback).
+export type AiAnalysis = {
+  id: string;
+  attemptHash: string;
+  overview: OverviewJson;
+  keywords: KeywordsJson;
+  diff: DiffJson;
+  model: string;
+  createdAt: Date;
+};
+
+export async function getAiAnalysis(
+  userId: string,
+  cardId: string,
+  attemptHash: string,
+): Promise<AiAnalysis | null> {
+  return safeRun(
+    `getAiAnalysis(${cardId})`,
+    async () => {
+      const db = getDb();
+      const [row] = await db
+        .select({
+          id: userCardAiAnalysis.id,
+          attemptHash: userCardAiAnalysis.attemptHash,
+          overview: userCardAiAnalysis.overviewJson,
+          keywords: userCardAiAnalysis.keywordsJson,
+          diff: userCardAiAnalysis.diffJson,
+          model: userCardAiAnalysis.model,
+          createdAt: userCardAiAnalysis.createdAt,
+        })
+        .from(userCardAiAnalysis)
+        .where(
+          and(
+            eq(userCardAiAnalysis.userId, userId),
+            eq(userCardAiAnalysis.cardId, cardId),
+            eq(userCardAiAnalysis.attemptHash, attemptHash),
+          ),
+        )
+        .limit(1);
+      return row ?? null;
+    },
+    null,
   );
 }
