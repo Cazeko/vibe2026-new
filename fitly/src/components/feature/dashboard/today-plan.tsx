@@ -48,7 +48,7 @@ export function TodayPlan({ items }: { items: PlanItem[] }) {
                     className={cn(
                       "grid h-[18px] w-[18px] place-items-center rounded-full border-[1.5px] transition-all",
                       completed
-                        ? "border-evergreen bg-evergreen text-white"
+                        ? "border-evergreen bg-evergreen text-primary-foreground"
                         : "border-rule-strong bg-transparent text-transparent"
                     )}
                   >

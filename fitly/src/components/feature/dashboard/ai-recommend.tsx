@@ -62,7 +62,7 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
             지나치게 빨아들이던 회귀. */}
         <Link
           href="/study/quiz"
-          className="inline-flex h-[34px] items-center gap-1.5 rounded-md bg-evergreen px-3 text-[12.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
+          className="inline-flex h-[34px] items-center gap-1.5 rounded-md bg-evergreen px-3 text-[12.5px] font-semibold text-primary-foreground hover:bg-evergreen-strong transition-colors"
         >
           추천 풀이 시작
           <ArrowRight className="h-3 w-3" aria-hidden />

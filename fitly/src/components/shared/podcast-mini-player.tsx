@@ -6,7 +6,7 @@ import { Loader2, Pause, Play, X, Rewind, FastForward } from "lucide-react";
 import { usePodcastPlayer } from "@/components/shared/podcast-player-provider";
 
 // Track 1.2 — sticky bottom 미니플레이어. 활성 에피소드가 있을 때만 노출.
-// lg+ 사이드바 오프셋(248px) 반영, 모바일은 fullwidth.
+// lg+ 사이드바 오프셋은 `--sidebar-w` 변수를 직접 참조한다 (단일 소스).
 //
 // 리뷰 H1+H2 fix — mount 시 CSS 변수 `--mini-player-h` 를 root에 셋업하여
 // (main) layout 의 main pb 와 study-card-form sticky bottom 등급 카드가 이를
@@ -64,7 +64,7 @@ export function PodcastMiniPlayer() {
     <div
       role="region"
       aria-label="팟캐스트 미니플레이어"
-      className="fixed bottom-0 inset-x-0 lg:left-[248px] z-40 border-t border-rule bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90 shadow-[0_-6px_18px_rgba(26,32,39,0.06)]"
+      className="fixed bottom-0 inset-x-0 lg:left-[var(--sidebar-w,188px)] z-40 border-t border-rule bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90 shadow-[0_-6px_18px_rgba(26,32,39,0.06)]"
     >
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-2.5 flex items-center gap-2 sm:gap-3">
         {/* v3.6 외부 평가 #5.2 — 15초 뒤로 (수험생이 해설을 다시 듣는 학습 패턴 정합). */}
