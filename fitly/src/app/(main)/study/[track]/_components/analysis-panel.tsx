@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import {
   BookOpenCheck,
+  Check,
   FileText,
   GitCompare,
   KeyRound,
   Lock,
+  Minus,
   Sparkles,
   ShieldCheck,
   CheckCircle2,
@@ -51,7 +53,7 @@ type TabSpec = {
 
 const TABS: TabSpec[] = [
   { key: "overview", label: "AI 총평", Icon: Sparkles, unlocked: true },
-  { key: "keywords", label: "키워드 비교", Icon: KeyRound, unlocked: false },
+  { key: "keywords", label: "키워드 비교", Icon: KeyRound, unlocked: true },
   { key: "diff", label: "답안 비교", Icon: GitCompare, unlocked: false },
   { key: "reference", label: "모범답안", Icon: BookOpenCheck, unlocked: true },
   { key: "explanation", label: "해설", Icon: FileText, unlocked: true },
@@ -191,6 +193,8 @@ export function AnalysisPanel({
           <LockedPanel />
         ) : active === "overview" ? (
           <OverviewTab analysis={analysis} hasReference={!!backMd} />
+        ) : active === "keywords" ? (
+          <KeywordsTab analysis={analysis} hasReference={!!backMd} />
         ) : active === "reference" ? (
           <ReferenceTab
             cardId={cardId}
@@ -391,6 +395,137 @@ function FeedbackCard({
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+// 헌법 §3의2 — 모범답안 키워드 vs 사용자 답안 매칭. ✔ matched / ✘ missing.
+// 정직성 정합으로 "n개 중 m개" 매칭 카운트만 표기. 비율(%) 표기 X.
+function KeywordsTab({
+  analysis,
+  hasReference,
+}: {
+  analysis: AnalysisState;
+  hasReference: boolean;
+}) {
+  if (!hasReference) {
+    return (
+      <div className="flex items-start gap-3 rounded-md border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30 p-4">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-warning" aria-hidden />
+        <p className="text-[12.5px] leading-relaxed text-foreground/80">
+          모범답안이 시드되지 않아 키워드 비교를 표시할 수 없습니다.
+        </p>
+      </div>
+    );
+  }
+
+  if (analysis.status === "idle" || analysis.status === "loading") {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Loader2 className="h-6 w-6 animate-spin text-evergreen" aria-hidden />
+        <p className="mt-3 text-[13px] font-medium text-foreground/85">
+          키워드를 비교하고 있습니다
+        </p>
+      </div>
+    );
+  }
+
+  if (analysis.status === "error") {
+    return (
+      <div className="flex items-start gap-3 rounded-md border-l-[3px] border-l-error border-y border-r border-rule bg-secondary/30 p-4">
+        <AlertCircle className="h-5 w-5 shrink-0 text-error" aria-hidden />
+        <p className="text-[12.5px] leading-relaxed text-foreground/80">
+          AI 분석에 일시적으로 실패했습니다.
+          <br />
+          잠시 후 다시 채점하거나 모범답안 탭에서 직접 비교해 주세요.
+        </p>
+      </div>
+    );
+  }
+
+  const refs = analysis.keywords.reference;
+
+  if (refs.length === 0) {
+    return (
+      <div className="flex items-start gap-3 rounded-md border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30 p-4">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-warning" aria-hidden />
+        <p className="text-[12.5px] leading-relaxed text-foreground/80">
+          모범답안에서 핵심 키워드가 추출되지 않았습니다. 답안을 다시 채점하거나
+          모범답안 탭을 참고해 주세요.
+        </p>
+      </div>
+    );
+  }
+
+  const matched = refs.filter((k) => k.matched).length;
+  const missing = refs.length - matched;
+
+  return (
+    <div className="space-y-3">
+      {/* 요약 라인 — 정성 매칭 카운트만. 비율(%) 미표기. */}
+      <div className="flex items-center gap-3 flex-wrap text-[11px] text-muted-foreground">
+        <span className="uppercase tracking-[0.12em] text-[10.5px]">
+          핵심 키워드
+        </span>
+        <span className="tabular-nums text-foreground/85">
+          총 <span className="font-medium">{refs.length}</span>개
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-evergreen/10 px-2 py-0.5 text-evergreen">
+          <Check className="h-3 w-3" aria-hidden />
+          포함 <span className="tabular-nums font-medium">{matched}</span>
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-error/10 px-2 py-0.5 text-error">
+          <Minus className="h-3 w-3" aria-hidden />
+          누락 <span className="tabular-nums font-medium">{missing}</span>
+        </span>
+        {analysis.cached && (
+          <span className="ml-auto text-[10.5px] text-muted-foreground">
+            캐시된 결과
+          </span>
+        )}
+      </div>
+
+      {/* 매트릭스 — 키워드 단위 row. */}
+      <ul
+        className="divide-y divide-rule rounded-md border border-rule overflow-hidden bg-card"
+        aria-label="모범답안 키워드 매칭 매트릭스"
+      >
+        {refs.map((k, i) => (
+          <li
+            key={`${k.text}-${i}`}
+            className="flex items-center gap-3 px-3.5 py-2"
+          >
+            <span
+              aria-hidden
+              className={`grid h-6 w-6 place-items-center rounded-full ${
+                k.matched
+                  ? "bg-evergreen/15 text-evergreen"
+                  : "bg-error/15 text-error"
+              }`}
+            >
+              {k.matched ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <Minus className="h-3.5 w-3.5" />
+              )}
+            </span>
+            <span
+              className={`flex-1 text-[12.5px] leading-relaxed ${
+                k.matched ? "text-foreground/90" : "text-foreground/75"
+              }`}
+            >
+              {k.text}
+            </span>
+            <span
+              className={`text-[10.5px] uppercase tracking-[0.1em] ${
+                k.matched ? "text-evergreen" : "text-error"
+              }`}
+            >
+              {k.matched ? "포함" : "누락"}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
