@@ -11,6 +11,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { examItems } from "./exam-items";
+import type { AnswerSource } from "@/types";
 
 // 헌법 v3.3 제13조의2 — 학습 카드 (다형 단일 테이블).
 // type='quiz'/'keyword' = 시드에서 자동 파생, user_id NULL (모든 사용자에게 공유).
@@ -49,6 +50,11 @@ export const cards = pgTable(
     // 검증
     verifiedText: boolean("verified_text").notNull().default(false),
     verifiedAnswer: boolean("verified_answer").notNull().default(false),
+    // 헌법 v1.8 제30조의2 — 4계층 출처 모델 (마이그레이션 0019, 2026-05-15 PR-11).
+    answerSource: varchar("answer_source", { length: 24 })
+      .$type<AnswerSource>()
+      .notNull()
+      .default("ai_estimate"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

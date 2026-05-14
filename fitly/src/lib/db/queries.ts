@@ -28,7 +28,7 @@ import type {
   OverviewJson,
 } from "@/lib/db/schema/user-card-ai-analysis";
 import { getSessionLabel } from "@/lib/exam/sessions";
-import type { CardType } from "@/types";
+import type { AnswerSource, CardType } from "@/types";
 
 const REVIEW_STATE_THRESHOLD = 2;
 
@@ -271,6 +271,8 @@ export type DueCard = {
   frontImagePaths: string[];
   backMd: string | null;
   verifiedAnswer: boolean;
+  // 헌법 §30의2 4계층 출처 (마이그레이션 0019, PR-11).
+  answerSource: AnswerSource;
   dueAt: Date;
   paperLabel: string | null; // "2024학년도 교직논술 1번"
   itemFormat: string | null;
@@ -338,6 +340,7 @@ export async function getDueCards(
         frontImagePath: cards.frontImagePath,
         backMd: cards.backMd,
         verifiedAnswer: cards.verifiedAnswer,
+        answerSource: cards.answerSource,
         dueAt: userCardState.dueAt,
         paperYear: examPapers.year,
         paperSession: examPapers.session,
@@ -386,6 +389,7 @@ export async function getDueCards(
         ),
         backMd: r.backMd,
         verifiedAnswer: r.verifiedAnswer,
+        answerSource: r.answerSource as AnswerSource,
         dueAt: r.dueAt ?? now,
         paperLabel: formatPaperLabel(r.paperYear, r.paperSession, r.itemNo),
         itemFormat: r.itemFormat,
@@ -424,6 +428,7 @@ export async function getCardById(
         frontImagePath: cards.frontImagePath,
         backMd: cards.backMd,
         verifiedAnswer: cards.verifiedAnswer,
+        answerSource: cards.answerSource,
         dueAt: userCardState.dueAt,
         paperYear: examPapers.year,
         paperSession: examPapers.session,
@@ -462,6 +467,7 @@ export async function getCardById(
         ),
         backMd: row.backMd,
         verifiedAnswer: row.verifiedAnswer,
+        answerSource: row.answerSource as AnswerSource,
         dueAt: row.dueAt ?? new Date(),
         paperLabel: formatPaperLabel(row.paperYear, row.paperSession, row.itemNo),
         itemFormat: row.itemFormat,
@@ -560,6 +566,7 @@ export type MistakePrintCard = {
   frontText: string;
   backMd: string | null;
   verifiedAnswer: boolean;
+  answerSource: AnswerSource;
   paperLabel: string | null;
   itemFormat: string | null;
   itemPoints: number | null;
@@ -578,6 +585,7 @@ export async function getMistakeCardsForPrint(
           frontText: cards.frontText,
           backMd: cards.backMd,
           verifiedAnswer: cards.verifiedAnswer,
+          answerSource: cards.answerSource,
           paperYear: examPapers.year,
           paperSession: examPapers.session,
           itemNo: examItems.itemNo,
@@ -596,6 +604,7 @@ export async function getMistakeCardsForPrint(
         frontText: r.frontText,
         backMd: r.backMd,
         verifiedAnswer: r.verifiedAnswer,
+        answerSource: r.answerSource as AnswerSource,
         paperLabel: formatPaperLabel(r.paperYear, r.paperSession, r.itemNo),
         itemFormat: r.itemFormat,
         itemPoints: r.itemPoints,

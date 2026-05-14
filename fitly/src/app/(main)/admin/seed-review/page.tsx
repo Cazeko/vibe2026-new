@@ -77,9 +77,13 @@ export default async function SeedReviewPage() {
                 className="block px-5 py-4 transition-all hover:bg-background hover:shadow-sm active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-                  {/* A1 — tabular-nums 로 숫자 정렬 */}
-                  <div className="font-mono text-xs text-muted-foreground tabular-nums">
-                    {row.year} {getSessionLabel(row.session)} · {row.itemNo}번
+                  <div className="flex items-baseline gap-2">
+                    {/* A1 — tabular-nums 로 숫자 정렬 */}
+                    <div className="font-mono text-xs text-muted-foreground tabular-nums">
+                      {row.year} {getSessionLabel(row.session)} · {row.itemNo}번
+                    </div>
+                    {/* M4 (PR-11) — 헌법 §30의2 4계층 출처 배지. */}
+                    <AnswerSourceBadge source={row.answerSource} />
                   </div>
                   {/* D2 — flex-wrap 으로 한 줄 overflow 방지 */}
                   <div className="flex flex-wrap gap-1.5 text-[11px]">
@@ -143,6 +147,36 @@ function Tag({ children }: { children: React.ReactNode }) {
   return (
     <span className="px-2 py-0.5 rounded border border-border text-muted-foreground whitespace-nowrap">
       {children}
+    </span>
+  );
+}
+
+// M4 (PR-11, 2026-05-15) — 4계층 출처 배지 (헌법 §30의2 정합).
+function AnswerSourceBadge({ source }: { source: string }) {
+  const map: Record<string, { label: string; className: string }> = {
+    official: {
+      label: "검증됨",
+      className: "bg-info/10 text-info",
+    },
+    crowd_verified: {
+      label: "교차 검증",
+      className: "bg-evergreen/10 text-evergreen",
+    },
+    user_self_corrected: {
+      label: "본인 정정",
+      className: "bg-secondary text-foreground/70",
+    },
+    ai_estimate: {
+      label: "AI 추정",
+      className: "bg-warning/10 text-warning-text",
+    },
+  };
+  const cfg = map[source] ?? map.ai_estimate;
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] ${cfg.className}`}
+    >
+      {cfg.label}
     </span>
   );
 }

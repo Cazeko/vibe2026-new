@@ -30,7 +30,7 @@ import { SplitView } from "@/components/shared/split-view";
 import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 import { formatExamStem } from "@/lib/exam/format-stem";
-import type { CardType } from "@/types";
+import type { AnswerSource, CardType } from "@/types";
 import type { CardHighlight, CardTag } from "@/lib/db/queries";
 import { submitAnswer, gradeCard } from "../actions";
 import { HighlightLayer, type HighlightLayerHandle } from "./highlight-layer";
@@ -49,6 +49,8 @@ type CardData = {
   frontImagePaths: string[];
   backMd: string | null;
   verifiedAnswer: boolean;
+  // 헌법 §30의2 4계층 출처 (M4, PR-11).
+  answerSource: AnswerSource;
   paperLabel: string | null;
   itemFormat: string | null;
   itemPoints: number | null;
@@ -469,7 +471,7 @@ export function StudyCardForm({
           {revealed && card.backMd && (
             <KeywordNoteBox
               markdown={card.backMd}
-              verified={card.verifiedAnswer}
+              source={card.answerSource}
               cardId={card.id}
               highlights={highlights}
               blindMode={blindMode}
@@ -966,14 +968,14 @@ function PdfViewer({
 // quiz/mistake 트랙은 AnalysisPanel/ReferenceTab 으로 격상.
 function KeywordNoteBox({
   markdown,
-  verified,
+  source,
   cardId,
   highlights,
   blindMode,
   onToggleBlind,
 }: {
   markdown: string;
-  verified: boolean;
+  source: AnswerSource;
   cardId: string;
   highlights: CardHighlight[];
   blindMode: boolean;
@@ -1014,7 +1016,7 @@ function KeywordNoteBox({
           <span className="text-[10.5px] uppercase tracking-[0.12em] text-evergreen">
             정리 노트
           </span>
-          <SourceBadge verified={verified} />
+          <SourceBadge source={source} />
           <span className="ml-auto inline-flex items-center gap-1.5">
             <button
               type="button"
@@ -1139,8 +1141,9 @@ function Tag({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SourceBadge({ verified }: { verified: boolean }) {
-  if (verified) {
+// 헌법 §30의2 4계층 출처 배지 (M4, PR-11, 2026-05-15).
+function SourceBadge({ source }: { source: AnswerSource }) {
+  if (source === "official") {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-info/10 px-2 py-0.5 text-[10.5px] text-info">
         <CheckCircle2 className="h-3 w-3" />
@@ -1148,10 +1151,27 @@ function SourceBadge({ verified }: { verified: boolean }) {
       </span>
     );
   }
+  if (source === "crowd_verified") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-evergreen/10 px-2 py-0.5 text-[10.5px] text-evergreen">
+        <CheckCircle2 className="h-3 w-3" />
+        교차 검증
+      </span>
+    );
+  }
+  if (source === "user_self_corrected") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10.5px] text-foreground/70">
+        <ShieldCheck className="h-3 w-3" />
+        본인 정정
+      </span>
+    );
+  }
+  // ai_estimate (기본)
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[10.5px] text-warning-text">
       <ShieldCheck className="h-3 w-3" />
-      검증 필요
+      AI 추정
     </span>
   );
 }
