@@ -93,6 +93,7 @@ export function SplitView({
 
   // ratio state 가 바뀌면 (pointerup·키보드 시) DOM 동기화 + localStorage 저장.
   // drag 중 매 프레임은 applyTemplate 직접 호출 (setState 우회).
+  // applyTemplate 은 본 effect 아래 선언되어 hoisting 불가 → exhaustive-deps disable.
   useEffect(() => {
     ratioRef.current = ratio;
     applyTemplate(ratio);
@@ -102,6 +103,7 @@ export function SplitView({
     } catch {
       // 무시
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ratio, storageKey]);
 
   // container 의 grid-template-columns 와 separator 의 aria-valuenow 를 직접 write.

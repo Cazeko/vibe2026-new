@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { Flag, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { reportCardIssue, REPORT_CATEGORIES } from "../actions";
@@ -36,16 +36,13 @@ export function ReportCardButton({ cardId }: { cardId: string }) {
     { type: "ok" | "err"; text: string } | null
   >(null);
 
-  function reset() {
+  // useCallback 으로 안정화 — useEffect deps 정합 (lint exhaustive-deps).
+  const close = useCallback(() => {
+    setOpen(false);
     setCategory("answer_wrong");
     setDetail("");
     setMessage(null);
-  }
-
-  function close() {
-    setOpen(false);
-    reset();
-  }
+  }, []);
 
   // ESC 로 닫기.
   useEffect(() => {
@@ -55,7 +52,7 @@ export function ReportCardButton({ cardId }: { cardId: string }) {
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, close]);
 
   function submit() {
     setMessage(null);
