@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { Loader2, Send, Sparkles, Trash2, X } from "lucide-react";
 import { Markdown } from "@/components/shared/markdown";
 import { chatWithTutor, type ChatTutorResult } from "../actions";
@@ -16,6 +17,12 @@ import type { ChatMessage } from "@/lib/ai/gemini-tutor-chat";
 // 헌법 v3.6.1 §16 단서 + §18 A 매트릭스 — AI 학습 도우미.
 // PR 6/6 + hotfix (사용자 발화 2026-05-14) — 모달/백드롭/사이드 드로어 → 플로팅
 // 위젯 형태로 재설계. 페이지 본문과 *동시 상호작용 가능*.
+//
+// 추가 hotfix (2026-05-14, 사용자 발화 2번째) — Portal 마운트로 viewport 고정.
+// 조상 `PageTransition` 의 `animate-fade-up` 키프레임이 `transform: translateY`
+// 를 사용하여 *containing block* 을 만드는 결과로, 자식의 `position: fixed` 가
+// viewport 가 아닌 PageTransition 의 div 기준으로 동작했다. createPortal 로
+// document.body 에 직접 마운트하여 PageTransition 조상 영향에서 벗어난다.
 //
 // 구현 요지
 //   - 우측 *중앙* fixed FAB (z-30, 작은 원형 48x48 Sparkles)
@@ -85,11 +92,17 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
   const [input, setInput] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  // SSR 안전 — useEffect 의 client-only mount 표시. 미마운트 시 Portal 렌더 X.
+  const [mounted, setMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const storageKey = useMemo(
     () => `${STORAGE_KEY_PREFIX}${cardId}`,
     [cardId],
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 카드 전환 시 localStorage 복원 — paint 전에 hydrate (플리커 회피).
   useLayoutEffect(() => {
@@ -183,61 +196,70 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
     setError(null);
   }
 
-  return (
+  // SSR 시점에는 document 가 없으므로 Portal 미렌더 → hydration mismatch 회피.
+  // mounted=true 이후 client-only Portal 마운트.
+  if (!mounted) return null;
+
+  const fab = !open && (
+    <button
+      type="button"
+      aria-label="AI 학습 도우미 열기"
+      onClick={() => setOpen(true)}
+      className="fixed right-4 top-1/2 -translate-y-1/2 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-evergreen text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2"
+    >
+      <Sparkles className="h-5 w-5" aria-hidden />
+    </button>
+  );
+
+  const panel = open && (
+    <aside
+      role="dialog"
+      aria-label="AI 학습 도우미"
+      className="fixed right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col overflow-hidden rounded-lg border border-rule bg-card shadow-2xl"
+      style={{
+        width: "min(380px, calc(100vw - 16px))",
+        height: "min(540px, calc(100vh - 32px))",
+      }}
+    >
+      <Header
+        onClose={() => setOpen(false)}
+        onClear={clearHistory}
+        hasHistory={messages.length > 0}
+      />
+
+      <QuickPromptBar
+        onPick={(p) => send(p.prompt)}
+        disabled={status === "sending"}
+      />
+
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-cream-soft/40">
+        {messages.length === 0 && status === "idle" && <EmptyState />}
+        {messages.map((m, i) => (
+          <ChatBubble key={i} message={m} />
+        ))}
+        {status === "sending" && <TypingBubble />}
+        {error && <ErrorBubble reason={error} />}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <InputBar
+        value={input}
+        onChange={setInput}
+        onSubmit={() => send(input)}
+        disabled={status === "sending"}
+      />
+    </aside>
+  );
+
+  // Portal — document.body 에 직접 마운트. PageTransition 의 transform
+  // (animate-fade-up keyframe) 이 만드는 containing block 영향에서 벗어나
+  // fixed 가 viewport 기준으로 동작한다.
+  return createPortal(
     <>
-      {/* FAB — 우측 중앙, 작은 원형. 닫혀 있을 때만 노출. */}
-      {!open && (
-        <button
-          type="button"
-          aria-label="AI 학습 도우미 열기"
-          onClick={() => setOpen(true)}
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-evergreen text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2"
-        >
-          <Sparkles className="h-5 w-5" aria-hidden />
-        </button>
-      )}
-
-      {/* 플로팅 챗 박스 — 백드롭 없음. 페이지와 동시 상호작용 가능. */}
-      {open && (
-        <aside
-          role="dialog"
-          aria-label="AI 학습 도우미"
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col overflow-hidden rounded-lg border border-rule bg-card shadow-2xl"
-          style={{
-            width: "min(380px, calc(100vw - 16px))",
-            height: "min(540px, calc(100vh - 32px))",
-          }}
-        >
-          <Header
-            onClose={() => setOpen(false)}
-            onClear={clearHistory}
-            hasHistory={messages.length > 0}
-          />
-
-          <QuickPromptBar
-            onPick={(p) => send(p.prompt)}
-            disabled={status === "sending"}
-          />
-
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-cream-soft/40">
-            {messages.length === 0 && status === "idle" && <EmptyState />}
-            {messages.map((m, i) => (
-              <ChatBubble key={i} message={m} />
-            ))}
-            {status === "sending" && <TypingBubble />}
-            {error && <ErrorBubble reason={error} />}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <InputBar
-            value={input}
-            onChange={setInput}
-            onSubmit={() => send(input)}
-            disabled={status === "sending"}
-          />
-        </aside>
-      )}
-    </>
+      {fab}
+      {panel}
+    </>,
+    document.body,
   );
 }
 

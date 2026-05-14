@@ -29,7 +29,11 @@ export type TutorContext = {
 };
 
 const MAX_HISTORY_TURNS = 16;
-const MAX_REPLY_TOKENS = 800;
+// hotfix (2026-05-14) — 800 토큰은 한글 약 500자로 학술 답변(체육과 교육과정
+// 등) 이 중간에 잘리는 사례 발생. 4096 으로 격상 — 한글 약 2500자 ≈ 답안 + 해설
+// 풍부히 수용. 비용은 입력 토큰 (system instruction + history) 가 크므로 출력
+// 토큰 증가는 호출당 ~0.2원 영향 추정. Gemini Flash maxOutputTokens 상한 정합.
+const MAX_REPLY_TOKENS = 4096;
 
 export function buildSystemInstruction(ctx: TutorContext): string {
   const parts: string[] = [];
