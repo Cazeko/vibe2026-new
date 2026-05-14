@@ -35,10 +35,10 @@ export default async function MistakePrintPage() {
           오답노트
         </h1>
         <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">
-          내 오답 카드 {cards.length}장 · 우측 상단 "인쇄 · PDF 저장" 버튼으로
-          브라우저 인쇄 다이얼로그를 여시고
+          내 오답 카드 {cards.length}장 · 우측 상단 &ldquo;인쇄 · PDF
+          저장&rdquo; 버튼으로 브라우저 인쇄 다이얼로그를 여시고
           <br />
-          대상 프린터에서 "PDF로 저장"을 선택하시면 됩니다.
+          대상 프린터에서 &ldquo;PDF로 저장&rdquo;을 선택하시면 됩니다.
         </p>
       </header>
 
