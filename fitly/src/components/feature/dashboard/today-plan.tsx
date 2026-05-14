@@ -26,11 +26,17 @@ export function TodayPlan({ items }: { items: PlanItem[] }) {
         {items.map((item) => {
           const completed = item.state === "completed";
           const locked = item.state === "locked";
+          // 코드리뷰 M20 (2026-05-15) — locked 행은 anchor 가 아닌 div 로 렌더.
+          // 종전 `<Link href="#" aria-disabled>` 는 키보드/스크린리더에서 여전히
+          // 활성 링크로 인식되어 `#` 으로 이동·history push 회귀가 있었음.
+          const RowTag = locked ? "div" : Link;
+          const rowProps = locked
+            ? ({ "aria-disabled": true } as Record<string, unknown>)
+            : { href: item.href };
           return (
             <li key={item.id}>
-              <Link
-                href={locked ? "#" : item.href}
-                aria-disabled={locked}
+              <RowTag
+                {...(rowProps as { href: string })}
                 className={cn(
                   "grid grid-cols-[22px_1fr_auto] items-center gap-3 rounded-[10px] border px-3.5 py-3 transition-colors",
                   locked
@@ -108,7 +114,7 @@ export function TodayPlan({ items }: { items: PlanItem[] }) {
                     </span>
                   </span>
                 )}
-              </Link>
+              </RowTag>
             </li>
           );
         })}

@@ -36,6 +36,9 @@ type Episode = {
   initialCompleted: boolean;
 };
 
+// 코드리뷰 M18 (2026-05-15) — audioRef 는 외부 소비자가 없어 context 인터페이스
+// 에서 제거. 외부에 ref 가 노출되면 캡슐화가 깨지고, audio 노드 직접 조작이
+// 가능해진다 → 미니플레이어·karaoke·audio-player 가 메서드만 사용하도록 정합.
 type PlayerCtx = {
   episode: Episode | null;
   playing: boolean;
@@ -48,7 +51,6 @@ type PlayerCtx = {
   togglePlay: () => void;
   seek: (sec: number) => void;
   close: () => void;
-  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
 };
 
 const Ctx = createContext<PlayerCtx | null>(null);
@@ -261,7 +263,6 @@ export function PodcastPlayerProvider({ children }: { children: ReactNode }) {
     togglePlay,
     seek,
     close,
-    audioRef,
   };
 
   return (

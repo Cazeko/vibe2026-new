@@ -111,6 +111,14 @@ export function ExamItemLightbox({
         target.isContentEditable
       );
     }
+    // 코드리뷰 M17 (2026-05-15) — Tab hot path 의 DOM 쿼리를 헬퍼로 분리.
+    function getFocusables(root: HTMLElement): HTMLElement[] {
+      return Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled"));
+    }
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -119,14 +127,12 @@ export function ExamItemLightbox({
       }
       if (e.key === "Tab") {
         // 포커스 트랩 — dialog 안 focusable 요소 사이만 순환.
+        // 코드리뷰 M17 (2026-05-15) — Tab 키마다 querySelectorAll 재실행 → 첫 호출
+        // 시 캐시하고 cleanup 시 무효화. 다이얼로그 내 focusable 변동은 zoom 변화로
+        // 발생하지만 영향 범위가 작아 매 Tab 마다 재계산은 과다.
         const dlg = dialogRef.current;
         if (!dlg) return;
-        const focusables = dlg.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-        );
-        const list = Array.from(focusables).filter(
-          (el) => !el.hasAttribute("disabled"),
-        );
+        const list = getFocusables(dlg);
         if (list.length === 0) return;
         const first = list[0];
         const last = list[list.length - 1];
@@ -365,10 +371,14 @@ function ImagePanel({
       className="h-full overflow-auto bg-cream-soft"
       aria-label={`${itemNo}번 본문 이미지 영역`}
     >
+      {/* 코드리뷰 M16 (2026-05-15) — lazy+async 디코딩 attribute 추가.
+          next/image 는 zoom 인터랙션과 충돌하므로 raw img 보존. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={`${itemNo}번 본문 이미지`}
+        loading="lazy"
+        decoding="async"
         className="block w-full origin-top-left transition-transform duration-150"
         style={{ transform: `scale(${zoom})`, width: `${100 / zoom}%` }}
       />

@@ -1,6 +1,9 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+// 코드리뷰 M8 (2026-05-15) — 신규 디자인 토큰 `rounded-card` (14px) 와 정합.
+// 종전 shadcn 기본 `rounded-lg` (8px) 와 직접 작성 카드가 혼재하여 study-plan 등
+// shadcn Card 사용처에서만 radius 차이가 발생하던 회귀 해소. DESIGN §6.2 정합.
 export const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -8,7 +11,7 @@ export const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border border-border bg-card text-card-foreground shadow-sm",
+      "rounded-card border border-border bg-card text-card-foreground shadow-sm",
       className
     )}
     {...props}

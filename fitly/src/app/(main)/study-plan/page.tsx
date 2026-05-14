@@ -19,6 +19,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getDashboardSummary } from "@/lib/dashboard/queries";
 import { getLibraryCounts } from "@/lib/dashboard/analytics";
 import { getReviewDueCardCounts } from "@/lib/db/queries";
+import {
+  computeKeywordDaily,
+  computeMistakeDaily,
+  computeMinutesDaily,
+  computeQuizDaily,
+} from "@/lib/study-plan/calculations";
 
 export const dynamic = "force-dynamic";
 
@@ -47,16 +53,13 @@ function computeDailyTargets(
   }
 
   const safeDays = Math.max(1, daysToExam);
-  const quizDaily = Math.max(3, Math.ceil(lib.quiz / safeDays));
-  const keywordDaily = daysToExam > 60 ? 15 : daysToExam > 30 ? 25 : 40;
-  const mistakeDaily = Math.max(
-    3,
-    Math.ceil(lib.mistake / Math.max(1, Math.floor(safeDays / 2))),
-  );
-  const minutesDaily = Math.min(
-    180,
-    20 + Math.round(quizDaily * 4 + keywordDaily * 0.5 + mistakeDaily * 2),
-  );
+  // 코드리뷰 M21 (2026-05-15) — 매직 넘버 산식을 lib/study-plan/calculations.ts 로
+  // 분리. 임계 일수·일일 목표 상수가 의미 있는 이름으로 노출되어 추후 헌법 §11
+  // Progress 공식과 정합 시 단일 진입점.
+  const quizDaily = computeQuizDaily(lib.quiz, daysToExam);
+  const keywordDaily = computeKeywordDaily(daysToExam);
+  const mistakeDaily = computeMistakeDaily(lib.mistake, daysToExam);
+  const minutesDaily = computeMinutesDaily(quizDaily, keywordDaily, mistakeDaily);
 
   return {
     quizDaily,
