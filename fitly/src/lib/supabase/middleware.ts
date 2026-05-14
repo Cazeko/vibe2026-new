@@ -27,15 +27,25 @@ const AUTH_PREFIXES = ["/login", "/signup"];
 // 코드리뷰 L2 (2026-05-15) — 변형 메서드(POST/PATCH/PUT/DELETE)에 대한 CSRF
 // defense-in-depth. SameSite=Lax 쿠키만으로는 일부 시나리오(폼 submit·preflight)
 // 우회가 가능하므로 Origin 헤더의 host 가 요청 host 와 일치하는지 확인한다.
-// 같은 origin (cross-origin 아님) 요청만 허용. Origin 헤더가 없는 same-origin
-// 일반 fetch 는 통과.
+//
+// hotfix (2026-05-15) — server action POST 는 next.js 내부 가드(`next-action`
+// 헤더 + Next.js allowedOrigins 정책) 가 별도 검증하므로 본 middleware 검사에서
+// 제외한다. Vercel proxy 환경에서 host header 가 `x-forwarded-host` 와 다를 때
+// false positive 차단이 발생하던 회귀 (#62 머지 후 풀이/하이라이트 차단) 해소.
+// 또한 Vercel proxy host 정합 위해 `x-forwarded-host` 를 우선 비교.
 const STATE_CHANGING_METHODS = new Set(["POST", "PATCH", "PUT", "DELETE"]);
 
 function csrfOriginCheck(request: NextRequest): NextResponse | null {
   if (!STATE_CHANGING_METHODS.has(request.method)) return null;
+  // Next.js server action POST 는 자체 보안 (next-action 헤더 식별 + allowedOrigins)
+  // 으로 검증하므로 middleware 단에서 추가 검사 X.
+  if (request.headers.has("next-action")) return null;
   const origin = request.headers.get("origin");
   if (!origin) return null; // 동일 origin 일반 fetch — Origin 헤더 없음. 통과.
-  const host = request.headers.get("host");
+  // Vercel/Cloudflare proxy 환경에서는 host 보다 x-forwarded-host 가 클라이언트
+  // 실제 호스트와 일치. fallback 으로 host.
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const host = forwardedHost ?? request.headers.get("host");
   if (!host) return null;
   let originHost: string;
   try {
