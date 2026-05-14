@@ -59,22 +59,29 @@ for (const dir of dirs) {
     papers_inserted++;
 
     for (const item of data.items) {
-      const stemImagePath =
+      // 0017 (2026-05-14) — 한 문항이 여러 PDF 페이지에 걸친 경우 모든 페이지
+      // 경로를 jsonb 배열로 보존. 단일 stem_image_path 는 호환성 유지용 첫 페이지.
+      const stemImagePaths =
         item.stem_image_paths && item.stem_image_paths.length > 0
-          ? `scripts/seed/data/papers/${dir}/${item.stem_image_paths[0]}`
-          : null;
+          ? item.stem_image_paths.map(
+              (p) => `scripts/seed/data/papers/${dir}/${p}`,
+            )
+          : [];
+      const stemImagePath = stemImagePaths[0] ?? null;
 
       const verifiedText = item.verified_text === false ? false : true;
       const verifiedAnswer = item.verified_answer === true;
 
       const [itemRow] = await sql`
         INSERT INTO exam_items (
-          paper_id, item_no, stem_text, stem_image_path, points, format,
+          paper_id, item_no, stem_text, stem_image_path, stem_image_paths,
+          points, format,
           domains, bloom, keywords, answer_md, explanation_md,
           verified_text, verified_answer
         )
         VALUES (
           ${paperRow.id}, ${item.item_no}, ${item.stem_text || ""}, ${stemImagePath},
+          ${JSON.stringify(stemImagePaths)}::jsonb,
           ${item.points != null ? Math.round(item.points) : null}, ${item.format ?? null},
           ${JSON.stringify(item.domains || [])}::jsonb,
           ${item.bloom ?? null},
@@ -95,11 +102,13 @@ for (const dir of dirs) {
         await sql`
           INSERT INTO cards (
             type, source_item_id, user_id, front_text, front_image_path,
+            front_image_paths,
             back_md, verified_text, verified_answer
           )
           VALUES (
             'quiz', ${itemRow.id}, ${null},
             ${item.stem_text || ""}, ${stemImagePath},
+            ${JSON.stringify(stemImagePaths)}::jsonb,
             ${backMd}, ${verifiedText}, ${verifiedAnswer}
           )
         `;

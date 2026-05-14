@@ -18,8 +18,10 @@
 //   매칭 실패 시 silently skip (해설/본문 변경 시 ghost 하이라이트 자연 소실).
 
 import {
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
   useTransition,
@@ -30,6 +32,13 @@ import { createHighlight, deleteHighlight } from "../actions";
 
 type Color = "yellow" | "green" | "pink" | "underline";
 type Surface = "back_md" | "front_text";
+
+// 주인님 보고 #5 (2026-05-14) — 외부 툴바(형광펜·밑줄 버튼) 진입점.
+// HighlightLayer 가 자체 ref 를 forwardRef 로 노출하고, 외부에서 현재
+// selection 에 색을 적용할 수 있도록 imperative handle 제공.
+export type HighlightLayerHandle = {
+  applyColorToSelection: (color: Color) => boolean;
+};
 
 const ANCHOR_CONTEXT = 20;
 const ZWSP = "​";
@@ -62,17 +71,18 @@ const COLOR_LABEL: Record<Color, string> = {
   underline: "밑줄",
 };
 
-export function HighlightLayer({
-  cardId,
-  surface,
-  initialHighlights,
-  children,
-}: {
-  cardId: string;
-  surface: Surface;
-  initialHighlights: CardHighlight[];
-  children: React.ReactNode;
-}) {
+export const HighlightLayer = forwardRef<
+  HighlightLayerHandle,
+  {
+    cardId: string;
+    surface: Surface;
+    initialHighlights: CardHighlight[];
+    children: React.ReactNode;
+  }
+>(function HighlightLayerImpl(
+  { cardId, surface, initialHighlights, children },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<CardHighlight[]>(() =>
     initialHighlights.filter((h) => h.surface === surface),
@@ -170,43 +180,90 @@ export function HighlightLayer({
     setPickMenu(null);
   }, []);
 
-  // 색 선택 → 낙관 업데이트 + server action.
-  function onPickColor(color: Color) {
-    if (!pickMenu) return;
-    const { quote, prefix, suffix } = pickMenu;
-    setPickMenu(null);
-    window.getSelection()?.removeAllRanges();
-    // 낙관: 임시 id 부여.
-    const tempId = `tmp-${Date.now()}`;
-    const optimistic: CardHighlight = {
-      id: tempId,
-      surface,
-      quote,
-      prefix,
-      suffix,
-      color,
-      createdAt: new Date(),
-    };
-    setItems((prev) => [...prev, optimistic]);
-    startTransition(async () => {
-      const res = await createHighlight({
-        cardId,
+  // 내부 — 임의 (quote, prefix, suffix) 묶음에 색을 적용.
+  const applyColorToAnchor = useCallback(
+    (
+      color: Color,
+      anchor: { quote: string; prefix: string; suffix: string },
+    ) => {
+      const { quote, prefix, suffix } = anchor;
+      window.getSelection()?.removeAllRanges();
+      const tempId = `tmp-${Date.now()}`;
+      const optimistic: CardHighlight = {
+        id: tempId,
         surface,
         quote,
         prefix,
         suffix,
         color,
+        createdAt: new Date(),
+      };
+      setItems((prev) => [...prev, optimistic]);
+      startTransition(async () => {
+        const res = await createHighlight({
+          cardId,
+          surface,
+          quote,
+          prefix,
+          suffix,
+          color,
+        });
+        if ("id" in res) {
+          setItems((prev) =>
+            prev.map((h) => (h.id === tempId ? { ...h, id: res.id } : h)),
+          );
+        } else {
+          setItems((prev) => prev.filter((h) => h.id !== tempId));
+        }
       });
-      if ("id" in res) {
-        setItems((prev) =>
-          prev.map((h) => (h.id === tempId ? { ...h, id: res.id } : h)),
-        );
-      } else {
-        // 실패 시 롤백.
-        setItems((prev) => prev.filter((h) => h.id !== tempId));
-      }
-    });
+    },
+    [cardId, surface, startTransition],
+  );
+
+  // pickMenu (drag 팝업) — 색 선택 시.
+  function onPickColor(color: Color) {
+    if (!pickMenu) return;
+    const { quote, prefix, suffix } = pickMenu;
+    setPickMenu(null);
+    applyColorToAnchor(color, { quote, prefix, suffix });
   }
+
+  // 외부 툴바 — 현재 selection 기반 anchor 계산 후 색 적용.
+  useImperativeHandle(
+    ref,
+    () => ({
+      applyColorToSelection(color: Color) {
+        const root = containerRef.current;
+        if (!root) return false;
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed || sel.rangeCount === 0) return false;
+        const range = sel.getRangeAt(0);
+        if (!root.contains(range.commonAncestorContainer)) return false;
+        const rawQuote = sel.toString();
+        const quote = rawQuote.replace(new RegExp(ZWSP, "g"), "").trim();
+        if (quote.length < 1) return false;
+        const fullText = (root.textContent ?? "").replace(
+          new RegExp(ZWSP, "g"),
+          "",
+        );
+        const idx = fullText.indexOf(quote);
+        const prefix =
+          idx > 0
+            ? fullText.slice(Math.max(0, idx - ANCHOR_CONTEXT), idx)
+            : "";
+        const suffix =
+          idx >= 0
+            ? fullText.slice(
+                idx + quote.length,
+                idx + quote.length + ANCHOR_CONTEXT,
+              )
+            : "";
+        applyColorToAnchor(color, { quote, prefix, suffix });
+        return true;
+      },
+    }),
+    [applyColorToAnchor],
+  );
 
   // 삭제 — 낙관 업데이트 + server action.
   function onDelete(id: string) {
@@ -313,7 +370,7 @@ export function HighlightLayer({
       )}
     </div>
   );
-}
+});
 
 // ============================================================
 // DOM wrap 알고리즘

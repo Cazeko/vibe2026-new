@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -8,6 +14,8 @@ import {
   ThumbsUp,
   Zap,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   EyeOff,
   Maximize2,
@@ -25,7 +33,8 @@ import { formatExamStem } from "@/lib/exam/format-stem";
 import type { CardType } from "@/types";
 import type { CardHighlight, CardTag } from "@/lib/db/queries";
 import { submitAnswer, gradeCard } from "../actions";
-import { HighlightLayer } from "./highlight-layer";
+import { HighlightLayer, type HighlightLayerHandle } from "./highlight-layer";
+import { Underline as UnderlineIcon } from "lucide-react";
 import { CardTags } from "./card-tags";
 import { WorkspaceTopbar } from "./workspace-topbar";
 import { AnalysisPanel } from "./analysis-panel";
@@ -36,6 +45,7 @@ type CardData = {
   type: CardType;
   frontText: string;
   frontImagePath: string | null;
+  frontImagePaths: string[];
   backMd: string | null;
   verifiedAnswer: boolean;
   paperLabel: string | null;
@@ -109,7 +119,19 @@ export function StudyCardForm({
   const draftRestoredRef = useRef(false);
   const firstMountRef = useRef(true);
 
-  const imageUrl = getExamPageUrl(card.frontImagePath);
+  // 0017 (2026-05-14) — 한 문항이 여러 PDF 페이지에 걸친 경우 모든 페이지 URL.
+  // 마이그레이션 미적용 row 와도 호환되도록 단일 경로 fallback.
+  const imageUrls = (() => {
+    const paths =
+      card.frontImagePaths && card.frontImagePaths.length > 0
+        ? card.frontImagePaths
+        : card.frontImagePath
+          ? [card.frontImagePath]
+          : [];
+    return paths
+      .map((p) => getExamPageUrl(p))
+      .filter((u): u is string => !!u);
+  })();
   // 백승환 추가 보고 (2026-05-13) — 본문 raw 노출 → formatExamStem 으로
   // 자료 블록·발문·답란 인식. 본문은 SplitView 좌측에 자연스럽게 정합.
   const cleanedFrontText = formatExamStem(card.frontText);
@@ -242,33 +264,23 @@ export function StudyCardForm({
   }, [revealed, pending]);
 
   // 본문 카드 (quiz/mistake 용) — SplitView 좌측 ProblemPane 의 상단.
+  // 0017 (2026-05-14) — 출처와 점수 사이 *중앙*에 PDF 컨트롤(페이지/줌) 배치.
+  // PdfViewer 가 헤더 컨트롤 + 본문 뷰포트를 한 단위로 관리한다.
   const stemCard = (
     <Card className="border-rule">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-            출처{" "}
-            <span className="ml-2 normal-case tracking-normal text-foreground/85 font-sans">
-              {card.paperLabel ?? "—"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-[11px]">
-            {card.itemFormat && <Tag>{card.itemFormat}</Tag>}
-            {card.itemPoints != null && (
-              <Tag>
-                <span className="tabular-nums">{card.itemPoints}</span>점
-              </Tag>
-            )}
-          </div>
-        </div>
-
-        {imageUrl && <PdfImage src={imageUrl} />}
+        <PdfViewer
+          imageUrls={imageUrls}
+          paperLabel={card.paperLabel}
+          itemFormat={card.itemFormat}
+          itemPoints={card.itemPoints}
+        />
 
         {card.frontText && (
           <div className="mt-5">
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
-                본문 텍스트{imageUrl && " (검색·낭독 보조)"}
+                본문 텍스트{imageUrls.length > 0 && " (검색·낭독 보조)"}
               </span>
               {isLongStem && (
                 <button
@@ -297,7 +309,6 @@ export function StudyCardForm({
                   : ""
               }`}
             >
-              {/* 헌법 v3.5.1 제16조 — 본문에도 사용자 형광펜 적용 (front_text surface). */}
               <HighlightLayer
                 cardId={card.id}
                 surface="front_text"
@@ -520,63 +531,341 @@ export function StudyCardForm({
   );
 }
 
-function PdfImage({ src }: { src: string }) {
-  const ZOOM_STEPS = [1, 1.5, 2, 3];
+// 0017 (2026-05-14, 주인님 보고 #1·#2) — 시험 본문 PDF 뷰어.
+// 헌법 §16 정합 — 본문 카드 인터랙션 다듬기.
+//
+// 요건
+//   #1 한 문항이 여러 PDF 페이지에 걸친 경우 < > 버튼으로 페이지 전환.
+//   #2 줌 시 카드 크기가 아닌 PDF *이미지*가 확대. PC 휠 줌 + 드래그 팬, 태블릿
+//      터치 핀치 줌 + 단일 터치 팬. 줌 컨트롤 위치를 "출처 — (여기) — 점수"
+//      사이로 이동.
+//
+// 구현 요지
+//   - 뷰포트(고정 높이 70vh) 내부에서 이미지에 transform: translate scale 적용.
+//   - 줌 단계: 0.6 / 0.8 / 1 / 1.25 / 1.5 / 2 / 3.
+//   - 헤더에 출처 · 컨트롤 · 점수 한 줄. 컨트롤은 페이지 네비 + 줌 통합.
+//   - 마우스 드래그(좌클릭 hold) 또는 단일 터치로 팬, 줌 ≥ 1.05 일 때만 활성.
+//   - PC 휠(deltaY) 로 줌 — Ctrl 미요구. preventDefault 로 페이지 스크롤 잠금.
+//   - 휠 줌은 커서 위치 기준 anchor — 자연스러운 확대 체감.
+function PdfViewer({
+  imageUrls,
+  paperLabel,
+  itemFormat,
+  itemPoints,
+}: {
+  imageUrls: string[];
+  paperLabel: string | null;
+  itemFormat: string | null;
+  itemPoints: number | null;
+}) {
+  const ZOOM_STEPS = [0.6, 0.8, 1, 1.25, 1.5, 2, 3];
+  const MIN_ZOOM = ZOOM_STEPS[0];
+  const MAX_ZOOM = ZOOM_STEPS[ZOOM_STEPS.length - 1];
+  const [pageIndex, setPageIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
-  const idx = ZOOM_STEPS.findIndex((z) => Math.abs(z - zoom) < 0.01);
-  const canZoomIn = idx < ZOOM_STEPS.length - 1;
-  const canZoomOut = idx > 0;
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  // pointer drag pan — pointer 단일 모델로 마우스 + 터치 + 펜 통일.
+  const dragStateRef = useRef<{
+    startX: number;
+    startY: number;
+    baseX: number;
+    baseY: number;
+  } | null>(null);
+  // 핀치 줌 — 활성 pointer 2개 트래킹.
+  const pinchStateRef = useRef<{
+    pointers: Map<number, { x: number; y: number }>;
+    initialDist: number;
+    initialZoom: number;
+  }>({ pointers: new Map(), initialDist: 0, initialZoom: 1 });
+
+  const pageCount = imageUrls.length;
+  const hasImage = pageCount > 0;
+  const src = hasImage ? imageUrls[pageIndex] : null;
+  const canZoomIn = zoom < MAX_ZOOM - 0.01;
+  const canZoomOut = zoom > MIN_ZOOM + 0.01;
+
+  // 페이지 전환 시 offset/zoom 초기화 — 새 페이지를 자연스럽게 처음부터.
+  const goPage = useCallback((dir: -1 | 1) => {
+    setPageIndex((p) => {
+      const next = Math.max(0, Math.min(pageCount - 1, p + dir));
+      if (next !== p) setOffset({ x: 0, y: 0 });
+      return next;
+    });
+  }, [pageCount]);
+
+  const nextStep = useCallback((direction: -1 | 1) => {
+    setZoom((z) => {
+      const idx = ZOOM_STEPS.findIndex((s) => Math.abs(s - z) < 0.01);
+      const cur = idx === -1
+        ? ZOOM_STEPS.reduce((best, s) =>
+            Math.abs(s - z) < Math.abs(best - z) ? s : best, ZOOM_STEPS[0])
+        : z;
+      const curIdx = ZOOM_STEPS.indexOf(cur);
+      const nextIdx = Math.max(
+        0,
+        Math.min(ZOOM_STEPS.length - 1, curIdx + direction),
+      );
+      const nextZ = ZOOM_STEPS[nextIdx];
+      // 줌 1 이하로 복귀하면 팬 오프셋 리셋 — UX 직관 (전체 화면 복귀).
+      if (nextZ <= 1.001) setOffset({ x: 0, y: 0 });
+      return nextZ;
+    });
+  }, [ZOOM_STEPS]);
+
+  // 휠 줌 — 커서 위치 anchor.
+  const handleWheel = useCallback(
+    (e: React.WheelEvent<HTMLDivElement>) => {
+      if (!hasImage) return;
+      // 휠 스크롤은 페이지 스크롤이 아닌 줌으로 전용.
+      e.preventDefault();
+      const dir = e.deltaY > 0 ? -1 : 1;
+      const vp = viewportRef.current;
+      if (!vp) {
+        nextStep(dir);
+        return;
+      }
+      const rect = vp.getBoundingClientRect();
+      const cx = e.clientX - rect.left - rect.width / 2;
+      const cy = e.clientY - rect.top - rect.height / 2;
+      setZoom((prevZoom) => {
+        const idx = ZOOM_STEPS.findIndex(
+          (s) => Math.abs(s - prevZoom) < 0.01,
+        );
+        const cur = idx === -1 ? prevZoom : prevZoom;
+        const curIdx =
+          idx === -1
+            ? ZOOM_STEPS.reduce(
+                (best, _s, i) =>
+                  Math.abs(ZOOM_STEPS[i] - cur) <
+                  Math.abs(ZOOM_STEPS[best] - cur)
+                    ? i
+                    : best,
+                0,
+              )
+            : idx;
+        const nextIdx = Math.max(
+          0,
+          Math.min(ZOOM_STEPS.length - 1, curIdx + dir),
+        );
+        const nextZ = ZOOM_STEPS[nextIdx];
+        if (Math.abs(nextZ - prevZoom) < 0.001) return prevZoom;
+        // anchor 보정 — 줌 전 cursor offset 을 줌 후에도 같은 점에 매핑.
+        const ratio = nextZ / prevZoom;
+        setOffset((o) => {
+          const nx = cx - (cx - o.x) * ratio;
+          const ny = cy - (cy - o.y) * ratio;
+          // 줌 1 이하로 복귀하면 중앙 정렬.
+          if (nextZ <= 1.001) return { x: 0, y: 0 };
+          return { x: nx, y: ny };
+        });
+        return nextZ;
+      });
+    },
+    [ZOOM_STEPS, hasImage, nextStep],
+  );
+
+  // pointer-down — 단일 포인터면 drag pan 시작, 두 번째 포인터면 핀치 진입.
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (!hasImage) return;
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    const pinch = pinchStateRef.current;
+    pinch.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pinch.pointers.size === 2) {
+      const pts = [...pinch.pointers.values()];
+      const dx = pts[0].x - pts[1].x;
+      const dy = pts[0].y - pts[1].y;
+      pinch.initialDist = Math.hypot(dx, dy);
+      pinch.initialZoom = zoom;
+      dragStateRef.current = null;
+      setDragging(false);
+      return;
+    }
+
+    // 단일 포인터 — 줌 1 이하면 팬 무의미.
+    if (zoom <= 1.001) return;
+    dragStateRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      baseX: offset.x,
+      baseY: offset.y,
+    };
+    setDragging(true);
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const pinch = pinchStateRef.current;
+    if (pinch.pointers.has(e.pointerId)) {
+      pinch.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+    if (pinch.pointers.size === 2) {
+      const pts = [...pinch.pointers.values()];
+      const dx = pts[0].x - pts[1].x;
+      const dy = pts[0].y - pts[1].y;
+      const dist = Math.hypot(dx, dy);
+      if (pinch.initialDist > 0) {
+        const ratio = dist / pinch.initialDist;
+        const target = Math.max(
+          MIN_ZOOM,
+          Math.min(MAX_ZOOM, pinch.initialZoom * ratio),
+        );
+        setZoom(target);
+        if (target <= 1.001) setOffset({ x: 0, y: 0 });
+      }
+      return;
+    }
+    const drag = dragStateRef.current;
+    if (!drag) return;
+    setOffset({
+      x: drag.baseX + (e.clientX - drag.startX),
+      y: drag.baseY + (e.clientY - drag.startY),
+    });
+  }
+
+  function onPointerEnd(e: React.PointerEvent<HTMLDivElement>) {
+    const pinch = pinchStateRef.current;
+    pinch.pointers.delete(e.pointerId);
+    if (pinch.pointers.size < 2) {
+      pinch.initialDist = 0;
+    }
+    dragStateRef.current = null;
+    setDragging(false);
+  }
+
+  // 카드 ID 가 바뀌면 (페이지 전환과 무관하게) 자동 리셋 보강.
+  useEffect(() => {
+    setPageIndex(0);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+  }, [imageUrls[0]]);
+
   return (
-    <div className="mt-5 relative rounded-md border border-rule overflow-hidden bg-cream-soft">
-      <div
-        className="overflow-auto max-h-[70vh]"
-        aria-label="시험 본문 이미지 영역"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        {/* v3.6 외부 평가 #3.11 — 다크모드 PDF 눈부심 방지. */}
-        <img
-          src={src}
-          alt="시험 본문 (PDF 페이지)"
-          className="block w-full origin-top-left transition-transform duration-150 dark:[filter:brightness(0.85)_contrast(1.15)]"
-          loading="lazy"
-          width={1240}
-          height={1754}
-          style={{ transform: `scale(${zoom})`, width: `${100 / zoom}%` }}
-        />
+    <div>
+      {/* 헤더 — 출처 | (페이지/줌 컨트롤) | 형식·점수 한 줄. */}
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+        <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          출처{" "}
+          <span className="ml-2 normal-case tracking-normal text-foreground/85 font-sans">
+            {paperLabel ?? "—"}
+          </span>
+        </div>
+
+        {hasImage && (
+          <div className="inline-flex items-center gap-1 rounded-md border border-rule bg-card/80 px-1 py-1 shadow-sm">
+            {pageCount > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => goPage(-1)}
+                  disabled={pageIndex === 0}
+                  aria-label="이전 페이지"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
+                </button>
+                <span className="text-[10.5px] text-muted-foreground tabular-nums px-1 select-none">
+                  {pageIndex + 1} / {pageCount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => goPage(1)}
+                  disabled={pageIndex >= pageCount - 1}
+                  aria-label="다음 페이지"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                </button>
+                <span className="mx-1 inline-block h-4 w-px bg-rule" aria-hidden />
+              </>
+            )}
+            <button
+              type="button"
+              onClick={() => canZoomOut && nextStep(-1)}
+              disabled={!canZoomOut}
+              aria-label="축소"
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+            >
+              <ZoomOut className="h-3.5 w-3.5" aria-hidden />
+            </button>
+            <span className="text-[10.5px] text-muted-foreground tabular-nums w-9 text-center select-none">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => canZoomIn && nextStep(1)}
+              disabled={!canZoomIn}
+              aria-label="확대"
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+            >
+              <ZoomIn className="h-3.5 w-3.5" aria-hidden />
+            </button>
+            <span className="mx-1 inline-block h-4 w-px bg-rule" aria-hidden />
+            {src && (
+              <a
+                href={src}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="새 탭에서 전체 크기로 보기"
+                className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+              >
+                <Maximize2 className="h-3.5 w-3.5" aria-hidden />
+              </a>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 text-[11px]">
+          {itemFormat && <Tag>{itemFormat}</Tag>}
+          {itemPoints != null && (
+            <Tag>
+              <span className="tabular-nums">{itemPoints}</span>점
+            </Tag>
+          )}
+        </div>
       </div>
-      <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-card/80 backdrop-blur-md supports-[backdrop-filter]:bg-card/70 px-1 py-1 border border-rule shadow-sm">
-        <button
-          type="button"
-          onClick={() => canZoomOut && setZoom(ZOOM_STEPS[idx - 1])}
-          disabled={!canZoomOut}
-          aria-label="축소"
-          className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+
+      {/* 뷰포트 — 줌/팬 인터랙션 영역. */}
+      {hasImage && src && (
+        <div
+          ref={viewportRef}
+          onWheel={handleWheel}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerEnd}
+          onPointerCancel={onPointerEnd}
+          onPointerLeave={onPointerEnd}
+          className="relative rounded-md border border-rule overflow-hidden bg-cream-soft select-none touch-none"
+          style={{
+            height: "min(70vh, 720px)",
+            cursor:
+              zoom > 1.001
+                ? dragging
+                  ? "grabbing"
+                  : "grab"
+                : "zoom-in",
+          }}
+          aria-label="시험 본문 PDF 뷰포트 — 휠로 확대축소, 드래그로 이동"
         >
-          <ZoomOut className="h-3.5 w-3.5" aria-hidden />
-        </button>
-        <span className="text-[10.5px] text-muted-foreground tabular-nums w-9 text-center">
-          {Math.round(zoom * 100)}%
-        </span>
-        <button
-          type="button"
-          onClick={() => canZoomIn && setZoom(ZOOM_STEPS[idx + 1])}
-          disabled={!canZoomIn}
-          aria-label="확대"
-          className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
-        >
-          <ZoomIn className="h-3.5 w-3.5" aria-hidden />
-        </button>
-        <span className="mx-1 inline-block h-4 w-px bg-rule" aria-hidden />
-        <a
-          href={src}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="새 탭에서 전체 크기로 보기"
-          className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
-        >
-          <Maximize2 className="h-3.5 w-3.5" aria-hidden />
-        </a>
-      </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={`시험 본문 PDF 페이지 ${pageIndex + 1}/${pageCount}`}
+            draggable={false}
+            className="absolute left-1/2 top-1/2 max-w-none origin-center transition-transform dark:[filter:brightness(0.85)_contrast(1.15)]"
+            style={{
+              transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${zoom})`,
+              transitionDuration: dragging ? "0ms" : "120ms",
+              // 본 뷰포트 전체에 맞춰 base width 100%. 줌이 그 위로 곱해진다.
+              width: "100%",
+              height: "auto",
+              willChange: "transform",
+            }}
+            loading="lazy"
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -607,6 +896,10 @@ function KeywordNoteBox({
       Math.max(0, (idx === -1 ? 1 : idx) + direction),
     );
     setZoom(ZOOM_STEPS[next]);
+  }
+  const layerRef = useRef<HighlightLayerHandle | null>(null);
+  function applyColor(c: "yellow" | "green" | "pink" | "underline") {
+    layerRef.current?.applyColorToSelection(c);
   }
 
   return (
@@ -640,6 +933,11 @@ function KeywordNoteBox({
               )}
               <span>블라인드</span>
             </button>
+            {/* 주인님 보고 #5 (2026-05-14) — 키워드 트랙에도 형광펜·밑줄 진입점. */}
+            <NoteToolButton label="노랑" tone="yellow" onClick={() => applyColor("yellow")} />
+            <NoteToolButton label="초록" tone="green" onClick={() => applyColor("green")} />
+            <NoteToolButton label="분홍" tone="pink" onClick={() => applyColor("pink")} />
+            <NoteToolButton label="밑줄" tone="underline" onClick={() => applyColor("underline")} />
             <button
               type="button"
               onClick={() => adjustZoom(-1)}
@@ -668,6 +966,7 @@ function KeywordNoteBox({
           style={{ fontSize: `${Math.round(zoom * 14)}px` }}
         >
           <HighlightLayer
+            ref={layerRef}
             cardId={cardId}
             surface="back_md"
             initialHighlights={highlights}
@@ -679,6 +978,41 @@ function KeywordNoteBox({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function NoteToolButton({
+  label,
+  tone,
+  onClick,
+}: {
+  label: string;
+  tone: "yellow" | "green" | "pink" | "underline";
+  onClick: () => void;
+}) {
+  const dot =
+    tone === "yellow"
+      ? "bg-yellow-300"
+      : tone === "green"
+        ? "bg-emerald-300"
+        : tone === "pink"
+          ? "bg-pink-300"
+          : "bg-foreground/60";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${label} — 선택한 텍스트에 적용`}
+      title={`${label} — 드래그한 텍스트에 적용`}
+      className="inline-flex h-8 px-2 items-center gap-1 rounded border border-rule text-muted-foreground hover:text-foreground hover:bg-secondary/60 text-[11px] transition-colors"
+    >
+      {tone === "underline" ? (
+        <UnderlineIcon className="h-3.5 w-3.5" aria-hidden />
+      ) : (
+        <span aria-hidden className={`block h-2.5 w-2.5 rounded-full ${dot}`} />
+      )}
+      <span className="hidden sm:inline">{label}</span>
+    </button>
   );
 }
 

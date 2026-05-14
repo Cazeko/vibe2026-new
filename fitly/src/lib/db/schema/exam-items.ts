@@ -35,7 +35,12 @@ export const examItems = pgTable(
     itemNo: integer("item_no").notNull(),
     // 본문 (PDF 원본 직접) — v3.3
     stemText: text("stem_text").notNull(), // unpdf 추출 본문 (검색·낭독·복사용)
-    stemImagePath: text("stem_image_path"), // pdftocairo PNG 경로 (사용자 화면 본문)
+    stemImagePath: text("stem_image_path"), // 단일 fallback (legacy — 첫 페이지)
+    // 0017 — 한 문항이 여러 페이지에 걸친 경우 모든 페이지를 보존한다.
+    stemImagePaths: jsonb("stem_image_paths")
+      .$type<string[]>()
+      .notNull()
+      .default([]),
     // 분석·태깅 (LLM 생성)
     points: integer("points"),
     format: varchar("format", { length: 16 }), // '객관식' | '단답형' | '서술형' | '논술형'

@@ -16,6 +16,7 @@ import {
   EyeOff,
   Loader2,
   AlertCircle,
+  Underline as UnderlineIcon,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Markdown } from "@/components/shared/markdown";
@@ -25,7 +26,7 @@ import type {
   KeywordsJson,
   DiffJson,
 } from "@/lib/db/schema/user-card-ai-analysis";
-import { HighlightLayer } from "./highlight-layer";
+import { HighlightLayer, type HighlightLayerHandle } from "./highlight-layer";
 import { requestAiAnalysis } from "../actions";
 
 // 헌법 v3.5.3 §16 + 2026-05-14 brainstorming PR 1/3 — 워크스페이스 분석 패널.
@@ -708,6 +709,8 @@ function ReferenceTab({
   blindMode: boolean;
   onToggleBlind: () => void;
 }) {
+  const layerRef = useRef<HighlightLayerHandle | null>(null);
+
   if (!backMd) {
     return (
       <div className="flex items-start gap-3 rounded-md border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30 p-4">
@@ -726,32 +729,62 @@ function ReferenceTab({
           모범답안
         </span>
         <SourceBadge verified={verifiedAnswer} />
-        <button
-          type="button"
-          onClick={onToggleBlind}
-          aria-pressed={blindMode}
-          aria-label={
-            blindMode
-              ? "블라인드 모드 끄기"
-              : "블라인드 모드 켜기 — 핵심 키워드 가리기"
-          }
-          className={`ml-auto inline-flex items-center gap-1 h-8 px-2 rounded border text-[11px] transition-colors ${
-            blindMode
-              ? "border-foreground/60 bg-foreground/10 text-foreground"
-              : "border-rule text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-          }`}
-        >
-          {blindMode ? (
-            <EyeOff className="h-3.5 w-3.5" aria-hidden />
-          ) : (
-            <Eye className="h-3.5 w-3.5" aria-hidden />
-          )}
-          <span>블라인드</span>
-        </button>
+        <div className="ml-auto inline-flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onToggleBlind}
+            aria-pressed={blindMode}
+            aria-label={
+              blindMode
+                ? "블라인드 모드 끄기"
+                : "블라인드 모드 켜기 — 핵심 키워드 가리기"
+            }
+            className={`inline-flex items-center gap-1 h-8 px-2 rounded border text-[11px] transition-colors ${
+              blindMode
+                ? "border-foreground/60 bg-foreground/10 text-foreground"
+                : "border-rule text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+            }`}
+          >
+            {blindMode ? (
+              <EyeOff className="h-3.5 w-3.5" aria-hidden />
+            ) : (
+              <Eye className="h-3.5 w-3.5" aria-hidden />
+            )}
+            <span>블라인드</span>
+          </button>
+          {/* 주인님 보고 #5 (2026-05-14) — 형광펜·밑줄 토글 버튼. 텍스트 selection
+              이 있으면 그 selection 에 색을 즉시 적용한다. selection 없으면
+              사용자에게 안내. 드래그 후 자동 팝업 진입점은 그대로 보존된다. */}
+          <HighlightToolButton
+            label="노랑"
+            ariaLabel="선택한 텍스트에 노랑 형광펜"
+            tone="yellow"
+            onClick={() => triggerColor(layerRef, "yellow")}
+          />
+          <HighlightToolButton
+            label="초록"
+            ariaLabel="선택한 텍스트에 초록 형광펜"
+            tone="green"
+            onClick={() => triggerColor(layerRef, "green")}
+          />
+          <HighlightToolButton
+            label="분홍"
+            ariaLabel="선택한 텍스트에 분홍 형광펜"
+            tone="pink"
+            onClick={() => triggerColor(layerRef, "pink")}
+          />
+          <HighlightToolButton
+            label="밑줄"
+            ariaLabel="선택한 텍스트에 밑줄"
+            tone="underline"
+            onClick={() => triggerColor(layerRef, "underline")}
+          />
+        </div>
       </div>
 
       <div className="rounded-md border-l-4 border-evergreen border-y border-r border-rule bg-card p-4">
         <HighlightLayer
+          ref={layerRef}
           cardId={cardId}
           surface="back_md"
           initialHighlights={highlights}
@@ -762,6 +795,65 @@ function ReferenceTab({
         </HighlightLayer>
       </div>
     </div>
+  );
+}
+
+// 외부 툴바에서 HighlightLayer 의 imperative handle 호출. selection 없으면
+// 안내 토스트 대신 가벼운 콘솔 noop — 주인님 보고 #5 정합.
+function triggerColor(
+  ref: React.RefObject<HighlightLayerHandle | null>,
+  color: "yellow" | "green" | "pink" | "underline",
+) {
+  const ok = ref.current?.applyColorToSelection(color);
+  if (!ok) {
+    // 안내: selection 가 없으면 시각 강조 없이 noop. 사용자 발화 #5 정합 —
+    // 드래그 후 자동 팝업 흐름은 그대로라 본 버튼은 *대체 진입점* 위치.
+    if (typeof window !== "undefined") {
+      // 알림은 가볍게 — DOM 토스트 없이 selection 안내만.
+      console.info(
+        "[fitly] 본문에서 텍스트를 드래그한 뒤 형광펜/밑줄 버튼을 눌러주세요.",
+      );
+    }
+  }
+}
+
+function HighlightToolButton({
+  label,
+  ariaLabel,
+  tone,
+  onClick,
+}: {
+  label: string;
+  ariaLabel: string;
+  tone: "yellow" | "green" | "pink" | "underline";
+  onClick: () => void;
+}) {
+  const dot =
+    tone === "yellow"
+      ? "bg-yellow-300"
+      : tone === "green"
+        ? "bg-emerald-300"
+        : tone === "pink"
+          ? "bg-pink-300"
+          : "bg-foreground/60";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      title={`${label} — 드래그한 텍스트에 적용`}
+      className="inline-flex items-center gap-1 h-8 px-2 rounded border border-rule text-muted-foreground hover:text-foreground hover:bg-secondary/60 text-[11px] transition-colors"
+    >
+      {tone === "underline" ? (
+        <UnderlineIcon className="h-3.5 w-3.5" aria-hidden />
+      ) : (
+        <span
+          aria-hidden
+          className={`block h-2.5 w-2.5 rounded-full ${dot}`}
+        />
+      )}
+      <span className="hidden sm:inline">{label}</span>
+    </button>
   );
 }
 

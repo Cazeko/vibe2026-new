@@ -7,6 +7,7 @@ import {
   timestamp,
   boolean,
   index,
+  jsonb,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { examItems } from "./exam-items";
@@ -37,7 +38,12 @@ export const cards = pgTable(
     userId: uuid("user_id"), // NULL for shared seed cards
     // 본문 (v3.3 분리)
     frontText: text("front_text").notNull(), // 본문 텍스트 (quiz/mistake = unpdf, keyword = LLM 개념 노트)
-    frontImagePath: text("front_image_path"), // PDF 페이지 PNG (quiz/mistake만, keyword는 NULL)
+    frontImagePath: text("front_image_path"), // 단일 fallback (legacy — 첫 페이지)
+    // 0017 — 한 문항이 여러 PDF 페이지에 걸친 경우 모든 페이지를 보존.
+    frontImagePaths: jsonb("front_image_paths")
+      .$type<string[]>()
+      .notNull()
+      .default([]),
     // 답안·해설 (LLM 생성)
     backMd: text("back_md"),
     // 검증

@@ -32,6 +32,17 @@ import type { CardType } from "@/types";
 
 const REVIEW_STATE_THRESHOLD = 2;
 
+// 0017 (2026-05-14) — 다중 페이지 stem 정규화. paths 배열이 비어 있으면 단일
+// fallback 으로 1원소 배열을 만든다. 마이그레이션 적용 전 row 와도 호환.
+function normalizeImagePaths(
+  paths: string[] | null | undefined,
+  fallback: string | null,
+): string[] {
+  if (paths && paths.length > 0) return paths;
+  if (fallback) return [fallback];
+  return [];
+}
+
 // 헌법 제37조 정합 — DB 일시 장애·RLS·마이그레이션 미적용 시 페이지 전체 SSR
 // 실패를 막기 위한 그래스풀 디그레이드. 콘솔에는 명시적 보고, UI는 안전한
 // fallback으로 동작 유지. 시드 미적재 상태도 동일 경로로 처리된다.
@@ -190,6 +201,9 @@ export type DueCard = {
   type: CardType;
   frontText: string;
   frontImagePath: string | null;
+  // 0017 (2026-05-14) — 한 문항이 여러 PDF 페이지에 걸친 경우 모든 페이지 경로.
+  // frontImagePath 는 첫 페이지(legacy fallback).
+  frontImagePaths: string[];
   backMd: string | null;
   verifiedAnswer: boolean;
   dueAt: Date;
@@ -214,6 +228,7 @@ export async function getDueCards(
           type: cards.type,
           frontText: cards.frontText,
           frontImagePath: cards.frontImagePath,
+          frontImagePaths: cards.frontImagePaths,
           backMd: cards.backMd,
           verifiedAnswer: cards.verifiedAnswer,
           dueAt: userCardState.dueAt,
@@ -253,6 +268,7 @@ export async function getDueCards(
         type: r.type as CardType,
         frontText: r.frontText,
         frontImagePath: r.frontImagePath,
+        frontImagePaths: normalizeImagePaths(r.frontImagePaths, r.frontImagePath),
         backMd: r.backMd,
         verifiedAnswer: r.verifiedAnswer,
         dueAt: r.dueAt ?? now,
@@ -291,6 +307,7 @@ export async function getCardById(
           type: cards.type,
           frontText: cards.frontText,
           frontImagePath: cards.frontImagePath,
+          frontImagePaths: cards.frontImagePaths,
           backMd: cards.backMd,
           verifiedAnswer: cards.verifiedAnswer,
           dueAt: userCardState.dueAt,
@@ -320,6 +337,7 @@ export async function getCardById(
         type: row.type as CardType,
         frontText: row.frontText,
         frontImagePath: row.frontImagePath,
+        frontImagePaths: normalizeImagePaths(row.frontImagePaths, row.frontImagePath),
         backMd: row.backMd,
         verifiedAnswer: row.verifiedAnswer,
         dueAt: row.dueAt ?? new Date(),

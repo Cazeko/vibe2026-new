@@ -94,6 +94,11 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
   // SSR 안전 — useEffect 의 client-only mount 표시. 미마운트 시 Portal 렌더 X.
   const [mounted, setMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  // 주인님 보고 #20 (2026-05-14) — 모델 답장이 길 때 자동 스크롤이 맨 아래로
+  // 떨어져 답장 시작점이 안 보이는 회귀. 모델 응답이 들어올 때는 *그 응답의
+  // 시작점* 으로 스크롤하도록 별도 ref. 사용자 메시지 추가/typing 중에는 기존
+  // end 스크롤 유지.
+  const lastModelStartRef = useRef<HTMLDivElement | null>(null);
   const storageKey = useMemo(
     () => `${STORAGE_KEY_PREFIX}${cardId}`,
     [cardId],
@@ -146,11 +151,24 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
     }
   }, [messages, storageKey]);
 
-  // 드로어 열릴 때 / 메시지 추가 시 스크롤 하단으로.
+  // 드로어 열릴 때 / 메시지 추가 시 스크롤. 주인님 보고 #20 (2026-05-14):
+  //   - 모델 답장이 마지막에 들어온 경우(직전이 model 메시지) — 그 답장의
+  //     *시작점* 으로 스크롤 (긴 답장 시작이 안 보이는 회귀 해소).
+  //   - 그 외 (사용자 메시지 / typing / 첫 진입) — 기존대로 맨 아래.
   useEffect(() => {
     if (!open) return;
+    const last = messages[messages.length - 1];
+    const isModelReplyJustArrived =
+      status === "idle" && last && last.role === "model";
+    if (isModelReplyJustArrived && lastModelStartRef.current) {
+      lastModelStartRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return;
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [open, messages.length, status]);
+  }, [open, messages, status]);
 
   // ESC 로 드로어 닫기.
   useEffect(() => {
@@ -240,9 +258,26 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-cream-soft/40">
         {messages.length === 0 && status === "idle" && <EmptyState />}
-        {messages.map((m, i) => (
-          <ChatBubble key={i} message={m} />
-        ))}
+        {messages.map((m, i) => {
+          // 마지막 model 메시지에만 lastModelStartRef 부착 → #20 스크롤 보정.
+          const isLastModel =
+            m.role === "model" &&
+            i === messages.length - 1 &&
+            status === "idle";
+          return (
+            <ChatBubble
+              key={i}
+              message={m}
+              anchorRef={
+                isLastModel
+                  ? (node) => {
+                      lastModelStartRef.current = node;
+                    }
+                  : undefined
+              }
+            />
+          );
+        })}
         {status === "sending" && <TypingBubble />}
         {error && <ErrorBubble reason={error} />}
         <div ref={messagesEndRef} />
@@ -364,13 +399,27 @@ function EmptyState() {
   );
 }
 
-function ChatBubble({ message }: { message: ChatMessage }) {
+function ChatBubble({
+  message,
+  anchorRef,
+}: {
+  message: ChatMessage;
+  // RefCallback 호환 — RefObject<T | null> 을 ref 에 직접 넘기지 못하는
+  // legacyRef 충돌 회피용 좁힘.
+  anchorRef?: (node: HTMLDivElement | null) => void;
+}) {
   const isUser = message.role === "user";
   // 헌법 v3.6.3 hotfix (2026-05-14) — 답변에 **·#·` 등 마크다운 마크업이
   // raw 노출되는 것을 방지. server-side `cleanMarkdown` 으로 1차 strip, 클라
   // 이언트는 plain text 로 렌더 (Markdown 컴포넌트 우회). 주인님 명시 요구.
+  //
+  // anchorRef — 주인님 보고 #20 (2026-05-14). 마지막 model 답장에만 부착되어
+  // useEffect 가 그 시작점으로 scroll 시킨다.
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div
+      ref={anchorRef}
+      className={`flex ${isUser ? "justify-end" : "justify-start"} scroll-mt-2`}
+    >
       <div
         className={`max-w-[85%] rounded-lg px-3.5 py-2.5 text-[13px] leading-[1.65] ${
           isUser
