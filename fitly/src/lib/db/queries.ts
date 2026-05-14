@@ -261,6 +261,12 @@ export type DueCard = {
 // cards.front_image_paths 컬럼이 없어 SELECT 가 실패하면 safeRun 이 통째로 빈
 // 배열을 반환 → 풀이/키워드/오답 전 트랙 빈 상태 회귀. 컬럼 존재 여부를 모듈
 // 단위로 캐시하여 컬럼이 없으면 단일 path 만 select 한다.
+//
+// F5 사후 리뷰 (2026-05-15) — *주의*: 본 캐시는 인스턴스 수명 동안 유지된다.
+// 운영자가 0017 마이그레이션을 production 에 *런타임 중* 적용하더라도, 이미
+// warm 된 Vercel/Node 인스턴스는 false 캐시를 유지하여 multi-page 가 그 인스턴스
+// 에서만 비활성 상태가 된다. Vercel function 의 자연 cold start 또는 재배포
+// 시점에 자동 해소된다. 즉시 활성화가 필요하면 배포를 한 번 트리거해 주세요.
 let _multiPagePathsAvailable: boolean | null = null;
 async function probeMultiPagePaths(): Promise<boolean> {
   if (_multiPagePathsAvailable !== null) return _multiPagePathsAvailable;

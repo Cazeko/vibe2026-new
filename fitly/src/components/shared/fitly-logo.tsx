@@ -41,10 +41,10 @@ export function FitlyLogo({
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
       {showMark && (
-        // 주인님 보고 #19 (2026-05-14) — 종전 svg 가 viewBox 안에서 12~88 영역만
-        // 차지하여 초록 박스 중앙에 *살짝 우상단* 으로 어긋나 보이던 회귀. 정사각형
-        // 박스 *정중앙* 에 자소가 더 크게 차도록 (svg 88% width + 중앙 grid place)
-        // viewBox 자체를 12~88 영역으로 잡아 시각 중심 정합.
+        // 주인님 보고 #19 + F6 사후 리뷰 (2026-05-15) — viewBox 를 100×100 정사각형
+        // 으로 되돌리고 자소를 22~78 영역(56×56)의 정중앙에 재배치. 종전 60×52
+        // 비율은 시각 중심이 위로 치우쳐 보이던 회귀. 자소가 박스에 꽉 차도록
+        // svg 자체는 80% 폭 + 박스 정중앙 grid place.
         <span
           aria-hidden
           className={cn(
@@ -53,17 +53,21 @@ export function FitlyLogo({
           )}
         >
           <svg
-            viewBox="20 24 60 52"
+            viewBox="0 0 100 100"
             xmlns="http://www.w3.org/2000/svg"
-            className="h-[88%] w-[88%]"
+            className="h-[80%] w-[80%]"
             aria-hidden
           >
             <g fill="hsl(var(--color-bg))">
-              <rect x="22" y="28" width="56" height="7" rx="1" />
-              <rect x="33" y="35" width="7" height="30" rx="1" />
-              <rect x="60" y="35" width="7" height="30" rx="1" />
-              <rect x="22" y="65" width="56" height="7" rx="1" />
-              <rect x="40" y="42" width="20" height="16" rx="1" opacity="0.35" />
+              {/* ㅍ 자소 — 22~78 영역(56×56) 정중앙.
+                  상단 가로 (22,29)~(78,36), 좌측 세로 (32,36)~(39,64),
+                  우측 세로 (61,36)~(68,64), 하단 가로 (22,64)~(78,71),
+                  내부 인셋 (42,42)~(58,58) 16×16. */}
+              <rect x="22" y="29" width="56" height="7" rx="1" />
+              <rect x="32" y="36" width="7" height="28" rx="1" />
+              <rect x="61" y="36" width="7" height="28" rx="1" />
+              <rect x="22" y="64" width="56" height="7" rx="1" />
+              <rect x="42" y="42" width="16" height="16" rx="1" opacity="0.35" />
             </g>
           </svg>
         </span>

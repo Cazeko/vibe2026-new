@@ -297,10 +297,11 @@ export default async function StudyPlanPage() {
                   const tone = STATE_TONE[item.state];
                   const isLocked = item.state === "locked";
                   // 주인님 보고 #21 (2026-05-14) — subtitle 의 "N장 due 예정"
-                  // 류 문구에서 due 영문을 한글로. dashboard/queries.ts 가 만드는
-                  // 텍스트라 여기서는 단순 치환으로 흡수한다.
+                  // 류 문구에서 due 영문을 한글로. F9 사후 리뷰 (2026-05-15) —
+                  // /due/gi 가 dueDate 류 substring 까지 치환하던 회귀 회피로
+                  // word-boundary /\bdue\b/gi 로 좁힌다.
                   const subtitle = item.subtitle
-                    .replace(/due/gi, "복습")
+                    .replace(/\bdue\b/gi, "복습")
                     .replace(/\bAgain\b/gi, "다시")
                     .replace(/\bHard\b/gi, "어려움");
                   return (

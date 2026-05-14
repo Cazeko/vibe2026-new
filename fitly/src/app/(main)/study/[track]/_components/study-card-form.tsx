@@ -542,11 +542,19 @@ export function StudyCardForm({
 //
 // 구현 요지
 //   - 뷰포트(고정 높이 70vh) 내부에서 이미지에 transform: translate scale 적용.
-//   - 줌 단계: 0.6 / 0.8 / 1 / 1.25 / 1.5 / 2 / 3.
+//   - 줌 단계: 1 / 1.25 / 1.5 / 2 / 3.
 //   - 헤더에 출처 · 컨트롤 · 점수 한 줄. 컨트롤은 페이지 네비 + 줌 통합.
 //   - 마우스 드래그(좌클릭 hold) 또는 단일 터치로 팬, 줌 ≥ 1.05 일 때만 활성.
 //   - PC 휠(deltaY) 로 줌 — Ctrl 미요구. preventDefault 로 페이지 스크롤 잠금.
 //   - 휠 줌은 커서 위치 기준 anchor — 자연스러운 확대 체감.
+
+// F2 (2026-05-15) — 사후 리뷰 정합: 모듈 상수로 hoist. 매 렌더 새 배열
+// reference 로 인해 useEffect/useCallback dep 가 변동하여 wheel listener 가
+// 반복 재바인딩되던 회귀 해소 (react-best-practices §5 Narrow effect deps).
+const ZOOM_STEPS = [1, 1.25, 1.5, 2, 3] as const;
+const MIN_ZOOM = ZOOM_STEPS[0];
+const MAX_ZOOM = ZOOM_STEPS[ZOOM_STEPS.length - 1];
+
 function PdfViewer({
   imageUrls,
   paperLabel,
@@ -558,12 +566,6 @@ function PdfViewer({
   itemFormat: string | null;
   itemPoints: number | null;
 }) {
-  // 주인님 보고 #24 (2026-05-15) — 1 미만(0.6/0.8)으로 축소 시 transform scale
-  // 보간이 거칠어 본문 텍스트가 깨져 보이던 회귀. base 가 이미 viewport 폭에
-  // 맞춰진 1.0 이라 더 작게 만들 동기도 약함 — 최저값을 1 로 끌어올린다.
-  const ZOOM_STEPS = [1, 1.25, 1.5, 2, 3];
-  const MIN_ZOOM = ZOOM_STEPS[0];
-  const MAX_ZOOM = ZOOM_STEPS[ZOOM_STEPS.length - 1];
   const [pageIndex, setPageIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -576,12 +578,25 @@ function PdfViewer({
     baseX: number;
     baseY: number;
   } | null>(null);
-  // 핀치 줌 — 활성 pointer 2개 트래킹.
+  // 핀치 줌 — 활성 pointer 2개 트래킹. F8 anchor 보정 정합으로 시작 시점
+  // anchor(중심점) + base offset 도 캡처.
   const pinchStateRef = useRef<{
     pointers: Map<number, { x: number; y: number }>;
     initialDist: number;
     initialZoom: number;
-  }>({ pointers: new Map(), initialDist: 0, initialZoom: 1 });
+    anchorX: number;
+    anchorY: number;
+    baseOffsetX: number;
+    baseOffsetY: number;
+  }>({
+    pointers: new Map(),
+    initialDist: 0,
+    initialZoom: 1,
+    anchorX: 0,
+    anchorY: 0,
+    baseOffsetX: 0,
+    baseOffsetY: 0,
+  });
 
   const pageCount = imageUrls.length;
   const hasImage = pageCount > 0;
@@ -601,11 +616,16 @@ function PdfViewer({
   const nextStep = useCallback((direction: -1 | 1) => {
     setZoom((z) => {
       const idx = ZOOM_STEPS.findIndex((s) => Math.abs(s - z) < 0.01);
-      const cur = idx === -1
-        ? ZOOM_STEPS.reduce((best, s) =>
-            Math.abs(s - z) < Math.abs(best - z) ? s : best, ZOOM_STEPS[0])
-        : z;
-      const curIdx = ZOOM_STEPS.indexOf(cur);
+      const curIdx =
+        idx === -1
+          ? ZOOM_STEPS.reduce(
+              (best, _s, i) =>
+                Math.abs(ZOOM_STEPS[i] - z) < Math.abs(ZOOM_STEPS[best] - z)
+                  ? i
+                  : best,
+              0,
+            )
+          : idx;
       const nextIdx = Math.max(
         0,
         Math.min(ZOOM_STEPS.length - 1, curIdx + direction),
@@ -615,7 +635,7 @@ function PdfViewer({
       if (nextZ <= 1.001) setOffset({ x: 0, y: 0 });
       return nextZ;
     });
-  }, [ZOOM_STEPS]);
+  }, []);
 
   // 주인님 보고 #25 (2026-05-15) — React onWheel 은 passive listener 로
   // 부착되어 e.preventDefault() 가 무시되고 fitly 페이지가 같이 스크롤되던
@@ -666,12 +686,30 @@ function PdfViewer({
     }
     vp.addEventListener("wheel", onWheel, { passive: false });
     return () => vp.removeEventListener("wheel", onWheel);
-  }, [ZOOM_STEPS, hasImage]);
+    // F2 정합 — ZOOM_STEPS 는 모듈 상수라 dep 제외. hasImage 만 추적.
+  }, [hasImage]);
+
+  // F8 (2026-05-15) — 핀치 anchor 보정. 두 손가락 중심점 (viewport 기준) 을
+  // anchor 로 잡고 줌 ratio 만큼 offset 도 함께 이동. 핀치 시 손가락이 모이는
+  // 지점이 이미지 위에서 고정되는 자연스러운 인터랙션.
+  function pinchCenter(
+    pts: { x: number; y: number }[],
+    rect: DOMRect,
+  ): { cx: number; cy: number } {
+    const mx = (pts[0].x + pts[1].x) / 2;
+    const my = (pts[0].y + pts[1].y) / 2;
+    return {
+      cx: mx - rect.left - rect.width / 2,
+      cy: my - rect.top - rect.height / 2,
+    };
+  }
 
   // pointer-down — 단일 포인터면 drag pan 시작, 두 번째 포인터면 핀치 진입.
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (!hasImage) return;
-    (e.target as Element).setPointerCapture?.(e.pointerId);
+    // F7 (2026-05-15) — viewport 컨테이너 자체에 pointer capture. e.target 은
+    // 자식 img 일 수 있어 unmount 시 capture 누락 가능 — viewport ref 로 통일.
+    viewportRef.current?.setPointerCapture?.(e.pointerId);
     const pinch = pinchStateRef.current;
     pinch.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
@@ -681,6 +719,15 @@ function PdfViewer({
       const dy = pts[0].y - pts[1].y;
       pinch.initialDist = Math.hypot(dx, dy);
       pinch.initialZoom = zoom;
+      // F8 — anchor 좌표 + 그 시점의 offset 캡처.
+      const vp = viewportRef.current;
+      if (vp) {
+        const { cx, cy } = pinchCenter(pts, vp.getBoundingClientRect());
+        pinch.anchorX = cx;
+        pinch.anchorY = cy;
+        pinch.baseOffsetX = offset.x;
+        pinch.baseOffsetY = offset.y;
+      }
       dragStateRef.current = null;
       setDragging(false);
       return;
@@ -714,7 +761,17 @@ function PdfViewer({
           Math.min(MAX_ZOOM, pinch.initialZoom * ratio),
         );
         setZoom(target);
-        if (target <= 1.001) setOffset({ x: 0, y: 0 });
+        if (target <= 1.001) {
+          setOffset({ x: 0, y: 0 });
+        } else {
+          // F8 — anchor 기준 offset 갱신. (target / initialZoom) 비율로 base
+          // offset 을 anchor 쪽으로 끌어당겨 손가락 중심이 이미지 위에서 고정.
+          const r = target / pinch.initialZoom;
+          setOffset({
+            x: pinch.anchorX - (pinch.anchorX - pinch.baseOffsetX) * r,
+            y: pinch.anchorY - (pinch.anchorY - pinch.baseOffsetY) * r,
+          });
+        }
       }
       return;
     }
@@ -728,7 +785,27 @@ function PdfViewer({
 
   function onPointerEnd(e: React.PointerEvent<HTMLDivElement>) {
     const pinch = pinchStateRef.current;
+    const wasPinching = pinch.pointers.size === 2;
     pinch.pointers.delete(e.pointerId);
+    // F7 — capture 명시 release. 자동 해제와 별도로 안전망.
+    viewportRef.current?.releasePointerCapture?.(e.pointerId);
+
+    // F3 (2026-05-15) — 핀치 → 단일 손가락 팬 전환. 한 손가락이 떨어진 직후
+    // 남은 손가락으로 자연스럽게 팬을 잇는다.
+    if (wasPinching && pinch.pointers.size === 1) {
+      pinch.initialDist = 0;
+      if (zoom > 1.001) {
+        const [remaining] = pinch.pointers.values();
+        dragStateRef.current = {
+          startX: remaining.x,
+          startY: remaining.y,
+          baseX: offset.x,
+          baseY: offset.y,
+        };
+        setDragging(true);
+      }
+      return;
+    }
     if (pinch.pointers.size < 2) {
       pinch.initialDist = 0;
     }
@@ -736,12 +813,15 @@ function PdfViewer({
     setDragging(false);
   }
 
-  // 카드 ID 가 바뀌면 (페이지 전환과 무관하게) 자동 리셋 보강.
+  // F1 (2026-05-15) — 사후 리뷰 정합: dep 를 안정 key 로. imageUrls 가 매 렌더
+  // 새 reference 라 [imageUrls[0]] 만으로는 ESLint 가 비안전 dep 으로 경고.
+  // imageUrls.join("|") 로 배열 전체 변화를 한 토큰에 압축.
+  const imageUrlsKey = imageUrls.join("|");
   useEffect(() => {
     setPageIndex(0);
     setZoom(1);
     setOffset({ x: 0, y: 0 });
-  }, [imageUrls[0]]);
+  }, [imageUrlsKey]);
 
   return (
     <div>
@@ -902,8 +982,21 @@ function KeywordNoteBox({
     setZoom(ZOOM_STEPS[next]);
   }
   const layerRef = useRef<HighlightLayerHandle | null>(null);
+  // F4 (2026-05-15) — selection 비었을 때 안내 토스트. aria-live=polite.
+  const [hint, setHint] = useState<string | null>(null);
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    };
+  }, []);
   function applyColor(c: "yellow" | "green" | "pink" | "underline") {
-    layerRef.current?.applyColorToSelection(c);
+    const ok = layerRef.current?.applyColorToSelection(c);
+    if (!ok) {
+      setHint("본문에서 텍스트를 드래그한 뒤 버튼을 눌러 주세요.");
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+      hintTimerRef.current = setTimeout(() => setHint(null), 2400);
+    }
   }
 
   return (
@@ -964,6 +1057,16 @@ function KeywordNoteBox({
               <span className="text-[12px] leading-none">A+</span>
             </button>
           </span>
+        </div>
+        {/* F4 — selection 비어 있을 때 안내 토스트. */}
+        <div
+          role="status"
+          aria-live="polite"
+          className={`mt-2 text-[11px] text-muted-foreground transition-opacity duration-200 ${
+            hint ? "opacity-100" : "opacity-0 h-0"
+          }`}
+        >
+          {hint}
         </div>
         <div
           className="mt-3 [font-variant-numeric:tabular-nums] tabular-nums origin-top-left [&_*]:![font-size:inherit] [&_*]:![line-height:1.65]"
