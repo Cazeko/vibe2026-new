@@ -9,6 +9,7 @@ import {
   getDueCards,
   getDueCardCounts,
   getCardHighlights,
+  getCardTags,
 } from "@/lib/db/queries";
 import { StudyCardForm } from "./_components/study-card-form";
 import type { CardType } from "@/types";
@@ -89,11 +90,14 @@ export default async function StudyTrackPage({
   const card = cards[0] ?? null;
   const meta = TRACK_META[track];
 
-  // 헌법 v3.5.1 제16조 — 카드별 사용자 하이라이트 hydrate.
+  // 헌법 v3.5.1 제16조 — 카드별 사용자 하이라이트/태그 hydrate.
   // 카드가 없으면 페치 skip (queries.ts safeRun 미호출).
-  const highlights = card
-    ? await getCardHighlights(user.id, card.id)
-    : [];
+  const [highlights, tags] = card
+    ? await Promise.all([
+        getCardHighlights(user.id, card.id),
+        getCardTags(user.id, card.id),
+      ])
+    : [[], []];
 
   return (
     <div className="min-h-screen pb-12">
@@ -195,6 +199,7 @@ export default async function StudyTrackPage({
               itemPoints: card.itemPoints,
             }}
             highlights={highlights}
+            tags={tags}
           />
         ) : (
           <EmptyQueue track={track} dueCounts={dueCounts} />

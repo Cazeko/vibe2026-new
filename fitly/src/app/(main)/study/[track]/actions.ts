@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { and, eq, isNull } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
+import { sql } from "drizzle-orm";
 import {
   cards,
   userAttempts,
   userCardHighlights,
   userCardState,
+  userCardTags,
 } from "@/lib/db/schema";
 import type { SrsState } from "@/types";
 
@@ -294,6 +296,92 @@ export async function deleteHighlight(
       and(
         eq(userCardHighlights.id, highlightId),
         eq(userCardHighlights.userId, user.id),
+      ),
+    );
+  return { ok: true };
+}
+
+// 헌법 v3.5.1 제16조 — 사용자 커스텀 해시태그 server actions. 카드 메타 다듬기.
+// 카드당 12개 상한 (시드 태깅 5개 상한과 분리 — 본 영역은 운영자 시드가 아닌
+// 사용자 메타라 더 넉넉히 허용).
+
+const TAG_LENGTH_MAX = 32;
+const TAGS_PER_CARD_MAX = 12;
+
+function normalizeTag(raw: string): string | null {
+  // # 접두 제거 + trim + 내부 공백 → 하이픈 + 32자 절단.
+  let t = raw.trim().replace(/^#+/, "").trim();
+  if (!t) return null;
+  t = t.replace(/\s+/g, "-");
+  // 제어/특수 문자 일부 제거 (공백/하이픈/언더스코어/한글/영숫자만 허용).
+  t = t.replace(/[^\p{L}\p{N}_-]/gu, "");
+  if (!t) return null;
+  if (t.length > TAG_LENGTH_MAX) t = t.slice(0, TAG_LENGTH_MAX);
+  return t;
+}
+
+export async function addCardTag(
+  cardId: string,
+  rawTag: string,
+): Promise<{ id: string; tag: string } | { error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const tag = normalizeTag(rawTag);
+  if (!tag) return { error: "BadTag" };
+
+  const db = getDb();
+  const [card] = await db
+    .select({ id: cards.id })
+    .from(cards)
+    .where(eq(cards.id, cardId))
+    .limit(1);
+  if (!card) return { error: "CardNotFound" };
+
+  // 카드당 상한 검사.
+  const [{ cnt }] = await db
+    .select({ cnt: sql<number>`count(*)::int` })
+    .from(userCardTags)
+    .where(
+      and(
+        eq(userCardTags.userId, user.id),
+        eq(userCardTags.cardId, cardId),
+      ),
+    );
+  if ((cnt ?? 0) >= TAGS_PER_CARD_MAX) return { error: "TooMany" };
+
+  // upsert — unique 충돌 시 onConflictDoNothing.
+  const inserted = await db
+    .insert(userCardTags)
+    .values({ userId: user.id, cardId, tag })
+    .onConflictDoNothing({
+      target: [userCardTags.userId, userCardTags.cardId, userCardTags.tag],
+    })
+    .returning({ id: userCardTags.id, tag: userCardTags.tag });
+
+  if (inserted.length === 0) return { error: "Duplicate" };
+  return { id: inserted[0].id, tag: inserted[0].tag };
+}
+
+export async function removeCardTag(
+  tagId: string,
+): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const db = getDb();
+  await db
+    .delete(userCardTags)
+    .where(
+      and(
+        eq(userCardTags.id, tagId),
+        eq(userCardTags.userId, user.id),
       ),
     );
   return { ok: true };

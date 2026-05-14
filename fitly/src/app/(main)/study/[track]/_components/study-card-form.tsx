@@ -23,9 +23,10 @@ import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 import { formatExamStem } from "@/lib/exam/format-stem";
 import type { CardType } from "@/types";
-import type { CardHighlight } from "@/lib/db/queries";
+import type { CardHighlight, CardTag } from "@/lib/db/queries";
 import { submitAnswer, gradeCard } from "../actions";
 import { HighlightLayer } from "./highlight-layer";
+import { CardTags } from "./card-tags";
 
 type CardData = {
   id: string;
@@ -84,9 +85,11 @@ const BLIND_KEY = "fitly:blind-mode";
 export function StudyCardForm({
   card,
   highlights = [],
+  tags = [],
 }: {
   card: CardData;
   highlights?: CardHighlight[];
+  tags?: CardTag[];
 }) {
   const router = useRouter();
   const { recordCard } = useStudySession(card.type);
@@ -394,6 +397,10 @@ export function StudyCardForm({
 
   return (
     <div className="space-y-5">
+      {/* 헌법 v3.5.1 제16조 — 카드 메타 영역. 사용자 커스텀 해시태그.
+          본 영역은 트랙(quiz/keyword/mistake) 무관 카드 단위 메타. */}
+      <CardTags cardId={card.id} initialTags={tags} />
+
       {sessionCount > 0 && (
         <div
           className="flex items-center gap-3 text-[11px] text-muted-foreground"
