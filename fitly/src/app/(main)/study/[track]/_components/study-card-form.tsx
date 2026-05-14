@@ -23,7 +23,9 @@ import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 import { formatExamStem } from "@/lib/exam/format-stem";
 import type { CardType } from "@/types";
+import type { CardHighlight } from "@/lib/db/queries";
 import { submitAnswer, gradeCard } from "../actions";
+import { HighlightLayer } from "./highlight-layer";
 
 type CardData = {
   id: string;
@@ -78,7 +80,13 @@ const GRADES: {
 
 const DRAFT_KEY_PREFIX = "fitly:draft:";
 
-export function StudyCardForm({ card }: { card: CardData }) {
+export function StudyCardForm({
+  card,
+  highlights = [],
+}: {
+  card: CardData;
+  highlights?: CardHighlight[];
+}) {
   const router = useRouter();
   const { recordCard } = useStudySession(card.type);
   const [answer, setAnswer] = useState("");
@@ -268,9 +276,16 @@ export function StudyCardForm({ card }: { card: CardData }) {
                   : ""
               }`}
             >
-              <p className="font-serif text-[14px] leading-[1.7] whitespace-pre-wrap text-foreground/85">
-                {cleanedFrontText}
-              </p>
+              {/* 헌법 v3.5.1 제16조 — 본문에도 사용자 형광펜 적용 (front_text surface). */}
+              <HighlightLayer
+                cardId={card.id}
+                surface="front_text"
+                initialHighlights={highlights}
+              >
+                <p className="font-serif text-[14px] leading-[1.7] whitespace-pre-wrap text-foreground/85">
+                  {cleanedFrontText}
+                </p>
+              </HighlightLayer>
               {isLongStem && !stemExpanded && (
                 <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-card via-card/90 to-transparent pointer-events-none" />
               )}
@@ -336,6 +351,8 @@ export function StudyCardForm({ card }: { card: CardData }) {
             tone="evergreen"
             markdown={card.backMd}
             verified={card.verifiedAnswer}
+            cardId={card.id}
+            highlights={highlights}
           />
         </div>
       )}
@@ -410,6 +427,8 @@ export function StudyCardForm({ card }: { card: CardData }) {
               markdown={card.backMd}
               verified={card.verifiedAnswer}
               zoomable
+              cardId={card.id}
+              highlights={highlights}
             />
           )}
           {revealed && !card.backMd && (
@@ -550,6 +569,8 @@ function AnswerBox({
   plainText,
   verified,
   zoomable = false,
+  cardId,
+  highlights,
 }: {
   label: string;
   tone: "evergreen" | "muted";
@@ -557,6 +578,9 @@ function AnswerBox({
   plainText?: string;
   verified?: boolean;
   zoomable?: boolean;
+  // 헌법 v3.5.1 제16조 — 사용자 형광펜 prop. plainText("내 답안") 에는 비전달.
+  cardId?: string;
+  highlights?: CardHighlight[];
 }) {
   const toneClass =
     tone === "evergreen"
@@ -622,7 +646,17 @@ function AnswerBox({
           style={zoomable ? { fontSize: `${Math.round(zoom * 14)}px` } : undefined}
         >
           {markdown ? (
-            <Markdown serif>{markdown}</Markdown>
+            cardId ? (
+              <HighlightLayer
+                cardId={cardId}
+                surface="back_md"
+                initialHighlights={highlights ?? []}
+              >
+                <Markdown serif>{markdown}</Markdown>
+              </HighlightLayer>
+            ) : (
+              <Markdown serif>{markdown}</Markdown>
+            )
           ) : (
             <div className="font-sans text-[13.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
               {plainText || "—"}

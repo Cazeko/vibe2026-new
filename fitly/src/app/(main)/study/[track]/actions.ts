@@ -4,7 +4,12 @@ import { revalidatePath } from "next/cache";
 import { and, eq, isNull } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
-import { cards, userAttempts, userCardState } from "@/lib/db/schema";
+import {
+  cards,
+  userAttempts,
+  userCardHighlights,
+  userCardState,
+} from "@/lib/db/schema";
 import type { SrsState } from "@/types";
 
 // 헌법 v3.0 제13조의2 — 학습 활동 server actions.
@@ -210,4 +215,86 @@ export async function gradeCard(cardId: string, grade: Grade): Promise<void> {
   revalidatePath("/study/mistake");
   revalidatePath("/study-plan");
   revalidatePath("/dashboard");
+}
+
+// 헌법 v3.5.1 제16조 — 사용자 형광펜/밑줄 server actions.
+// 카드 본문 인터랙션 다듬기 (시행규칙 32 제34조 정합).
+// 색 변경은 delete + insert 로 처리한다 (마이그레이션 0013 정합).
+
+type HighlightColor = "yellow" | "green" | "pink" | "underline";
+type HighlightSurface = "back_md" | "front_text";
+
+const VALID_COLORS: HighlightColor[] = ["yellow", "green", "pink", "underline"];
+const VALID_SURFACES: HighlightSurface[] = ["back_md", "front_text"];
+
+// prefix/suffix 컨텍스트 길이 상한 — anchor 매칭 정확도 vs 저장 비용 균형.
+const ANCHOR_CONTEXT_MAX = 20;
+const QUOTE_MAX = 2000;
+
+export async function createHighlight(input: {
+  cardId: string;
+  surface: HighlightSurface;
+  quote: string;
+  prefix?: string;
+  suffix?: string;
+  color: HighlightColor;
+}): Promise<{ id: string } | { error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  if (!VALID_SURFACES.includes(input.surface)) return { error: "BadSurface" };
+  if (!VALID_COLORS.includes(input.color)) return { error: "BadColor" };
+  const quote = input.quote.trim();
+  if (quote.length === 0 || quote.length > QUOTE_MAX) {
+    return { error: "BadQuote" };
+  }
+  const prefix = (input.prefix ?? "").slice(-ANCHOR_CONTEXT_MAX);
+  const suffix = (input.suffix ?? "").slice(0, ANCHOR_CONTEXT_MAX);
+
+  const db = getDb();
+  const [card] = await db
+    .select({ id: cards.id })
+    .from(cards)
+    .where(eq(cards.id, input.cardId))
+    .limit(1);
+  if (!card) return { error: "CardNotFound" };
+
+  const [created] = await db
+    .insert(userCardHighlights)
+    .values({
+      userId: user.id,
+      cardId: input.cardId,
+      surface: input.surface,
+      quote,
+      prefix,
+      suffix,
+      color: input.color,
+    })
+    .returning({ id: userCardHighlights.id });
+
+  return { id: created.id };
+}
+
+export async function deleteHighlight(
+  highlightId: string,
+): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const db = getDb();
+  await db
+    .delete(userCardHighlights)
+    .where(
+      and(
+        eq(userCardHighlights.id, highlightId),
+        eq(userCardHighlights.userId, user.id),
+      ),
+    );
+  return { ok: true };
 }

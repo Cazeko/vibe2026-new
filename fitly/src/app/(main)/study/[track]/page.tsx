@@ -5,7 +5,11 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
-import { getDueCards, getDueCardCounts } from "@/lib/db/queries";
+import {
+  getDueCards,
+  getDueCardCounts,
+  getCardHighlights,
+} from "@/lib/db/queries";
 import { StudyCardForm } from "./_components/study-card-form";
 import type { CardType } from "@/types";
 
@@ -84,6 +88,12 @@ export default async function StudyTrackPage({
   ]);
   const card = cards[0] ?? null;
   const meta = TRACK_META[track];
+
+  // 헌법 v3.5.1 제16조 — 카드별 사용자 하이라이트 hydrate.
+  // 카드가 없으면 페치 skip (queries.ts safeRun 미호출).
+  const highlights = card
+    ? await getCardHighlights(user.id, card.id)
+    : [];
 
   return (
     <div className="min-h-screen pb-12">
@@ -184,6 +194,7 @@ export default async function StudyTrackPage({
               itemFormat: card.itemFormat,
               itemPoints: card.itemPoints,
             }}
+            highlights={highlights}
           />
         ) : (
           <EmptyQueue track={track} dueCounts={dueCounts} />
