@@ -1,6 +1,7 @@
 import { Target, TrendingUp, Clock, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardKpi } from "@/lib/dashboard/types";
+import { StreakFreezeAction } from "./streak-freeze-action";
 
 function formatHourMin(min: number): string {
   if (!min || min < 1) return "0분";
@@ -82,7 +83,14 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
       label: "연속 학습",
       value: `${kpi.streakDays}`,
       unit: "일",
-      sub: kpi.streakBest > 0 ? `최장 ${kpi.streakBest}일 · 오늘도 이어가요` : "오늘부터 첫 기록",
+      // 헌법 v3.5.1 제16조 — 잔디 얼리기 sub inject. canFreezeToday 일 때만 노출.
+      sub: kpi.canFreezeToday ? (
+        <StreakFreezeAction available={kpi.streakFreezesAvailable} />
+      ) : kpi.streakBest > 0 ? (
+        `최장 ${kpi.streakBest}일 · 오늘도 이어가요`
+      ) : (
+        "오늘부터 첫 기록"
+      ),
       Icon: Flame,
     },
   ];

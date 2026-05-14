@@ -39,6 +39,11 @@ export type DashboardKpi = {
   streakDays: number;
   streakBest: number;
   daysToExam: number | null;
+  // 헌법 v3.5.1 제16조 — 잔디(Streak) 얼리기. 듀오링고 차용 retention 장치.
+  // streakFreezesAvailable — 30일 윈도우 잔여 freeze 토큰 수 (월 2회 상한).
+  // canFreezeToday — 오늘 freeze 가능 여부 (오늘 미학습 + 미사용 + 잔여 ≥1).
+  streakFreezesAvailable: number;
+  canFreezeToday: boolean;
 };
 
 export type DashboardSummary = {
