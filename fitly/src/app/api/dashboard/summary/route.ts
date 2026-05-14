@@ -19,7 +19,8 @@ export async function GET() {
     const summary = await getDashboardSummary(user.id);
     return NextResponse.json({ summary });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "조회 실패";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // 법률17 제28조 정합 — 외부 응답은 상수 메시지, SQL/스택 leak 차단.
+    console.error("[api/dashboard/summary] query error", err);
+    return NextResponse.json({ error: "조회 실패" }, { status: 500 });
   }
 }
