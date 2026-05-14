@@ -19,6 +19,7 @@ import type { SrsState } from "@/types";
 import {
   analyzeEssay,
   computeAttemptHash,
+  MAX_ANSWER_LEN,
 } from "@/lib/ai/gemini-essay-analyze";
 import {
   chatWithTutor as chatWithTutorLLM,
@@ -435,6 +436,15 @@ export async function requestAiAnalysis(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Unauthorized" };
 
+  // 코드리뷰 C.H3 (2026-05-15) — 답안 길이 서버 측 상한. 클라이언트 카운터만으로는
+  // 비용 폭주 방어가 불가. MAX_ANSWER_LEN 초과 시 422 의미의 명시 에러 반환.
+  if (typeof answerText !== "string") {
+    return { ok: false, error: "InvalidAnswer" };
+  }
+  if (answerText.length > MAX_ANSWER_LEN) {
+    return { ok: false, error: "AnswerTooLong" };
+  }
+
   const db = getDb();
   const [card] = await db
     .select({ id: cards.id, backMd: cards.backMd, type: cards.type })
@@ -444,7 +454,9 @@ export async function requestAiAnalysis(
   if (!card) return { ok: false, error: "CardNotFound" };
   if (!card.backMd) return { ok: false, error: "NoReference" };
 
-  const attemptHash = computeAttemptHash(answerText);
+  // 코드리뷰 C.H4 (2026-05-15) — backMd 변경 시 캐시 자동 무효화 위해 hash 입력에
+  // 모범답안도 포함.
+  const attemptHash = computeAttemptHash(answerText, card.backMd);
 
   // 캐시 hit?
   const cached = await getAiAnalysis(user.id, cardId, attemptHash);
@@ -550,7 +562,8 @@ export async function chatWithTutor(input: {
   if (!row.backMd) return { ok: false, error: "NoReference" };
 
   // AI 분석 캐시 hit 여부 확인 — 있으면 system instruction 에 포함.
-  const attemptHash = computeAttemptHash(input.userAnswer);
+  // 코드리뷰 C.H4 (2026-05-15) — backMd 동반 해시.
+  const attemptHash = computeAttemptHash(input.userAnswer, row.backMd);
   const cached = await getAiAnalysis(user.id, input.cardId, attemptHash);
 
   const ctx: TutorContext = {
