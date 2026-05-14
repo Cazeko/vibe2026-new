@@ -18,6 +18,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { REGION_NAMES, type RegionName } from "@/types";
 import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/components/shared/profile-provider";
 
 // 헌법 v3.0 — userProfiles.targetUniversity 컬럼은 region 라벨로 임시 재해석.
 type Profile = {
@@ -40,17 +41,17 @@ const FOCUS_RING =
 export default function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const [profile, setProfile] = useState<Profile>({
-    targetRegion: null,
-    examDate: null,
-  });
+  // 코드리뷰 B.H2/H3 (2026-05-15 PR-8) — layout SSR profile context 사용.
+  // 종전 useEffect mount fetch 패턴 제거. email 도 동일 context 에서 합성.
+  const ssrProfile = useProfile();
+  const initialFromSsr: Profile = {
+    targetRegion: ssrProfile?.targetRegion ?? null,
+    examDate: ssrProfile?.examDate ?? null,
+  };
+  const [profile, setProfile] = useState<Profile>(initialFromSsr);
   // I3 dirty state 추적 — 초기 로드값 보관 후 변경 비교.
-  const [initialProfile, setInitialProfile] = useState<Profile>({
-    targetRegion: null,
-    examDate: null,
-  });
-  const [email, setEmail] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [initialProfile, setInitialProfile] = useState<Profile>(initialFromSsr);
+  const email = ssrProfile?.email ?? null;
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,31 +62,6 @@ export default function SettingsPage() {
 
   useEffect(() => {
     setMounted(true);
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null);
-    });
-
-    fetch("/api/user/profile")
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "조회 실패");
-        if (data.profile) {
-          const loaded: Profile = {
-            targetRegion: (data.profile.targetUniversity ?? null) as
-              | RegionName
-              | null,
-            examDate: data.profile.examDate ?? null,
-          };
-          setProfile(loaded);
-          setInitialProfile(loaded);
-        }
-      })
-      .catch(() => {
-        // C3 raw 에러 노출 금지 — 사용자 친화 메시지로 변환.
-        setError("네트워크 오류입니다. 잠시 후 다시 시도해 주세요.");
-      })
-      .finally(() => setLoading(false));
   }, []);
 
   // C2 success/error 3초 후 자동 dismiss (S2 aria-live 정합).
@@ -167,7 +143,7 @@ export default function SettingsPage() {
             <CardTitle className="text-sm">목표 설정</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {loading ? (
+            {!mounted ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> 불러오는 중…
               </div>

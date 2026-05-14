@@ -1,49 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bell, Play } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { MobileMenuButton } from "@/components/shared/mobile-menu-button";
-
-type Profile = {
-  displayName: string | null;
-  targetRegion: string | null;
-};
+import { useProfile } from "@/components/shared/profile-provider";
 
 export function DashboardHeader() {
-  const [profile, setProfile] = useState<Profile>({
-    displayName: null,
-    targetRegion: null,
-  });
-  // P0-11 (외부 평가 2026-05-12) — client-side fetch 로딩 상태. 인사말이
-  // null → 실제 이름으로 깜빡이지 않도록 fetch 동안 스켈레톤 노출.
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/user/profile")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.profile) {
-          setProfile({
-            displayName: d.profile.displayName ?? null,
-            targetRegion: d.profile.targetUniversity ?? null,
-          });
-        }
-      })
-      .catch(() => undefined)
-      .finally(() => setLoaded(true));
-  }, []);
+  // 코드리뷰 B.H2/H3 (2026-05-15 PR-8) — layout SSR profile context 사용.
+  // 종전 useEffect mount fetch + loaded state 패턴 제거. SSR 시점에 이미 채워져
+  // 있으므로 client 깜빡임 자체가 없어 loaded 분기도 불필요.
+  const profile = useProfile();
+  const loaded = profile !== null;
 
   // 호칭 정책 (2026-05-12 사용자 명시 결정) — UI 학습자 호칭은 "{이름} 선생님"
   // 으로 고정. 헌법 제0조의 "주인님"은 Claude↔주관자 대화 호칭이며, UI 학습자
   // 호칭과는 분리 사안 (제38조 7항 사용자 즉시 발화 우선).
-  const greetingName = profile.displayName ?? null;
+  const greetingName = profile?.displayName ?? null;
   const initial = (greetingName ?? "선").trim().charAt(0) || "선";
 
   // D-17 (외부 리뷰 2026-05-12, DESIGN §9.1 v3.5.3 동기부여 카피 단서) —
   // 펀치라인 "적합도" 톤 유지하면서 학습 의지 환기. 강제·재촉 표현은 회피.
-  const subtitle = profile.targetRegion
+  const subtitle = profile?.targetRegion
     ? `${profile.targetRegion} 시험까지, 오늘의 적합도 한 점 함께 짚어 드릴게요.`
     : "오늘의 풀이·키워드·오답이 자동으로 채워집니다. 한 점씩, 함께 가요.";
 
