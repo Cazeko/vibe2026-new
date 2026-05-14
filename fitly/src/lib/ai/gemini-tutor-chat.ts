@@ -1,4 +1,5 @@
 import { getGemini, GEMINI_MODELS } from "./gemini";
+import { cleanMarkdown } from "@/lib/text/markdown";
 import type {
   OverviewJson,
   KeywordsJson,
@@ -42,7 +43,7 @@ export function buildSystemInstruction(ctx: TutorContext): string {
     "당신은 한국 초등교사 임용 1차 서술형 학습의 친절하고 정확한 튜터입니다.",
   );
   parts.push("");
-  parts.push("[정책 — Fitly 헌법 §3의2·§0 정합]");
+  parts.push("[정책 — Fitly 헌법 §3의2·§0·v3.6.3 정합]");
   parts.push("1. 모든 응답은 존댓말. 한국 교육 용어 정합.");
   parts.push(
     "2. 점수(예: 18/20·합격 가능성·지역 합격 컷 추정) 표기 절대 금지.",
@@ -52,10 +53,13 @@ export function buildSystemInstruction(ctx: TutorContext): string {
     "4. 모범답안은 [모범답안] 섹션을 참고하되, 그대로 인용하지 말고 학습자 질문 맥락에 맞게 설명합니다.",
   );
   parts.push(
-    "5. 답안 작성·암기·심화 학습 등 학습 활동의 *보조* 역할이며, 학습자를 대신해 풀이를 작성하지 않습니다.",
+    "5. 답안 작성·암기·심화 학습 등 학습 활동의 보조 역할이며, 학습자를 대신해 풀이를 작성하지 않습니다.",
   );
   parts.push(
     "6. 외부 강사·학원·족보 등 특정 비공개 자료를 권유하지 않습니다.",
+  );
+  parts.push(
+    "7. **마크다운 마크업 절대 금지** — 별표(**bold**, *italic*), 우물 정자(# heading), 백틱(`code`), 인용(> quote), 수평선(---), 리스트 마커(-, +, *) 등 일체 사용 금지. 오로지 평문 한국어 문장과 줄바꿈만 사용합니다. 강조가 필요하면 단어를 그대로 쓰거나 ' 따옴표 ' 또는 '괄호'로 표현합니다.",
   );
   parts.push("");
 
@@ -122,13 +126,17 @@ export async function chatWithTutor(
       },
     });
 
-    const reply =
+    const rawReply =
       typeof response.text === "string"
         ? response.text
         : response.text != null
           ? String(response.text)
           : "";
-    return { reply: reply.trim(), model };
+    // 헌법 v3.6.3 hotfix (2026-05-14) — system instruction 으로 마크업 금지
+    // 명시했음에도 LLM 이 가끔 ** · # · ` 등을 출력. server-side cleanMarkdown
+    // 으로 이중 방어. 주인님 명시 요구.
+    const reply = cleanMarkdown(rawReply);
+    return { reply, model };
   } catch (e) {
     // PR 6 이후 hotfix — LlmFailed 진단을 위해 모델 ID 동반 로깅.
     console.error(

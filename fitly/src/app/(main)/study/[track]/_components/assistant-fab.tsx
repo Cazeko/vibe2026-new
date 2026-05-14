@@ -10,7 +10,6 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Loader2, Send, Sparkles, Trash2, X } from "lucide-react";
-import { Markdown } from "@/components/shared/markdown";
 import { chatWithTutor, type ChatTutorResult } from "../actions";
 import type { ChatMessage } from "@/lib/ai/gemini-tutor-chat";
 
@@ -200,12 +199,18 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
   // mounted=true 이후 client-only Portal 마운트.
   if (!mounted) return null;
 
+  // 헌법 v3.6.3 hotfix (2026-05-14) — 우측 *하단* 으로 이동 (주인님 발화).
+  // mini-player 와 GradingBar 위로 16px 띄움. z-30 으로 sticky GradingBar(z-20)
+  // 위 표시. FAB 가 작아(48x48) GradingBar 우측 일부 가림 — 의도된 동작.
+  const fabBottom = "calc(var(--mini-player-h, 0px) + 16px)";
+
   const fab = !open && (
     <button
       type="button"
       aria-label="AI 학습 도우미 열기"
       onClick={() => setOpen(true)}
-      className="fixed right-4 top-1/2 -translate-y-1/2 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-evergreen text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2"
+      style={{ bottom: fabBottom }}
+      className="fixed right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-evergreen text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2"
     >
       <Sparkles className="h-5 w-5" aria-hidden />
     </button>
@@ -215,10 +220,11 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
     <aside
       role="dialog"
       aria-label="AI 학습 도우미"
-      className="fixed right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col overflow-hidden rounded-lg border border-rule bg-card shadow-2xl"
+      className="fixed right-4 z-30 flex flex-col overflow-hidden rounded-lg border border-rule bg-card shadow-2xl"
       style={{
+        bottom: fabBottom,
         width: "min(380px, calc(100vw - 16px))",
-        height: "min(540px, calc(100vh - 32px))",
+        height: "min(540px, calc(100vh - var(--mini-player-h, 0px) - 32px))",
       }}
     >
       <Header
@@ -360,6 +366,9 @@ function EmptyState() {
 
 function ChatBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
+  // 헌법 v3.6.3 hotfix (2026-05-14) — 답변에 **·#·` 등 마크다운 마크업이
+  // raw 노출되는 것을 방지. server-side `cleanMarkdown` 으로 1차 strip, 클라
+  // 이언트는 plain text 로 렌더 (Markdown 컴포넌트 우회). 주인님 명시 요구.
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
@@ -369,11 +378,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
             : "bg-card border border-rule text-foreground/90"
         }`}
       >
-        {isUser ? (
-          <p className="whitespace-pre-wrap break-words">{message.text}</p>
-        ) : (
-          <Markdown serif={false}>{message.text}</Markdown>
-        )}
+        <p className="whitespace-pre-wrap break-words">{message.text}</p>
       </div>
     </div>
   );
