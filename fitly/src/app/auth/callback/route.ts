@@ -28,8 +28,9 @@ export async function GET(request: NextRequest) {
 function sanitizeNext(value: string | null): string {
   // open redirect 방어 — 내부 경로(/로 시작)만 허용.
   // v3.5 — 인증 후 기본 진입점은 /dashboard (레거시 /home 경유 폐지).
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/dashboard";
-  }
+  // 코드리뷰 L1 (2026-05-15) — `\` 백슬래시·프로토콜 상대 경로 추가 차단.
+  if (!value) return "/dashboard";
+  // 단일 슬래시로 시작하고, 두 번째 문자가 `/`·`\`가 아닐 때만 허용.
+  if (!/^\/[^/\\]/.test(value)) return "/dashboard";
   return value;
 }

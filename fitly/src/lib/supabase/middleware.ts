@@ -24,6 +24,32 @@ const PROTECTED_PREFIXES = [
 ];
 const AUTH_PREFIXES = ["/login", "/signup"];
 
+// 코드리뷰 L2 (2026-05-15) — 변형 메서드(POST/PATCH/PUT/DELETE)에 대한 CSRF
+// defense-in-depth. SameSite=Lax 쿠키만으로는 일부 시나리오(폼 submit·preflight)
+// 우회가 가능하므로 Origin 헤더의 host 가 요청 host 와 일치하는지 확인한다.
+// 같은 origin (cross-origin 아님) 요청만 허용. Origin 헤더가 없는 same-origin
+// 일반 fetch 는 통과.
+const STATE_CHANGING_METHODS = new Set(["POST", "PATCH", "PUT", "DELETE"]);
+
+function csrfOriginCheck(request: NextRequest): NextResponse | null {
+  if (!STATE_CHANGING_METHODS.has(request.method)) return null;
+  const origin = request.headers.get("origin");
+  if (!origin) return null; // 동일 origin 일반 fetch — Origin 헤더 없음. 통과.
+  const host = request.headers.get("host");
+  if (!host) return null;
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host;
+  } catch {
+    return new NextResponse("Forbidden: malformed origin", { status: 403 });
+  }
+  if (originHost !== host) {
+    console.warn(`[csrf] origin mismatch: ${originHost} vs ${host}`);
+    return new NextResponse("Forbidden: cross-origin", { status: 403 });
+  }
+  return null;
+}
+
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -32,6 +58,9 @@ export async function updateSession(request: NextRequest) {
   if (pathname.startsWith("/auth/")) {
     return NextResponse.next({ request });
   }
+
+  const csrfBlock = csrfOriginCheck(request);
+  if (csrfBlock) return csrfBlock;
 
   // 성능 최적화 — 보호도 인증 라우트도 아닌 *완전 공개 페이지* (예: /, /privacy 등)
   // 는 supabase.auth.getUser() 호출 자체를 건너뛴다 (한국→Supabase RTT 100-200ms 절약).
