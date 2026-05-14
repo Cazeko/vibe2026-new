@@ -43,9 +43,25 @@ function normalizeImagePaths(
   return [];
 }
 
-// 헌법 제37조 정합 — DB 일시 장애·RLS·마이그레이션 미적용 시 페이지 전체 SSR
-// 실패를 막기 위한 그래스풀 디그레이드. 콘솔에는 명시적 보고, UI는 안전한
-// fallback으로 동작 유지. 시드 미적재 상태도 동일 경로로 처리된다.
+// 헌법 제37조 정합 — DB 일시 장애·시드 미적재·마이그레이션 미적용 시 페이지
+// 전체 SSR 실패를 막기 위한 그래스풀 디그레이드. 콘솔에는 명시적 보고, UI는
+// 안전한 fallback으로 동작 유지.
+//
+// 코드리뷰 L3 (2026-05-15) — RLS 위반은 정직성 §3의2 직격 결함이므로 throw 유지.
+// 사용자에게 "데이터 없음" 으로 위장 노출되는 회귀를 막고 (main)/error.tsx
+// 경계로 흘려 명시 보고한다.
+const RLS_KEYWORDS = [
+  "permission denied",
+  "row-level security",
+  "rls",
+  "insufficient_privilege",
+];
+
+function isRlsViolation(msg: string): boolean {
+  const lower = msg.toLowerCase();
+  return RLS_KEYWORDS.some((k) => lower.includes(k));
+}
+
 export async function safeRun<T>(
   label: string,
   fn: () => Promise<T>,
@@ -55,6 +71,10 @@ export async function safeRun<T>(
     return await fn();
   } catch (e) {
     const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    if (isRlsViolation(msg)) {
+      console.error(`[db.queries] ${label} RLS violation — propagating. cause=${msg}`);
+      throw e;
+    }
     console.error(`[db.queries] ${label} failed → fallback. cause=${msg}`);
     return fallback;
   }
@@ -267,18 +287,35 @@ export type DueCard = {
 // warm 된 Vercel/Node 인스턴스는 false 캐시를 유지하여 multi-page 가 그 인스턴스
 // 에서만 비활성 상태가 된다. Vercel function 의 자연 cold start 또는 재배포
 // 시점에 자동 해소된다. 즉시 활성화가 필요하면 배포를 한 번 트리거해 주세요.
+// 코드리뷰 L4 (2026-05-15) — 캐시에 TTL 추가. 마이그레이션 0017 을 런타임 적용한
+// 경우에도 5분 안에 자동 재탐지되도록 한다. true 응답은 영구 캐시 (컬럼이 사라지는
+// 회귀는 매우 드물고, false 응답만 갱신이 필요).
 let _multiPagePathsAvailable: boolean | null = null;
+let _multiPagePathsProbedAt = 0;
+const PROBE_TTL_MS = 5 * 60 * 1000;
+
 async function probeMultiPagePaths(): Promise<boolean> {
-  if (_multiPagePathsAvailable !== null) return _multiPagePathsAvailable;
+  const now = Date.now();
+  if (
+    _multiPagePathsAvailable === true ||
+    (_multiPagePathsAvailable === false &&
+      now - _multiPagePathsProbedAt < PROBE_TTL_MS)
+  ) {
+    return _multiPagePathsAvailable;
+  }
   try {
     const db = getDb();
     await db.execute(sql`select front_image_paths from cards limit 1`);
     _multiPagePathsAvailable = true;
+    _multiPagePathsProbedAt = now;
   } catch {
-    console.warn(
-      "[db.queries] cards.front_image_paths 미존재 — 단일 path fallback. 0017 마이그레이션을 적용하면 multi-page PDF 가 활성화됩니다.",
-    );
+    if (_multiPagePathsAvailable !== false) {
+      console.warn(
+        "[db.queries] cards.front_image_paths 미존재 — 단일 path fallback. 0017 마이그레이션을 적용하면 multi-page PDF 가 활성화됩니다.",
+      );
+    }
     _multiPagePathsAvailable = false;
+    _multiPagePathsProbedAt = now;
   }
   return _multiPagePathsAvailable;
 }

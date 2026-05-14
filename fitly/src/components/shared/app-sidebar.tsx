@@ -130,12 +130,30 @@ export function AppSidebar() {
     // localStorage 에서 초기화. 재로그인 시 닫힌 채로 시작하지 않도록 보장.
     if (typeof window !== "undefined") {
       window.localStorage.removeItem("fitly:sidebar-open");
+      // 코드리뷰 L10 (2026-05-15) — 다른 탭에 로그아웃 신호 brodacast.
+      // 동일 origin 의 다른 탭에서 storage 이벤트 listener 가 /login 으로 이동.
+      window.localStorage.setItem("fitly:logout-broadcast", String(Date.now()));
+      window.localStorage.removeItem("fitly:logout-broadcast");
     }
     const supabase = createClient();
     await supabase.auth.signOut();
     router.replace("/login");
     router.refresh();
   }
+
+  // 코드리뷰 L10 (2026-05-15) — 다른 탭의 로그아웃 broadcast 수신 → 본 탭도
+  // /login 으로 이동. 동일 사용자 다중 탭 일관성 보장.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    function onStorage(e: StorageEvent) {
+      if (e.key === "fitly:logout-broadcast" && e.newValue) {
+        router.replace("/login");
+        router.refresh();
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [router]);
 
   const dDay = dDayLabel(target.examDate);
   const examDateLabel = target.examDate

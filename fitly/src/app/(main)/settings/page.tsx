@@ -139,6 +139,11 @@ export default function SettingsPage() {
   async function signOut() {
     if (!confirm("로그아웃 하시겠습니까?")) return;
     setSigningOut(true);
+    // 코드리뷰 L10 (2026-05-15) — 다른 탭에 로그아웃 신호 broadcast.
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("fitly:logout-broadcast", String(Date.now()));
+      window.localStorage.removeItem("fitly:logout-broadcast");
+    }
     const supabase = createClient();
     await supabase.auth.signOut();
     router.replace("/login");

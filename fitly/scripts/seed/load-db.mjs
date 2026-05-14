@@ -38,6 +38,11 @@ let cards_quiz_inserted = 0;
 let cards_keyword_inserted = 0;
 const errors = [];
 
+// 코드리뷰 M6 (2026-05-15) — 헌법 제18조의3 5항: 2002 학년도 이전 PDF 는
+// 폰트 손상으로 한국어 본문이 거의 손실되어 시드 대상에서 제외한다.
+const MIN_SEED_YEAR = 2002;
+const skipped_pre2002 = [];
+
 for (const dir of dirs) {
   const itemsPath = join(papersBase, dir, "items.json");
   if (!existsSync(itemsPath)) continue;
@@ -47,6 +52,10 @@ for (const dir of dirs) {
     continue;
   }
   const paper = data.paper;
+  if (typeof paper.year !== "number" || paper.year < MIN_SEED_YEAR) {
+    skipped_pre2002.push(dir);
+    continue;
+  }
   const session = normalizeSession(paper.session);
   const pdfPath = `kice_pdfs/${dir}.pdf`;
 
@@ -154,6 +163,11 @@ console.log("exam_papers:        " + papers_inserted);
 console.log("exam_items:         " + items_inserted);
 console.log("cards (quiz):       " + cards_quiz_inserted);
 console.log("cards (keyword):    " + cards_keyword_inserted);
+if (skipped_pre2002.length > 0) {
+  console.log(
+    `skipped (pre-${MIN_SEED_YEAR}): ${skipped_pre2002.length} — ${skipped_pre2002.join(", ")}`,
+  );
+}
 console.log("errors:             " + errors.length);
 if (errors.length > 0) {
   console.log("---ERRORS---");

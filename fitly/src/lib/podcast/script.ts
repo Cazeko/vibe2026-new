@@ -81,10 +81,19 @@ export async function generatePodcastScript(
   // 헌법 §35 백업 — preview 모델 503/429/500 일시 과부하 시 stable model로 fallback.
   // 사용자 체감은 응답 약간 느려질 뿐, 성공률 99%+. preview 모델 가용성 spike 회피.
   // Default를 Flash로 — Vercel Hobby 60초 한도 안에서 script(빠름) + TTS(긴) 합산 정합.
-  // env GEMINI_MODEL_PRO override 시 그 값 우선 (사용자가 명시적으로 Pro 원하면).
-  const PRIMARY = process.env.GEMINI_MODEL_PRO ?? "gemini-2.5-flash";
+  //
+  // 코드리뷰 L6 (2026-05-15) — 변수명-default 의미 불일치 정합.
+  // 종전 `GEMINI_MODEL_PRO` (default flash) ⇄ `GEMINI_MODEL_PRO_FALLBACK` (default pro)
+  // 의 의미가 뒤집혀 있어 새 진입자 혼선 + 운영 설정 오작동 위험. 전용 변수명으로
+  // 분리하고 legacy 변수는 fallback 으로 계속 인식 (운영 환경 무중단 정합).
+  const PRIMARY =
+    process.env.PODCAST_SCRIPT_MODEL ??
+    process.env.GEMINI_MODEL_PRO ??
+    "gemini-2.5-flash";
   const FALLBACK =
-    process.env.GEMINI_MODEL_PRO_FALLBACK ?? "gemini-2.5-pro";
+    process.env.PODCAST_SCRIPT_MODEL_FALLBACK ??
+    process.env.GEMINI_MODEL_PRO_FALLBACK ??
+    "gemini-2.5-pro";
   const prompt = SCRIPT_PROMPT_BASE + theme;
 
   let result = await callGemini(PRIMARY, apiKey, prompt);
