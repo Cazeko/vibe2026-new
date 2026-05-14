@@ -8,32 +8,26 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  Loader2,
-  MessageCircle,
-  Send,
-  Sparkles,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Loader2, Send, Sparkles, Trash2, X } from "lucide-react";
 import { Markdown } from "@/components/shared/markdown";
 import { chatWithTutor, type ChatTutorResult } from "../actions";
 import type { ChatMessage } from "@/lib/ai/gemini-tutor-chat";
 
-// 헌법 v3.6.1 §16 단서 + §18 A 매트릭스 — AI 학습 도우미 FAB + 챗봇 드로어.
-// PR 6/6. 풀이 트랙(quiz/mistake) 한정. keyword 트랙은 마운트 X.
+// 헌법 v3.6.1 §16 단서 + §18 A 매트릭스 — AI 학습 도우미.
+// PR 6/6 + hotfix (사용자 발화 2026-05-14) — 모달/백드롭/사이드 드로어 → 플로팅
+// 위젯 형태로 재설계. 페이지 본문과 *동시 상호작용 가능*.
 //
 // 구현 요지
-//   - 우측 하단 fixed FAB (z-30, sticky GradingBar z-20 위)
-//   - 클릭 → 우측 슬라이드 드로어 (md ≥ 720px) / 전체 바텀 시트 (sm)
-//   - 빠른 프롬프트 5종 — 누르면 input 에 자동 입력 후 즉시 전송
-//   - 대화 history 는 useState + localStorage 보존 (`fitly:tutor-chat:${cardId}`)
+//   - 우측 *중앙* fixed FAB (z-30, 작은 원형 48x48 Sparkles)
+//   - 클릭 → 우측 중앙 작은 플로팅 챗 박스 (380×min(540, 70vh)). 백드롭 없음
+//   - 모바일(sm 이하) — 박스 폭 calc(100vw - 16px) 까지 자동 축소
+//   - 빠른 프롬프트 5종 — 누르면 즉시 LLM 호출
+//   - 대화 history — useState + localStorage `fitly:tutor-chat:${cardId}`
 //   - 카드 전환 시 자동 로드/리셋
 //
 // 정합
 //   - §3의2 (정직성) — system instruction 에 점수 표기 금지 명시 (서버측)
-//   - §16 단서 v3.6.1 — 풀이 트랙 한정. revealed=false 일 때도 마운트되어 있어
-//     도우미가 미리 활성, 단 사용자 답안은 빈 문자열로 시작
+//   - §16 단서 v3.6.1 — 풀이 트랙 한정
 //   - §16의2 (디자인 시스템) — evergreen / rule / cream-soft / error 토큰만
 
 const STORAGE_KEY_PREFIX = "fitly:tutor-chat:";
@@ -191,74 +185,57 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
 
   return (
     <>
-      {/* FAB — 닫혀 있을 때만 노출 */}
+      {/* FAB — 우측 중앙, 작은 원형. 닫혀 있을 때만 노출. */}
       {!open && (
         <button
           type="button"
           aria-label="AI 학습 도우미 열기"
           onClick={() => setOpen(true)}
-          className="fixed right-4 z-30 inline-flex items-center gap-2 rounded-full bg-evergreen text-white shadow-lg hover:shadow-xl active:scale-95 transition-all px-4 py-3 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
-          style={{
-            bottom: "calc(var(--mini-player-h, 0px) + 80px)",
-          }}
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-evergreen text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2"
         >
-          <Sparkles className="h-4 w-4" aria-hidden />
-          <span className="hidden sm:inline">AI 도우미</span>
-          <span className="sm:hidden">
-            <MessageCircle className="h-4 w-4" aria-hidden />
-          </span>
+          <Sparkles className="h-5 w-5" aria-hidden />
         </button>
       )}
 
-      {/* 드로어 + 백드롭 */}
+      {/* 플로팅 챗 박스 — 백드롭 없음. 페이지와 동시 상호작용 가능. */}
       {open && (
-        <div
-          className="fixed inset-0 z-40"
+        <aside
           role="dialog"
-          aria-modal="true"
           aria-label="AI 학습 도우미"
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col overflow-hidden rounded-lg border border-rule bg-card shadow-2xl"
+          style={{
+            width: "min(380px, calc(100vw - 16px))",
+            height: "min(540px, calc(100vh - 32px))",
+          }}
         >
-          {/* 백드롭 — 클릭 시 닫힘 */}
-          <div
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-            onClick={() => setOpen(false)}
-            aria-hidden
+          <Header
+            onClose={() => setOpen(false)}
+            onClear={clearHistory}
+            hasHistory={messages.length > 0}
           />
 
-          {/* 패널 — md 이상 우측 슬라이드, sm 이하 바텀 시트 */}
-          <aside
-            className="absolute right-0 bottom-0 top-0 flex w-full sm:max-w-[440px] flex-col bg-card shadow-2xl border-l border-rule"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Header
-              onClose={() => setOpen(false)}
-              onClear={clearHistory}
-              hasHistory={messages.length > 0}
-            />
+          <QuickPromptBar
+            onPick={(p) => send(p.prompt)}
+            disabled={status === "sending"}
+          />
 
-            <QuickPromptBar
-              onPick={(p) => send(p.prompt)}
-              disabled={status === "sending"}
-            />
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-cream-soft/40">
+            {messages.length === 0 && status === "idle" && <EmptyState />}
+            {messages.map((m, i) => (
+              <ChatBubble key={i} message={m} />
+            ))}
+            {status === "sending" && <TypingBubble />}
+            {error && <ErrorBubble reason={error} />}
+            <div ref={messagesEndRef} />
+          </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-cream-soft/40">
-              {messages.length === 0 && status === "idle" && <EmptyState />}
-              {messages.map((m, i) => (
-                <ChatBubble key={i} message={m} />
-              ))}
-              {status === "sending" && <TypingBubble />}
-              {error && <ErrorBubble reason={error} />}
-              <div ref={messagesEndRef} />
-            </div>
-
-            <InputBar
-              value={input}
-              onChange={setInput}
-              onSubmit={() => send(input)}
-              disabled={status === "sending"}
-            />
-          </aside>
-        </div>
+          <InputBar
+            value={input}
+            onChange={setInput}
+            onSubmit={() => send(input)}
+            disabled={status === "sending"}
+          />
+        </aside>
       )}
     </>
   );

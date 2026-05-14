@@ -30,13 +30,23 @@ export const env = {
       return required("GEMINI_API_KEY");
     },
     // 헌법 제18조 — 성능 최우선 정책의 모델 매트릭스 fallback.
-    // 2026-05-14 PR 2 — Flash 티어 fallback 을 신모델 자동 업그레이드 정합으로
-    // gemini-3.0-flash 갱신 (디자인 문서 §3 정합).
+    //
+    // 매트릭스 권장 ID (v3.6.2, 2026-05-14 주인님 발화)
+    //   - Pro:   gemini-2.5-pro    (서술형 첨삭/채점 — 추론 깊이 우선)
+    //   - Flash: gemini-2.5-flash  (실시간 AI 튜터 — 빠른 응답 우선)
+    //
+    // fallback 정책 — 환경변수 미설정 시 *안정 운용* 모델로 폴백.
+    // 운영 환경(Vercel)에서는 GEMINI_MODEL_PRO / GEMINI_MODEL_FLASH 환경변수
+    // 를 명시 설정하여 매트릭스 정합을 보존한다.
+    //
+    // PR 6 이후 hotfix (LlmFailed 사고) — 신모델 ID (3.0-flash·3.1-pro-preview)
+    // 가 환경/리전별 미가용 가능성이 있어 fallback 은 가용성이 검증된 안정 세대
+    // (2.5-pro / 2.5-flash) 로 유지한다.
     get modelPro() {
-      return optional("GEMINI_MODEL_PRO", "gemini-3.1-pro-preview");
+      return optional("GEMINI_MODEL_PRO", "gemini-2.5-pro");
     },
     get modelFlash() {
-      return optional("GEMINI_MODEL_FLASH", "gemini-3.0-flash");
+      return optional("GEMINI_MODEL_FLASH", "gemini-2.5-flash");
     },
     get embeddingModel() {
       return optional("GEMINI_EMBEDDING_MODEL", "gemini-embedding-2");
