@@ -9,6 +9,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db";
 import { examItems } from "@/lib/db/schema/exam-items";
+import { cardReports } from "@/lib/db/schema/card-reports";
 import { requireAdmin } from "@/lib/auth/require-admin";
 
 export async function markAnswerVerified(id: string): Promise<void> {
@@ -31,4 +32,36 @@ export async function unmarkAnswerVerified(id: string): Promise<void> {
     .where(eq(examItems.id, id));
   revalidatePath("/admin/seed-review");
   revalidatePath(`/admin/seed-review/${id}`);
+}
+
+// 코드리뷰 C.H2 후속 (2026-05-15, 시행규칙 33 §35) — 운영자 신고 처리.
+// reviewed = 신고 내용을 반영해 카드를 정정함. dismissed = 신고 내용을 기각함.
+// 두 액션 모두 reviewedAt + reviewedBy 를 기록한다 (감사 추적).
+
+export async function markReportReviewed(id: string): Promise<void> {
+  const admin = await requireAdmin();
+  const db = getDb();
+  await db
+    .update(cardReports)
+    .set({
+      status: "reviewed",
+      reviewedAt: new Date(),
+      reviewedBy: admin.id,
+    })
+    .where(eq(cardReports.id, id));
+  revalidatePath("/admin/reports");
+}
+
+export async function markReportDismissed(id: string): Promise<void> {
+  const admin = await requireAdmin();
+  const db = getDb();
+  await db
+    .update(cardReports)
+    .set({
+      status: "dismissed",
+      reviewedAt: new Date(),
+      reviewedBy: admin.id,
+    })
+    .where(eq(cardReports.id, id));
+  revalidatePath("/admin/reports");
 }

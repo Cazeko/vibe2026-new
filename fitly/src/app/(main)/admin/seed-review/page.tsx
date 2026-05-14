@@ -36,6 +36,16 @@ export default async function SeedReviewPage() {
         subtitle="AI가 생성한 모범답안을 검수해 검증 라벨을 부여합니다."
       />
 
+      {/* PR-7 (2026-05-15) — 사용자 신고 큐 navigation. */}
+      <div className="mt-3">
+        <Link
+          href="/admin/reports"
+          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-rule px-3 text-[12px] font-medium text-muted-foreground hover:bg-secondary/60 transition-colors"
+        >
+          사용자 신고 큐 →
+        </Link>
+      </div>
+
       {/* D1 — StatCard 카드별 배경 차별화 (운영 페이지 정합) */}
       <div className="grid grid-cols-3 gap-4 mb-8 mt-6">
         <StatCard label="전체 문항" value={stats.total} tone="neutral" />

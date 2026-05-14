@@ -235,7 +235,9 @@ export function FitlySignIn({ mode }: Props) {
             아니라 <em className="not-italic text-gold">적합도</em>다.
           </h1>
           <p className="mt-[22px] text-[clamp(14px,1.05vw,15.5px)] leading-[1.7] text-cream/80">
-            기출 24년 · 합격선 17개 시도 · 누적 응시자 12,840명의 데이터로,
+            {/* 코드리뷰 L7 (2026-05-15, §3의2 정직성) — "합격선 17개 시도" 는
+                외부 비공개 데이터 보유 인상을 줄 위험이 있어 사실 표현으로 정합. */}
+            기출 24년 · 17개 시도교육청 시험 · 누적 응시자 12,840명의 데이터로,
             <br />
             지금 당신에게 부족한 한 점을 찾아드립니다.
           </p>
