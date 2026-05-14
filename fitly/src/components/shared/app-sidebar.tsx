@@ -84,28 +84,30 @@ export function AppSidebar() {
       .catch(() => undefined);
   }, []);
 
-  // v3.5.3 — 라우트 변경 시 모바일 drawer 자동 닫기.
-  // 리뷰 H4 fix — mount 첫 회는 skip (race 회피).
+  // v3.5.3 — 라우트 변경 시 모바일 drawer 자동 닫기. lg+ 데스크탑은 본인 선택
+  // 보존 (collapsed 유지). 리뷰 H4 fix — mount 첫 회는 skip (race 회피).
   useEffect(() => {
     if (firstPathRef.current) {
       firstPathRef.current = false;
       return;
     }
+    if (isLg) return;
     setOpen(false);
-  }, [pathname, setOpen]);
+  }, [pathname, setOpen, isLg]);
 
   // v3.5.3 — drawer 열린 상태에서 body 스크롤 잠금 (모바일 한정).
-  // 리뷰 H3 fix — 진입 시 prev overflow 캡처 → cleanup 시 복원 (다른 모달
-  // (shadcn Dialog 등)의 lock 을 빈 문자열로 덮어쓰는 회귀 방지).
+  // v3.5.2 (2026-05-14) — 데스크탑(lg+) 사이드바는 본문과 공존하므로 스크롤
+  // 잠금 X. isLg=false + open=true 시에만 잠금 적용.
+  // 리뷰 H3 fix — 진입 시 prev overflow 캡처 → cleanup 시 복원.
   useEffect(() => {
     if (typeof document === "undefined") return;
-    if (!open) return;
+    if (!open || isLg) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [open]);
+  }, [open, isLg]);
 
   // 리뷰 H1 fix — Esc 키로 drawer 닫기 (WAI-ARIA dialog 패턴).
   useEffect(() => {
@@ -150,16 +152,17 @@ export function AppSidebar() {
         aria-hidden
       />
 
-      {/* 리뷰 H2 fix — modal drawer 시멘틱 + 모바일 폐쇄 시 aria-hidden.
-          lg+ 데스크톱은 always visible 사이드바라 dialog 시멘틱 X. */}
+      {/* v3.5.2 (2026-05-14) — 모든 디바이스에서 collapsible. lg+ 도 close 시
+          -translate-x-full 로 hide, main padding-left 가 CSS 변수로 동기화.
+          aria-modal 은 모바일(drawer) 에서만 적용 (lg+ 는 dialog 패턴 X). */}
       <aside
         aria-label="주 메뉴"
         role={isLg ? undefined : "dialog"}
         aria-modal={!isLg && open ? "true" : undefined}
-        aria-hidden={!isLg && !open ? "true" : undefined}
+        aria-hidden={!open ? "true" : undefined}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[248px] flex flex-col bg-cream-deep text-foreground border-r border-rule transition-transform duration-200 ease-out lg:translate-x-0",
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          "fixed inset-y-0 left-0 z-50 w-[188px] flex flex-col bg-cream-deep text-foreground border-r border-rule transition-transform duration-200 ease-out",
+          open ? "translate-x-0" : "-translate-x-full"
         )}
       >
       {/* ─ 브랜드 + 모바일 닫기 버튼 ─ */}
@@ -171,7 +174,7 @@ export function AppSidebar() {
           type="button"
           onClick={() => setOpen(false)}
           aria-label="메뉴 닫기"
-          className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
         >
           <X className="h-5 w-5" aria-hidden />
         </button>

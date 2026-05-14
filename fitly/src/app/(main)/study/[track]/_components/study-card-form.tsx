@@ -474,24 +474,16 @@ export function StudyCardForm({
         </div>
       )}
 
-      {/* 등급 버튼 — sticky bottom. SplitView 외부, 전체 폭 유지.
-          리뷰 H1 fix — 미니플레이어 활성 시 자동으로 위로 끌어올림.
-          `--mini-player-h` 가 0(비활성)·76px(활성) 토글되며 등급 카드와 자연 공존. */}
+      {/* v3.5.2 (2026-05-14) — 자가 채점 sticky 슬림화.
+          종전 약 140px 높이 → ~52px. 헤더 라벨·안내 텍스트·세로 hint 제거하여
+          본문 가시성 우선. label + 단축키 kbd 만 단일 라인. */}
       {revealed && (
         <Card
-          className="sticky z-20 border-rule shadow-[0_-6px_18px_rgba(26,32,39,0.06)] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90"
-          style={{ bottom: "calc(var(--mini-player-h, 0px) + 12px)" }}
+          className="sticky z-20 border-rule shadow-[0_-4px_12px_rgba(26,32,39,0.05)] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90"
+          style={{ bottom: "calc(var(--mini-player-h, 0px) + 8px)" }}
         >
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-                자가 채점 — 복습 등급
-              </p>
-              <p className="hidden sm:block text-[10.5px] text-muted-foreground tabular-nums">
-                키보드 1 · 2 · 3 · 4 로 빠른 채점
-              </p>
-            </div>
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <CardContent className="px-2.5 py-2">
+            <div className="grid grid-cols-4 gap-1.5">
               {GRADES.map(({ key, label, hint, tone, Icon }, idx) => (
                 <button
                   key={key}
@@ -499,26 +491,18 @@ export function StudyCardForm({
                   disabled={pending}
                   onClick={() => handleGrade(key)}
                   aria-keyshortcuts={String(idx + 1)}
-                  /* v3.6 외부 평가 #3.6 — click 시 scale 0.96 으로 압축 피드백.
-                     §7 모션 절제 — transition-all 100ms 짧게. */
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border bg-card px-3 py-3.5 min-h-[56px] text-[13px] font-medium transition-[colors,transform] duration-100 active:scale-[0.96] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${tone}`}
+                  aria-label={`${label} · ${hint}`}
+                  title={`${label} — ${hint}`}
+                  className={`inline-flex items-center justify-center gap-1.5 rounded-md border bg-card h-9 px-1.5 text-[12.5px] font-medium transition-[colors,transform] duration-100 active:scale-[0.96] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${tone}`}
                 >
-                  <Icon className="h-4 w-4" aria-hidden />
-                  <span className="flex items-center gap-1.5">
-                    {label}
-                    <kbd className="hidden sm:inline-flex items-center justify-center h-[20px] min-w-[20px] rounded-[4px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[10.5px] font-bold leading-none tabular-nums px-1 shadow-[inset_0_-1.5px_0_rgba(0,0,0,0.08)] font-sans">
-                      {idx + 1}
-                    </kbd>
-                  </span>
-                  <span className="text-[10.5px] font-normal text-muted-foreground tabular-nums">
-                    {hint}
-                  </span>
+                  <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  <span>{label}</span>
+                  <kbd className="hidden sm:inline-flex items-center justify-center h-4 min-w-[16px] rounded-[3px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[9.5px] font-bold leading-none tabular-nums px-1 font-sans">
+                    {idx + 1}
+                  </kbd>
                 </button>
               ))}
             </div>
-            <p className="mt-3 text-[10px] text-muted-foreground leading-relaxed">
-              {`"다시" · "어려움"은 다음 학습 시 다시 등장 · 오답 트랙에 자동 합류합니다.`}
-            </p>
           </CardContent>
         </Card>
       )}

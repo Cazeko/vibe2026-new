@@ -21,14 +21,12 @@ export default function MainLayout({
       <PodcastPlayerProvider>
         <div className="min-h-screen">
           <AppSidebar />
-          {/* lg+ 에서는 사이드바 폭 248px offset, 모바일에서는 fullwidth.
-              DESIGN.md §4.5 — body cream + 1% grain 그대로.
-              Track 1.2 (v3.5.4) — 활성 팟캐스트 에피소드가 있을 때 미니플레이어가
-              하단에 sticky 노출. main 영역 하단 패딩으로 가림 회피.
-              리뷰 H2 fix — pb 를 `--mini-player-h` (활성 시 76px, 비활성 0px) +
-              16px 기본 여백으로 동적 계산. 미니플레이어 닫으면 자동 축소. */}
+          {/* v3.5.2 (2026-05-14) — 사이드바 토글 통합 + 폭 슬림화 (248→188px).
+              `--sidebar-w` (globals.css) 가 html[data-sidebar] 에 따라 188/0 토글.
+              lg+ 만 pl 적용, lg 미만은 drawer 모델로 main pl 영향 X.
+              Track 1.2 — 미니플레이어 sticky 시 pb 동적. */}
           <main
-            className="lg:ml-[248px] min-h-screen"
+            className="min-h-screen lg:pl-[var(--sidebar-w,188px)] transition-[padding-left] duration-200"
             style={{ paddingBottom: "calc(var(--mini-player-h, 0px) + 16px)" }}
           >
             <PageTransition>{children}</PageTransition>
