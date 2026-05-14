@@ -1,6 +1,12 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, BookOpenCheck, ArrowRight, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpenCheck,
+  ArrowRight,
+  ChevronRight,
+  Printer,
+} from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -139,21 +145,31 @@ export default async function StudyTrackPage({
         {/* D2 — 진행 헤더 flex-wrap + 모바일 stack. S2 큐 상태 변화 aria-live. */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div
-            className="text-[12px] text-muted-foreground tabular-nums leading-relaxed"
+            className="text-[12px] text-muted-foreground tabular-nums leading-relaxed inline-flex items-center gap-1 flex-wrap"
             aria-live="polite"
           >
-            오늘의 due {" — "}
+            <span>오늘의 due {" — "}</span>
             <span className="text-foreground font-medium">
               풀이 {dueCounts.quiz}장
             </span>
-            {" · "}
+            <span>{" · "}</span>
             <span className="text-foreground font-medium">
               키워드 {dueCounts.keyword}장
             </span>
-            {" · "}
+            <span>{" · "}</span>
             <span className="text-foreground font-medium">
               오답 {dueCounts.mistake}장
             </span>
+            {/* 헌법 v3.5.1 제16조 — 오답 트랙 자연스러운 출력 진입점. */}
+            {track === "mistake" && (
+              <Link
+                href="/study/mistake-print"
+                className="ml-2 inline-flex items-center gap-1 text-evergreen underline underline-offset-2 hover:text-foreground transition-colors"
+              >
+                <Printer className="h-3 w-3" aria-hidden />
+                오답노트 인쇄
+              </Link>
+            )}
           </div>
           {/* G2 트랙 스위치 — active border-b-2 evergreen (활성 메뉴 정합).
               v3.6 외부 평가 #3.13 — active indicator 굵기/명도 보강.
