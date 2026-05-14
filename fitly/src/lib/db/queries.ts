@@ -17,6 +17,7 @@ import {
   cards,
   examItems,
   examPapers,
+  userCardHighlights,
   userCardState,
 } from "@/lib/db/schema";
 import { getSessionLabel } from "@/lib/exam/sessions";
@@ -321,5 +322,49 @@ export async function getCardById(
       };
     },
     null,
+  );
+}
+
+// 헌법 v3.5.1 제16조 — 사용자 형광펜/밑줄 조회. 카드 본문 인터랙션 다듬기 정합.
+//
+// 본 함수는 풀이/키워드/오답 카드 화면 hydrate 용. surface(back_md/front_text)
+// 별로 묶지 않고 그대로 반환 — 렌더 후 클라이언트에서 surface 별 분기 wrap.
+export type CardHighlight = {
+  id: string;
+  surface: "back_md" | "front_text";
+  quote: string;
+  prefix: string;
+  suffix: string;
+  color: "yellow" | "green" | "pink" | "underline";
+  createdAt: Date;
+};
+
+export async function getCardHighlights(
+  userId: string,
+  cardId: string,
+): Promise<CardHighlight[]> {
+  return safeRun(
+    `getCardHighlights(${cardId})`,
+    async () => {
+      const rows = await getDb()
+        .select({
+          id: userCardHighlights.id,
+          surface: userCardHighlights.surface,
+          quote: userCardHighlights.quote,
+          prefix: userCardHighlights.prefix,
+          suffix: userCardHighlights.suffix,
+          color: userCardHighlights.color,
+          createdAt: userCardHighlights.createdAt,
+        })
+        .from(userCardHighlights)
+        .where(
+          and(
+            eq(userCardHighlights.userId, userId),
+            eq(userCardHighlights.cardId, cardId),
+          ),
+        );
+      return rows;
+    },
+    [],
   );
 }

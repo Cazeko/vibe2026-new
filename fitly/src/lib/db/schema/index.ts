@@ -16,6 +16,7 @@ export * from "./exam-items";
 export * from "./cards";
 export * from "./user-card-state";
 export * from "./user-card-log";
+export * from "./user-card-highlights";
 export * from "./user-attempts";
 export * from "./podcast-episodes";
 export * from "./podcast-progress";
