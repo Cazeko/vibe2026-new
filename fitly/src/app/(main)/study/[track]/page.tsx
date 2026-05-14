@@ -149,7 +149,7 @@ export default async function StudyTrackPage({
             className="text-[12px] text-muted-foreground tabular-nums leading-relaxed inline-flex items-center gap-1 flex-wrap"
             aria-live="polite"
           >
-            <span>오늘의 due {" — "}</span>
+            <span>오늘의 복습 대기{" — "}</span>
             <span className="text-foreground font-medium">
               풀이 {dueCounts.quiz}장
             </span>

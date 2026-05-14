@@ -41,14 +41,23 @@ export function FitlyLogo({
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
       {showMark && (
+        // 주인님 보고 #19 (2026-05-14) — 종전 svg 가 viewBox 안에서 12~88 영역만
+        // 차지하여 초록 박스 중앙에 *살짝 우상단* 으로 어긋나 보이던 회귀. 정사각형
+        // 박스 *정중앙* 에 자소가 더 크게 차도록 (svg 88% width + 중앙 grid place)
+        // viewBox 자체를 12~88 영역으로 잡아 시각 중심 정합.
         <span
           aria-hidden
           className={cn(
-            "inline-flex shrink-0 items-center justify-center rounded-lg bg-evergreen",
+            "grid shrink-0 place-items-center rounded-lg bg-evergreen",
             MARK_BOX[size]
           )}
         >
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="h-[72%] w-[72%]">
+          <svg
+            viewBox="20 24 60 52"
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-[88%] w-[88%]"
+            aria-hidden
+          >
             <g fill="hsl(var(--color-bg))">
               <rect x="22" y="28" width="56" height="7" rx="1" />
               <rect x="33" y="35" width="7" height="30" rx="1" />

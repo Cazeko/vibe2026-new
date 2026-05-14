@@ -73,7 +73,11 @@ export async function TopicTab() {
               시드 적재 후 채워집니다.
             </p>
           ) : (
-            <ul className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            // 주인님 보고 #14 (2026-05-14) — 키워드와 횟수 간격이 너무 넓어 보이던
+            // 회귀. justify-between 을 버리고 *키워드 직후* 횟수를 인라인으로 붙여
+            // 넓은 간극 제거. 영역별 컬럼은 3열까지 확장 (xl) 하여 좁아진 간격
+            // 만큼 다른 과목으로 채움.
+            <ul className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-3">
               {byDomain.map((row) => (
                 <li
                   key={row.domain}
@@ -82,22 +86,20 @@ export async function TopicTab() {
                   <h4 className="font-serif text-[13px] font-medium tracking-tight truncate">
                     {row.domain}
                   </h4>
-                  {/* 백승환 피드백 #10 — truncate 제거. 긴 키워드는 wrap 으로 자연
-                      줄바꿈하여 잘림 회피. break-keep 으로 한국어 어절 단위 wrap. */}
                   <ol className="mt-1.5 space-y-1">
                     {row.keywords.map((k, idx) => (
                       <li
                         key={k.keyword}
-                        className="flex items-baseline justify-between gap-2 text-[12px] min-w-0"
+                        className="text-[12px] min-w-0 flex items-baseline gap-1.5"
                       >
-                        <span className="flex items-baseline gap-1.5 min-w-0">
-                          <span className="text-[10px] text-muted-foreground tabular-nums w-3 text-right shrink-0">
-                            {idx + 1}
-                          </span>
-                          <span className="break-keep">{k.keyword}</span>
+                        <span className="text-[10px] text-muted-foreground tabular-nums w-3 text-right shrink-0">
+                          {idx + 1}
                         </span>
-                        <span className="text-[10.5px] text-muted-foreground tabular-nums shrink-0">
-                          {k.count}회
+                        <span className="break-keep">
+                          {k.keyword}
+                          <span className="ml-1.5 text-[10.5px] text-muted-foreground tabular-nums">
+                            {k.count}회
+                          </span>
                         </span>
                       </li>
                     ))}
@@ -214,17 +216,16 @@ function KeywordCloud({
     return 0.55 + ratio * 0.45;
   };
 
-  // 백승환 피드백 #10 (2026-05-13) — 긴 키워드가 우측에서 답답하게 잘려 보임.
-  // 칩 스타일(border + padding) 로 시각 경계 명확화 + max-w-full + break-keep 으로
-  // 매우 긴 단어도 컨테이너 안에서 자연 줄바꿈. overflow-hidden 제거 (잘림 회피).
-  // 리뷰 M10 fix — opacity 를 칩 컨테이너 대신 텍스트 span 에만 적용. 빈도 낮은
-  // 키워드의 border 까지 함께 흐려져 "깨진 칩" 처럼 보이던 회귀 회피.
+  // 주인님 보고 #15 (2026-05-14) — 칩 내부 텍스트가 baseline 정렬이라 글자가
+  // 박스 중심에서 어긋나 보이던 회귀. inline-flex + items-center 로 글자가
+  // 항상 칩의 *세로 중앙* 에 오도록 정합. items-baseline → items-center 로 전환
+  // 시 컨테이너의 leading-tight 도 함께 보정.
   return (
-    <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-2 leading-tight">
+    <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-2 leading-tight">
       {cloud.map((k) => (
         <span
           key={k.keyword}
-          className="inline-block max-w-full rounded-md border border-rule px-2 py-0.5 font-serif tracking-tight bg-card/50"
+          className="inline-flex items-center justify-center max-w-full rounded-md border border-rule px-2 py-0.5 font-serif tracking-tight bg-card/50 text-center"
           style={{ fontSize: sizeOf(k.count), wordBreak: "keep-all" }}
           title={`${k.keyword} · ${k.count}회 누적`}
         >

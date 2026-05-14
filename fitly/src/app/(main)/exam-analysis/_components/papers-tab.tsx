@@ -131,9 +131,11 @@ function YearCard({ year, sessions }: { year: number; sessions: PaperRow[] }) {
   const subjectIdx = (year % 7) + 1;
   const subjectVar = `--subject-${subjectIdx}`;
   return (
-    /* v3.6 외부 평가 #4.10 — 연도 카드 hover translateY (-2px) + 보더 강조. */
+    /* 주인님 보고 #23 (2026-05-15) — 종전 `transition-all` 은 layout/font 등
+       의도 외 속성에도 트랜지션이 걸려 카드가 호버 시 꿈틀거리던 회귀. 명시
+       속성 목록(transform·border-color·box-shadow)만 ease-out 으로 정합. */
     <Card
-      className="border-rule transition-all hover:border-rule-strong hover:shadow-sm hover:-translate-y-0.5 overflow-hidden border-l-[3px]"
+      className="border-rule overflow-hidden border-l-[3px] [transition:transform_150ms_ease-out,border-color_150ms_ease-out,box-shadow_150ms_ease-out] hover:border-rule-strong hover:shadow-sm hover:-translate-y-0.5 transform-gpu"
       style={{ borderLeftColor: `hsl(var(${subjectVar}))` }}
     >
       <CardContent className="p-5 flex flex-col gap-3 min-w-0">

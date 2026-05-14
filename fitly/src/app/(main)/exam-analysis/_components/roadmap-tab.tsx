@@ -61,13 +61,15 @@ function SortableTh({
     sort: field,
     dir: targetDir,
   });
+  // 주인님 보고 #16 (2026-05-14) — 좁은 컬럼에서 라벨이 두 줄로 깨지던 회귀.
+  // whitespace-nowrap 으로 한 줄 강제.
   return (
     <Link
       href={`/exam-analysis?${params.toString()}`}
       scroll={false}
       prefetch={false}
       aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
-      className={`inline-flex items-center gap-1 hover:text-foreground transition-colors ${
+      className={`inline-flex items-center gap-1 whitespace-nowrap hover:text-foreground transition-colors ${
         active ? "text-foreground" : ""
       } ${align === "right" ? "ml-auto" : ""}`}
     >
@@ -149,17 +151,19 @@ export async function RoadmapTab({
               className={`border ${meta.rule}`}
             >
               <CardContent className="p-4">
-                <div className="flex items-baseline justify-between">
+                <div className="flex items-baseline justify-between gap-2">
                   <span
-                    className={`font-serif text-2xl font-medium tracking-tight tabular-nums ${meta.tone}`}
+                    className={`font-serif text-2xl font-medium tracking-tight tabular-nums shrink-0 ${meta.tone}`}
                   >
                     {grade}
                   </span>
-                  <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                  <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground whitespace-nowrap">
                     {meta.label}
                   </span>
                 </div>
-                <p className="mt-2 text-[11.5px] text-muted-foreground tabular-nums">
+                {/* 주인님 보고 #16 (2026-05-14) — "영역 N개 (M%)" 가 두 줄로
+                    깨지던 회귀. whitespace-nowrap 으로 한 줄 강제. */}
+                <p className="mt-2 text-[11.5px] text-muted-foreground tabular-nums whitespace-nowrap">
                   영역 <span className="text-foreground font-medium">{items.length}</span>개{" "}
                   ({pct}%)
                 </p>
@@ -227,11 +231,15 @@ export async function RoadmapTab({
                         {r.grade}
                       </span>
                     </td>
-                    <td className="px-5 py-2.5 font-medium">{r.domain}</td>
-                    <td className="px-5 py-2.5 text-right tabular-nums">
+                    {/* 주인님 보고 #16 (2026-05-14) — '교육학' 등 긴 영역 라벨이
+                        좁은 컬럼에서 두 줄로 깨지지 않도록 whitespace-nowrap. */}
+                    <td className="px-5 py-2.5 font-medium whitespace-nowrap">
+                      {r.domain}
+                    </td>
+                    <td className="px-5 py-2.5 text-right tabular-nums whitespace-nowrap">
                       {r.itemCount}문항
                     </td>
-                    <td className="px-5 py-2.5 text-right tabular-nums text-muted-foreground">
+                    <td className="px-5 py-2.5 text-right tabular-nums text-muted-foreground whitespace-nowrap">
                       {Math.round(r.recencyScore * 100)}%
                     </td>
                     <td className="px-5 py-2.5 text-muted-foreground">

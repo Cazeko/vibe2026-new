@@ -324,7 +324,7 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
       "오답 트랙",
       "mistake",
       "/study/mistake",
-      "풀이를 again/hard 로 평가하면 자동 합류",
+      "풀이를 ‘다시·어려움’ 으로 평가하면 자동 합류",
     ),
   ];
 }

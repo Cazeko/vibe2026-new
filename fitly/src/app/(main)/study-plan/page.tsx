@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { getDashboardSummary } from "@/lib/dashboard/queries";
 import { getLibraryCounts } from "@/lib/dashboard/analytics";
+import { getReviewDueCardCounts } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -103,7 +104,7 @@ const MODES: StudyMode[] = [
   {
     href: "/study/mistake",
     title: "오답 트랙",
-    description: "풀이의 again/hard 자동 합류",
+    description: "풀이의 ‘다시·어려움’ 자동 합류",
     hint: "복습 대기 자동",
     Icon: RefreshCw,
   },
@@ -128,27 +129,30 @@ export default async function StudyPlanPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [summary, lib] = await Promise.all([
+  const [summary, lib, reviewDue] = await Promise.all([
     getDashboardSummary(user.id),
     getLibraryCounts(user.id),
+    // 주인님 보고 #18 (2026-05-14) — 오늘의 복습 대기는 *이미 학습 시작한* 카드
+    // 중 due 도래한 것만 카운트. NEW(미학습) 시드 전체를 484장으로 잡던 회귀 해소.
+    getReviewDueCardCounts(user.id),
   ]);
 
-  const totalDue = lib.quizDue + lib.keywordDue + lib.mistakeDue;
+  const totalReviewDue = reviewDue.quiz + reviewDue.keyword + reviewDue.mistake;
   const targets = computeDailyTargets(
     { quiz: lib.quiz, keyword: lib.keyword, mistake: lib.mistake },
     summary.kpi.daysToExam,
   );
 
   return (
-    <div className="min-h-screen pb-10">
+    <div className="min-h-screen pb-6 xl:h-screen xl:pb-0 xl:overflow-hidden xl:flex xl:flex-col">
       <PageHeader
         title="학습 계획"
         subtitle="시험일 기준으로 오늘 해야 할 양을 자동 계산해 드립니다."
       />
-      <div className="px-6 mx-auto max-w-7xl space-y-3">
+      <div className="px-4 sm:px-6 mx-auto max-w-7xl w-full space-y-3 xl:flex-1 xl:min-h-0 xl:flex xl:flex-col xl:gap-3 xl:space-y-0">
         {/* 시험일 역산 일일 목표 */}
-        <Card className="border-rule">
-          <CardContent className="p-5">
+        <Card className="border-rule shrink-0">
+          <CardContent className="p-4 xl:p-3">
             <div className="flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden />
               <h2 className="font-serif text-lg font-medium tracking-tight">
@@ -160,9 +164,8 @@ export default async function StudyPlanPage() {
                 </span>
               )}
             </div>
-            {/* A1 (헌법 제24조의2 정합) — 일일 목표 grid 단계화 (lg 2 → xl 4) */}
-            <ul className="mt-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-4 gap-2">
-              <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
+            <ul className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2">
+              <li className="rounded-lg border border-rule bg-background px-3 py-2">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   풀이
                 </p>
@@ -173,7 +176,7 @@ export default async function StudyPlanPage() {
                   </span>
                 </p>
               </li>
-              <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
+              <li className="rounded-lg border border-rule bg-background px-3 py-2">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   키워드
                 </p>
@@ -184,7 +187,7 @@ export default async function StudyPlanPage() {
                   </span>
                 </p>
               </li>
-              <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
+              <li className="rounded-lg border border-rule bg-background px-3 py-2">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   오답 복습
                 </p>
@@ -195,7 +198,7 @@ export default async function StudyPlanPage() {
                   </span>
                 </p>
               </li>
-              <li className="rounded-lg border border-rule bg-background px-3 py-2.5">
+              <li className="rounded-lg border border-rule bg-background px-3 py-2">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   권장 학습 시간
                 </p>
@@ -204,122 +207,120 @@ export default async function StudyPlanPage() {
                 </p>
               </li>
             </ul>
-            {/* K1 (헌법 제4조의3 정합) — 안내 문구 의미 단위 줄바꿈 */}
-            <p className="mt-2 text-[10.5px] text-muted-foreground leading-[1.6]">
+            <p className="mt-2 text-[10.5px] text-muted-foreground leading-[1.55]">
               {targets.reason}.{" "}
-              {targets.hasExamDate ? (
-                <>
-                  시험일이 가까워질수록
-                  <br className="hidden sm:inline" />
-                  키워드 비중이 자동 증가합니다.
-                </>
-              ) : (
-                <>
-                  설정에서 시험일을 등록하시면
-                  <br className="hidden sm:inline" />
-                  본인 보유 카드 기준으로 자동 분배됩니다.
-                </>
-              )}
+              {targets.hasExamDate
+                ? "시험일이 가까워질수록 키워드 비중이 자동 증가합니다."
+                : "설정에서 시험일을 등록하시면 본인 보유 카드 기준으로 자동 분배됩니다."}
             </p>
           </CardContent>
         </Card>
 
-        {/* 듀카드 요약 — C1/C2 (헌법 제24조의2 정합): totalDue===0 시 "—" + 친화 메시지 */}
-        <Card className="border-evergreen bg-evergreen/[0.06]">
-          <CardContent className="p-5 flex items-center justify-between flex-wrap gap-3">
-            <div>
+        {/* 주인님 보고 #10 (2026-05-14) — 트랙 3 카드 + 오늘의 복습 대기 1 카드를
+            한 줄로 통합. 동일 크기, 핸드폰/태블릿/PC 반응형. xl+ 에서는 전체
+            페이지가 한 화면(스크롤 없음) 안에 들어가도록 flex-1 영역 차지. */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 xl:flex-1 xl:min-h-0">
+          {/* 오늘의 복습 대기 — 가장 좌측에 배치, evergreen 강조 보존 */}
+          <Card className="border-evergreen bg-evergreen/[0.06] flex flex-col">
+            <CardContent className="p-4 xl:p-3 flex flex-col flex-1 min-h-0">
               <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                 오늘의 복습 대기
               </p>
               <p className="mt-1 font-serif text-evergreen text-3xl font-medium tracking-tight num">
-                {totalDue > 0 ? totalDue : "—"}
-                {totalDue > 0 && (
+                {totalReviewDue > 0 ? totalReviewDue : "—"}
+                {totalReviewDue > 0 && (
                   <span className="ml-1 text-base font-sans font-normal text-muted-foreground">
                     장
                   </span>
                 )}
               </p>
-              <p className="mt-1 text-[12px] text-muted-foreground">
-                {totalDue > 0 ? (
+              <p className="mt-1 text-[11.5px] text-muted-foreground leading-[1.5]">
+                {totalReviewDue > 0 ? (
                   <>
-                    풀이 {lib.quizDue}장 · 키워드 {lib.keywordDue}장 · 오답{" "}
-                    {lib.mistakeDue}장
+                    풀이 {reviewDue.quiz}장 · 키워드 {reviewDue.keyword}장 ·
+                    오답 {reviewDue.mistake}장
                   </>
                 ) : (
-                  <>오늘 due 없음 — 새 카드를 학습하시면 복습 큐가 형성됩니다.</>
+                  <>복습 대기 없음 — 새 카드를 학습하시면 복습 큐가 형성됩니다.</>
                 )}
               </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button asChild size="sm" className="h-8 rounded-lg">
-                <Link href="/study/quiz">
-                  학습 시작 <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-auto pt-3">
+                <Button asChild size="sm" className="h-8 rounded-lg w-full">
+                  <Link href="/study/quiz">
+                    학습 시작 <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* 모드 3 카드 — G1 (헌법 제16조의2 정합): evergreen 보호, hover는 rule-strong+shadow */}
-        <ul className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {MODES.map(({ href, title, description, Icon, hint }) => (
-            <li key={title}>
-              <Link
-                href={href}
-                className="block rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule-strong/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                <Card className="border-rule transition-all hover:border-rule-strong hover:shadow-sm">
-                  <CardContent className="p-5">
-                    <span
-                      aria-hidden
-                      className="grid h-11 w-11 place-items-center rounded-lg bg-secondary text-foreground"
-                    >
-                      <Icon className="h-5 w-5" />
-                    </span>
-                    <p className="mt-3 font-serif text-lg font-medium">{title}</p>
-                    <p className="mt-1 text-[12px] text-muted-foreground">
-                      {description}
-                    </p>
-                    <p className="mt-3 text-[11px] font-medium text-evergreen">
-                      {hint} →
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            </li>
+            <Link
+              key={title}
+              href={href}
+              className="block rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule-strong/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <Card className="border-rule h-full transition-colors duration-150 ease-out hover:border-rule-strong flex flex-col">
+                <CardContent className="p-4 xl:p-3 flex flex-col flex-1 min-h-0">
+                  <span
+                    aria-hidden
+                    className="grid h-10 w-10 place-items-center rounded-lg bg-secondary text-foreground"
+                  >
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <p className="mt-3 font-serif text-base font-medium tracking-tight">
+                    {title}
+                  </p>
+                  <p className="mt-1 text-[11.5px] text-muted-foreground leading-[1.5]">
+                    {description}
+                  </p>
+                  <p className="mt-auto pt-2 text-[11px] font-medium text-evergreen">
+                    {hint} →
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
-        </ul>
+        </section>
 
-        {/* 사용자 보고 2026-05-12 — 오늘의 플랜 진행도 카드를 반쪽으로 줄이고
-            나머지 반쪽을 학습 가이드로 채워 한 화면 꽉 차게 배치 (lg+ 좌우 2열). */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* 진행도 + 학습 가이드 — xl+ 좌우 2열로 viewport 안에 정합. */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
           {/* 오늘의 플랜 진행도 */}
           <Card className="border-rule">
-            <CardContent className="p-5">
-              <h2 className="font-serif text-lg font-medium tracking-tight">
+            <CardContent className="p-4 xl:p-3">
+              <h2 className="font-serif text-base font-medium tracking-tight">
                 오늘의 플랜 진행도
               </h2>
-              <ul className="mt-3 -mx-5 divide-y divide-rule border-y border-rule">
+              <ul className="mt-2 -mx-4 xl:-mx-3 divide-y divide-rule border-y border-rule">
                 {summary.plan.map((item) => {
                   const Icon = STATE_ICON[item.state];
                   const tone = STATE_TONE[item.state];
                   const isLocked = item.state === "locked";
+                  // 주인님 보고 #21 (2026-05-14) — subtitle 의 "N장 due 예정"
+                  // 류 문구에서 due 영문을 한글로. dashboard/queries.ts 가 만드는
+                  // 텍스트라 여기서는 단순 치환으로 흡수한다.
+                  const subtitle = item.subtitle
+                    .replace(/due/gi, "복습")
+                    .replace(/\bAgain\b/gi, "다시")
+                    .replace(/\bHard\b/gi, "어려움");
                   return (
                     <li key={item.id}>
                       <Link
                         href={isLocked ? "#" : item.href}
                         aria-disabled={isLocked}
-                        className={`flex items-center gap-3 px-5 py-3 transition-colors ${
+                        className={`flex items-center gap-3 px-4 py-2 transition-colors duration-150 ease-out ${
                           isLocked
                             ? "opacity-60 cursor-not-allowed"
                             : "hover:bg-secondary/40"
                         }`}
                       >
-                        <Icon className={`h-5 w-5 shrink-0 ${tone}`} aria-hidden />
+                        <Icon className={`h-4 w-4 shrink-0 ${tone}`} aria-hidden />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-medium">{item.title}</p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">
-                            {item.subtitle}
+                          <p className="text-[12.5px] font-medium truncate">
+                            {item.title}
+                          </p>
+                          <p className="text-[10.5px] text-muted-foreground mt-0.5 truncate">
+                            {subtitle}
                           </p>
                         </div>
                         <div className="flex items-center gap-2 text-[11px] shrink-0">
@@ -341,51 +342,49 @@ export default async function StudyPlanPage() {
             </CardContent>
           </Card>
 
-          {/* 학습 가이드 — v3.0 · I3 (헌법 제24조의2 정합): 실제 due 카운트 동적 연결 */}
+          {/* 학습 가이드 — 주인님 보고 #9 (2026-05-14): 팟캐스트 단어의 밑줄·색을
+              제거하고 형광펜 칠로 변경. 색은 검정 유지. */}
           <Card className="border-rule">
-            <CardContent className="p-5">
-              <h2 className="font-serif text-lg font-medium tracking-tight">
+            <CardContent className="p-4 xl:p-3">
+              <h2 className="font-serif text-base font-medium tracking-tight">
                 학습 가이드
               </h2>
               <ol className="mt-2 space-y-1.5 text-[12px] text-foreground/80 leading-relaxed list-decimal pl-4">
                 <li>
                   <strong>풀이 트랙</strong>
-                  {lib.quizDue > 0 && (
+                  {reviewDue.quiz > 0 && (
                     <span className="ml-1 text-evergreen font-medium num">
-                      (오늘 {lib.quizDue}장 추천)
+                      (오늘 {reviewDue.quiz}장 추천)
                     </span>
                   )}{" "}
                   — 서술형 기출에 답안을 작성하고 AI 모범답안과 비교, 자가 채점합니다.
                 </li>
                 <li>
                   <strong>키워드 트랙</strong>
-                  {lib.keywordDue > 0 && (
+                  {reviewDue.keyword > 0 && (
                     <span className="ml-1 text-evergreen font-medium num">
-                      (오늘 {lib.keywordDue}장 추천)
+                      (오늘 {reviewDue.keyword}장 추천)
                     </span>
                   )}{" "}
-                  — 개념 정리 노트로 정의·핵심 요소를 반복 학습합니다
-                  (객관식 시대 데이터 포함).
+                  — 개념 정리 노트로 정의·핵심 요소를 반복 학습합니다.
                 </li>
                 <li>
                   <strong>오답 트랙</strong>
-                  {lib.mistakeDue > 0 && (
+                  {reviewDue.mistake > 0 && (
                     <span className="ml-1 text-evergreen font-medium num">
-                      (오늘 {lib.mistakeDue}장 추천)
+                      (오늘 {reviewDue.mistake}장 추천)
                     </span>
                   )}{" "}
-                  — 풀이를 다시/어려움으로 평가하면 자동 합류, 마스터될 때까지 반복합니다.
+                  — 풀이를 ‘다시·어려움’으로 평가하면 자동 합류, 마스터까지 반복합니다.
                 </li>
                 <li>
-                  <strong>
-                    <Link
-                      href="/podcast"
-                      className="text-info underline underline-offset-2 hover:text-foreground"
-                    >
-                      팟캐스트 →
-                    </Link>
-                  </strong>{" "}
-                  영역·연도·주제 선택 후 2인 화자 대화체 팟캐스트로 자동 생성,
+                  <Link
+                    href="/podcast"
+                    className="font-bold text-foreground bg-gold-soft/55 dark:bg-gold-soft/30 px-1 py-px rounded-sm hover:bg-gold-soft/80 transition-colors no-underline"
+                  >
+                    팟캐스트
+                  </Link>{" "}
+                  — 영역·연도·주제 선택 후 2인 화자 대화체 팟캐스트로 자동 생성,
                   이동 중에도 청취 학습.
                 </li>
               </ol>
