@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { getGemini, GEMINI_MODELS } from "./gemini";
+import { cleanMarkdown } from "@/lib/text/markdown";
 import type {
   DiffJson,
   KeywordsJson,
@@ -105,19 +106,28 @@ function safeParse(text: string): {
     const overview = raw?.overview ?? {};
     const keywords = raw?.keywords ?? {};
     const diff = raw?.diff ?? {};
+    // 헌법 v3.6.3 hotfix (2026-05-14) — 응답 안의 모든 string 에 cleanMarkdown
+    // 적용하여 **·#·` 등 마크다운 마크업 제거. 주인님 명시 요구 — "특수기호 절대
+    // 답변에 들어가면 안돼". system instruction 으로도 금지하지만 server-side
+    // strip 으로 이중 방어.
     return {
       overview: {
         strengths: Array.isArray(overview.strengths)
-          ? overview.strengths.filter((s: unknown) => typeof s === "string").slice(0, 3)
+          ? overview.strengths
+              .filter((s: unknown) => typeof s === "string")
+              .map((s: string) => cleanMarkdown(s))
+              .slice(0, 3)
           : [],
         improvements: Array.isArray(overview.improvements)
           ? overview.improvements
               .filter((s: unknown) => typeof s === "string")
+              .map((s: string) => cleanMarkdown(s))
               .slice(0, 3)
           : [],
         missing_keywords: Array.isArray(overview.missing_keywords)
           ? overview.missing_keywords
               .filter((s: unknown) => typeof s === "string")
+              .map((s: string) => cleanMarkdown(s))
               .slice(0, 5)
           : [],
       },
@@ -131,7 +141,7 @@ function safeParse(text: string): {
                   typeof (k as { text?: unknown }).text === "string",
               )
               .map((k: { text: string; matched?: unknown }) => ({
-                text: k.text,
+                text: cleanMarkdown(k.text),
                 matched: Boolean(k.matched),
               }))
               .slice(0, 12)
@@ -151,7 +161,7 @@ function safeParse(text: string): {
               )
               .map((s: { type: DiffJson["segments"][number]["type"]; text: string }) => ({
                 type: s.type,
-                text: s.text,
+                text: cleanMarkdown(s.text),
               }))
               .slice(0, 60)
           : [],
@@ -167,9 +177,10 @@ export async function analyzeEssay(
   input: EssayAnalysisInput,
 ): Promise<EssayAnalysisResult> {
   const gemini = getGemini();
-  // 헌법 v3.6.2 (2026-05-14) — 서술형 첨삭/채점은 Pro 티어 사용. 추론 깊이
-  // 우선 (강점·보완점·키워드 매칭·diff 모두 정성 추론). 채팅은 Flash 유지.
-  const model = GEMINI_MODELS.pro;
+  // 헌법 v3.6.3 (2026-05-14) — 학습 본업 전 Flash 통일. 채점/첨삭의 Pro 추론은
+  // 정성 평가 깊이 우수하나 응답 5~10초 지연이 학습 흐름 단절을 유발 → Flash
+  // 1~2초 응답으로 통일. 추후 한국어 학술 평가 품질이 부족하면 Pro 재격상 검토.
+  const model = GEMINI_MODELS.flash;
 
   try {
     const response = await gemini.models.generateContent({

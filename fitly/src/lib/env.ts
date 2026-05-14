@@ -31,9 +31,9 @@ export const env = {
     },
     // 헌법 제18조 — 성능 최우선 정책의 모델 매트릭스 fallback.
     //
-    // 매트릭스 권장 ID (v3.6.2, 2026-05-14 주인님 발화)
-    //   - Pro:   gemini-2.5-pro    (서술형 첨삭/채점 — 추론 깊이 우선)
-    //   - Flash: gemini-2.5-flash  (실시간 AI 튜터 — 빠른 응답 우선)
+    // 매트릭스 권장 ID (v3.6.3, 2026-05-14 주인님 발화 — 학습 본업 전 Flash 통일)
+    //   - Pro:   gemini-2.5-pro    (Vision OCR / 코칭 / 팟캐스트 스크립트 등 미통일 영역)
+    //   - Flash: gemini-2.5-flash  (학습 본업 — 채점/첨삭/챗봇/힌트/암기법/키워드 추출)
     //
     // fallback 정책 — 환경변수 미설정 시 *안정 운용* 모델로 폴백.
     // 운영 환경(Vercel)에서는 GEMINI_MODEL_PRO / GEMINI_MODEL_FLASH 환경변수
