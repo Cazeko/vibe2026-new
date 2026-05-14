@@ -107,21 +107,18 @@ export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
         return (
           <article
             key={label}
-            tabIndex={0}
             className={cn(
-              // G2 — focus-visible ring (evergreen은 진척도/CTA/AI 추천에만, 일반은 rule-strong)
+              // 코드리뷰 B.H4 (2026-05-15) — 비-인터랙티브 카드의 tabIndex={0} 제거.
+              // 카드 자체에는 액션이 없고 내부 streak-freeze 버튼에 진짜 키보드 stop 이
+              // 있어 Tab 순회 시 카드/내부 버튼 이중 stop 회귀 해소 (WCAG 2.4.3).
               // viewport fit — lg+ 컴팩트 padding (px-22→px-4, py-5→py-3)
               // D-19 (외부 리뷰 2026-05-12) — 카드 hover 어포던스. §7 모션 절제 정합으로
-              // Y-이동 없이 보더+shadow 만 변화. 리뷰 M5 fix — transition-all 즉각성
-              // 저하 회피, colors/shadow/border 만 transition (150ms).
+              // Y-이동 없이 보더+shadow 만 변화.
               // v3.6 외부 평가 #2.6 — 카드 hover translateY (-2px) 재도입.
-              // 사용자 명시 발화 §38 7항 우선 — v3.5.4 M5 fix 의 절제 결정 위에
-              // 외부 평가의 어포던스 요구를 적용. translate + 색·shadow 동시 transition.
               "rounded-card border min-h-[132px] lg:min-h-[110px] px-[22px] py-5 lg:px-4 lg:py-3 flex flex-col [transition:transform_150ms_ease,border-color_150ms_ease,box-shadow_150ms_ease,background-color_150ms_ease] hover:-translate-y-0.5 overflow-hidden min-w-0",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               isGoal
-                ? "bg-evergreen border-evergreen text-cream focus-visible:ring-evergreen/40 hover:bg-evergreen-strong"
-                : "bg-cream-soft border-rule hover:border-rule-strong hover:shadow-sm dark:hover:bg-cream-soft/80 focus-visible:ring-rule-strong/60"
+                ? "bg-evergreen border-evergreen text-cream hover:bg-evergreen-strong"
+                : "bg-cream-soft border-rule hover:border-rule-strong hover:shadow-sm dark:hover:bg-cream-soft/80"
             )}
           >
             <div className="flex items-center justify-between mb-3.5 lg:mb-2">
