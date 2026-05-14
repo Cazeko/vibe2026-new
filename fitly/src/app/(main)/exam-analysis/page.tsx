@@ -136,41 +136,37 @@ export default async function ExamAnalysisPage({
       />
 
       <div className="px-6 mx-auto max-w-7xl space-y-6">
-        {/* 백승환 피드백 #9 (2026-05-13) — KPI 와 RegionCard 가 한 grid row 에
-            5 items 로 배치되어 lg(1024px)에서 RegionCard col-span-4 폭이 너무
-            좁아 정보가 답답하게 잘리던 문제. 두 section 으로 분리하여 각자
-            자연스러운 폭 확보 + sm/md/lg/xl 각 breakpoint 균형 정합. */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard
-            label="시험지"
-            value={paperStats?.paperCount ? paperStats.paperCount : "—"}
-            unit={paperStats?.paperCount ? "회분" : ""}
-          />
-          <StatCard
-            label="문항"
-            value={itemStats?.itemCount ? itemStats.itemCount : "—"}
-            unit={itemStats?.itemCount ? "개" : ""}
-          />
-          <StatCard
-            label="학년도 범위"
-            value={
-              paperStats?.yearMin && paperStats?.yearMax
-                ? `${paperStats.yearMin}–${paperStats.yearMax}`
-                : "—"
-            }
-            unit=""
-          />
-          <StatCard
-            label="시드 상태"
-            value={seedReady ? "활성" : "대기"}
-            unit=""
-            accent={seedReady}
-          />
-        </section>
-
-        {/* RegionCard 별도 section — lg+ 에서는 max-w-md (≈28rem) 로 제한하여
-            합격선 추이 표시 영역이 답답해지지 않고 우측 여백 자연스럽게 정합. */}
-        <section className="lg:max-w-md">
+        {/* 주인님 보고 #12 (2026-05-14) — 상위 4 카드를 2x2 로 묶고 RegionCard
+            와 한 줄에 배치. xl+ 에서는 stats(2x2 grid 50%) + region(50%) 한 줄,
+            그 아래 화면 자연스럽게 흐름. md(≥768) 에서도 2x2 + region 한 줄 가능. */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard
+              label="시험지"
+              value={paperStats?.paperCount ? paperStats.paperCount : "—"}
+              unit={paperStats?.paperCount ? "회분" : ""}
+            />
+            <StatCard
+              label="문항"
+              value={itemStats?.itemCount ? itemStats.itemCount : "—"}
+              unit={itemStats?.itemCount ? "개" : ""}
+            />
+            <StatCard
+              label="학년도 범위"
+              value={
+                paperStats?.yearMin && paperStats?.yearMax
+                  ? `${paperStats.yearMin}–${paperStats.yearMax}`
+                  : "—"
+              }
+              unit=""
+            />
+            <StatCard
+              label="시드 상태"
+              value={seedReady ? "활성" : "대기"}
+              unit=""
+              accent={seedReady}
+            />
+          </div>
           <RegionCard region={targetRegion} cutScores={cutScores} />
         </section>
 

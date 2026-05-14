@@ -196,6 +196,51 @@ export const getDueCardCounts = cache(async (
   }, EMPTY_DUE_COUNTS);
 });
 
+// 주인님 보고 #18·#21 (2026-05-14) — "오늘의 복습 대기" 는 *이미 한 번이라도
+// 학습한* 카드 중 due 가 도래한 것만 카운트. NEW(dueAt IS NULL) 시드 카드까지
+// 포함하면 484/290 같은 큰 수가 나와 사용자 체감과 어긋난다. 학습 본업 큐
+// (study/[track]) 에서는 NEW 도 노출하지만, 복습 대기 KPI 는 좁힌 정의를 사용.
+export const getReviewDueCardCounts = cache(async (
+  userId: string,
+  now: Date = new Date(),
+): Promise<DueCardCounts> => {
+  return safeRun("getReviewDueCardCounts", async () => {
+    const db = getDb();
+    const rows = await db
+      .select({
+        type: cards.type,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(cards)
+      .innerJoin(
+        userCardState,
+        and(
+          eq(userCardState.cardId, cards.id),
+          eq(userCardState.userId, userId),
+        ),
+      )
+      .where(
+        and(
+          or(isNull(cards.userId), eq(cards.userId, userId)),
+          lte(userCardState.dueAt, now),
+        ),
+      )
+      .groupBy(cards.type);
+
+    const counts: DueCardCounts = { quiz: 0, keyword: 0, mistake: 0 };
+    for (const row of rows) {
+      if (
+        row.type === "quiz" ||
+        row.type === "keyword" ||
+        row.type === "mistake"
+      ) {
+        counts[row.type] = row.count;
+      }
+    }
+    return counts;
+  }, EMPTY_DUE_COUNTS);
+});
+
 export type DueCard = {
   id: string;
   type: CardType;
@@ -212,6 +257,26 @@ export type DueCard = {
   itemPoints: number | null;
 };
 
+// 2026-05-15 hotfix — 0017 마이그레이션이 production 에 적용되지 않은 환경에서
+// cards.front_image_paths 컬럼이 없어 SELECT 가 실패하면 safeRun 이 통째로 빈
+// 배열을 반환 → 풀이/키워드/오답 전 트랙 빈 상태 회귀. 컬럼 존재 여부를 모듈
+// 단위로 캐시하여 컬럼이 없으면 단일 path 만 select 한다.
+let _multiPagePathsAvailable: boolean | null = null;
+async function probeMultiPagePaths(): Promise<boolean> {
+  if (_multiPagePathsAvailable !== null) return _multiPagePathsAvailable;
+  try {
+    const db = getDb();
+    await db.execute(sql`select front_image_paths from cards limit 1`);
+    _multiPagePathsAvailable = true;
+  } catch {
+    console.warn(
+      "[db.queries] cards.front_image_paths 미존재 — 단일 path fallback. 0017 마이그레이션을 적용하면 multi-page PDF 가 활성화됩니다.",
+    );
+    _multiPagePathsAvailable = false;
+  }
+  return _multiPagePathsAvailable;
+}
+
 export async function getDueCards(
   userId: string,
   type: CardType,
@@ -222,22 +287,26 @@ export async function getDueCards(
     `getDueCards(${type})`,
     async () => {
       const db = getDb();
+      const hasPaths = await probeMultiPagePaths();
+      const baseSelect = {
+        id: cards.id,
+        type: cards.type,
+        frontText: cards.frontText,
+        frontImagePath: cards.frontImagePath,
+        backMd: cards.backMd,
+        verifiedAnswer: cards.verifiedAnswer,
+        dueAt: userCardState.dueAt,
+        paperYear: examPapers.year,
+        paperSession: examPapers.session,
+        itemNo: examItems.itemNo,
+        itemFormat: examItems.format,
+        itemPoints: examItems.points,
+      } as const;
+      const selection = hasPaths
+        ? { ...baseSelect, frontImagePaths: cards.frontImagePaths }
+        : baseSelect;
       const rows = await db
-        .select({
-          id: cards.id,
-          type: cards.type,
-          frontText: cards.frontText,
-          frontImagePath: cards.frontImagePath,
-          frontImagePaths: cards.frontImagePaths,
-          backMd: cards.backMd,
-          verifiedAnswer: cards.verifiedAnswer,
-          dueAt: userCardState.dueAt,
-          paperYear: examPapers.year,
-          paperSession: examPapers.session,
-          itemNo: examItems.itemNo,
-          itemFormat: examItems.format,
-          itemPoints: examItems.points,
-        })
+        .select(selection)
         .from(cards)
         .leftJoin(
           userCardState,
@@ -268,7 +337,10 @@ export async function getDueCards(
         type: r.type as CardType,
         frontText: r.frontText,
         frontImagePath: r.frontImagePath,
-        frontImagePaths: normalizeImagePaths(r.frontImagePaths, r.frontImagePath),
+        frontImagePaths: normalizeImagePaths(
+          (r as { frontImagePaths?: string[] | null }).frontImagePaths ?? null,
+          r.frontImagePath,
+        ),
         backMd: r.backMd,
         verifiedAnswer: r.verifiedAnswer,
         dueAt: r.dueAt ?? now,
@@ -301,22 +373,26 @@ export async function getCardById(
     "getCardById",
     async () => {
       const db = getDb();
+      const hasPaths = await probeMultiPagePaths();
+      const baseSelect = {
+        id: cards.id,
+        type: cards.type,
+        frontText: cards.frontText,
+        frontImagePath: cards.frontImagePath,
+        backMd: cards.backMd,
+        verifiedAnswer: cards.verifiedAnswer,
+        dueAt: userCardState.dueAt,
+        paperYear: examPapers.year,
+        paperSession: examPapers.session,
+        itemNo: examItems.itemNo,
+        itemFormat: examItems.format,
+        itemPoints: examItems.points,
+      } as const;
+      const selection = hasPaths
+        ? { ...baseSelect, frontImagePaths: cards.frontImagePaths }
+        : baseSelect;
       const [row] = await db
-        .select({
-          id: cards.id,
-          type: cards.type,
-          frontText: cards.frontText,
-          frontImagePath: cards.frontImagePath,
-          frontImagePaths: cards.frontImagePaths,
-          backMd: cards.backMd,
-          verifiedAnswer: cards.verifiedAnswer,
-          dueAt: userCardState.dueAt,
-          paperYear: examPapers.year,
-          paperSession: examPapers.session,
-          itemNo: examItems.itemNo,
-          itemFormat: examItems.format,
-          itemPoints: examItems.points,
-        })
+        .select(selection)
         .from(cards)
         .leftJoin(
           userCardState,
@@ -337,7 +413,10 @@ export async function getCardById(
         type: row.type as CardType,
         frontText: row.frontText,
         frontImagePath: row.frontImagePath,
-        frontImagePaths: normalizeImagePaths(row.frontImagePaths, row.frontImagePath),
+        frontImagePaths: normalizeImagePaths(
+          (row as { frontImagePaths?: string[] | null }).frontImagePaths ?? null,
+          row.frontImagePath,
+        ),
         backMd: row.backMd,
         verifiedAnswer: row.verifiedAnswer,
         dueAt: row.dueAt ?? new Date(),

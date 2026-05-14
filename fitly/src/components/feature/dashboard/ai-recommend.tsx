@@ -57,12 +57,12 @@ export function AiRecommend({ weakest }: { weakest: WeakType | null }) {
       </p>
 
       <div className="flex gap-1.5 flex-wrap shrink-0">
-        {/* v3.6 외부 평가 #2.4 — AI 추천 메인 CTA 에 fitly-pulse (1.6s ease-out).
-            §7 모션 절제 정합 — prefers-reduced-motion 시 자동 비활성 (globals.css).
-            펄스는 시각 강조 1회성이라 §4.3 evergreen 6 사용처 보호 정합. */}
+        {/* 주인님 보고 #7 (2026-05-14) — fitly-pulse 반복 강조 효과 제거. CTA 는
+            §16의2 정합으로 평면 버튼만 유지한다. 종전 1.6s 무한 펄스가 시선을
+            지나치게 빨아들이던 회귀. */}
         <Link
           href="/study/quiz"
-          className="inline-flex h-[34px] items-center gap-1.5 rounded-md bg-evergreen px-3 text-[12.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors fitly-pulse"
+          className="inline-flex h-[34px] items-center gap-1.5 rounded-md bg-evergreen px-3 text-[12.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
         >
           추천 풀이 시작
           <ArrowRight className="h-3 w-3" aria-hidden />

@@ -126,6 +126,11 @@ export function AppSidebar() {
   async function handleLogout() {
     // 리뷰 M6 fix — logout 전 drawer 명시 close (SPA transition 사이 잔존 회피).
     setOpen(false);
+    // 주인님 보고 #22 (2026-05-14) — 로그아웃 시 사이드바 collapsed 상태를
+    // localStorage 에서 초기화. 재로그인 시 닫힌 채로 시작하지 않도록 보장.
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("fitly:sidebar-open");
+    }
     const supabase = createClient();
     await supabase.auth.signOut();
     router.replace("/login");
@@ -218,24 +223,25 @@ export function AppSidebar() {
         </ul>
 
         {/* ─ D-day 칩 (시험 카운트다운) ─
-            P1-07 (외부 리뷰 2026-05-12) — 대시보드 KPI "목표" 카드와 D-day 중복.
-            큰 evergreen 박스를 작은 인라인 칩으로 축소하여 정보 밀도 분산.
-            P1 코드 리뷰 H1 fix — text-evergreen 은 §4.3 6 사용처 외이므로
-            font weight + tabular-nums 로만 강조. 배경도 secondary tint 로 전환. */}
+            주인님 보고 #6 (2026-05-14) — 좁은 188px 사이드바에서 D-day/지역/시험일
+            세 정보가 두 줄로 깨지던 회귀. 칩을 위·아래 2단으로 재구성 + 명도 위계로
+            정갈하게 한 카드 안에 정합. 1행: D-day, 2행: 지역 · 시험일. */}
         {dDay && (
-          <div className="mt-4 mx-3 flex items-center gap-1.5 rounded-md bg-secondary/60 px-2.5 py-1.5 text-[12px]">
-            <span className="font-bold text-foreground tabular-nums tracking-tight">
-              {dDay}
-            </span>
+          <div className="mt-4 mx-3 rounded-md bg-secondary/60 px-2.5 py-1.5">
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-bold text-foreground tabular-nums tracking-tight text-[13px] leading-none">
+                {dDay}
+              </span>
+              {examDateLabel && (
+                <span className="ml-auto text-[10.5px] text-muted-foreground tabular-nums leading-none">
+                  {examDateLabel}
+                </span>
+              )}
+            </div>
             {target.region && (
-              <span className="text-muted-foreground">
-                · {target.region}
-              </span>
-            )}
-            {examDateLabel && (
-              <span className="ml-auto text-[10.5px] text-muted-foreground tabular-nums">
-                {examDateLabel}
-              </span>
+              <p className="mt-1 text-[10.5px] text-muted-foreground truncate leading-tight">
+                {target.region}
+              </p>
             )}
           </div>
         )}

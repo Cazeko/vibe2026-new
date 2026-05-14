@@ -217,7 +217,7 @@ export default async function MePage() {
           정답률 <b className="text-foreground font-semibold">{accuracy}%</b>
         </>
       ),
-      footR: lib.quizDue > 0 ? `복습 대기 ${lib.quizDue}` : "오늘 due 0",
+      footR: lib.quizDue > 0 ? `복습 대기 ${lib.quizDue}` : "오늘 복습 대기 0",
       isZero: lib.quiz === 0,
     },
     {
@@ -228,7 +228,7 @@ export default async function MePage() {
       unit: "개념",
       footL: (
         <>
-          오늘 due <b className="text-foreground font-semibold">{lib.keywordDue}</b>
+          오늘 복습 대기 <b className="text-foreground font-semibold">{lib.keywordDue}</b>
         </>
       ),
       footR: lib.keyword === 0 ? "아직 시작 전" : "개념 정리 노트",
@@ -245,7 +245,7 @@ export default async function MePage() {
           다시보기 대기 <b className="text-foreground font-semibold">{lib.mistakeDue}</b>
         </>
       ),
-      footR: lib.mistake === 0 ? "again/hard 자동 합류" : "오답 복습",
+      footR: lib.mistake === 0 ? "‘다시·어려움’ 자동 합류" : "오답 복습",
       isZero: lib.mistake === 0,
     },
   ];
@@ -449,22 +449,21 @@ export default async function MePage() {
               꾸준한 학습으로 배지를 모아 보세요.
             </p>
 
-            {/* A1 (헌법 제24조의2 정합) — 배지 grid 단계화: 2→3→4→6 */}
+            {/* 주인님 보고 #17 (2026-05-14) — 호버 시 위로 떠오르는 배지가 부모
+                overflow-y-auto 에 의해 윗줄이 잘리던 회귀. 호버 변위를 제거하고
+                대신 보더/그림자로 시각 강조. 내용도 flex 로 *세로 중앙* 정렬해
+                상단 비어 보이던 회귀 해소. */}
             <ul
               aria-live="polite"
               aria-label={`학습 배지: ${earnedCount} / ${badges.length} 획득`}
               className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 flex-1 min-h-0 overflow-y-auto"
             >
-              {/* E2 (헌법 제24조의2 정합) — 미획득 명도 차 강화: opacity-60 + grayscale.
-                  v3.5.6 외부 리뷰 #5.5 — 추가로 우상단 자물쇠 오버레이를 노출하여
-                  "해제하고 싶은 욕구" 시각 단서 강화. §4.3 evergreen 보호 정합으로
-                  자물쇠 색은 rule-strong (액센트 외 일반 토큰). */}
               {badges.map((b) => (
                 <li
                   key={b.id}
-                  className={`relative rounded-[10px] border px-2 pt-2.5 pb-2 text-center transition-all ${
+                  className={`relative rounded-[10px] border px-2 py-2.5 text-center flex flex-col items-center justify-center min-h-[88px] transition-[border-color,box-shadow] duration-150 ease-out ${
                     b.earned
-                      ? "border-gold bg-cream-soft hover:-translate-y-0.5"
+                      ? "border-gold bg-cream-soft hover:border-evergreen hover:shadow-sm"
                       : "border-rule bg-cream opacity-60 grayscale"
                   }`}
                 >
@@ -488,11 +487,11 @@ export default async function MePage() {
                     <b.Icon className="h-[14px] w-[14px]" />
                   </span>
                   <p
-                    className={`text-[11.5px] font-bold tracking-[-0.02em] truncate ${b.earned ? "text-foreground" : "text-muted2-deep"}`}
+                    className={`text-[11.5px] font-bold tracking-[-0.02em] truncate w-full ${b.earned ? "text-foreground" : "text-muted2-deep"}`}
                   >
                     {b.title}
                   </p>
-                  <p className="text-[9.5px] text-muted-foreground mt-0.5 leading-[1.3] tracking-[-0.005em] truncate">
+                  <p className="text-[9.5px] text-muted-foreground mt-0.5 leading-[1.3] tracking-[-0.005em] truncate w-full">
                     {b.description}
                   </p>
                 </li>

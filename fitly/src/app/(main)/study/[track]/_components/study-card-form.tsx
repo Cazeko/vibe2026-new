@@ -558,7 +558,10 @@ function PdfViewer({
   itemFormat: string | null;
   itemPoints: number | null;
 }) {
-  const ZOOM_STEPS = [0.6, 0.8, 1, 1.25, 1.5, 2, 3];
+  // 주인님 보고 #24 (2026-05-15) — 1 미만(0.6/0.8)으로 축소 시 transform scale
+  // 보간이 거칠어 본문 텍스트가 깨져 보이던 회귀. base 가 이미 viewport 폭에
+  // 맞춰진 1.0 이라 더 작게 만들 동기도 약함 — 최저값을 1 로 끌어올린다.
+  const ZOOM_STEPS = [1, 1.25, 1.5, 2, 3];
   const MIN_ZOOM = ZOOM_STEPS[0];
   const MAX_ZOOM = ZOOM_STEPS[ZOOM_STEPS.length - 1];
   const [pageIndex, setPageIndex] = useState(0);
@@ -614,32 +617,31 @@ function PdfViewer({
     });
   }, [ZOOM_STEPS]);
 
-  // 휠 줌 — 커서 위치 anchor.
-  const handleWheel = useCallback(
-    (e: React.WheelEvent<HTMLDivElement>) => {
+  // 주인님 보고 #25 (2026-05-15) — React onWheel 은 passive listener 로
+  // 부착되어 e.preventDefault() 가 무시되고 fitly 페이지가 같이 스크롤되던
+  // 회귀. native addEventListener({ passive: false }) 로 직접 등록한다.
+  useEffect(() => {
+    const vp = viewportRef.current;
+    if (!vp) return;
+    function onWheel(e: WheelEvent) {
       if (!hasImage) return;
-      // 휠 스크롤은 페이지 스크롤이 아닌 줌으로 전용.
+      // 페이지 스크롤 차단 — passive: false 일 때만 유효.
       e.preventDefault();
+      e.stopPropagation();
       const dir = e.deltaY > 0 ? -1 : 1;
-      const vp = viewportRef.current;
-      if (!vp) {
-        nextStep(dir);
-        return;
-      }
-      const rect = vp.getBoundingClientRect();
+      const rect = vp!.getBoundingClientRect();
       const cx = e.clientX - rect.left - rect.width / 2;
       const cy = e.clientY - rect.top - rect.height / 2;
       setZoom((prevZoom) => {
         const idx = ZOOM_STEPS.findIndex(
           (s) => Math.abs(s - prevZoom) < 0.01,
         );
-        const cur = idx === -1 ? prevZoom : prevZoom;
         const curIdx =
           idx === -1
             ? ZOOM_STEPS.reduce(
                 (best, _s, i) =>
-                  Math.abs(ZOOM_STEPS[i] - cur) <
-                  Math.abs(ZOOM_STEPS[best] - cur)
+                  Math.abs(ZOOM_STEPS[i] - prevZoom) <
+                  Math.abs(ZOOM_STEPS[best] - prevZoom)
                     ? i
                     : best,
                 0,
@@ -651,20 +653,20 @@ function PdfViewer({
         );
         const nextZ = ZOOM_STEPS[nextIdx];
         if (Math.abs(nextZ - prevZoom) < 0.001) return prevZoom;
-        // anchor 보정 — 줌 전 cursor offset 을 줌 후에도 같은 점에 매핑.
         const ratio = nextZ / prevZoom;
         setOffset((o) => {
-          const nx = cx - (cx - o.x) * ratio;
-          const ny = cy - (cy - o.y) * ratio;
-          // 줌 1 이하로 복귀하면 중앙 정렬.
           if (nextZ <= 1.001) return { x: 0, y: 0 };
-          return { x: nx, y: ny };
+          return {
+            x: cx - (cx - o.x) * ratio,
+            y: cy - (cy - o.y) * ratio,
+          };
         });
         return nextZ;
       });
-    },
-    [ZOOM_STEPS, hasImage, nextStep],
-  );
+    }
+    vp.addEventListener("wheel", onWheel, { passive: false });
+    return () => vp.removeEventListener("wheel", onWheel);
+  }, [ZOOM_STEPS, hasImage]);
 
   // pointer-down — 단일 포인터면 drag pan 시작, 두 번째 포인터면 핀치 진입.
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
@@ -826,17 +828,16 @@ function PdfViewer({
         </div>
       </div>
 
-      {/* 뷰포트 — 줌/팬 인터랙션 영역. */}
+      {/* 뷰포트 — 줌/팬 인터랙션 영역. wheel 은 useEffect 에서 native passive:false 로 부착. */}
       {hasImage && src && (
         <div
           ref={viewportRef}
-          onWheel={handleWheel}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerEnd}
           onPointerCancel={onPointerEnd}
           onPointerLeave={onPointerEnd}
-          className="relative rounded-md border border-rule overflow-hidden bg-cream-soft select-none touch-none"
+          className="relative rounded-md border border-rule overflow-hidden bg-cream-soft select-none touch-none overscroll-contain"
           style={{
             height: "min(70vh, 720px)",
             cursor:
@@ -855,12 +856,15 @@ function PdfViewer({
             draggable={false}
             className="absolute left-1/2 top-1/2 max-w-none origin-center transition-transform dark:[filter:brightness(0.85)_contrast(1.15)]"
             style={{
-              transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${zoom})`,
+              // translateZ(0) 으로 GPU compositing 강제 → scale transform 보간이
+              // 일관되게 high-quality 경로를 타도록 한다.
+              transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) translateZ(0) scale(${zoom})`,
               transitionDuration: dragging ? "0ms" : "120ms",
-              // 본 뷰포트 전체에 맞춰 base width 100%. 줌이 그 위로 곱해진다.
               width: "100%",
               height: "auto",
               willChange: "transform",
+              imageRendering: "auto",
+              backfaceVisibility: "hidden",
             }}
             loading="lazy"
           />

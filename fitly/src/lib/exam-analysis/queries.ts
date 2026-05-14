@@ -312,6 +312,17 @@ export const getFormatHeatmap = cache(async (): Promise<HeatmapMatrix> => {
 
 // ── 4. topicCloud — topic 탭 ───────────────────────────────────────────────
 
+// 주인님 보고 #13 (2026-05-14) — '~~~ 교육과정' 류 일반 라벨은 학습 키워드가
+// 아니라 분류 메타라 빈도를 잡아먹어 클라우드 의미를 흐린다. 필터링.
+// 본 stopword 패턴은 SQL 레벨에서 *전체 키워드 풀*을 좁히는 데 사용.
+const STOPWORD_PATTERNS = [
+  "%교육과정%", // 2007 개정 교육과정, 초등 교육과정, 교과통합 (포함 매칭)
+  "%교과통합%",
+  "초등",
+  "임용",
+  "기출",
+];
+
 export const getKeywordCloud = cache(async (limit = 60): Promise<KeywordTone[]> => {
   return safeRun(
     "exam-analysis getKeywordCloud",
@@ -324,6 +335,12 @@ export const getKeywordCloud = cache(async (limit = 60): Promise<KeywordTone[]> 
         from exam_items ei
         cross join lateral jsonb_array_elements_text(ei.keywords) as k(value)
         where length(trim(k.value)) > 0
+          and not (
+            ${sql.join(
+              STOPWORD_PATTERNS.map((p) => sql`k.value ilike ${p}`),
+              sql` or `,
+            )}
+          )
         group by k.value
         order by cnt desc, k.value asc
         limit ${limit}
