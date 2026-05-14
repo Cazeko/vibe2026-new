@@ -7,6 +7,8 @@ import { getDb } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import {
   cards,
+  examItems,
+  examPapers,
   userAttempts,
   userCardAiAnalysis,
   userCardHighlights,
@@ -18,7 +20,16 @@ import {
   analyzeEssay,
   computeAttemptHash,
 } from "@/lib/ai/gemini-essay-analyze";
-import { getAiAnalysis, type AiAnalysis } from "@/lib/db/queries";
+import {
+  chatWithTutor as chatWithTutorLLM,
+  type ChatMessage,
+  type TutorContext,
+} from "@/lib/ai/gemini-tutor-chat";
+import {
+  getAiAnalysis,
+  formatPaperLabel,
+  type AiAnalysis,
+} from "@/lib/db/queries";
 
 // 헌법 v3.0 제13조의2 — 학습 활동 server actions.
 // 답안 저장 + 자가 채점 등급 처리 (현 시점은 단순 spaced repetition,
@@ -487,6 +498,77 @@ export async function requestAiAnalysis(
   } catch (e) {
     const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
     console.error(`[requestAiAnalysis] LLM call failed. cause=${msg}`);
+    return { ok: false, error: "LlmFailed" };
+  }
+}
+
+// 헌법 v3.6.1 §16 단서 + §18 A 매트릭스 (튜터 챗봇 행) — PR 6/6.
+// 카드 컨텍스트(본문·모범답안·사용자 답안·AI 분석 캐시) 자동 주입 후 Gemini
+// Flash multi-turn 호출. 대화 history 는 클라이언트가 보존 (세션 메모리 +
+// localStorage). 본 server action 은 single-turn 처리이며 history 는 클라이언트
+// 가 매 호출마다 전체 전송.
+
+export type ChatTutorResult =
+  | { ok: true; reply: string; model: string }
+  | { ok: false; error: string };
+
+const MAX_MESSAGE_LEN = 2000;
+
+export async function chatWithTutor(input: {
+  cardId: string;
+  userAnswer: string;
+  history: ChatMessage[];
+  newMessage: string;
+}): Promise<ChatTutorResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Unauthorized" };
+
+  const msg = input.newMessage.trim();
+  if (!msg) return { ok: false, error: "EmptyMessage" };
+  if (msg.length > MAX_MESSAGE_LEN) return { ok: false, error: "TooLong" };
+
+  const db = getDb();
+  // 카드 + paper label 조인 — Tutor 컨텍스트.
+  const [row] = await db
+    .select({
+      backMd: cards.backMd,
+      frontText: cards.frontText,
+      paperYear: examPapers.year,
+      paperSession: examPapers.session,
+      itemNo: examItems.itemNo,
+    })
+    .from(cards)
+    .leftJoin(examItems, eq(cards.sourceItemId, examItems.id))
+    .leftJoin(examPapers, eq(examItems.paperId, examPapers.id))
+    .where(eq(cards.id, input.cardId))
+    .limit(1);
+
+  if (!row) return { ok: false, error: "CardNotFound" };
+  if (!row.backMd) return { ok: false, error: "NoReference" };
+
+  // AI 분석 캐시 hit 여부 확인 — 있으면 system instruction 에 포함.
+  const attemptHash = computeAttemptHash(input.userAnswer);
+  const cached = await getAiAnalysis(user.id, input.cardId, attemptHash);
+
+  const ctx: TutorContext = {
+    paperLabel: formatPaperLabel(row.paperYear, row.paperSession, row.itemNo),
+    frontText: row.frontText ?? "",
+    backMd: row.backMd,
+    userAnswer: input.userAnswer,
+    analysis: cached
+      ? { overview: cached.overview, keywords: cached.keywords }
+      : null,
+  };
+
+  try {
+    const { reply, model } = await chatWithTutorLLM(ctx, input.history, msg);
+    return { ok: true, reply, model };
+  } catch (e) {
+    const errMsg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    console.error(`[chatWithTutor] LLM call failed. cause=${errMsg}`);
     return { ok: false, error: "LlmFailed" };
   }
 }

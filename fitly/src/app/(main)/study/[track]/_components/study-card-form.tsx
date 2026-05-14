@@ -29,6 +29,7 @@ import { HighlightLayer } from "./highlight-layer";
 import { CardTags } from "./card-tags";
 import { WorkspaceTopbar } from "./workspace-topbar";
 import { AnalysisPanel } from "./analysis-panel";
+import { AssistantFab } from "./assistant-fab";
 
 type CardData = {
   id: string;
@@ -508,6 +509,12 @@ export function StudyCardForm({
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* 헌법 v3.6.1 §16 단서 — 학습 본업(풀이 트랙) 한정 AI 학습 도우미.
+          fixed 진입점이라 SplitView 외부, 페이지 우측 하단 floating. */}
+      {isWorkspaceTrack && (
+        <AssistantFab cardId={card.id} userAnswer={answer} />
       )}
     </div>
   );
