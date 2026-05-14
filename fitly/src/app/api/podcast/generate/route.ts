@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, count, eq, gte } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { podcastEpisodes } from "@/lib/db/schema";
@@ -10,12 +10,22 @@ import { uploadPodcastAudio } from "@/lib/podcast/storage";
 // 헌법 §15 — 팟캐스트 생성은 script(gemini-3.1-pro-preview) → TTS(gemini-2.5-flash-preview-tts) → Storage 업로드 순.
 // 헌법 §3.2 정직성 — 모든 episode default verified=false. 운영자 검수 후 true 갱신.
 // 헌법 §35 백업 — 어떤 단계든 실패 시 정직 보고 (사용자에게 즉시 알림).
+// 법률17 제28조 정합 — per-user 일일 생성 캡으로 Gemini 호출 비용 폭주 차단.
+//   PODCAST_DAILY_LIMIT 초과 시 429 반환.
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 // Vercel Hobby 60초 한도. TTS 한 번에 30~50초 소요 가능 — 한도 안에서 짧은 dialogue 우선.
 export const maxDuration = 60;
 export const preferredRegion = "icn1";
+
+const PODCAST_DAILY_LIMIT = 5;
+const IS_PROD = process.env.NODE_ENV === "production";
+
+function errorPayload(label: string, e: unknown): { error: string; detail?: string } {
+  const detail = e instanceof Error ? e.message : String(e);
+  return IS_PROD ? { error: label } : { error: label, detail };
+}
 
 type GenerateBody = {
   theme: string;
@@ -57,19 +67,46 @@ export async function POST(req: Request) {
     );
   }
 
+  // 법률17 제28조 정합 — per-user 일일 캡.
+  const db = getDb();
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  try {
+    const [row] = await db
+      .select({ n: count() })
+      .from(podcastEpisodes)
+      .where(
+        and(
+          eq(podcastEpisodes.userId, user.id),
+          gte(podcastEpisodes.generatedAt, startOfDay),
+        ),
+      );
+    const todayCount = Number(row?.n ?? 0);
+    if (todayCount >= PODCAST_DAILY_LIMIT) {
+      return NextResponse.json(
+        {
+          error: `오늘 생성 한도(${PODCAST_DAILY_LIMIT}회)를 초과하였습니다. 내일 다시 시도해 주세요.`,
+        },
+        { status: 429 },
+      );
+    }
+  } catch (e) {
+    console.error("[podcast/generate] quota check error", e);
+    // quota 조회 실패 시 안전한 쪽으로 차단.
+    return NextResponse.json(errorPayload("생성 가능 여부 확인 실패", e), {
+      status: 500,
+    });
+  }
+
   // Stage A: 스크립트 생성
   let script;
   try {
     script = await generatePodcastScript(theme);
   } catch (e) {
     console.error("[podcast/generate] script error", e);
-    return NextResponse.json(
-      {
-        error: "스크립트 생성 실패",
-        detail: e instanceof Error ? e.message : String(e),
-      },
-      { status: 502 },
-    );
+    return NextResponse.json(errorPayload("스크립트 생성 실패", e), {
+      status: 502,
+    });
   }
 
   // Stage B: TTS
@@ -82,16 +119,12 @@ export async function POST(req: Request) {
   } catch (e) {
     console.error("[podcast/generate] tts error", e);
     return NextResponse.json(
-      {
-        error: "음성 합성 실패 (백업: 단일 화자 또는 다음 시도)",
-        detail: e instanceof Error ? e.message : String(e),
-      },
+      errorPayload("음성 합성 실패 (백업: 단일 화자 또는 다음 시도)", e),
       { status: 502 },
     );
   }
 
   // Stage C: DB insert (episodeId 먼저 발급) + Storage upload + audio_url 갱신
-  const db = getDb();
   let episodeId: string;
   try {
     const [row] = await db
@@ -109,13 +142,9 @@ export async function POST(req: Request) {
     episodeId = row.id;
   } catch (e) {
     console.error("[podcast/generate] db insert error", e);
-    return NextResponse.json(
-      {
-        error: "DB 기록 실패",
-        detail: e instanceof Error ? e.message : String(e),
-      },
-      { status: 500 },
-    );
+    return NextResponse.json(errorPayload("DB 기록 실패", e), {
+      status: 500,
+    });
   }
 
   // Stage D: Storage upload + audio_url update
@@ -140,10 +169,7 @@ export async function POST(req: Request) {
         console.error("[podcast/generate] cleanup delete failed", delErr);
       });
     return NextResponse.json(
-      {
-        error: "Storage 업로드 실패 — 다시 시도해 주세요",
-        detail: e instanceof Error ? e.message : String(e),
-      },
+      errorPayload("Storage 업로드 실패 — 다시 시도해 주세요", e),
       { status: 502 },
     );
   }
