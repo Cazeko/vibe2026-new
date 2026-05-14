@@ -404,3 +404,44 @@
     hsl(var(--color-rule)) 100%
   );
 }
+
+/* 헌법 v3.5.1 제16조 — 오답노트 인쇄 (`/study/mistake-print`).
+ * 브라우저 인쇄 다이얼로그 → 사용자가 "PDF로 저장" 선택. 외부 의존성 0.
+ * 시행규칙 32 제34조 정합 — 신규 모듈 X, 오답 트랙의 자연스러운 출력 기능. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .print-root {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-card + .print-card {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .print-card .border,
+  .print-card .border-rule,
+  .print-card .border-rule-strong {
+    border-color: #888 !important;
+  }
+
+  @page {
+    margin: 1.4cm 1.2cm;
+  }
+}

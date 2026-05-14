@@ -404,3 +404,57 @@ export async function getCardTags(
     [],
   );
 }
+
+// 헌법 v3.5.1 제16조 — 오답노트 인쇄용 (다듬기). 사용자의 mistake 카드 전체 페치.
+// limit 없이 전부 — 인쇄 데이터셋이라 due 필터 미적용.
+// 정렬: 최근 합류 순 (cards.createdAt desc) — 최신 오답이 앞에 노출되어
+// 출제연도 역순 시각과 정합.
+export type MistakePrintCard = {
+  id: string;
+  frontText: string;
+  backMd: string | null;
+  verifiedAnswer: boolean;
+  paperLabel: string | null;
+  itemFormat: string | null;
+  itemPoints: number | null;
+};
+
+export async function getMistakeCardsForPrint(
+  userId: string,
+): Promise<MistakePrintCard[]> {
+  return safeRun(
+    "getMistakeCardsForPrint",
+    async () => {
+      const db = getDb();
+      const rows = await db
+        .select({
+          id: cards.id,
+          frontText: cards.frontText,
+          backMd: cards.backMd,
+          verifiedAnswer: cards.verifiedAnswer,
+          paperYear: examPapers.year,
+          paperSession: examPapers.session,
+          itemNo: examItems.itemNo,
+          itemFormat: examItems.format,
+          itemPoints: examItems.points,
+          createdAt: cards.createdAt,
+        })
+        .from(cards)
+        .leftJoin(examItems, eq(cards.sourceItemId, examItems.id))
+        .leftJoin(examPapers, eq(examItems.paperId, examPapers.id))
+        .where(and(eq(cards.type, "mistake"), eq(cards.userId, userId)))
+        .orderBy(sql`${cards.createdAt} desc`);
+
+      return rows.map((r) => ({
+        id: r.id,
+        frontText: r.frontText,
+        backMd: r.backMd,
+        verifiedAnswer: r.verifiedAnswer,
+        paperLabel: formatPaperLabel(r.paperYear, r.paperSession, r.itemNo),
+        itemFormat: r.itemFormat,
+        itemPoints: r.itemPoints,
+      }));
+    },
+    [],
+  );
+}
