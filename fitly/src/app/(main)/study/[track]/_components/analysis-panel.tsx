@@ -54,7 +54,7 @@ type TabSpec = {
 const TABS: TabSpec[] = [
   { key: "overview", label: "AI 총평", Icon: Sparkles, unlocked: true },
   { key: "keywords", label: "키워드 비교", Icon: KeyRound, unlocked: true },
-  { key: "diff", label: "답안 비교", Icon: GitCompare, unlocked: false },
+  { key: "diff", label: "답안 비교", Icon: GitCompare, unlocked: true },
   { key: "reference", label: "모범답안", Icon: BookOpenCheck, unlocked: true },
   { key: "explanation", label: "해설", Icon: FileText, unlocked: true },
 ];
@@ -195,6 +195,8 @@ export function AnalysisPanel({
           <OverviewTab analysis={analysis} hasReference={!!backMd} />
         ) : active === "keywords" ? (
           <KeywordsTab analysis={analysis} hasReference={!!backMd} />
+        ) : active === "diff" ? (
+          <DiffTab analysis={analysis} hasReference={!!backMd} />
         ) : active === "reference" ? (
           <ReferenceTab
             cardId={cardId}
@@ -527,6 +529,167 @@ function KeywordsTab({
         ))}
       </ul>
     </div>
+  );
+}
+
+// 헌법 §3의2 + Cursor 스타일 라인 단위 diff.
+// 색상 정합 (DESIGN.md §4.3 / 헌법 §16의2)
+//   common  — 무색, 본문 톤
+//   missing — evergreen (모범답안에 있고 학습자 답안에 없음 → 추가해야 할 부분)
+//   extra   — warning (학습자 답안에만 있음 → 모범에는 없는 내용)
+// 좌측 게터에 +/=/- 기호로 git diff 시각화.
+function DiffTab({
+  analysis,
+  hasReference,
+}: {
+  analysis: AnalysisState;
+  hasReference: boolean;
+}) {
+  if (!hasReference) {
+    return (
+      <div className="flex items-start gap-3 rounded-md border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30 p-4">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-warning" aria-hidden />
+        <p className="text-[12.5px] leading-relaxed text-foreground/80">
+          모범답안이 시드되지 않아 답안 비교를 표시할 수 없습니다.
+        </p>
+      </div>
+    );
+  }
+
+  if (analysis.status === "idle" || analysis.status === "loading") {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Loader2 className="h-6 w-6 animate-spin text-evergreen" aria-hidden />
+        <p className="mt-3 text-[13px] font-medium text-foreground/85">
+          답안 차이를 분석하고 있습니다
+        </p>
+      </div>
+    );
+  }
+
+  if (analysis.status === "error") {
+    return (
+      <div className="flex items-start gap-3 rounded-md border-l-[3px] border-l-error border-y border-r border-rule bg-secondary/30 p-4">
+        <AlertCircle className="h-5 w-5 shrink-0 text-error" aria-hidden />
+        <p className="text-[12.5px] leading-relaxed text-foreground/80">
+          AI 분석에 일시적으로 실패했습니다.
+          <br />
+          잠시 후 다시 채점하거나 모범답안 탭에서 직접 비교해 주세요.
+        </p>
+      </div>
+    );
+  }
+
+  const { segments } = analysis.diff;
+
+  if (segments.length === 0) {
+    return (
+      <div className="flex items-start gap-3 rounded-md border-l-[3px] border-l-warning border-y border-r border-rule bg-secondary/30 p-4">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-warning" aria-hidden />
+        <p className="text-[12.5px] leading-relaxed text-foreground/80">
+          비교할 텍스트가 추출되지 않았습니다. 모범답안 탭에서 직접 비교해
+          주세요.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* 범례 */}
+      <div className="flex items-center gap-2 flex-wrap text-[10.5px] text-muted-foreground">
+        <span className="uppercase tracking-[0.12em]">범례</span>
+        <LegendChip tone="common" label="공통" sign="=" />
+        <LegendChip tone="missing" label="모범 — 추가 필요" sign="+" />
+        <LegendChip tone="extra" label="답안 — 모범 외" sign="−" />
+        {analysis.cached && (
+          <span className="ml-auto text-[10.5px] text-muted-foreground">
+            캐시된 결과
+          </span>
+        )}
+      </div>
+
+      {/* 라인 단위 diff */}
+      <div
+        className="rounded-md border border-rule overflow-hidden bg-card font-mono"
+        aria-label="모범답안 답안 라인 단위 비교"
+      >
+        {segments.map((seg, i) => (
+          <DiffLine key={i} segment={seg} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DiffLine({
+  segment,
+}: {
+  segment: { type: "common" | "missing" | "extra"; text: string };
+}) {
+  const { type, text } = segment;
+  const sign = type === "missing" ? "+" : type === "extra" ? "−" : "=";
+  // 색 토큰
+  //   missing — evergreen 좌측 막대 + 미세 배경 (강조 — "모범에 있는 내용")
+  //   extra   — warning 좌측 막대 + 미세 배경 (모범에 없는 내용)
+  //   common  — rule 좌측 막대, 배경 없음
+  const tone =
+    type === "missing"
+      ? "border-l-evergreen bg-evergreen/5"
+      : type === "extra"
+        ? "border-l-warning bg-warning/5"
+        : "border-l-rule";
+  const signColor =
+    type === "missing"
+      ? "text-evergreen"
+      : type === "extra"
+        ? "text-warning-text"
+        : "text-muted-foreground/60";
+  const bodyColor =
+    type === "missing"
+      ? "text-foreground/95"
+      : type === "extra"
+        ? "text-foreground/85"
+        : "text-foreground/80";
+  return (
+    <div
+      className={`flex gap-3 border-l-[3px] ${tone} px-3 py-1.5 text-[12.5px] leading-[1.65]`}
+    >
+      <span
+        aria-hidden
+        className={`shrink-0 w-3 text-center tabular-nums select-none ${signColor}`}
+      >
+        {sign}
+      </span>
+      <span className={`flex-1 whitespace-pre-wrap break-words ${bodyColor}`}>
+        {text}
+      </span>
+    </div>
+  );
+}
+
+function LegendChip({
+  tone,
+  label,
+  sign,
+}: {
+  tone: "common" | "missing" | "extra";
+  label: string;
+  sign: string;
+}) {
+  const cls =
+    tone === "missing"
+      ? "border-evergreen/40 text-evergreen"
+      : tone === "extra"
+        ? "border-warning/40 text-warning-text"
+        : "border-rule text-muted-foreground";
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 ${cls}`}
+    >
+      <span className="tabular-nums">{sign}</span>
+      <span>{label}</span>
+    </span>
   );
 }
 
