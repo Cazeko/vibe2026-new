@@ -87,7 +87,7 @@ export function DashboardHeader() {
             유지. 사용자 시선이 지나치게 빨려들어가던 회귀 해소. */}
         <Link
           href="/study/quiz"
-          className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-4 text-[13.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
+          className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-4 text-[13.5px] font-semibold text-primary-foreground hover:bg-evergreen-strong transition-colors"
         >
           <Play className="h-3.5 w-3.5 text-gold" aria-hidden />
           <span>오늘 학습 시작</span>

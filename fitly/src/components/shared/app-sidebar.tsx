@@ -204,7 +204,7 @@ export function AppSidebar() {
                     // 다크는 evergreen-strong + shadow (38%→50% 광도) 로 비-active 와 명확 분리.
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium tracking-[-0.01em] transition-colors",
                     active
-                      ? "bg-evergreen text-white dark:bg-evergreen-strong dark:shadow-[0_1px_0_0_hsl(var(--color-gold)/0.18)_inset]"
+                      ? "bg-evergreen text-primary-foreground dark:bg-evergreen-strong dark:shadow-[0_1px_0_0_hsl(var(--color-gold)/0.18)_inset]"
                       : "text-ink-2 hover:bg-evergreen/[0.06] dark:text-cream/85 dark:hover:bg-evergreen/[0.10]"
                   )}
                 >

@@ -101,7 +101,7 @@ function OnboardingBanner() {
         </Link>
         <Link
           href="/exam-analysis"
-          className="inline-flex h-9 items-center gap-1 rounded-lg bg-evergreen px-3 text-[12.5px] font-semibold text-white hover:bg-evergreen-strong transition-colors"
+          className="inline-flex h-9 items-center gap-1 rounded-lg bg-evergreen px-3 text-[12.5px] font-semibold text-primary-foreground hover:bg-evergreen-strong transition-colors"
         >
           2) 기출 분석 시작
           <ArrowRight className="h-3.5 w-3.5" aria-hidden />

@@ -228,7 +228,7 @@ export function AssistantFab({ cardId, userAnswer }: Props) {
       aria-label="AI 학습 도우미 열기"
       onClick={() => setOpen(true)}
       style={{ bottom: fabBottom }}
-      className="fixed right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-evergreen text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2"
+      className="fixed right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-evergreen text-primary-foreground shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2"
     >
       <Sparkles className="h-5 w-5" aria-hidden />
     </button>
@@ -423,7 +423,7 @@ function ChatBubble({
       <div
         className={`max-w-[85%] rounded-lg px-3.5 py-2.5 text-[13px] leading-[1.65] ${
           isUser
-            ? "bg-evergreen text-white"
+            ? "bg-evergreen text-primary-foreground"
             : "bg-card border border-rule text-foreground/90"
         }`}
       >
@@ -498,7 +498,7 @@ function InputBar({
           onClick={onSubmit}
           disabled={disabled || value.trim().length === 0}
           aria-label="전송"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-evergreen text-white hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-evergreen text-primary-foreground hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
         >
           {disabled ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

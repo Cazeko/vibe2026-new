@@ -311,7 +311,7 @@ export default async function MePage() {
             </Link>
             <Link
               href="/settings"
-              className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-[18px] text-[13px] font-semibold text-white hover:bg-evergreen-strong transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex h-10 items-center gap-2 rounded-lg bg-evergreen px-[18px] text-[13px] font-semibold text-primary-foreground hover:bg-evergreen-strong transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Settings className="h-3.5 w-3.5" aria-hidden />
               계정 설정
@@ -507,6 +507,7 @@ export default async function MePage() {
             본인 계정의 실제 학습 데이터
           </strong>
           만으로 산출됩니다.
+          <br />
           외부 비교 지표는 사용하지 않습니다.
         </p>
       </div>

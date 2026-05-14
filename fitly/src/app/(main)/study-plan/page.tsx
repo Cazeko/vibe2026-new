@@ -160,7 +160,7 @@ export default async function StudyPlanPage() {
               </h2>
               {summary.kpi.daysToExam != null && (
                 <span className="ml-auto rounded-full bg-evergreen/10 px-2 py-0.5 text-[11px] font-semibold text-evergreen">
-                  D-{summary.kpi.daysToExam}
+                  D−{summary.kpi.daysToExam}
                 </span>
               )}
             </div>
