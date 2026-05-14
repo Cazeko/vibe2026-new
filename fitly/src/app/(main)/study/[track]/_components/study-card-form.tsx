@@ -79,6 +79,7 @@ const GRADES: {
 ];
 
 const DRAFT_KEY_PREFIX = "fitly:draft:";
+const BLIND_KEY = "fitly:blind-mode";
 
 export function StudyCardForm({
   card,
@@ -94,6 +95,9 @@ export function StudyCardForm({
   const [stemExpanded, setStemExpanded] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  // 헌법 v3.5.1 제16조 — 블라인드(가리기) 모드. localStorage 글로벌 보존.
+  const [blindMode, setBlindMode] = useState(false);
+  const toggleBlind = () => setBlindMode((v) => !v);
   const [pending, startTransition] = useTransition();
   const answerCompareRef = useRef<HTMLDivElement | null>(null);
   const draftRestoredRef = useRef(false);
@@ -157,6 +161,18 @@ export function StudyCardForm({
     if (typeof window === "undefined") return;
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [card.id]);
+
+  // 블라인드 모드 localStorage hydrate (마운트 1회).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.localStorage.getItem(BLIND_KEY) === "1") setBlindMode(true);
+  }, []);
+
+  // 블라인드 모드 localStorage persist.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(BLIND_KEY, blindMode ? "1" : "0");
+  }, [blindMode]);
 
   useEffect(() => {
     draftRestoredRef.current = false;
@@ -353,6 +369,8 @@ export function StudyCardForm({
             verified={card.verifiedAnswer}
             cardId={card.id}
             highlights={highlights}
+            blindMode={blindMode}
+            onToggleBlind={toggleBlind}
           />
         </div>
       )}
@@ -429,6 +447,8 @@ export function StudyCardForm({
               zoomable
               cardId={card.id}
               highlights={highlights}
+              blindMode={blindMode}
+              onToggleBlind={toggleBlind}
             />
           )}
           {revealed && !card.backMd && (
@@ -571,6 +591,8 @@ function AnswerBox({
   zoomable = false,
   cardId,
   highlights,
+  blindMode = false,
+  onToggleBlind,
 }: {
   label: string;
   tone: "evergreen" | "muted";
@@ -581,6 +603,9 @@ function AnswerBox({
   // 헌법 v3.5.1 제16조 — 사용자 형광펜 prop. plainText("내 답안") 에는 비전달.
   cardId?: string;
   highlights?: CardHighlight[];
+  // 헌법 v3.5.1 제16조 — 블라인드(가리기) 모드. plainText 박스에는 미적용.
+  blindMode?: boolean;
+  onToggleBlind?: () => void;
 }) {
   const toneClass =
     tone === "evergreen"
@@ -610,31 +635,61 @@ function AnswerBox({
             {label}
           </span>
           {verified !== undefined && <SourceBadge verified={verified} />}
-          {zoomable && (
-            // v3.6 외부 평가 #3.10 — 모바일 오터치 회피. 버튼 hitbox h-8 w-8 +
-            // gap-1.5 로 확대. 시각 크기는 동일하나 터치 영역 ≥32×32 (모바일).
+          {(onToggleBlind || zoomable) && (
             <span className="ml-auto inline-flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => adjustZoom(-1)}
-                disabled={zoom <= ZOOM_STEPS[0]}
-                aria-label="글자 작게"
-                className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <span className="text-[12px] leading-none">A−</span>
-              </button>
-              <span className="text-[10px] text-muted-foreground tabular-nums w-9 text-center">
-                {Math.round(zoom * 100)}%
-              </span>
-              <button
-                type="button"
-                onClick={() => adjustZoom(1)}
-                disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
-                aria-label="글자 크게"
-                className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <span className="text-[12px] leading-none">A+</span>
-              </button>
+              {/* 헌법 v3.5.1 제16조 — 블라인드 모드 토글. markdown 본문 의 strong
+                  (학습 핵심 마크업) 을 검정 박스로 가린다. 클릭 시 단어별 reveal. */}
+              {markdown && onToggleBlind && (
+                <button
+                  type="button"
+                  onClick={onToggleBlind}
+                  aria-pressed={blindMode}
+                  aria-label={
+                    blindMode
+                      ? "블라인드 모드 끄기"
+                      : "블라인드 모드 켜기 — 핵심 키워드 가리기"
+                  }
+                  className={`inline-flex items-center gap-1 h-8 px-2 rounded border text-[11px] transition-colors ${
+                    blindMode
+                      ? "border-foreground/60 bg-foreground/10 text-foreground"
+                      : "border-rule text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                  }`}
+                >
+                  {blindMode ? (
+                    <EyeOff className="h-3.5 w-3.5" aria-hidden />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5" aria-hidden />
+                  )}
+                  <span>블라인드</span>
+                </button>
+              )}
+              {zoomable && (
+                // v3.6 외부 평가 #3.10 — 모바일 오터치 회피. 버튼 hitbox h-8 w-8 +
+                // gap-1.5 로 확대. 시각 크기는 동일하나 터치 영역 ≥32×32 (모바일).
+                <>
+                  <button
+                    type="button"
+                    onClick={() => adjustZoom(-1)}
+                    disabled={zoom <= ZOOM_STEPS[0]}
+                    aria-label="글자 작게"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <span className="text-[12px] leading-none">A−</span>
+                  </button>
+                  <span className="text-[10px] text-muted-foreground tabular-nums w-9 text-center">
+                    {Math.round(zoom * 100)}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => adjustZoom(1)}
+                    disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
+                    aria-label="글자 크게"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded border border-rule text-muted-foreground hover:bg-secondary/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <span className="text-[12px] leading-none">A+</span>
+                  </button>
+                </>
+              )}
             </span>
           )}
         </div>
@@ -652,10 +707,14 @@ function AnswerBox({
                 surface="back_md"
                 initialHighlights={highlights ?? []}
               >
-                <Markdown serif>{markdown}</Markdown>
+                <Markdown serif blind={blindMode}>
+                  {markdown}
+                </Markdown>
               </HighlightLayer>
             ) : (
-              <Markdown serif>{markdown}</Markdown>
+              <Markdown serif blind={blindMode}>
+                {markdown}
+              </Markdown>
             )
           ) : (
             <div className="font-sans text-[13.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
