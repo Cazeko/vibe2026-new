@@ -710,6 +710,23 @@ function ReferenceTab({
   onToggleBlind: () => void;
 }) {
   const layerRef = useRef<HighlightLayerHandle | null>(null);
+  // F4 (2026-05-15) — selection 비어 있을 때 형광펜 버튼 입력에 가벼운 토스트.
+  // aria-live=polite 로 스크린리더 호환.
+  const [hint, setHint] = useState<string | null>(null);
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    };
+  }, []);
+  function applyColor(color: "yellow" | "green" | "pink" | "underline") {
+    const ok = layerRef.current?.applyColorToSelection(color);
+    if (!ok) {
+      setHint("본문에서 텍스트를 드래그한 뒤 버튼을 눌러 주세요.");
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+      hintTimerRef.current = setTimeout(() => setHint(null), 2400);
+    }
+  }
 
   if (!backMd) {
     return (
@@ -752,34 +769,42 @@ function ReferenceTab({
             )}
             <span>블라인드</span>
           </button>
-          {/* 주인님 보고 #5 (2026-05-14) — 형광펜·밑줄 토글 버튼. 텍스트 selection
-              이 있으면 그 selection 에 색을 즉시 적용한다. selection 없으면
-              사용자에게 안내. 드래그 후 자동 팝업 진입점은 그대로 보존된다. */}
           <HighlightToolButton
             label="노랑"
             ariaLabel="선택한 텍스트에 노랑 형광펜"
             tone="yellow"
-            onClick={() => triggerColor(layerRef, "yellow")}
+            onClick={() => applyColor("yellow")}
           />
           <HighlightToolButton
             label="초록"
             ariaLabel="선택한 텍스트에 초록 형광펜"
             tone="green"
-            onClick={() => triggerColor(layerRef, "green")}
+            onClick={() => applyColor("green")}
           />
           <HighlightToolButton
             label="분홍"
             ariaLabel="선택한 텍스트에 분홍 형광펜"
             tone="pink"
-            onClick={() => triggerColor(layerRef, "pink")}
+            onClick={() => applyColor("pink")}
           />
           <HighlightToolButton
             label="밑줄"
             ariaLabel="선택한 텍스트에 밑줄"
             tone="underline"
-            onClick={() => triggerColor(layerRef, "underline")}
+            onClick={() => applyColor("underline")}
           />
         </div>
+      </div>
+
+      {/* F4 — selection 비어 있을 때 안내 토스트 (aria-live). */}
+      <div
+        role="status"
+        aria-live="polite"
+        className={`text-[11px] text-muted-foreground transition-opacity duration-200 ${
+          hint ? "opacity-100" : "opacity-0 h-0"
+        }`}
+      >
+        {hint}
       </div>
 
       <div className="rounded-md border-l-4 border-evergreen border-y border-r border-rule bg-card p-4">
@@ -796,25 +821,6 @@ function ReferenceTab({
       </div>
     </div>
   );
-}
-
-// 외부 툴바에서 HighlightLayer 의 imperative handle 호출. selection 없으면
-// 안내 토스트 대신 가벼운 콘솔 noop — 주인님 보고 #5 정합.
-function triggerColor(
-  ref: React.RefObject<HighlightLayerHandle | null>,
-  color: "yellow" | "green" | "pink" | "underline",
-) {
-  const ok = ref.current?.applyColorToSelection(color);
-  if (!ok) {
-    // 안내: selection 가 없으면 시각 강조 없이 noop. 사용자 발화 #5 정합 —
-    // 드래그 후 자동 팝업 흐름은 그대로라 본 버튼은 *대체 진입점* 위치.
-    if (typeof window !== "undefined") {
-      // 알림은 가볍게 — DOM 토스트 없이 selection 안내만.
-      console.info(
-        "[fitly] 본문에서 텍스트를 드래그한 뒤 형광펜/밑줄 버튼을 눌러주세요.",
-      );
-    }
-  }
 }
 
 function HighlightToolButton({
