@@ -412,6 +412,7 @@ export function StudyCardForm({
                   highlights={highlights}
                   blindMode={blindMode}
                   onToggleBlind={toggleBlind}
+                  userAnswer={answer}
                 />
               }
               stickyLeft
