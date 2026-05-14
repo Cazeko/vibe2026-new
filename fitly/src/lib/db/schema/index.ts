@@ -23,3 +23,5 @@ export * from "./user-streak-freezes";
 export * from "./user-attempts";
 export * from "./podcast-episodes";
 export * from "./podcast-progress";
+// 헌법 시행규칙 33 §35 백업 매트릭스 — 사용자 AI 답안 신고 채널 (2026-05-15)
+export * from "./card-reports";

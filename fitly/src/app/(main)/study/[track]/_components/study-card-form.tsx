@@ -39,6 +39,7 @@ import { CardTags } from "./card-tags";
 import { WorkspaceTopbar } from "./workspace-topbar";
 import { AnalysisPanel } from "./analysis-panel";
 import { AssistantFab } from "./assistant-fab";
+import { ReportCardButton } from "./report-card-button";
 
 type CardData = {
   id: string;
@@ -487,6 +488,13 @@ export function StudyCardForm({
                 </p>
               </CardContent>
             </Card>
+          )}
+          {/* 코드리뷰 C.H2 (2026-05-15, 시행규칙 33 §35) — 사용자 AI 답안 신고 채널.
+              reveal 후에만 노출 (학습자가 모범답안을 확인한 뒤 오류 보고). */}
+          {revealed && (
+            <div className="flex justify-end">
+              <ReportCardButton cardId={card.id} />
+            </div>
           )}
         </div>
       )}
