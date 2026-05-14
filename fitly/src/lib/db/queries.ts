@@ -19,6 +19,7 @@ import {
   examPapers,
   userCardHighlights,
   userCardState,
+  userCardTags,
 } from "@/lib/db/schema";
 import { getSessionLabel } from "@/lib/exam/sessions";
 import type { CardType } from "@/types";
@@ -363,6 +364,41 @@ export async function getCardHighlights(
             eq(userCardHighlights.cardId, cardId),
           ),
         );
+      return rows;
+    },
+    [],
+  );
+}
+
+// 헌법 v3.5.1 제16조 — 사용자 커스텀 해시태그 조회. 카드 메타 다듬기 정합.
+// 생성 순서대로 반환 (createdAt asc) — 칩 표시 순서 안정.
+export type CardTag = {
+  id: string;
+  tag: string;
+  createdAt: Date;
+};
+
+export async function getCardTags(
+  userId: string,
+  cardId: string,
+): Promise<CardTag[]> {
+  return safeRun(
+    `getCardTags(${cardId})`,
+    async () => {
+      const rows = await getDb()
+        .select({
+          id: userCardTags.id,
+          tag: userCardTags.tag,
+          createdAt: userCardTags.createdAt,
+        })
+        .from(userCardTags)
+        .where(
+          and(
+            eq(userCardTags.userId, userId),
+            eq(userCardTags.cardId, cardId),
+          ),
+        )
+        .orderBy(userCardTags.createdAt);
       return rows;
     },
     [],
