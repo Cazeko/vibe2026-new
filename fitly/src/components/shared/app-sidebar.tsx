@@ -219,7 +219,12 @@ export function AppSidebar() {
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium tracking-[-0.01em] transition-colors",
                     active
                       ? "bg-evergreen text-primary-foreground dark:bg-evergreen-strong dark:shadow-[0_1px_0_0_hsl(var(--color-gold)/0.18)_inset]"
-                      : "text-ink-2 hover:bg-evergreen/[0.06] dark:text-cream/85 dark:hover:bg-evergreen/[0.10]"
+                      : // 2026-05-16 — 다크 모드 inactive 글자 회귀 fix.
+                        // 종전 `dark:text-cream/85` 는 cream 토큰이 다크에서
+                        // `--color-bg`(거의 검정) 으로 매핑되어 사이드바 cream-deep
+                        // 배경 위에 가시성 0. `dark:text-foreground` 로 대시보드
+                        // "안녕하세요" 글자 색과 동일하게 정합 (사용자 보고).
+                        "text-ink-2 hover:bg-evergreen/[0.06] dark:text-foreground dark:hover:bg-evergreen/[0.10]"
                   )}
                 >
                   <Icon
