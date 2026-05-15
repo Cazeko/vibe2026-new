@@ -4,8 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import {
   BookOpenCheck,
   Check,
+  ChevronDown,
+  ChevronUp,
+  Clock,
   FileText,
   GitCompare,
+  History,
   KeyRound,
   Lock,
   Minus,
@@ -43,7 +47,7 @@ import { requestAiAnalysis } from "../actions";
 // - 채점 전(revealed === false) — 전체 잠금, 자물쇠 + "채점 후 활성화" 안내
 // - 채점 후 — overview 자동 활성. unlocked 가 false 인 탭은 "준비 중".
 
-type TabKey = "overview" | "keywords" | "diff" | "reference" | "explanation";
+type TabKey = "overview" | "keywords" | "diff" | "reference" | "explanation" | "history";
 
 type TabSpec = {
   key: TabKey;
@@ -52,12 +56,15 @@ type TabSpec = {
   unlocked: boolean;
 };
 
+// 백승환 #8 (2026-05-15) — "이력" 탭 추가. 채점과 무관하게 unlocked
+// (이전 시도가 있다면 채점 전에도 검토 가능 — 동일 카드 재학습 시 유용).
 const TABS: TabSpec[] = [
   { key: "overview", label: "AI 총평", Icon: Sparkles, unlocked: true },
   { key: "keywords", label: "키워드 비교", Icon: KeyRound, unlocked: true },
   { key: "diff", label: "답안 비교", Icon: GitCompare, unlocked: true },
   { key: "reference", label: "모범답안", Icon: BookOpenCheck, unlocked: true },
   { key: "explanation", label: "해설", Icon: FileText, unlocked: true },
+  { key: "history", label: "이력", Icon: History, unlocked: true },
 ];
 
 type AnalysisState =
@@ -72,6 +79,13 @@ type AnalysisState =
       cached: boolean;
     };
 
+type AttemptRecord = {
+  id: string;
+  answerMd: string;
+  selfGrade: string | null;
+  attemptedAt: string;
+};
+
 type Props = {
   revealed: boolean;
   cardId: string;
@@ -81,6 +95,7 @@ type Props = {
   blindMode: boolean;
   onToggleBlind: () => void;
   userAnswer: string;
+  attemptHistory?: AttemptRecord[];
 };
 
 export function AnalysisPanel({
@@ -92,6 +107,7 @@ export function AnalysisPanel({
   blindMode,
   onToggleBlind,
   userAnswer,
+  attemptHistory = [],
 }: Props) {
   const [active, setActive] = useState<TabKey>("overview");
   const [analysis, setAnalysis] = useState<AnalysisState>({ status: "idle" });
@@ -152,7 +168,9 @@ export function AnalysisPanel({
         >
           {TABS.map((tab) => {
             const isActive = active === tab.key;
-            const locked = !revealed || !tab.unlocked;
+            // 백승환 #8 — "이력" 은 채점 게이트 면제 (이전 시도 검토는 항상 가능).
+            const isAlwaysOpen = tab.key === "history";
+            const locked = !isAlwaysOpen && (!revealed || !tab.unlocked);
             const lockReason = !revealed
               ? "채점 후 활성화"
               : !tab.unlocked
@@ -188,9 +206,15 @@ export function AnalysisPanel({
         </div>
       </div>
 
-      {/* 패널 본문 */}
+      {/* 패널 본문. 백승환 #8 — "이력" 탭은 채점 무관 항상 노출.
+          그 외 탭은 LockedPanel 게이트 유지 (기존 정합). */}
       <CardContent className="p-5">
-        {!revealed ? (
+        {active === "history" ? (
+          <AttemptHistoryTab
+            attempts={attemptHistory}
+            currentAnswer={userAnswer}
+          />
+        ) : !revealed ? (
           <LockedPanel />
         ) : active === "overview" ? (
           <OverviewTab analysis={analysis} hasReference={!!backMd} />
@@ -911,6 +935,132 @@ function SourceBadge({ verified }: { verified: boolean }) {
     <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[10.5px] text-warning-text">
       <ShieldCheck className="h-3 w-3" />
       검증 필요
+    </span>
+  );
+}
+
+// 백승환 #8 (2026-05-15) — 답안 시도 이력 탭.
+// 가장 최근 시도부터 노출. 클릭 시 펼쳐 본문 비교. 현재 작성 중 답안과
+// 첫 번째 이력의 글자수·등급 차이를 한눈에 표기.
+function AttemptHistoryTab({
+  attempts,
+  currentAnswer,
+}: {
+  attempts: AttemptRecord[];
+  currentAnswer: string;
+}) {
+  const [expandedId, setExpandedId] = useState<string | null>(
+    attempts[0]?.id ?? null,
+  );
+
+  if (attempts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <span
+          aria-hidden
+          className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-cream-deep text-muted-foreground"
+        >
+          <History className="h-5 w-5" />
+        </span>
+        <p className="font-serif text-[14px] font-medium tracking-tight">
+          시도 이력이 없습니다
+        </p>
+        <p className="mt-2 max-w-sm text-[12px] leading-relaxed text-muted-foreground">
+          답안을 작성하고 채점하면
+          <br />
+          이 카드의 시도 이력이 여기에 누적됩니다.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2.5">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          시도 이력 — 최근 {attempts.length}건
+        </p>
+        {currentAnswer.trim().length > 0 && (
+          <p className="text-[10.5px] text-muted-foreground tabular-nums">
+            현재 작성: {currentAnswer.length}자
+          </p>
+        )}
+      </div>
+      <ol className="space-y-2">
+        {attempts.map((a, idx) => {
+          const isExpanded = expandedId === a.id;
+          const date = new Date(a.attemptedAt);
+          const dateLabel = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+          const len = a.answerMd.length;
+          const isMostRecent = idx === 0;
+          return (
+            <li
+              key={a.id}
+              className={`rounded-md border transition-colors ${
+                isMostRecent
+                  ? "border-evergreen/40 bg-evergreen/5"
+                  : "border-rule bg-card"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => setExpandedId(isExpanded ? null : a.id)}
+                aria-expanded={isExpanded}
+                className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 rounded-md"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[11px] tabular-nums text-muted-foreground shrink-0">
+                    #{attempts.length - idx}
+                  </span>
+                  <Clock className="h-3 w-3 text-muted-foreground shrink-0" aria-hidden />
+                  <span className="text-[12px] tabular-nums text-foreground/85">
+                    {dateLabel}
+                  </span>
+                  {a.selfGrade && (
+                    <GradeBadge grade={a.selfGrade} />
+                  )}
+                  <span className="text-[10.5px] text-muted-foreground tabular-nums ml-1">
+                    {len}자
+                  </span>
+                </div>
+                {isExpanded ? (
+                  <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden />
+                )}
+              </button>
+              {isExpanded && (
+                <div className="px-3 pb-3 pt-1 border-t border-rule/60">
+                  <div className="font-sans text-[12.5px] leading-[1.7] whitespace-pre-wrap text-foreground/85 max-h-[400px] overflow-y-auto">
+                    {a.answerMd || (
+                      <span className="text-muted-foreground italic">
+                        (답안 없이 채점)
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+const GRADE_TONE: Record<string, { label: string; cls: string }> = {
+  again: { label: "다시", cls: "bg-error/10 text-error" },
+  hard: { label: "어려움", cls: "bg-warning/10 text-warning-text" },
+  good: { label: "좋음", cls: "bg-evergreen/10 text-evergreen" },
+  easy: { label: "쉬움", cls: "bg-info/10 text-info" },
+};
+
+function GradeBadge({ grade }: { grade: string }) {
+  const tone = GRADE_TONE[grade];
+  if (!tone) return null;
+  return (
+    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${tone.cls}`}>
+      {tone.label}
     </span>
   );
 }

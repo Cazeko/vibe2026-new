@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Pencil, Sparkles } from "lucide-react";
 import type { CardType } from "@/types";
+import { StudyTimer } from "./study-timer";
 
 // 헌법 v3.5.3 §16 + 2026-05-14 brainstorming PR 1 — 학습 워크스페이스 골격.
 // 카드 메타·세션 진행률·학습 상태(채점 전/후) 를 가로 한 줄로 압축 표기한다.
@@ -13,6 +14,8 @@ import type { CardType } from "@/types";
 // 개선: "현재 N번째 / 총 M장" + (현재/총)% 실제 진행률.
 // 총 M = 세션 시작 시점의 dueCount 를 ref 로 fix (router.refresh 로 재로드되어도 보존).
 // 현재 N = sessionCount + 1 (지금 풀고 있는 카드는 N번째).
+//
+// 백승환 #7 (2026-05-15) — 카드 메타 우측에 타이머 통합. cardId 기반 자동 리셋.
 
 type Props = {
   track: CardType;
@@ -22,6 +25,7 @@ type Props = {
   sessionCount: number;
   remainingCount: number;
   revealed: boolean;
+  cardId: string;
 };
 
 const TRACK_LABEL: Record<CardType, string> = {
@@ -38,6 +42,7 @@ export function WorkspaceTopbar({
   sessionCount,
   remainingCount,
   revealed,
+  cardId,
 }: Props) {
   const initialTotalRef = useRef<number | null>(null);
   const [initialTotal, setInitialTotal] = useState<number>(0);
@@ -83,9 +88,14 @@ export function WorkspaceTopbar({
           )}
         </div>
 
+        {/* 백승환 #7 — 타이머 chip. 우측 진행률 좌측에 배치. */}
+        <div className="ml-auto">
+          <StudyTimer cardId={cardId} />
+        </div>
+
         {/* 세션 진행률 — 우측 정렬. "N / M" + 굵은 progress bar. */}
         <div
-          className="ml-auto flex items-center gap-2.5 text-[11.5px] text-muted-foreground"
+          className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground"
           aria-live="polite"
         >
           <span className="uppercase tracking-[0.12em] text-[10.5px]">
