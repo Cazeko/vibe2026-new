@@ -7,6 +7,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -22,6 +23,9 @@ import {
   ZoomIn,
   ZoomOut,
   ShieldCheck,
+  Bookmark,
+  Star,
+  HelpCircle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +37,7 @@ import { getExamPageUrl } from "@/lib/supabase/storage";
 import { formatExamStem } from "@/lib/exam/format-stem";
 import type { AnswerSource, CardType } from "@/types";
 import type { CardHighlight, CardTag } from "@/lib/db/queries";
-import { submitAnswer, gradeCard } from "../actions";
+import { submitAnswer, gradeCard, setCardMark } from "../actions";
 import { HighlightLayer, type HighlightLayerHandle } from "./highlight-layer";
 import { Underline as UnderlineIcon } from "lucide-react";
 import { CardTags } from "./card-tags";
@@ -55,7 +59,18 @@ type CardData = {
   paperLabel: string | null;
   itemFormat: string | null;
   itemPoints: number | null;
+  // 백승환 #9 (2026-05-15) — 카드 마크.
+  mark: "bookmark" | "star" | "unsure" | null;
 };
+
+// 백승환 #5 (2026-05-15) — 세션 큐 메타. 점프/이전·다음용 최소 데이터.
+type QueueItem = {
+  id: string;
+  paperLabel: string | null;
+  mark: "bookmark" | "star" | "unsure" | null;
+};
+
+type MarkKind = "bookmark" | "star" | "unsure";
 
 type Grade = "again" | "hard" | "good" | "easy";
 
@@ -104,11 +119,17 @@ export function StudyCardForm({
   highlights = [],
   tags = [],
   remainingCount = 0,
+  sessionQueue = [],
+  currentIndex = 0,
+  markFilter = null,
 }: {
   card: CardData;
   highlights?: CardHighlight[];
   tags?: CardTag[];
   remainingCount?: number;
+  sessionQueue?: QueueItem[];
+  currentIndex?: number;
+  markFilter?: "bookmark" | "star" | "unsure" | null;
 }) {
   const router = useRouter();
   const { recordCard } = useStudySession(card.type);
@@ -117,6 +138,9 @@ export function StudyCardForm({
   const [stemExpanded, setStemExpanded] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  // 백승환 #9 (2026-05-15) — 마크 낙관 갱신. router.refresh 까지 즉시 반영.
+  const [optimisticMark, setOptimisticMark] = useState<MarkKind | null>(card.mark);
+  const [markPending, startMarkTransition] = useTransition();
   // 헌법 v3.5.1 제16조 — 블라인드(가리기) 모드. localStorage 글로벌 보존.
   const [blindMode, setBlindMode] = useState(false);
   const toggleBlind = () => setBlindMode((v) => !v);
@@ -208,6 +232,45 @@ export function StudyCardForm({
     if (typeof window === "undefined") return;
     if (window.localStorage.getItem(BLIND_KEY) === "1") setBlindMode(true);
   }, []);
+
+  // 백승환 #9 (2026-05-15) — 카드 변경 시 mark optimistic state 동기화.
+  useEffect(() => {
+    setOptimisticMark(card.mark);
+  }, [card.id, card.mark]);
+
+  // 백승환 #9 (2026-05-15) — 마크 토글. 동일 마크 클릭 시 해제.
+  const handleMarkToggle = useCallback(
+    (kind: MarkKind) => {
+      const next = optimisticMark === kind ? null : kind;
+      setOptimisticMark(next);
+      startMarkTransition(async () => {
+        const res = await setCardMark(card.id, next);
+        if ("error" in res) {
+          setOptimisticMark(card.mark);
+        } else {
+          router.refresh();
+        }
+      });
+    },
+    [card.id, card.mark, optimisticMark, router],
+  );
+
+  // 백승환 #5 (2026-05-15) — 큐 내 prev/next 점프. URL ?card=xxx 로 이동.
+  const trackPath = `/study/${card.type}`;
+  const buildQueueUrl = useCallback(
+    (cardId: string) => {
+      const qs = new URLSearchParams();
+      qs.set("card", cardId);
+      if (markFilter) qs.set("mark", markFilter);
+      return `${trackPath}?${qs.toString()}`;
+    },
+    [trackPath, markFilter],
+  );
+  const prevCard = currentIndex > 0 ? sessionQueue[currentIndex - 1] : null;
+  const nextCard =
+    currentIndex < sessionQueue.length - 1
+      ? sessionQueue[currentIndex + 1]
+      : null;
 
   // 블라인드 모드 localStorage persist.
   useEffect(() => {
@@ -411,8 +474,27 @@ export function StudyCardForm({
 
   return (
     <div className="space-y-4">
-      {/* 헌법 v3.5.1 제16조 — 카드 메타 영역. 사용자 커스텀 해시태그. */}
-      <CardTags cardId={card.id} initialTags={tags} />
+      {/* 백승환 #5/#9 (2026-05-15) — 카드 메타 영역.
+          (1) 좌: 큐 점프 nav (이전·다음·dot strip)
+          (2) 우: 마크 토글 (북마크 / 별표 / 모르겠음)
+          (3) 그 아래: 사용자 커스텀 해시태그(기존). */}
+      {sessionQueue.length > 1 && (
+        <QueueNav
+          queue={sessionQueue}
+          currentIndex={currentIndex}
+          buildUrl={buildQueueUrl}
+          prevCard={prevCard}
+          nextCard={nextCard}
+        />
+      )}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <CardTags cardId={card.id} initialTags={tags} />
+        <MarkToggle
+          current={optimisticMark}
+          onToggle={handleMarkToggle}
+          disabled={markPending}
+        />
+      </div>
 
       {isWorkspaceTrack && (
         <>
@@ -557,6 +639,204 @@ export function StudyCardForm({
       {isWorkspaceTrack && (
         <AssistantFab cardId={card.id} userAnswer={answer} />
       )}
+    </div>
+  );
+}
+
+// 백승환 #5 (2026-05-15) — 큐 점프 nav.
+// 좌: 이전 버튼, 중앙: dot strip (현재 카드 = evergreen, 마크 카드 = 색 dot),
+// 우: 다음 버튼. dot strip 은 큐 길이 ≤ 12 일 때 모두 노출, 초과 시 현재 ±5 만.
+const MARK_COLOR: Record<MarkKind, string> = {
+  bookmark: "bg-info",
+  star: "bg-warning",
+  unsure: "bg-error",
+};
+
+function QueueNav({
+  queue,
+  currentIndex,
+  buildUrl,
+  prevCard,
+  nextCard,
+}: {
+  queue: QueueItem[];
+  currentIndex: number;
+  buildUrl: (cardId: string) => string;
+  prevCard: QueueItem | null;
+  nextCard: QueueItem | null;
+}) {
+  const router = useRouter();
+  // 키보드 단축키 J/K — 이전/다음. textarea/input 안에서는 무시.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const tgt = e.target as HTMLElement | null;
+      const tag = tgt?.tagName;
+      if (tag === "TEXTAREA" || tag === "INPUT" || tgt?.isContentEditable)
+        return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "j" && nextCard) {
+        e.preventDefault();
+        router.push(buildUrl(nextCard.id));
+      } else if (e.key === "k" && prevCard) {
+        e.preventDefault();
+        router.push(buildUrl(prevCard.id));
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [nextCard, prevCard, buildUrl, router]);
+
+  // dot strip slice — 큐 12 초과 시 현재 ±5.
+  const visible = queue.length <= 12
+    ? queue.map((c, i) => ({ c, i }))
+    : queue
+        .slice(Math.max(0, currentIndex - 5), Math.min(queue.length, currentIndex + 6))
+        .map((c, idx) => ({ c, i: Math.max(0, currentIndex - 5) + idx }));
+
+  return (
+    <div
+      role="navigation"
+      aria-label="문제 큐 이동"
+      className="flex items-center justify-between gap-2 rounded-md border border-rule bg-card/40 px-3 py-1.5"
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild={!!prevCard}
+        disabled={!prevCard}
+        className="px-2 h-7 text-[11.5px] disabled:opacity-40"
+      >
+        {prevCard ? (
+          <Link href={buildUrl(prevCard.id)} prefetch={false} aria-label="이전 문제 (K)">
+            <ChevronLeft className="h-3.5 w-3.5 mr-0.5" aria-hidden />
+            이전
+            <kbd className="hidden sm:inline-flex ml-1.5 items-center justify-center h-4 min-w-[16px] rounded-[3px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[9.5px] font-bold leading-none tabular-nums px-1 font-sans">
+              K
+            </kbd>
+          </Link>
+        ) : (
+          <span>
+            <ChevronLeft className="h-3.5 w-3.5 mr-0.5" aria-hidden />
+            이전
+          </span>
+        )}
+      </Button>
+
+      <div
+        className="flex items-center gap-1 overflow-x-auto"
+        role="tablist"
+        aria-label="문제 점프"
+      >
+        {visible.map(({ c, i }) => {
+          const isCurrent = i === currentIndex;
+          const markColor = c.mark ? MARK_COLOR[c.mark] : null;
+          return (
+            <Link
+              key={c.id}
+              href={buildUrl(c.id)}
+              prefetch={false}
+              role="tab"
+              aria-selected={isCurrent}
+              aria-label={`${i + 1}번째 문제${c.paperLabel ? ` — ${c.paperLabel}` : ""}${c.mark ? ` (마크: ${c.mark})` : ""}`}
+              title={`${i + 1} / ${queue.length}${c.paperLabel ? ` — ${c.paperLabel}` : ""}`}
+              className={`relative inline-flex items-center justify-center min-w-[20px] h-5 rounded text-[10.5px] tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${
+                isCurrent
+                  ? "bg-evergreen text-white font-semibold"
+                  : "text-muted-foreground hover:bg-secondary/60"
+              }`}
+            >
+              {i + 1}
+              {markColor && !isCurrent && (
+                <span
+                  aria-hidden
+                  className={`absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full ${markColor}`}
+                />
+              )}
+            </Link>
+          );
+        })}
+      </div>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild={!!nextCard}
+        disabled={!nextCard}
+        className="px-2 h-7 text-[11.5px] disabled:opacity-40"
+      >
+        {nextCard ? (
+          <Link href={buildUrl(nextCard.id)} prefetch={false} aria-label="다음 문제 (J)">
+            <kbd className="hidden sm:inline-flex mr-1.5 items-center justify-center h-4 min-w-[16px] rounded-[3px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[9.5px] font-bold leading-none tabular-nums px-1 font-sans">
+              J
+            </kbd>
+            다음
+            <ChevronRight className="h-3.5 w-3.5 ml-0.5" aria-hidden />
+          </Link>
+        ) : (
+          <span>
+            다음
+            <ChevronRight className="h-3.5 w-3.5 ml-0.5" aria-hidden />
+          </span>
+        )}
+      </Button>
+    </div>
+  );
+}
+
+// 백승환 #9 (2026-05-15) — 마크 토글. 동일 마크 재클릭 시 해제.
+function MarkToggle({
+  current,
+  onToggle,
+  disabled,
+}: {
+  current: MarkKind | null;
+  onToggle: (kind: MarkKind) => void;
+  disabled: boolean;
+}) {
+  const buttons: { key: MarkKind; label: string; Icon: typeof Bookmark; tone: string }[] = [
+    {
+      key: "bookmark",
+      label: "북마크",
+      Icon: Bookmark,
+      tone: "text-info border-info/40 bg-info/10",
+    },
+    {
+      key: "star",
+      label: "별표",
+      Icon: Star,
+      tone: "text-warning border-warning/40 bg-warning/10",
+    },
+    {
+      key: "unsure",
+      label: "모르겠음",
+      Icon: HelpCircle,
+      tone: "text-error border-error/40 bg-error/10",
+    },
+  ];
+  return (
+    <div className="inline-flex items-center gap-1" aria-label="카드 마크">
+      {buttons.map(({ key, label, Icon, tone }) => {
+        const active = current === key;
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onToggle(key)}
+            disabled={disabled}
+            aria-pressed={active}
+            aria-label={`${label}${active ? " 해제" : ""}`}
+            title={`${label}${active ? " 해제" : " 추가"}`}
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${
+              active
+                ? `${tone} font-semibold`
+                : "border-rule text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+            }`}
+          >
+            <Icon className="h-3 w-3" aria-hidden />
+            <span>{label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

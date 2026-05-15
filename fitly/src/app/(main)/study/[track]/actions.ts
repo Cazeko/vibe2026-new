@@ -17,6 +17,10 @@ import {
   userCardTags,
 } from "@/lib/db/schema";
 import {
+  CARD_MARK_KINDS,
+  type CardMarkKind,
+} from "@/lib/db/schema/user-card-state";
+import {
   CARD_REPORT_CATEGORIES,
   type CardReportCategory,
 } from "@/lib/db/schema/card-reports";
@@ -407,6 +411,64 @@ export async function removeCardTag(
         eq(userCardTags.userId, user.id),
       ),
     );
+  return { ok: true };
+}
+
+// 백승환 #9 (2026-05-15) — 카드 마크(북마크 / 별표 / 모르겠음) 토글.
+// user_card_state.mark 컬럼 update. row 미존재 시 default fsrsState 로 insert.
+// mark=null 전달 시 마크 해제. 트랙 페이지 필터 (?mark=star) 와 정합.
+export async function setCardMark(
+  cardId: string,
+  mark: CardMarkKind | null,
+): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  if (mark !== null && !CARD_MARK_KINDS.includes(mark)) {
+    return { error: "BadMark" };
+  }
+
+  const db = getDb();
+  const [card] = await db
+    .select({ id: cards.id })
+    .from(cards)
+    .where(eq(cards.id, cardId))
+    .limit(1);
+  if (!card) return { error: "CardNotFound" };
+
+  const now = new Date();
+  // user_card_state 가 없는 카드(아직 학습 전)도 마킹 가능. dueAt = now,
+  // FSRS state placeholder 로 row 생성. grade 시 정상 갱신.
+  await db
+    .insert(userCardState)
+    .values({
+      userId: user.id,
+      cardId,
+      mark,
+      dueAt: now,
+      fsrsState: {
+        due: now.toISOString(),
+        stability: 0.5,
+        difficulty: 5,
+        elapsed_days: 0,
+        scheduled_days: 0,
+        reps: 0,
+        lapses: 0,
+        state: 0,
+        last_review: now.toISOString(),
+      },
+    })
+    .onConflictDoUpdate({
+      target: [userCardState.userId, userCardState.cardId],
+      set: { mark, updatedAt: now },
+    });
+
+  revalidatePath("/study/quiz");
+  revalidatePath("/study/keyword");
+  revalidatePath("/study/mistake");
   return { ok: true };
 }
 

@@ -18,7 +18,12 @@ import {
   getCardTags,
 } from "@/lib/db/queries";
 import { StudyCardForm } from "./_components/study-card-form";
+import { TrackFilters } from "./_components/track-filters";
 import type { CardType } from "@/types";
+
+// 백승환 #9 (2026-05-15) — URL ?mark=star/bookmark/unsure 마크 필터.
+const VALID_MARKS = ["bookmark", "star", "unsure"] as const;
+type MarkFilter = (typeof VALID_MARKS)[number] | null;
 
 export const dynamic = "force-dynamic";
 
@@ -75,12 +80,20 @@ export async function generateMetadata({
 
 export default async function StudyTrackPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ track: string }>;
+  searchParams: Promise<{ mark?: string; card?: string }>;
 }) {
   const { track: trackParam } = await params;
   if (!VALID_TRACKS.includes(trackParam as CardType)) notFound();
   const track = trackParam as CardType;
+  const sp = await searchParams;
+  const markFilter: MarkFilter =
+    sp.mark && VALID_MARKS.includes(sp.mark as typeof VALID_MARKS[number])
+      ? (sp.mark as MarkFilter)
+      : null;
+  const focusedCardId = sp.card ?? null;
 
   const supabase = await createClient();
   const {
@@ -88,12 +101,18 @@ export default async function StudyTrackPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // O2 병렬 fetch — Promise.all 검증 OK (기존 유지).
-  const [cards, dueCounts] = await Promise.all([
-    getDueCards(user.id, track, 1),
+  // 백승환 #5 (2026-05-15) — 단일 카드 limit=1 → 세션 큐 limit=30.
+  // 큐 전체를 client 에 전달하여 prev/next/jump 인터랙션 가능.
+  // 큐 끝까지 풀면 router.refresh 로 다음 묶음 자동 로드.
+  const [queue, dueCounts] = await Promise.all([
+    getDueCards(user.id, track, 30, new Date(), markFilter),
     getDueCardCounts(user.id),
   ]);
-  const card = cards[0] ?? null;
+  // focusedCardId 가 큐에 있으면 해당 카드, 없으면 큐 첫 카드.
+  const focusedIndex = focusedCardId
+    ? queue.findIndex((c) => c.id === focusedCardId)
+    : 0;
+  const card = queue[focusedIndex >= 0 ? focusedIndex : 0] ?? null;
   const meta = TRACK_META[track];
 
   // 헌법 v3.5.1 제16조 — 카드별 사용자 하이라이트/태그 hydrate.
@@ -202,6 +221,9 @@ export default async function StudyTrackPage({
           </nav>
         </div>
 
+        {/* 백승환 #9 (2026-05-15) — 마크 필터 chips. 트랙 헤더 직하단. */}
+        <TrackFilters track={track} active={markFilter} />
+
         {card ? (
           <StudyCardForm
             card={{
@@ -216,10 +238,18 @@ export default async function StudyTrackPage({
               paperLabel: card.paperLabel,
               itemFormat: card.itemFormat,
               itemPoints: card.itemPoints,
+              mark: card.mark,
             }}
             highlights={highlights}
             tags={tags}
             remainingCount={dueCounts[track]}
+            sessionQueue={queue.map((c) => ({
+              id: c.id,
+              paperLabel: c.paperLabel,
+              mark: c.mark,
+            }))}
+            currentIndex={focusedIndex >= 0 ? focusedIndex : 0}
+            markFilter={markFilter}
           />
         ) : (
           <EmptyQueue track={track} dueCounts={dueCounts} />

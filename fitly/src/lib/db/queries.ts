@@ -277,6 +277,8 @@ export type DueCard = {
   paperLabel: string | null; // "2024학년도 교직논술 1번"
   itemFormat: string | null;
   itemPoints: number | null;
+  // 백승환 #9 (2026-05-15) — 카드별 마크. null 은 미마킹.
+  mark: "bookmark" | "star" | "unsure" | null;
 };
 
 // 2026-05-15 hotfix — 0017 마이그레이션이 production 에 적용되지 않은 환경에서
@@ -322,17 +324,48 @@ async function probeMultiPagePaths(): Promise<boolean> {
   return _multiPagePathsAvailable;
 }
 
+// 백승환 #9 (2026-05-15) — mark 필터 + mark probe (마이그레이션 0001 미적용 환경 폴백).
+let _markColumnAvailable: boolean | null = null;
+let _markColumnProbedAt = 0;
+async function probeMarkColumn(): Promise<boolean> {
+  const now = Date.now();
+  if (
+    _markColumnAvailable === true ||
+    (_markColumnAvailable === false &&
+      now - _markColumnProbedAt < PROBE_TTL_MS)
+  ) {
+    return _markColumnAvailable;
+  }
+  try {
+    const db = getDb();
+    await db.execute(sql`select mark from user_card_state limit 1`);
+    _markColumnAvailable = true;
+    _markColumnProbedAt = now;
+  } catch {
+    if (_markColumnAvailable !== false) {
+      console.warn(
+        "[db.queries] user_card_state.mark 미존재 — null fallback. 0001 마이그레이션을 적용하면 마크 필터/표식이 활성화됩니다.",
+      );
+    }
+    _markColumnAvailable = false;
+    _markColumnProbedAt = now;
+  }
+  return _markColumnAvailable;
+}
+
 export async function getDueCards(
   userId: string,
   type: CardType,
   limit = 20,
   now: Date = new Date(),
+  markFilter: "bookmark" | "star" | "unsure" | null = null,
 ): Promise<DueCard[]> {
   return safeRun(
     `getDueCards(${type})`,
     async () => {
       const db = getDb();
       const hasPaths = await probeMultiPagePaths();
+      const hasMark = await probeMarkColumn();
       const baseSelect = {
         id: cards.id,
         type: cards.type,
@@ -348,9 +381,12 @@ export async function getDueCards(
         itemFormat: examItems.format,
         itemPoints: examItems.points,
       } as const;
-      const selection = hasPaths
+      const withPaths = hasPaths
         ? { ...baseSelect, frontImagePaths: cards.frontImagePaths }
         : baseSelect;
+      const selection = hasMark
+        ? { ...withPaths, mark: userCardState.mark }
+        : withPaths;
       const rows = await db
         .select(selection)
         .from(cards)
@@ -367,10 +403,14 @@ export async function getDueCards(
           and(
             eq(cards.type, type),
             or(isNull(cards.userId), eq(cards.userId, userId)),
-            or(
-              isNull(userCardState.dueAt),
-              lte(userCardState.dueAt, now),
-            ),
+            // mark 필터: 마크 트랙에서는 due 만료 여부 무시(과거 마크 카드 모두 노출).
+            // 미적용 환경(hasMark=false)은 markFilter 도 무시.
+            markFilter && hasMark
+              ? eq(userCardState.mark, markFilter)
+              : or(
+                  isNull(userCardState.dueAt),
+                  lte(userCardState.dueAt, now),
+                ),
           ),
         )
         // dueAt NULL(NEW)을 먼저 노출 → 첫 학습 시 새 카드가 보인다.
@@ -394,6 +434,8 @@ export async function getDueCards(
         paperLabel: formatPaperLabel(r.paperYear, r.paperSession, r.itemNo),
         itemFormat: r.itemFormat,
         itemPoints: r.itemPoints,
+        mark:
+          (r as { mark?: "bookmark" | "star" | "unsure" | null }).mark ?? null,
       }));
     },
     [],
@@ -421,6 +463,7 @@ export async function getCardById(
     async () => {
       const db = getDb();
       const hasPaths = await probeMultiPagePaths();
+      const hasMark = await probeMarkColumn();
       const baseSelect = {
         id: cards.id,
         type: cards.type,
@@ -436,9 +479,12 @@ export async function getCardById(
         itemFormat: examItems.format,
         itemPoints: examItems.points,
       } as const;
-      const selection = hasPaths
+      const withPaths = hasPaths
         ? { ...baseSelect, frontImagePaths: cards.frontImagePaths }
         : baseSelect;
+      const selection = hasMark
+        ? { ...withPaths, mark: userCardState.mark }
+        : withPaths;
       const [row] = await db
         .select(selection)
         .from(cards)
@@ -472,6 +518,8 @@ export async function getCardById(
         paperLabel: formatPaperLabel(row.paperYear, row.paperSession, row.itemNo),
         itemFormat: row.itemFormat,
         itemPoints: row.itemPoints,
+        mark:
+          (row as { mark?: "bookmark" | "star" | "unsure" | null }).mark ?? null,
       };
     },
     null,
