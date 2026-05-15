@@ -164,11 +164,17 @@ export function StudyCardForm({
       window.localStorage.removeItem(draftKey);
     }
     setSavedAt(null);
+    // UX (주인님 보고 2026-05-15) — 종전에는 client reset 을 `await gradeCard`
+    // 뒤에 두어 다시·어려움(mistake 합류 INSERT 포함)·쉬움(AI 분석 server action
+    // 과 동일 함수 슬롯 큐잉) 평가 시 UI 가 멈춰 보였다. client 가 결정 가능한
+    // 입력 영역 초기화는 transition 밖에서 동기 적용해 다음 사이클로 곧장 진입.
+    setAnswer("");
+    setRevealed(card.type === "keyword");
+    setStemExpanded(false);
+    // server mutation + 새 카드 SSR 재로드는 백그라운드 transition. 카드 본문
+    // 자체는 router.refresh 가 완료될 때 새 카드로 교체된다.
     startTransition(async () => {
       await gradeCard(card.id, grade);
-      setAnswer("");
-      setRevealed(card.type === "keyword");
-      setStemExpanded(false);
       router.refresh();
     });
   }
