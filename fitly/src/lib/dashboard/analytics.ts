@@ -5,7 +5,7 @@ import { and, desc, eq, gt, gte, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { studySessions } from "@/lib/db/schema";
 import type { HeatmapCell } from "@/components/feature/analysis/activity-heatmap";
-import { getCardCounts, getDueCardCounts, safeRun } from "@/lib/db/queries";
+import { getCardCounts, getReviewDueCardCounts, safeRun } from "@/lib/db/queries";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -115,7 +115,10 @@ export async function getSessionStats(userId: string): Promise<SessionStat> {
 }
 
 // 헌법 v3.0 제13조의2 — 카드 라이브러리 카운트 (풀이/키워드/오답).
-// D-S1.5 stub 해제: getCardCounts + getDueCardCounts 통합 query.
+// D-S1.5 stub 해제: getCardCounts + getReviewDueCardCounts 통합 query.
+// 2026-05-15 — 마이페이지 "복습 대기 292" 회귀 (NEW 시드까지 포함되던 회귀) 해소.
+// 대시보드·학습계획과 정합한 좁은 정의(`getReviewDueCardCounts` — 이미 학습한 카드
+// 중 dueAt 도래) 로 통일. NEW 카드는 학습 트랙 큐(study/[track])에서만 노출 유지.
 export type LibraryCounts = {
   quiz: number;
   keyword: number;
@@ -128,7 +131,7 @@ export type LibraryCounts = {
 export async function getLibraryCounts(userId: string): Promise<LibraryCounts> {
   const [counts, due] = await Promise.all([
     getCardCounts(userId),
-    getDueCardCounts(userId),
+    getReviewDueCardCounts(userId),
   ]);
   return {
     quiz: counts.quizTotal,
