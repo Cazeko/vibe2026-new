@@ -220,37 +220,38 @@ export default async function StudyPlanPage() {
         </Card>
 
         {/* 주인님 보고 #10 (2026-05-14) — 트랙 3 카드 + 오늘의 복습 대기 1 카드를
-            한 줄로 통합. 동일 크기, 핸드폰/태블릿/PC 반응형. xl+ 에서는 전체
-            페이지가 한 화면(스크롤 없음) 안에 들어가도록 flex-1 영역 차지. */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 xl:flex-1 xl:min-h-0">
+            한 줄로 통합. 동일 크기, 핸드폰/태블릿/PC 반응형.
+            주인님 발화 (2026-05-15) — 카드 세로 절반 축소. padding/icon/spacing 모두
+            컴팩트화 (p-4 → p-3, icon h-10 → h-8, mt-3 → mt-2, mt-auto pt-3 → pt-2). */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 xl:shrink-0">
           {/* 오늘의 복습 대기 — 가장 좌측에 배치, evergreen 강조 보존 */}
           <Card className="border-evergreen bg-evergreen/[0.06] flex flex-col">
-            <CardContent className="p-4 xl:p-3 flex flex-col flex-1 min-h-0">
+            <CardContent className="p-3 flex flex-col flex-1 min-h-0">
               <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                 오늘의 복습 대기
               </p>
-              <p className="mt-1 font-serif text-evergreen text-3xl font-medium tracking-tight num">
+              <p className="mt-0.5 font-serif text-evergreen text-2xl font-medium tracking-tight num leading-tight">
                 {totalReviewDue > 0 ? totalReviewDue : "—"}
                 {totalReviewDue > 0 && (
-                  <span className="ml-1 text-base font-sans font-normal text-muted-foreground">
+                  <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
                     장
                   </span>
                 )}
               </p>
-              <p className="mt-1 text-[11.5px] text-muted-foreground leading-[1.5]">
+              <p className="mt-1 text-[11px] text-muted-foreground leading-[1.4] line-clamp-2">
                 {totalReviewDue > 0 ? (
                   <>
                     풀이 {reviewDue.quiz}장 · 키워드 {reviewDue.keyword}장 ·
                     오답 {reviewDue.mistake}장
                   </>
                 ) : (
-                  <>복습 대기 없음 — 새 카드를 학습하시면 복습 큐가 형성됩니다.</>
+                  <>복습 대기 없음 — 새 카드 학습 후 큐 형성</>
                 )}
               </p>
-              <div className="mt-auto pt-3">
-                <Button asChild size="sm" className="h-8 rounded-lg w-full">
+              <div className="mt-auto pt-2">
+                <Button asChild size="sm" className="h-7 rounded-lg w-full text-[12px]">
                   <Link href="/study/quiz">
-                    학습 시작 <ArrowRight className="h-3.5 w-3.5" />
+                    학습 시작 <ArrowRight className="h-3 w-3" />
                   </Link>
                 </Button>
               </div>
@@ -264,20 +265,20 @@ export default async function StudyPlanPage() {
               className="block rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule-strong/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Card className="border-rule h-full transition-colors duration-150 ease-out hover:border-rule-strong flex flex-col">
-                <CardContent className="p-4 xl:p-3 flex flex-col flex-1 min-h-0">
+                <CardContent className="p-3 flex flex-col flex-1 min-h-0">
                   <span
                     aria-hidden
-                    className="grid h-10 w-10 place-items-center rounded-lg bg-secondary text-foreground"
+                    className="grid h-8 w-8 place-items-center rounded-lg bg-secondary text-foreground"
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-4 w-4" />
                   </span>
-                  <p className="mt-3 font-serif text-base font-medium tracking-tight">
+                  <p className="mt-2 font-serif text-[14px] font-medium tracking-tight leading-tight">
                     {title}
                   </p>
-                  <p className="mt-1 text-[11.5px] text-muted-foreground leading-[1.5]">
+                  <p className="mt-0.5 text-[11px] text-muted-foreground leading-[1.4] line-clamp-2">
                     {description}
                   </p>
-                  <p className="mt-auto pt-2 text-[11px] font-medium text-evergreen">
+                  <p className="mt-auto pt-1.5 text-[11px] font-medium text-evergreen">
                     {hint} →
                   </p>
                 </CardContent>

@@ -338,15 +338,15 @@ function StatCard({
 }) {
   // 값이 긴 문자열(예: 2002–2026)일 때도 KPI 카드 폭(좁은 뷰포트 ~140px) 안에
   // 자동 축소되도록 clamp + min-w-0 적용. 사용자 보고 2026-05-12.
-  // 추가 보고 2026-05-12 — padding/폰트/spacing 일괄 컴팩트화 (여백 과다).
+  // 주인님 발화 (2026-05-15) — 4 카드 안 문구 가로·세로 정중앙 정렬.
   const isLongValue = typeof value === "string" && value.length > 4;
   return (
     <Card className={`border-rule overflow-hidden ${className}`}>
-      <CardContent className="px-3 py-2.5 min-w-0">
+      <CardContent className="px-3 py-3 min-w-0 flex flex-col items-center justify-center text-center min-h-[88px] gap-1">
         <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
           {label}
         </div>
-        <div className="mt-1 flex items-baseline gap-1 min-w-0">
+        <div className="flex items-baseline justify-center gap-1 min-w-0">
           <span
             className={`font-serif font-medium tabular-nums tracking-tight whitespace-nowrap leading-none ${
               accent ? "text-evergreen" : "text-foreground"

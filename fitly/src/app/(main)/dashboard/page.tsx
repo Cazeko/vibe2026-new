@@ -47,9 +47,18 @@ export default async function DashboardPage() {
 
         <KpiCards kpi={summary.kpi} />
 
-        <section className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-[22px] xl:gap-3 xl:flex-1 xl:min-h-0">
-          <LearningTrend data={summary.trend} />
-          <TodayPlan items={summary.plan} />
+        {/* 주인님 발화 (2026-05-15) — 대시보드 오와열 정렬.
+            상단 KpiCards 4 col grid 와 아래 LearningTrend/TodayPlan 폭이 정합되도록
+            xl 이상에서 동일 4 col grid 사용 + col-span 분배 (3:1).
+            학습성과추이 ↔ KPI 1~3번째(목표/학습진척도/최근7일) 폭 정합.
+            오늘의 학습 플랜 ↔ KPI 4번째(연속학습) 폭 정합. */}
+        <section className="grid grid-cols-1 xl:grid-cols-4 gap-[22px] xl:gap-3 xl:flex-1 xl:min-h-0">
+          <div className="xl:col-span-3 min-w-0">
+            <LearningTrend data={summary.trend} />
+          </div>
+          <div className="xl:col-span-1 min-w-0">
+            <TodayPlan items={summary.plan} />
+          </div>
         </section>
 
         <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.05fr] gap-[22px] xl:gap-3 xl:flex-1 xl:min-h-0">

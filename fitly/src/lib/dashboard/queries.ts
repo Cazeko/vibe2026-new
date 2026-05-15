@@ -11,7 +11,12 @@ import {
   userStreakFreezes,
 } from "@/lib/db/schema";
 import { computeProgress } from "@/lib/progress/score";
-import { getCardCounts, getDueCardCounts, safeRun } from "@/lib/db/queries";
+import {
+  getCardCounts,
+  getReviewDueCardCounts,
+  getReviewedTodayCounts,
+  safeRun,
+} from "@/lib/db/queries";
 import type {
   DashboardKpi,
   DashboardSummary,
@@ -284,7 +289,17 @@ async function computeTrend(userId: string): Promise<TrendPoint[]> {
 // 헌법 v3.0 제13조의2 — 3 트랙 SRS 큐 (풀이·키워드·오답).
 // D-S1.5 stub 해제: getDueCardCounts로 오늘의 due 수를 실측.
 async function computePlan(userId: string): Promise<PlanItem[]> {
-  const due = await getDueCardCounts(userId);
+  // 주인님 발화 (2026-05-15) — 회귀 3건 동시 수정.
+  //  1. 종전 getDueCardCounts 는 NEW(미학습) 시드까지 포함해 "오늘 292장" 같은
+  //     체감 어긋난 큰 수치 노출 → 학습 시작 카드 중 due 도래한 것만 카운트하는
+  //     getReviewDueCardCounts 로 교체 (study-plan 의 "오늘의 복습 대기" 와 정합).
+  //  2. progress 가 0% 고정 → 오늘 학습 카드 / (오늘 학습 + 남은 due) × 100 로
+  //     실제 진행률 계산. KST 00:00 기준 user_card_log distinct cardId 카운트.
+  //  3. subtitle 의 "due" 영문 → "복습" 한글 (어려운 용어 제거 발화 정합).
+  const [reviewDue, reviewedToday] = await Promise.all([
+    getReviewDueCardCounts(userId),
+    getReviewedTodayCounts(userId),
+  ]);
 
   const planRow = (
     id: string,
@@ -293,15 +308,20 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
     href: string,
     fallbackSubtitle: string,
   ): PlanItem => {
-    const dueCount = due[type];
-    return {
-      id,
-      title,
-      subtitle: dueCount > 0 ? `오늘 ${dueCount}장 due` : fallbackSubtitle,
-      progress: 0,
-      state: dueCount > 0 ? "in_progress" : "locked",
-      href,
-    };
+    const dueCount = reviewDue[type];
+    const reviewedCount = reviewedToday[type];
+    const total = dueCount + reviewedCount;
+    const progress =
+      total > 0 ? Math.round((reviewedCount / total) * 100) : 0;
+    const state: PlanItem["state"] =
+      total === 0 ? "locked" : dueCount === 0 ? "completed" : "in_progress";
+    const subtitle =
+      dueCount > 0
+        ? `오늘 ${dueCount}장 복습`
+        : reviewedCount > 0
+          ? `오늘 ${reviewedCount}장 완료`
+          : fallbackSubtitle;
+    return { id, title, subtitle, progress, state, href };
   };
 
   return [
@@ -310,14 +330,14 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
       "풀이 트랙 — 서술형 기출",
       "quiz",
       "/study/quiz",
-      "오늘의 due 없음 — 새 카드 학습",
+      "오늘의 복습 없음 — 새 카드 학습",
     ),
     planRow(
       "plan-keyword",
       "키워드 트랙 — 개념 정리 노트",
       "keyword",
       "/study/keyword",
-      "오늘의 due 없음 — 새 카드 학습",
+      "오늘의 복습 없음 — 새 카드 학습",
     ),
     planRow(
       "plan-mistake",

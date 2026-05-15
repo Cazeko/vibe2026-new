@@ -11,7 +11,7 @@
 // FSRS 상태는 user_card_state 1:1.
 
 import { cache } from "react";
-import { and, eq, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, gte, isNull, lte, or, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import {
   cards,
@@ -20,6 +20,7 @@ import {
   userAttempts,
   userCardAiAnalysis,
   userCardHighlights,
+  userCardLog,
   userCardState,
   userCardTags,
 } from "@/lib/db/schema";
@@ -200,6 +201,54 @@ export const getDueCardCounts = cache(async (
             isNull(userCardState.dueAt),
             lte(userCardState.dueAt, now),
           ),
+        ),
+      )
+      .groupBy(cards.type);
+
+    const counts: DueCardCounts = { quiz: 0, keyword: 0, mistake: 0 };
+    for (const row of rows) {
+      if (
+        row.type === "quiz" ||
+        row.type === "keyword" ||
+        row.type === "mistake"
+      ) {
+        counts[row.type] = row.count;
+      }
+    }
+    return counts;
+  }, EMPTY_DUE_COUNTS);
+});
+
+// 주인님 발화 (2026-05-15) — 오늘 학습한 카드 수 by type. KST 00:00 기준.
+// computePlan 의 progress 계산용 — (오늘 학습 / 오늘 학습 + 남은 due) × 100.
+// user_card_log append-only 라 같은 카드 여러 번 학습 시 distinct 로 한 번만 카운트.
+export const getReviewedTodayCounts = cache(async (
+  userId: string,
+  now: Date = new Date(),
+): Promise<DueCardCounts> => {
+  return safeRun("getReviewedTodayCounts", async () => {
+    // KST = UTC+9. KST 오늘 00:00 = UTC (오늘-1)일 15:00.
+    const kstOffsetMs = 9 * 60 * 60 * 1000;
+    const kstNow = new Date(now.getTime() + kstOffsetMs);
+    const kstTodayStartUtc = new Date(
+      Date.UTC(
+        kstNow.getUTCFullYear(),
+        kstNow.getUTCMonth(),
+        kstNow.getUTCDate(),
+      ) - kstOffsetMs,
+    );
+    const db = getDb();
+    const rows = await db
+      .select({
+        type: cards.type,
+        count: sql<number>`count(distinct ${userCardLog.cardId})::int`,
+      })
+      .from(userCardLog)
+      .innerJoin(cards, eq(cards.id, userCardLog.cardId))
+      .where(
+        and(
+          eq(userCardLog.userId, userId),
+          gte(userCardLog.reviewedAt, kstTodayStartUtc),
         ),
       )
       .groupBy(cards.type);
