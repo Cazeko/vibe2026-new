@@ -27,6 +27,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/shared/markdown";
 import { SplitView } from "@/components/shared/split-view";
+import { ExamItemLightbox } from "@/components/shared/exam-item-lightbox";
 import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 import { formatExamStem } from "@/lib/exam/format-stem";
@@ -102,10 +103,12 @@ export function StudyCardForm({
   card,
   highlights = [],
   tags = [],
+  remainingCount = 0,
 }: {
   card: CardData;
   highlights?: CardHighlight[];
   tags?: CardTag[];
+  remainingCount?: number;
 }) {
   const router = useRouter();
   const { recordCard } = useStudySession(card.type);
@@ -283,6 +286,7 @@ export function StudyCardForm({
           paperLabel={card.paperLabel}
           itemFormat={card.itemFormat}
           itemPoints={card.itemPoints}
+          stemText={cleanedFrontText}
         />
 
         {card.frontText && (
@@ -337,54 +341,57 @@ export function StudyCardForm({
     </Card>
   );
 
-  // ProblemPane — 본문 + (작성 중) 답안 textarea + (채점 후) 내 답안 readonly.
+  // 백승환 피드백 #3 (2026-05-15) — 답안 입력창을 우측 패널로 격상.
+  // 종전: 좌측에 본문 + 답안 입력 세로 stack → 위아래 스크롤 반복.
+  // 개선: 좌측 본문 / 우측 (채점 전 답안 입력 | 채점 후 분석) 좌우 동시 시야.
+  const answerInputCard = (
+    <Card className="border-rule">
+      <CardContent className="p-5">
+        <div className="flex items-baseline justify-between gap-2">
+          <label
+            htmlFor="answer-input"
+            className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground cursor-pointer"
+          >
+            내 답안
+          </label>
+          <span
+            className="inline-flex items-center gap-2 text-[10.5px] text-muted-foreground tabular-nums"
+            aria-live="polite"
+          >
+            {savedAt ? (
+              <span className="inline-flex items-center gap-1 text-evergreen/80">
+                <CheckCircle2 className="h-3 w-3" aria-hidden /> 자동 저장됨
+              </span>
+            ) : answer ? (
+              <span className="opacity-70">자동 저장 중…</span>
+            ) : null}
+            <span>{answer.length}자</span>
+          </span>
+        </div>
+        <textarea
+          id="answer-input"
+          value={answer}
+          onChange={(e) => setAnswer(e.target.value)}
+          rows={14}
+          className="mt-2 w-full rounded-md border border-rule-strong bg-background px-3.5 py-3 text-[13.5px] leading-[1.7] resize-y focus:border-evergreen focus:outline-none focus:ring-2 focus:ring-evergreen/40 transition-colors min-h-[320px]"
+          placeholder={"답안을 작성해 주세요.\n비워두고 채점도 가능합니다."}
+        />
+        <div className="mt-4 flex justify-end">
+          <Button onClick={handleReveal} disabled={pending}>
+            {pending ? "처리 중…" : "채점하기 — 답안 보기"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // ProblemPane — 본문 PDF/텍스트 (좌측). 답안 입력은 우측 패널로 이동.
   const problemPane = (
     <div className="space-y-4">
       {stemCard}
 
-      {showAnswerInput && (
-        <Card className="border-rule">
-          <CardContent className="p-5">
-            <div className="flex items-baseline justify-between gap-2">
-              <label
-                htmlFor="answer-input"
-                className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground cursor-pointer"
-              >
-                내 답안
-              </label>
-              <span
-                className="inline-flex items-center gap-2 text-[10.5px] text-muted-foreground tabular-nums"
-                aria-live="polite"
-              >
-                {savedAt ? (
-                  <span className="inline-flex items-center gap-1 text-evergreen/80">
-                    <CheckCircle2 className="h-3 w-3" aria-hidden /> 자동 저장됨
-                  </span>
-                ) : answer ? (
-                  <span className="opacity-70">자동 저장 중…</span>
-                ) : null}
-                <span>{answer.length}자</span>
-              </span>
-            </div>
-            <textarea
-              id="answer-input"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={9}
-              className="mt-2 w-full rounded-md border border-rule-strong bg-background px-3.5 py-3 text-[13.5px] leading-[1.7] resize-y focus:border-evergreen focus:outline-none focus:ring-2 focus:ring-evergreen/40 transition-colors"
-              placeholder={"답안을 작성해 주세요.\n비워두고 채점도 가능합니다."}
-            />
-            <div className="mt-4 flex justify-end">
-              <Button onClick={handleReveal} disabled={pending}>
-                {pending ? "처리 중…" : "채점하기 — 답안 보기"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 채점 후 — 사용자가 작성한 답안을 readonly 박스로 좌측에 보존.
-          AnalysisPanel(우측) 의 모범답안과 좌우 비교 가능. */}
+      {/* 채점 후 — 사용자가 작성한 답안을 readonly 로 본문 아래에 보존.
+          채점 후에는 우측이 분석 패널로 전환되므로 좌측에 답안 사본을 둔다. */}
       {revealed && answer.trim().length > 0 && (
         <Card className="border-l-4 border-rule-strong border-y border-r border-rule bg-card">
           <CardContent className="p-5">
@@ -415,33 +422,40 @@ export function StudyCardForm({
             itemFormat={card.itemFormat}
             itemPoints={card.itemPoints}
             sessionCount={sessionCount}
+            remainingCount={remainingCount}
             revealed={revealed}
           />
 
-          {/* SplitView — ProblemPane (좌) | AnalysisPanel (우).
-              xl(≥1280px) 이상에서 활성, 미만은 vertical stack fallback. */}
+          {/* SplitView — ProblemPane (좌) | (채점 전 답안 입력 / 채점 후 분석) (우).
+              xl(≥1280px) 이상에서 활성, 미만은 vertical stack fallback.
+              백승환 #3 (2026-05-15) — 답안 입력을 우측에 배치하여 본문 보면서
+              답안 작성 가능. 채점 후에는 동일 위치가 분석 패널로 전환. */}
           <div ref={analysisAnchorRef} className="scroll-mt-4">
             <SplitView
               storageKey={`study-${card.type}`}
               left={problemPane}
               right={
-                <AnalysisPanel
-                  revealed={revealed}
-                  cardId={card.id}
-                  backMd={card.backMd}
-                  verifiedAnswer={card.verifiedAnswer}
-                  highlights={highlights}
-                  blindMode={blindMode}
-                  onToggleBlind={toggleBlind}
-                  userAnswer={answer}
-                />
+                showAnswerInput ? (
+                  answerInputCard
+                ) : (
+                  <AnalysisPanel
+                    revealed={revealed}
+                    cardId={card.id}
+                    backMd={card.backMd}
+                    verifiedAnswer={card.verifiedAnswer}
+                    highlights={highlights}
+                    blindMode={blindMode}
+                    onToggleBlind={toggleBlind}
+                    userAnswer={answer}
+                  />
+                )
               }
               stickyLeft
               stickyTop="top-[96px]"
               defaultRatio={0.5}
               minRatio={0.35}
               maxRatio={0.65}
-              ariaLabel="본문 / 분석 분할 비율"
+              ariaLabel="본문 / 답안·분석 분할 비율"
             />
           </div>
         </>
@@ -576,16 +590,20 @@ function PdfViewer({
   paperLabel,
   itemFormat,
   itemPoints,
+  stemText,
 }: {
   imageUrls: string[];
   paperLabel: string | null;
   itemFormat: string | null;
   itemPoints: number | null;
+  stemText: string;
 }) {
   const [pageIndex, setPageIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
+  // 백승환 피드백 #2 (2026-05-15) — 새 탭 → 모달 lightbox. 학습 흐름 이탈 방지.
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   // pointer drag pan — pointer 단일 모델로 마우스 + 터치 + 펜 통일.
   const dragStateRef = useRef<{
@@ -959,15 +977,15 @@ function PdfViewer({
             </button>
             <span className="mx-1 inline-block h-4 w-px bg-rule" aria-hidden />
             {src && (
-              <a
-                href={src}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="새 탭에서 전체 크기로 보기"
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                aria-label="전체화면으로 보기"
+                title="전체화면 (모달)"
                 className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40"
               >
                 <Maximize2 className="h-3.5 w-3.5" aria-hidden />
-              </a>
+              </button>
             )}
           </div>
         )}
@@ -1023,6 +1041,21 @@ function PdfViewer({
             loading="lazy"
           />
         </div>
+      )}
+
+      {/* 백승환 피드백 #2 (2026-05-15) — 전체화면 모달. 새 탭 이탈 대신 in-app
+          lightbox 로 학습 흐름 보존. itemNo 는 paperLabel 로부터 추출 어려워
+          페이지 인덱스+1 사용 (모달 헤더 표기용). */}
+      {src && (
+        <ExamItemLightbox
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          itemNo={pageIndex + 1}
+          imageUrl={src}
+          stemText={stemText}
+          paperLabel={paperLabel ?? ""}
+          initialMode="image"
+        />
       )}
     </div>
   );
