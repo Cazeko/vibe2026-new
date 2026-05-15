@@ -1,29 +1,41 @@
-// Fitly 발표 .pptx 빌더 (2026-05-15)
+// Fitly 발표 .pptx 빌더 (2026-05-15 / 2026-05-16 색·그레인 정합)
 //
 // 입력: docs/plans/2026-05-15-presentation-package.md (정리본)
 // 출력: fitly/발표.pptx (14 슬라이드, 16:9, 1920×1080)
 //
-// 디자인 토큰 (DESIGN.md v3.0.1)
-//   배경:    cream    #FAF7F0
+// 디자인 토큰 (DESIGN.md v3.0.1 §4 — 색 / §4.5 종이 그레인 정합)
+//   배경:    cream    #FAF6EE
+//   카드:    cream-soft #FFFAF1 / cream-deep #F3EDE0
 //   텍스트:  ink      #1A2027
-//   액센트:  evergreen #2F5D50 (단 1색만)
-//   괘선:    ink/30%  #1A2027 (opacity 0.3)
+//   보조:    text-muted #6B6256 (warm gray, DESIGN.md §4.1)
+//   액센트:  evergreen #1F5C4A (deep — §4.3 6 사용처 한정)
+//   괘선:    rule #E8E2D5 / rule-strong #C8BFA8
 //   헤드라인: Noto Serif KR Bold
 //   본문:    Noto Sans KR
+//
+// 종이 그레인 (§4.5) — SlideMaster 단위로 한 번 정의 → 14 슬라이드 공유.
+//   PPT 는 CSS radial-gradient 지원 X 라 200 개 의 미세 도형(0.02"×0.02",
+//   ink transparency 92~95%) 을 무작위 분포 → 종이 결 근사. 4px grid 원본
+//   대비 거칠지만 "가까이 보면 결, 멀리 보면 단색" 정합 톤.
 //
 // 16:9 레이아웃 = 10 × 5.625 inches
 // 콘텐츠 안전 영역: 좌우 0.4", 상하 0.3" 여백 → 9.2" × 5.025"
 
 const pptxgen = require("pptxgenjs");
 
-// ─────────── 디자인 토큰 ───────────
+// ─────────── 디자인 토큰 (DESIGN.md §4 정합) ───────────
 const C = {
-  cream: "FAF7F0",
-  ink: "1A2027",
-  inkSoft: "434B55",   // 본문 부드럽게
-  inkMuted: "8A929B",  // 캡션/메타
-  evergreen: "2F5D50",
-  evergreenSoft: "5C8077",
+  cream: "FAF6EE",          // --color-bg (warm cream paper)
+  creamSoft: "FFFAF1",      // --color-surface
+  creamDeep: "F3EDE0",      // --color-surface-deep
+  ink: "1A2027",            // --color-text (deep ink)
+  inkSoft: "434B55",        // 본문 부드럽게 (자체 톤)
+  inkMuted: "6B6256",       // --color-text-muted (warm gray)
+  evergreen: "1F5C4A",      // --color-accent (deep evergreen)
+  evergreenStrong: "173F33",// --color-accent-strong
+  evergreenSoft: "5C8077",  // 자체 (보조 evergreen)
+  rule: "E8E2D5",           // --color-rule
+  ruleStrong: "C8BFA8",     // --color-rule-strong
 };
 const F = {
   serif: "Noto Serif KR",
@@ -80,12 +92,43 @@ pres.title = "Fitly — 합격은 시간이 아니라 적합도다";
 pres.author = "Fitly Team";
 pres.subject = "한국 초등교사 임용 1차 학습 플래너 PWA";
 
+// ─────────── SlideMaster — 종이 그레인 배경 (DESIGN.md §4.5) ───────────
+// 마스터에 한 번 정의 → 14 슬라이드 자동 상속. PPTX 파일 크기 절약 (master 객체는
+// 한 번만 직렬화). 점 위치는 시드 고정 무작위 — 빌드 재현성 보장.
+function seededRandom(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0x100000000;
+  };
+}
+const grainRand = seededRandom(20260516);
+const GRAIN_DOTS = 220;
+const grainObjects = [];
+for (let i = 0; i < GRAIN_DOTS; i++) {
+  const x = +(grainRand() * (W - 0.05)).toFixed(3);
+  const y = +(grainRand() * (H - 0.05)).toFixed(3);
+  const size = 0.012 + grainRand() * 0.012; // 0.012~0.024"
+  const transp = 88 + Math.floor(grainRand() * 8); // 88~95
+  grainObjects.push({
+    rect: {
+      x, y, w: +size.toFixed(3), h: +size.toFixed(3),
+      fill: { color: C.ink, transparency: transp },
+      line: { type: "none" },
+    },
+  });
+}
+pres.defineSlideMaster({
+  title: "FITLY_PAPER",
+  background: { color: C.cream },
+  objects: grainObjects,
+});
+
 let pageNo = 0;
 
 // ─────────── Slide 0-1 표지 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   // 좌측 상단 작은 라벨
@@ -128,8 +171,7 @@ let pageNo = 0;
 
 // ─────────── Slide 1-1 배경 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 1 · 문제");
@@ -191,8 +233,7 @@ let pageNo = 0;
 
 // ─────────── Slide 1-2 페르소나 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 1 · 문제");
@@ -263,8 +304,7 @@ let pageNo = 0;
 
 // ─────────── Slide 2-1 핵심 가치 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 2 · 솔루션");
@@ -331,8 +371,7 @@ let pageNo = 0;
 
 // ─────────── Slide 2-2 페인-가치-기능 매핑 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 2 · 솔루션");
@@ -417,8 +456,7 @@ let pageNo = 0;
 
 // ─────────── Slide 3-1 데모 작동성 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 3 · 데모 ① 작동성");
@@ -511,8 +549,7 @@ let pageNo = 0;
 
 // ─────────── Slide 4-1 데모 사용성 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 4 · 데모 ② 사용성");
@@ -598,8 +635,7 @@ let pageNo = 0;
 
 // ─────────── Slide 5-1 차별성 정량 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 5 · 차별성");
@@ -665,8 +701,7 @@ let pageNo = 0;
 
 // ─────────── Slide 5-2 차별성 정성 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 5 · 차별성");
@@ -747,8 +782,7 @@ let pageNo = 0;
 
 // ─────────── Slide 6-1 시장 (TAM/SAM/SOM) ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 6 · 기대효과·향후계획");
@@ -817,8 +851,7 @@ let pageNo = 0;
 
 // ─────────── Slide 6-2 BM 한 장 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 6 · 기대효과·향후계획");
@@ -914,8 +947,7 @@ let pageNo = 0;
 
 // ─────────── Slide 6-3 GTM + 로드맵 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 6 · 기대효과·향후계획");
@@ -931,24 +963,29 @@ let pageNo = 0;
     color: C.evergreen, charSpacing: 6, margin: 0,
   });
   // 단기
+  // 2026-05-16 — Gemini 외부 평가 (시장 이해도) 반영: 교대생 특화 커뮤니티 바이럴
+  // 키워드 추가 (에브리타임·초임공). 타겟층 밀집 채널 명시로 GTM 신뢰도 보강.
   s.addShape("rect", {
-    x: MX, y: 1.85, w: halfW, h: 1.2,
-    fill: { color: C.cream },
-    line: { color: C.ink, width: 0.5, transparency: 80 },
+    x: MX, y: 1.85, w: halfW, h: 1.55,
+    fill: { color: C.creamSoft },
+    line: { color: C.ruleStrong, width: 0.5 },
   });
   s.addText([
     { text: "단기  ", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.inkMuted, charSpacing: 4 } },
-    { text: "임용 유튜버 합작", options: { fontFace: F.sans, fontSize: 14, bold: true, color: C.ink, breakLine: true } },
+    { text: "유튜버 합작 + 교대 커뮤니티 바이럴", options: { fontFace: F.sans, fontSize: 14, bold: true, color: C.ink, breakLine: true } },
     { text: " ", options: { fontSize: 4, breakLine: true } },
     { text: "임용 유튜버 5~10명 무료 Pass +", options: { fontFace: F.sans, fontSize: 12, color: C.inkSoft, breakLine: true } },
-    { text: "콘텐츠 합작 1편씩 발행", options: { fontFace: F.sans, fontSize: 12, color: C.inkSoft } },
-  ], { x: MX + 0.25, y: 1.95, w: halfW - 0.5, h: 1.0, valign: "top", margin: 0, paraSpaceAfter: 2 });
+    { text: "콘텐츠 합작 1편씩 발행", options: { fontFace: F.sans, fontSize: 12, color: C.inkSoft, breakLine: true } },
+    { text: "교대 ", options: { fontFace: F.sans, fontSize: 12, color: C.inkSoft } },
+    { text: "에브리타임·초임공", options: { fontFace: F.sans, fontSize: 12, bold: true, color: C.ink } },
+    { text: " 시드 후기 + 무료 체험", options: { fontFace: F.sans, fontSize: 12, color: C.inkSoft } },
+  ], { x: MX + 0.25, y: 1.95, w: halfW - 0.5, h: 1.4, valign: "top", margin: 0, paraSpaceAfter: 2 });
 
   // 장기
   s.addShape("rect", {
-    x: MX, y: 3.15, w: halfW, h: 1.2,
-    fill: { color: C.cream },
-    line: { color: C.ink, width: 0.5, transparency: 80 },
+    x: MX, y: 3.5, w: halfW, h: 1.2,
+    fill: { color: C.creamSoft },
+    line: { color: C.ruleStrong, width: 0.5 },
   });
   s.addText([
     { text: "장기  ", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.inkMuted, charSpacing: 4 } },
@@ -956,7 +993,7 @@ let pageNo = 0;
     { text: " ", options: { fontSize: 4, breakLine: true } },
     { text: "24년치 데이터 자산 → 블로그", options: { fontFace: F.sans, fontSize: 12, color: C.inkSoft, breakLine: true } },
     { text: "주 2편, 50편 발행 시 long-tail 안정", options: { fontFace: F.sans, fontSize: 12, color: C.inkSoft } },
-  ], { x: MX + 0.25, y: 3.25, w: halfW - 0.5, h: 1.0, valign: "top", margin: 0, paraSpaceAfter: 2 });
+  ], { x: MX + 0.25, y: 3.6, w: halfW - 0.5, h: 1.0, valign: "top", margin: 0, paraSpaceAfter: 2 });
 
   // 우: 로드맵 타임라인
   const rx = MX + halfW + 0.4;
@@ -1013,6 +1050,8 @@ let pageNo = 0;
 
   s.addNotes(
     "GTM 은 두 축입니다. 단기 — 임용 유튜버 5~10명에게 무료 Pass 와 콘텐츠 합작. " +
+    "그리고 교대생이 극도로 밀집한 에브리타임·초임공 커뮤니티에 시드 후기와 무료 체험을 풀어 " +
+    "타겟층 바이럴을 일으킵니다. " +
     "장기 — 24년치 데이터를 SEO 블로그로 풀어 검색 유입. " +
     "12개월 로드맵은 7월 베타, 9월 정식, 12월 시즌 1 종료, 2027년 3월 시즌 2 v2 출시. " +
     "첫 시즌 데이터로 PMF 검증 후 v2 로 본격 운영합니다."
@@ -1021,8 +1060,7 @@ let pageNo = 0;
 
 // ─────────── Slide 7-1 회고 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   addPartLabel(s, "PART 7 · 회고·소회");
@@ -1032,66 +1070,107 @@ let pageNo = 0;
 
   // 상단: 14일 통계
   s.addText([
-    { text: "225 ", options: { fontFace: F.serif, fontSize: 36, bold: true, color: C.evergreen } },
-    { text: "commits   ·   ", options: { fontFace: F.sans, fontSize: 14, color: C.inkMuted } },
-    { text: "56 ", options: { fontFace: F.serif, fontSize: 36, bold: true, color: C.evergreen } },
-    { text: "PR   ·   ", options: { fontFace: F.sans, fontSize: 14, color: C.inkMuted } },
-    { text: "6 ", options: { fontFace: F.serif, fontSize: 36, bold: true, color: C.evergreen } },
-    { text: "단계 PR 시리즈", options: { fontFace: F.sans, fontSize: 14, color: C.inkMuted } },
+    { text: "225 ", options: { fontFace: F.serif, fontSize: 32, bold: true, color: C.evergreen } },
+    { text: "commits   ·   ", options: { fontFace: F.sans, fontSize: 13, color: C.inkMuted } },
+    { text: "56 ", options: { fontFace: F.serif, fontSize: 32, bold: true, color: C.evergreen } },
+    { text: "PR   ·   ", options: { fontFace: F.sans, fontSize: 13, color: C.inkMuted } },
+    { text: "6 ", options: { fontFace: F.serif, fontSize: 32, bold: true, color: C.evergreen } },
+    { text: "단계 PR 시리즈", options: { fontFace: F.sans, fontSize: 13, color: C.inkMuted } },
   ], {
-    x: MX, y: 1.4, w: CW, h: 0.9, align: "center", valign: "middle", margin: 0,
+    x: MX, y: 1.25, w: CW, h: 0.7, align: "center", valign: "middle", margin: 0,
   });
 
-  // 극복점 박스
+  // 2026-05-16 — 두 박스 가로 분할. 주인님 요청: AI 통제(헌법 시스템) 경험을
+  // silent fallback 회고와 동등 비중으로 노출. 회고 핵심 메시지를 "규율 + 정직"
+  // 으로 묶어 발표 톤 강화.
+  const recapHalfW = (CW - 0.3) / 2;
+  const boxY = 2.05;
+  const boxH = 2.5;
+
+  // 좌: 헌법 시스템 — AI 통제
   s.addShape("rect", {
-    x: MX, y: 2.4, w: CW, h: 1.85,
+    x: MX, y: boxY, w: recapHalfW, h: boxH,
     fill: { color: C.evergreen, transparency: 92 },
     line: { color: C.evergreen, width: 1 },
   });
-  s.addText("극복점 — AI silent fallback 회귀 (PR #71)", {
-    x: MX + 0.3, y: 2.55, w: CW - 0.6, h: 0.35,
-    fontFace: F.sans, fontSize: 13, bold: true,
+  s.addText("규율 — 헌법 시스템으로 AI 통제", {
+    x: MX + 0.25, y: boxY + 0.15, w: recapHalfW - 0.5, h: 0.32,
+    fontFace: F.sans, fontSize: 12, bold: true,
     color: C.evergreen, charSpacing: 4, margin: 0,
   });
   s.addText([
-    { text: "증상  ", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.inkMuted, charSpacing: 4 } },
-    { text: "채점 후 AI 총평·키워드·diff 모두 “분석 결과가 비어 있습니다” 표시", options: { fontFace: F.sans, fontSize: 12, color: C.ink, breakLine: true } },
-    { text: "원인  ", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.inkMuted, charSpacing: 4 } },
-    { text: "LLM JSON 파싱 실패 시 빈 배열로 ", options: { fontFace: F.sans, fontSize: 12, color: C.ink } },
-    { text: "조용히 fallback ", options: { fontFace: F.sans, fontSize: 12, italic: true, bold: true, color: C.ink } },
-    { text: "→ UI 가 “성공인데 빈 답안” 으로 잘못 안내", options: { fontFace: F.sans, fontSize: 12, color: C.ink, breakLine: true } },
-    { text: "해결  ", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.inkMuted, charSpacing: 4 } },
-    { text: "파싱 실패 시 명시 throw + 진단 로그 + 출력 토큰 2048 → 4096 격상", options: { fontFace: F.sans, fontSize: 12, color: C.ink } },
+    { text: "종전  ", options: { fontFace: F.sans, fontSize: 10, bold: true, color: C.inkMuted, charSpacing: 4 } },
+    { text: "단일 ", options: { fontFace: F.sans, fontSize: 11, color: C.ink } },
+    { text: "CLAUDE.md ", options: { fontFace: F.sans, fontSize: 11, italic: true, color: C.ink } },
+    { text: "지침서 → AI 가 자주 말을 안 듣고 스코프 폭주", options: { fontFace: F.sans, fontSize: 11, color: C.ink, breakLine: true } },
+    { text: "전환  ", options: { fontFace: F.sans, fontSize: 10, bold: true, color: C.inkMuted, charSpacing: 4 } },
+    { text: "4 계층 위계 (한국 법체계 정합)", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.ink, breakLine: true } },
+    { text: "        헌법 / 법률 / 시행령 / 시행규칙", options: { fontFace: F.sans, fontSize: 10.5, italic: true, color: C.inkSoft, breakLine: true } },
+    { text: "결과  ", options: { fontFace: F.sans, fontSize: 10, bold: true, color: C.inkMuted, charSpacing: 4 } },
+    { text: "모든 결정 → 헌법 조항 ", options: { fontFace: F.sans, fontSize: 11, color: C.ink } },
+    { text: "근거 명시 의무", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.ink, breakLine: true } },
+    { text: "        신규 기능 자가 추가 금지 (스코프 보호)", options: { fontFace: F.sans, fontSize: 10.5, italic: true, color: C.inkSoft } },
   ], {
-    x: MX + 0.3, y: 2.95, w: CW - 0.6, h: 1.2, valign: "top", margin: 0, paraSpaceAfter: 4,
+    x: MX + 0.25, y: boxY + 0.5, w: recapHalfW - 0.5, h: boxH - 0.65,
+    valign: "top", margin: 0, paraSpaceAfter: 4,
   });
 
-  // 배움
+  // 우: 정직 — silent fallback 회귀
+  const rx = MX + recapHalfW + 0.3;
+  s.addShape("rect", {
+    x: rx, y: boxY, w: recapHalfW, h: boxH,
+    fill: { color: C.evergreen, transparency: 92 },
+    line: { color: C.evergreen, width: 1 },
+  });
+  s.addText("정직 — silent fallback 회귀 (PR #71)", {
+    x: rx + 0.25, y: boxY + 0.15, w: recapHalfW - 0.5, h: 0.32,
+    fontFace: F.sans, fontSize: 12, bold: true,
+    color: C.evergreen, charSpacing: 4, margin: 0,
+  });
+  s.addText([
+    { text: "증상  ", options: { fontFace: F.sans, fontSize: 10, bold: true, color: C.inkMuted, charSpacing: 4 } },
+    { text: "채점 후 AI 총평·키워드·diff 모두 빈 화면", options: { fontFace: F.sans, fontSize: 11, color: C.ink, breakLine: true } },
+    { text: "원인  ", options: { fontFace: F.sans, fontSize: 10, bold: true, color: C.inkMuted, charSpacing: 4 } },
+    { text: "LLM JSON 파싱 실패 시 ", options: { fontFace: F.sans, fontSize: 11, color: C.ink } },
+    { text: "조용히 빈 배열 fallback", options: { fontFace: F.sans, fontSize: 11, italic: true, bold: true, color: C.ink, breakLine: true } },
+    { text: "        → UI 가 “성공인데 빈 답안” 으로 오안내", options: { fontFace: F.sans, fontSize: 10.5, italic: true, color: C.inkSoft, breakLine: true } },
+    { text: "해결  ", options: { fontFace: F.sans, fontSize: 10, bold: true, color: C.inkMuted, charSpacing: 4 } },
+    { text: "명시 throw + 진단 로그", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.ink, breakLine: true } },
+    { text: "        + 출력 토큰 2048 → 4096 격상", options: { fontFace: F.sans, fontSize: 10.5, italic: true, color: C.inkSoft } },
+  ], {
+    x: rx + 0.25, y: boxY + 0.5, w: recapHalfW - 0.5, h: boxH - 0.65,
+    valign: "top", margin: 0, paraSpaceAfter: 4,
+  });
+
+  // 배움 — 두 박스의 핵심을 한 줄로
   s.addText([
     { text: "배움  ", options: { fontFace: F.sans, fontSize: 11, bold: true, color: C.evergreen, charSpacing: 4 } },
-    { text: "AI 출력 처리에서 fallback 은 ", options: { fontFace: F.serif, fontSize: 14, italic: true, color: C.ink } },
-    { text: "명시 에러로 surface", options: { fontFace: F.serif, fontSize: 14, italic: true, bold: true, color: C.evergreen } },
-    { text: " — silent 는 사용자에게 정직하지 않다.", options: { fontFace: F.serif, fontSize: 14, italic: true, color: C.ink } },
+    { text: "AI 협업은 ", options: { fontFace: F.serif, fontSize: 14, italic: true, color: C.ink } },
+    { text: "규율과 정직", options: { fontFace: F.serif, fontSize: 14, italic: true, bold: true, color: C.evergreen } },
+    { text: " — 헌법으로 통제, fallback 은 명시 에러로 surface.", options: { fontFace: F.serif, fontSize: 14, italic: true, color: C.ink } },
   ], {
-    x: MX, y: 4.5, w: CW, h: 0.7, align: "center", valign: "middle", margin: 0,
+    x: MX, y: 4.75, w: CW, h: 0.4, align: "center", valign: "middle", margin: 0,
   });
 
   s.addNotes(
     "마지막으로, 14일 AI 협업 회고를 짧게. " +
     "225 commits, 56 PR — 프로젝트 원칙 문서까지 4 계층으로 진화시켰습니다. " +
-    "가장 인상 깊은 극복점은 — AI 분석 결과가 빈 화면으로 표시되는 회귀였습니다. " +
-    "LLM JSON 파싱이 실패하면 코드가 조용히 빈 배열로 fallback 하고 있었습니다. " +
-    "사용자는 ‘내 답안이 부족하구나’ 오해하지만, 실제로는 LLM 응답이 토큰 한도에 잘렸던 것입니다. " +
-    "여기서 배운 원칙 — AI 출력 처리에서 fallback 은 명시 에러로 surface 해야 한다, silent 는 사용자에게 정직하지 않다. " +
-    "우리 정직성 원칙과 정합하는 약속으로 코드에 박았습니다. " +
+    "회고는 두 축으로 묶었습니다. " +
+    "첫째, 규율 — 처음에는 단일 CLAUDE.md 지침서로 AI 에게 명령했지만, " +
+    "AI 가 자주 말을 안 들었고 스코프가 폭주했습니다. " +
+    "그래서 한국 법체계처럼 4 계층 위계 — 헌법, 법률, 시행령, 시행규칙 — 으로 분리하고, " +
+    "모든 결정에 헌법 조항 근거를 명시하도록 의무화했습니다. " +
+    "이후 AI 가 임의로 신규 기능을 추가하는 일이 사라졌습니다. " +
+    "둘째, 정직 — AI 분석 결과가 빈 화면으로 표시되는 회귀였습니다. " +
+    "LLM JSON 파싱 실패 시 코드가 조용히 빈 배열로 fallback 하고 있었습니다. " +
+    "여기서 배운 원칙은, fallback 은 명시 에러로 surface 해야 한다, silent 는 사용자에게 정직하지 않다. " +
     "감사합니다."
   );
 }
 
 // ─────────── Slide 마지막 컷 ───────────
 {
-  const s = pres.addSlide();
-  s.background = { color: C.cream };
+  const s = pres.addSlide({ masterName: "FITLY_PAPER" });
   pageNo += 1;
 
   // 메인 헤드라인
