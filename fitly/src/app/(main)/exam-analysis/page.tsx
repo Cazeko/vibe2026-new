@@ -339,10 +339,14 @@ function StatCard({
   // 값이 긴 문자열(예: 2002–2026)일 때도 KPI 카드 폭(좁은 뷰포트 ~140px) 안에
   // 자동 축소되도록 clamp + min-w-0 적용. 사용자 보고 2026-05-12.
   // 주인님 발화 (2026-05-15) — 4 카드 안 문구 가로·세로 정중앙 정렬.
+  // 후속 발화 — Card/CardContent 에 h-full 추가. 종전엔 RegionCard 가 우측에서
+  // 더 길어 grid stretch 로 row 높이 증가하는데, Card 가 자기 콘텐츠 높이만
+  // 차지(h-full 없음) → CardContent 도 같음 → justify-center 가 작은 영역 안에서만
+  // 작동해 시각상 위쪽 치우침. h-full 로 row 높이 모두 받아 진짜 정중앙.
   const isLongValue = typeof value === "string" && value.length > 4;
   return (
-    <Card className={`border-rule overflow-hidden ${className}`}>
-      <CardContent className="px-3 py-3 min-w-0 flex flex-col items-center justify-center text-center min-h-[88px] gap-1">
+    <Card className={`border-rule overflow-hidden h-full ${className}`}>
+      <CardContent className="px-3 py-3 min-w-0 h-full flex flex-col items-center justify-center text-center min-h-[88px] gap-1">
         <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
           {label}
         </div>
