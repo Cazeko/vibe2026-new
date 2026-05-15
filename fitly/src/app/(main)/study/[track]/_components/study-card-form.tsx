@@ -585,6 +585,14 @@ const ZOOM_STEPS = [1, 1.25, 1.5, 2, 3] as const;
 const MIN_ZOOM = ZOOM_STEPS[0];
 const MAX_ZOOM = ZOOM_STEPS[ZOOM_STEPS.length - 1];
 
+// 백승환 #2 후속 — paperLabel("2024학년도 교직논술 3번") 끝 숫자 추출.
+// 미파싱 시 1 fallback (lightbox 헤더 "{N}번" 표기용).
+function extractItemNo(paperLabel: string | null): number {
+  if (!paperLabel) return 1;
+  const m = paperLabel.match(/(\d+)\s*번\s*$/);
+  return m ? Number(m[1]) : 1;
+}
+
 function PdfViewer({
   imageUrls,
   paperLabel,
@@ -1044,13 +1052,13 @@ function PdfViewer({
       )}
 
       {/* 백승환 피드백 #2 (2026-05-15) — 전체화면 모달. 새 탭 이탈 대신 in-app
-          lightbox 로 학습 흐름 보존. itemNo 는 paperLabel 로부터 추출 어려워
-          페이지 인덱스+1 사용 (모달 헤더 표기용). */}
+          lightbox 로 학습 흐름 보존. itemNo 는 paperLabel("…N번") 끝의 숫자를
+          정규식으로 추출 — formatPaperLabel(queries.ts) 출력 형식 정합. */}
       {src && (
         <ExamItemLightbox
           open={lightboxOpen}
           onClose={() => setLightboxOpen(false)}
-          itemNo={pageIndex + 1}
+          itemNo={extractItemNo(paperLabel)}
           imageUrl={src}
           stemText={stemText}
           paperLabel={paperLabel ?? ""}
