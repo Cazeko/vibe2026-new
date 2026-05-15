@@ -77,7 +77,12 @@ export function FitlyLogo({
           className={cn(
             "inline-flex items-baseline font-semibold tracking-[-0.02em] leading-none",
             WORD_SIZE[size],
-            onAccentBg ? "text-cream" : "text-foreground"
+            onAccentBg
+              ? // 2026-05-16 — `text-cream` 토큰이 다크에서 `--color-bg`(거의 검정)
+                // 으로 매핑되어 hero 배경 위 가시성 0 (사이드바 회귀와 동일 원인).
+                // `dark:text-foreground` 로 다크 모드에서도 밝게 유지.
+                "text-cream dark:text-foreground"
+              : "text-foreground"
           )}
         >
           <span
