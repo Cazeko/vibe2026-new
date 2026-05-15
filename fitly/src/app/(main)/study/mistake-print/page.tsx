@@ -7,8 +7,11 @@ import { PrintActions } from "./_components/print-actions";
 
 export const dynamic = "force-dynamic";
 
+// title.absolute — 루트 layout.tsx 의 template "%s · Fitly" 우회.
+// 브라우저 인쇄 → PDF 저장 시 파일명이 page <title> 그대로 떨어지므로,
+// "Fitly 오답노트" 단일 토큰으로 두어 깔끔한 파일명 보장.
 export const metadata = {
-  title: "오답노트 · 인쇄 · Fitly",
+  title: { absolute: "Fitly 오답노트" },
   description: "내 오답 카드를 A4 인쇄 또는 PDF 저장",
 };
 

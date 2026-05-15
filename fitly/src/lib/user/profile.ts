@@ -26,14 +26,28 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfile | null
   } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // 2026-05-15 — Promise.race timeout 가드. (main)/layout.tsx 가 매 라우트 전환마다
+  // 본 헬퍼를 await 하므로 DB 응답 지연(서울→Supabase RTT spike·cold start)이 곧
+  // 페이지 무한 로딩으로 이어지는 회귀가 보고됨. row=null fallback 으로 페이지는
+  // 그래도 렌더되도록 그래스풀 디그레이드. statement_timeout 8s 보다 짧게 잡아
+  // 사용자 체감 hang 을 5s 이내로 묶는다.
   const db = getDb();
+  const PROFILE_TIMEOUT_MS = 5_000;
   let row: typeof userProfiles.$inferSelect | null = null;
   try {
-    const rows = await db
-      .select()
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, user.id))
-      .limit(1);
+    const rows = await Promise.race([
+      db
+        .select()
+        .from(userProfiles)
+        .where(eq(userProfiles.userId, user.id))
+        .limit(1),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("getCurrentUserProfile timeout")),
+          PROFILE_TIMEOUT_MS,
+        ),
+      ),
+    ]);
     row = rows[0] ?? null;
   } catch (e) {
     console.error("[getCurrentUserProfile] query failed", e);

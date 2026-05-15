@@ -181,8 +181,11 @@ export function AppSidebar() {
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-      {/* ─ 브랜드 + 모바일 닫기 버튼 ─ */}
-      <div className="px-5 pt-6 pb-5 border-b border-rule flex items-center justify-between">
+      {/* ─ 브랜드 + 모바일 닫기 버튼 ─
+          2026-05-15 — lg+ min-h-[96px] 로 PageHeader 와 동일 높이 유지.
+          가로선이 페이지 헤더 가로선과 일자 정렬, 로고는 flex items-center
+          로 박스 정중앙 위치 (사용자 보고 2026-05-15). 모바일은 종전 padding 보존. */}
+      <div className="px-5 pt-6 pb-5 lg:min-h-[96px] border-b border-rule flex items-center justify-between">
         <Link href="/dashboard" aria-label="Fitly 대시보드">
           <FitlyLogo size="md" />
         </Link>

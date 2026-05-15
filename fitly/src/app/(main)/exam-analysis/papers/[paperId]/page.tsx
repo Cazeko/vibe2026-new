@@ -15,6 +15,34 @@ import { ItemCard } from "./_components/item-card";
 
 export const dynamic = "force-dynamic";
 
+// title.absolute — 루트 layout.tsx 의 template "%s · Fitly" 우회.
+// 브라우저 인쇄 → PDF 저장 시 파일명을 "Fitly {YYYY학년도 회차}" 로 통일.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ paperId: string }>;
+}) {
+  const { paperId } = await params;
+  const paper = await safeRun(
+    "paper detail metadata",
+    async () => {
+      const db = getDb();
+      const [row] = await db
+        .select()
+        .from(examPapers)
+        .where(eq(examPapers.id, paperId))
+        .limit(1);
+      return row ?? null;
+    },
+    null,
+  );
+  if (!paper) return { title: { absolute: "Fitly 기출분석" } };
+  const sessionLabel = getSessionLabel(paper.session);
+  return {
+    title: { absolute: `Fitly ${paper.year}학년도 ${sessionLabel}` },
+  };
+}
+
 // 헌법 v3.5 제13조의2·제18조의2 정합 — 시험지 상세 페이지.
 // 백승환 검토자 피드백 (2026-05-13) 반영
 // #4 본문 텍스트 전체 보기 — Lightbox 텍스트 모드 + "전체 텍스트 보기" 버튼
