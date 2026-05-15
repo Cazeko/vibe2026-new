@@ -1,4 +1,7 @@
-const CACHE_VERSION = "fitly-v1";
+// 2026-05-15 — v2 bump. PDF 파일명 회귀 수정 (PR #76) 후에도 옛 페이지 HTML(title
+// "오답노트 · 인쇄 · Fitly · Fitly") 이 RUNTIME_CACHE 에 남아 새 metadata 반영이
+// 늦어지던 회귀. 본 bump 로 activate 단계에서 v1-* 캐시를 일괄 삭제 → 강제 갱신.
+const CACHE_VERSION = "fitly-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
