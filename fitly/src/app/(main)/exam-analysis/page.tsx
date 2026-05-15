@@ -7,7 +7,6 @@ import {
   Activity,
   Network,
   Compass,
-  Printer,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +22,7 @@ import { PapersTab } from "./_components/papers-tab";
 import { AnalysisTab } from "./_components/analysis-tab";
 import { TopicTab } from "./_components/topic-tab";
 import { RoadmapTab } from "./_components/roadmap-tab";
+import { PrintButton } from "./_components/print-button";
 
 export const dynamic = "force-dynamic";
 
@@ -306,22 +306,9 @@ function RegionCard({
   );
 }
 
-function PrintButton() {
-  // server component 안의 inline event handler 를 위해 별도 client island 가
-  // 필요하나, 본 버튼은 "use client" 없이도 form action 또는 <a> 로 동일 효과
-  // 가능. window.print 만으로는 client 필요 — 별도 light client 컴포넌트.
-  return (
-    <a
-      href="javascript:window.print()"
-      className="inline-flex h-9 items-center gap-1.5 rounded-md border border-rule-strong px-3 text-[12.5px] font-semibold text-muted2-deep hover:border-evergreen hover:text-evergreen transition-colors"
-      aria-label="현재 분석 페이지를 PDF/지면 출력"
-    >
-      <Printer className="h-3.5 w-3.5" aria-hidden />
-      <span className="hidden sm:inline">PDF 저장 / 인쇄</span>
-      <span className="sm:hidden">PDF</span>
-    </a>
-  );
-}
+// PrintButton 은 client island (./_components/print-button.tsx) 로 분리.
+// 종전 href="javascript:window.print()" 는 React/Next.js 보안(XSS 회피) 정책으로
+// 무시·차단되어 클릭 시 아무 동작 없는 회귀였음 (2026-05-15 주인님 발화).
 
 function StatCard({
   label,
