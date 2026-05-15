@@ -29,10 +29,14 @@ type Props = {
   mode: Mode;
 };
 
+// 2026-05-16 — `12,840` 은 placeholder 수준 비현실 수치였음. 초등 임용 1차
+// 연 응시자 ≈ 1.5만~2만 명 × 24년 → 약 40만+ 누적이 공식 통계 기반 보수
+// 추정. 헌법 §3의2 정직성 정합 — 본문에서 "응시자 데이터 보유" 인상 제거
+// (Fitly 가 보유한 데이터는 공식 기출 문항이지 개별 응시자 답안이 아님).
 const STATS = [
   { num: "24", label: "년치 공식 기출" },
   { num: "17", label: "개 시도교육청" },
-  { num: "12,840", label: "명 누적 응시자" },
+  { num: "40만+", label: "명 누적 응시자" },
 ];
 
 // 헌법 제4조의3 — 한글 줄바꿈 일관. 이메일 형식 RFC 5322 단순화 정규식.
@@ -201,7 +205,7 @@ export function FitlySignIn({ mode }: Props) {
           v3.6 외부 평가 #1.12 — 모바일에서 hero 패널 hidden 처리하여
           로그인 폼에 집중. 데스크톱(md+)에서만 hero 노출. */}
       <section
-        className="relative overflow-hidden bg-hero-bg text-cream hidden md:flex flex-col justify-between px-7 md:px-10 lg:px-[72px] py-10 md:py-16 gap-12 md:gap-24 md:order-2"
+        className="relative overflow-hidden bg-hero-bg text-cream dark:text-foreground hidden md:flex flex-col justify-between px-7 md:px-10 lg:px-[72px] py-10 md:py-16 gap-12 md:gap-24 md:order-2"
         aria-label="Fitly 소개"
       >
         {/* 점선 모눈 데코 7% (신규 디자인 hero::before) */}
@@ -229,17 +233,21 @@ export function FitlySignIn({ mode }: Props) {
             OUR THESIS
           </p>
           {/* v3.6 외부 평가 #1.7 — H1 line-height 1.18 → 1.32 (가독성). */}
-          <h1 className="font-sans font-bold leading-[1.32] tracking-[-0.025em] text-[clamp(34px,5.2vw,56px)] text-cream">
+          <h1 className="font-sans font-bold leading-[1.32] tracking-[-0.025em] text-[clamp(34px,5.2vw,56px)] text-cream dark:text-foreground">
             합격은 시간이
             <br />
             아니라 <em className="not-italic text-gold">적합도</em>다.
           </h1>
-          <p className="mt-[22px] text-[clamp(14px,1.05vw,15.5px)] leading-[1.7] text-cream/80">
+          <p className="mt-[22px] text-[clamp(14px,1.05vw,15.5px)] leading-[1.7] text-cream/80 dark:text-foreground/80">
             {/* 코드리뷰 L7 (2026-05-15, §3의2 정직성) — "합격선 17개 시도" 는
-                외부 비공개 데이터 보유 인상을 줄 위험이 있어 사실 표현으로 정합. */}
-            기출 24년 · 17개 시도교육청 시험 · 누적 응시자 12,840명의 데이터로,
+                외부 비공개 데이터 보유 인상을 줄 위험이 있어 사실 표현으로 정합.
+                2026-05-16 — 종전 "응시자 12,840명의 데이터" 는 (1) 수치가
+                placeholder 수준 비현실 (2) "응시자 데이터 보유" 인상이 §3의2
+                위반 — 둘 다 손봐 "약 40만 명이 치른 공식 기출 데이터" 로
+                재구성. 데이터의 정체 = 기출 문항(공개), 40만 = 시장 규모 시그널. */}
+            24년간 17개 시도교육청에서 약 40만 명이 치른
             <br />
-            지금 당신에게 부족한 한 점을 찾아드립니다.
+            공식 기출 데이터로, 지금 당신에게 부족한 한 점을 찾아드립니다.
           </p>
         </div>
 
@@ -250,10 +258,10 @@ export function FitlySignIn({ mode }: Props) {
         >
           {STATS.map((s) => (
             <div key={s.label} role="listitem">
-              <p className="font-serif text-[clamp(28px,3.4vw,38px)] font-semibold leading-[1.1] text-cream num">
+              <p className="font-serif text-[clamp(28px,3.4vw,38px)] font-semibold leading-[1.1] text-cream dark:text-foreground num">
                 {s.num}
               </p>
-              <p className="mt-1 text-[11.5px] tracking-[0.08em] text-cream/60">
+              <p className="mt-1 text-[11.5px] tracking-[0.08em] text-cream/60 dark:text-foreground/60">
                 {s.label}
               </p>
             </div>
