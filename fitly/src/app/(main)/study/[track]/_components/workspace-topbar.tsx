@@ -1,11 +1,18 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { Pencil, Sparkles } from "lucide-react";
 import type { CardType } from "@/types";
 
 // 헌법 v3.5.3 §16 + 2026-05-14 brainstorming PR 1 — 학습 워크스페이스 골격.
 // 카드 메타·세션 진행률·학습 상태(채점 전/후) 를 가로 한 줄로 압축 표기한다.
 // docs/plans/2026-05-14-essay-workspace-design.md §4 정합.
+//
+// 백승환 #4 (2026-05-15) — 진행률 표기 재설계.
+// 종전: "세션 0장" + (sessionCount * 8)% 가짜 progress bar → 작동 안 함 인상.
+// 개선: "현재 N번째 / 총 M장" + (현재/총)% 실제 진행률.
+// 총 M = 세션 시작 시점의 dueCount 를 ref 로 fix (router.refresh 로 재로드되어도 보존).
+// 현재 N = sessionCount + 1 (지금 풀고 있는 카드는 N번째).
 
 type Props = {
   track: CardType;
@@ -13,6 +20,7 @@ type Props = {
   itemFormat: string | null;
   itemPoints: number | null;
   sessionCount: number;
+  remainingCount: number;
   revealed: boolean;
 };
 
@@ -28,9 +36,24 @@ export function WorkspaceTopbar({
   itemFormat,
   itemPoints,
   sessionCount,
+  remainingCount,
   revealed,
 }: Props) {
-  const sessionProgressPct = Math.min(100, sessionCount * 8);
+  const initialTotalRef = useRef<number | null>(null);
+  const [initialTotal, setInitialTotal] = useState<number>(0);
+  // 첫 마운트 시 dueCount 스냅샷 — 카드를 풀어 dueCount 가 줄어도 분모 보존.
+  // remainingCount 는 현재 카드를 포함한 남은 수. sessionCount 누적과 합쳐 총량 추정.
+  useEffect(() => {
+    if (initialTotalRef.current == null) {
+      const snap = sessionCount + remainingCount;
+      initialTotalRef.current = snap;
+      setInitialTotal(snap);
+    }
+  }, [sessionCount, remainingCount]);
+
+  const total = initialTotal > 0 ? initialTotal : Math.max(sessionCount + remainingCount, 1);
+  const current = Math.min(sessionCount + 1, total);
+  const progressPct = Math.min(100, Math.round((sessionCount / total) * 100));
   const phase = revealed ? "review" : "writing";
 
   return (
@@ -60,28 +83,33 @@ export function WorkspaceTopbar({
           )}
         </div>
 
-        {/* 세션 진행률 — 우측 정렬 */}
+        {/* 세션 진행률 — 우측 정렬. "N / M" + 굵은 progress bar. */}
         <div
-          className="ml-auto flex items-center gap-2 text-[11px] text-muted-foreground"
+          className="ml-auto flex items-center gap-2.5 text-[11.5px] text-muted-foreground"
           aria-live="polite"
         >
           <span className="uppercase tracking-[0.12em] text-[10.5px]">
-            세션
+            진행
           </span>
-          <span className="tabular-nums font-medium text-foreground">
-            {sessionCount}장
+          <span className="tabular-nums font-semibold text-foreground">
+            <span className="text-evergreen">{current}</span>
+            <span className="mx-0.5 text-muted-foreground/70">/</span>
+            <span>{total}</span>
+            <span className="ml-0.5 text-[10.5px] text-muted-foreground font-normal">
+              장
+            </span>
           </span>
           <div
-            className="h-1 w-24 overflow-hidden rounded-full bg-rule"
+            className="h-1.5 w-32 overflow-hidden rounded-full bg-rule"
             role="progressbar"
-            aria-valuenow={sessionProgressPct}
+            aria-valuenow={progressPct}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label="세션 진행률"
+            aria-label={`세션 진행률 — ${current} / ${total}장 (${progressPct}%)`}
           >
             <div
               className="h-full bg-evergreen transition-all duration-500"
-              style={{ width: `${sessionProgressPct}%` }}
+              style={{ width: `${progressPct}%` }}
             />
           </div>
         </div>

@@ -219,6 +219,7 @@ export default async function StudyTrackPage({
             }}
             highlights={highlights}
             tags={tags}
+            remainingCount={dueCounts[track]}
           />
         ) : (
           <EmptyQueue track={track} dueCounts={dueCounts} />
