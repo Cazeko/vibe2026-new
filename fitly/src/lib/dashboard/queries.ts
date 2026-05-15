@@ -9,6 +9,9 @@ import {
   learningLogs,
   userProfiles,
   userStreakFreezes,
+  userCardLog,
+  cards,
+  examItems,
 } from "@/lib/db/schema";
 import { computeProgress } from "@/lib/progress/score";
 import {
@@ -350,16 +353,22 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
 }
 
 // 2026-05-16 — 데모용 약점 영역 산출 (D-S2 정식 구현 전 임시안).
-// user_card_log × cards × exam_items.domains LATERAL JOIN 으로 최근 60일 윈도우
-// 의 영역별 정답률 집계. `good`/`easy` = 정답, `again`/`hard` = 오답.
-// HAVING COUNT(*) >= 5 로 표본 너무 적은 도메인은 노이즈 회피.
-// 표시 라벨은 DB domain 값을 그대로 사용 (한글). exam-analysis/queries.ts:251
-// 의 LATERAL JOIN 패턴과 정합.
+// 최근 60일 윈도우에서 user_card_log × cards × exam_items 의 도메인별 정답률
+// 집계. `good`/`easy` = 정답, `again`/`hard` = 오답.
+//
+// 구현 노트: 종전 raw `db.execute(sql\`...cross join lateral...\`)` 버전은
+// production drizzle 컨텍스트에서 0 행을 반환하던 회귀가 있었다 (PR #86 의
+// `::uuid` 캐스트 fix 후에도 미해결). 정확한 원인은 drizzle 의 sql template
+// 이 LATERAL/parameter binding 을 처리하는 미묘한 경로로 추정. 따라서 drizzle
+// ORM API (`eq`/`gte`/`innerJoin`) 만 사용해 데이터를 가져온 뒤 도메인 펼치기
+// 와 집계는 JS 에서 수행한다. 60일 윈도우 ≈ 1k 행 수준이라 메모리 비용 무시
+// 가능.
 // D-S2 정식 구현 시 user_attempts.selfGrade 와 user_card_log 양쪽을 통합한
 // 약점 산출로 교체 예정.
 const WEAK_WINDOW_DAYS = 60;
 const WEAK_MIN_SAMPLES = 5;
 const WEAK_LIMIT = 5;
+const CORRECT_GRADES = new Set(["good", "easy"]);
 
 async function computeWeakTypes(userId: string): Promise<WeakType[]> {
   return safeRun(
@@ -367,35 +376,49 @@ async function computeWeakTypes(userId: string): Promise<WeakType[]> {
     async () => {
       const db = getDb();
       const since = new Date(Date.now() - WEAK_WINDOW_DAYS * DAY_MS);
-      const rows = await db.execute<{
-        domain: string;
-        total: number;
-        correct: number;
-      }>(sql`
-        select
-          d.value as domain,
-          count(*)::int as total,
-          sum(case when ucl.grade in ('good','easy') then 1 else 0 end)::int as correct
-        from user_card_log ucl
-        join cards c on c.id = ucl.card_id
-        join exam_items ei on ei.id = c.source_item_id
-        cross join lateral jsonb_array_elements_text(ei.domains) as d(value)
-        where ucl.user_id = ${userId}::uuid
-          and ucl.reviewed_at >= ${since}::timestamptz
-        group by d.value
-        having count(*) >= ${WEAK_MIN_SAMPLES}
-        order by (
-          sum(case when ucl.grade in ('good','easy') then 1 else 0 end)::float
-          / nullif(count(*), 0)
-        ) asc
-        limit ${WEAK_LIMIT}
-      `);
 
-      return rows.map((r, i) => ({
-        id: `weak-${i}-${encodeURIComponent(r.domain)}`,
-        label: r.domain,
-        accuracy: Math.round((Number(r.correct) / Number(r.total)) * 100),
-        total: Number(r.total),
+      const rows = await db
+        .select({
+          grade: userCardLog.grade,
+          domains: examItems.domains,
+        })
+        .from(userCardLog)
+        .innerJoin(cards, eq(cards.id, userCardLog.cardId))
+        .innerJoin(examItems, eq(examItems.id, cards.sourceItemId))
+        .where(
+          and(
+            eq(userCardLog.userId, userId),
+            gte(userCardLog.reviewedAt, since),
+          ),
+        );
+
+      const stats = new Map<string, { total: number; correct: number }>();
+      for (const row of rows) {
+        const isCorrect = CORRECT_GRADES.has(row.grade);
+        const domains = Array.isArray(row.domains) ? row.domains : [];
+        for (const dom of domains) {
+          let s = stats.get(dom);
+          if (!s) {
+            s = { total: 0, correct: 0 };
+            stats.set(dom, s);
+          }
+          s.total += 1;
+          if (isCorrect) s.correct += 1;
+        }
+      }
+
+      const items = [...stats.entries()].filter(
+        ([, s]) => s.total >= WEAK_MIN_SAMPLES,
+      );
+      items.sort(
+        (a, b) => a[1].correct / a[1].total - b[1].correct / b[1].total,
+      );
+
+      return items.slice(0, WEAK_LIMIT).map(([domain, s], i) => ({
+        id: `weak-${i}-${encodeURIComponent(domain)}`,
+        label: domain,
+        accuracy: Math.round((s.correct / s.total) * 100),
+        total: s.total,
       }));
     },
     [] as WeakType[],
