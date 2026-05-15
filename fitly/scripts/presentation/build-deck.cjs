@@ -89,7 +89,7 @@ function addFooter(slide, pageNo) {
 const pres = new pptxgen();
 pres.layout = "LAYOUT_16x9";
 pres.title = "Fitly — 합격은 시간이 아니라 적합도다";
-pres.author = "Fitly Team";
+pres.author = "편돌이들";
 pres.subject = "한국 초등교사 임용 1차 학습 플래너 PWA";
 
 // ─────────── SlideMaster — 종이 그레인 배경 (DESIGN.md §4.5) ───────────
@@ -155,17 +155,26 @@ let pageNo = 0;
   // 가로 괘선 (메모러블 앵커)
   addRule(s, 3.3);
 
-  // 부제 + 팀
+  // 부제 + 팀 (2026-05-16 — 팀명·팀원 명세)
   s.addText([
     { text: "한국 초등교사 임용 1차 학습 플래너 PWA", options: { fontFace: F.sans, fontSize: 14, color: C.inkSoft, breakLine: true } },
     { text: " ", options: { fontSize: 6, breakLine: true } },
-    { text: "팀명: [팀명]   ·   2026.05", options: { fontFace: F.sans, fontSize: 12, color: C.inkMuted } },
+    { text: "팀명 ", options: { fontFace: F.sans, fontSize: 13, color: C.inkMuted } },
+    { text: "편돌이들", options: { fontFace: F.sans, fontSize: 13, bold: true, color: C.ink } },
+    { text: "   ·   2026.05", options: { fontFace: F.sans, fontSize: 13, color: C.inkMuted, breakLine: true } },
+    { text: " ", options: { fontSize: 4, breakLine: true } },
+    { text: "팀장 ", options: { fontFace: F.sans, fontSize: 11, color: C.inkMuted } },
+    { text: "이정주", options: { fontFace: F.sans, fontSize: 11, color: C.ink } },
+    { text: "   ·   부팀장 ", options: { fontFace: F.sans, fontSize: 11, color: C.inkMuted } },
+    { text: "백승환", options: { fontFace: F.sans, fontSize: 11, color: C.ink } },
+    { text: "   ·   팀원 ", options: { fontFace: F.sans, fontSize: 11, color: C.inkMuted } },
+    { text: "오세울, 문규승", options: { fontFace: F.sans, fontSize: 11, color: C.ink } },
   ], {
-    x: MX, y: 3.5, w: CW, h: 1.5, align: "center", valign: "top", margin: 0,
+    x: MX, y: 3.5, w: CW, h: 1.6, align: "center", valign: "top", margin: 0,
   });
 
   s.addNotes(
-    "안녕하세요, [팀명] 입니다. 저희가 만든 Fitly 를 소개해 드리겠습니다."
+    "안녕하세요, 편돌이들 팀입니다. 저희가 만든 Fitly 를 소개해 드리겠습니다."
   );
 }
 
