@@ -380,8 +380,8 @@ async function computeWeakTypes(userId: string): Promise<WeakType[]> {
         join cards c on c.id = ucl.card_id
         join exam_items ei on ei.id = c.source_item_id
         cross join lateral jsonb_array_elements_text(ei.domains) as d(value)
-        where ucl.user_id = ${userId}
-          and ucl.reviewed_at >= ${since}
+        where ucl.user_id = ${userId}::uuid
+          and ucl.reviewed_at >= ${since}::timestamptz
         group by d.value
         having count(*) >= ${WEAK_MIN_SAMPLES}
         order by (
