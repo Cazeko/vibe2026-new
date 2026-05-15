@@ -50,8 +50,11 @@ export function computeAttemptHash(answer: string, referenceMd: string): string 
 // 서술형 표준 분량의 2배 이상이라 충분히 여유.
 export const MAX_ANSWER_LEN = 4000;
 export const MAX_REFERENCE_LEN = 8000;
-// Gemini Flash maxOutputTokens 상한 — 분석 JSON 출력은 보통 1k 미만이라 2k 로 충분.
-const MAX_OUTPUT_TOKENS = 2048;
+// 백승환 #2차 핫픽스 (2026-05-15) — Gemini Flash 출력 토큰 상한 2048 → 4096.
+// 종전 2048 은 한글 분석 결과(키워드 12개 + diff 60 segments + 강점/보완점/누락
+// 키워드)가 자주 truncation 되어 JSON 파싱 실패 → safeParse fallback 으로
+// 빈 결과가 표시되던 회귀. Flash 모델 8192 상한 내 안전 마진.
+const MAX_OUTPUT_TOKENS = 4096;
 
 // 프롬프트 인젝션 방어 — 사용자 입력을 고유 delimiter 로 감싸 system 정책 영역과
 // 분리. 입력 내 동일 delimiter 가 발견되면 strip (코드리뷰 M7 — 2026-05-15).
@@ -140,16 +143,16 @@ function extractJson(text: string): string {
   return trimmed;
 }
 
+// 백승환 #2차 핫픽스 (2026-05-15) — JSON 파싱 실패 시 silent fallback 제거.
+// 종전: parse 실패 → 모든 배열 빈 fallback → 사용자에게 "분석 결과 비어있음"
+// 으로 잘못 표시되어, 실제로는 LLM 응답 깨짐(주로 maxOutputTokens 도달 truncation)
+// 인지 알 수 없었음. 이제 null 반환 → analyzeEssay 가 throw → requestAiAnalysis
+// 가 LlmFailed 로 catch → UI 에서 "AI 분석 일시적 실패" 안내 + 재시도 권장.
 function safeParse(text: string): {
   overview: OverviewJson;
   keywords: KeywordsJson;
   diff: DiffJson;
-} {
-  const fallback = {
-    overview: { strengths: [], improvements: [], missing_keywords: [] },
-    keywords: { reference: [] },
-    diff: { segments: [] },
-  };
+} | null {
   try {
     const raw = JSON.parse(extractJson(text));
     const overview = raw?.overview ?? {};
@@ -217,8 +220,11 @@ function safeParse(text: string): {
       },
     };
   } catch (e) {
-    console.error("[gemini-essay-analyze] JSON parse failed → fallback", e);
-    return fallback;
+    console.error(
+      `[gemini-essay-analyze] JSON parse failed (text head=${JSON.stringify(text.slice(0, 200))} tail=${JSON.stringify(text.slice(-200))} len=${text.length})`,
+      e,
+    );
+    return null;
   }
 }
 
@@ -238,7 +244,7 @@ export async function analyzeEssay(
       config: {
         temperature: 0.3,
         responseMimeType: "application/json",
-        // 코드리뷰 C.H3 (2026-05-15) — Flash 응답 토큰 상한 명시.
+        // 백승환 #2차 핫픽스 (2026-05-15) — Flash 응답 토큰 상한 4096 (2048 → 4096).
         maxOutputTokens: MAX_OUTPUT_TOKENS,
       },
     });
@@ -250,7 +256,24 @@ export async function analyzeEssay(
           ? String(response.text)
           : "";
 
+    // 백승환 #2차 핫픽스 (2026-05-15) — finishReason 진단 로깅.
+    // MAX_TOKENS / SAFETY 등 truncation·차단 원인을 Vercel logs 에서 즉시 식별.
+    const finishReason = response.candidates?.[0]?.finishReason;
+    if (finishReason && finishReason !== "STOP") {
+      console.error(
+        `[gemini-essay-analyze] non-STOP finish. reason=${finishReason} text.length=${text.length} answer.length=${input.userAnswer.length}`,
+      );
+    }
+
     const parsed = safeParse(text);
+    if (!parsed) {
+      // safeParse 가 null 이면 JSON 파싱 실패 — 위 로그(safeParse 내부 head/tail
+      // 출력)와 finishReason 으로 진단. 호출자(requestAiAnalysis)가 LlmFailed
+      // 로 변환해 사용자에게 명확한 재시도 안내를 노출하도록 throw.
+      throw new Error(
+        `EssayAnalysisParseFailed (finishReason=${finishReason ?? "unknown"}, text.length=${text.length})`,
+      );
+    }
     return { ...parsed, model };
   } catch (e) {
     // PR 6 이후 hotfix — LlmFailed 진단을 위해 모델 ID + stack 동반 로깅.
