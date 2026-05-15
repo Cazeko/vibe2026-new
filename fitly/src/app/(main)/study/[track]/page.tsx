@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import {
   getDueCards,
-  getDueCardCounts,
+  getReviewDueCardCounts,
   getCardHighlights,
   getCardTags,
   getCardAttemptHistory,
@@ -105,9 +105,14 @@ export default async function StudyTrackPage({
   // 백승환 #5 (2026-05-15) — 단일 카드 limit=1 → 세션 큐 limit=30.
   // 큐 전체를 client 에 전달하여 prev/next/jump 인터랙션 가능.
   // 큐 끝까지 풀면 router.refresh 로 다음 묶음 자동 로드.
+  //
+  // 2026-05-16 — dueCounts 를 getReviewDueCardCounts (좁힌 정의) 로 교체.
+  // 사용자 보고 "오늘의 복습 대기 292" 회귀. 헌법 코멘트 (db/queries.ts:270) 의
+  // 표준대로 KPI 표시는 *이미 학습한 카드 중 due* 만 카운트해 대시보드·학습계획·
+  // 마이페이지와 정합. 큐(queue) 자체는 getDueCards 로 NEW 포함 유지 → 학습 가능.
   const [queue, dueCounts] = await Promise.all([
     getDueCards(user.id, track, 30, new Date(), markFilter),
-    getDueCardCounts(user.id),
+    getReviewDueCardCounts(user.id),
   ]);
   // focusedCardId 가 큐에 있으면 해당 카드, 없으면 큐 첫 카드.
   const focusedIndex = focusedCardId

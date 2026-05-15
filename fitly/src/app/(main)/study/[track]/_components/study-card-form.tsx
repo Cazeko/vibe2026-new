@@ -620,6 +620,40 @@ export function StudyCardForm({
               </CardContent>
             </Card>
           )}
+          {/* 2026-05-16 — 키워드 트랙 자가 채점 4 버튼 회귀 회복 (사용자 보고).
+              8dfdd7d (sticky → 답안 사본 카드 안 통합) 리팩터에서 problemPane 만
+              렌더되는 quiz/mistake 트랙에만 채점 버튼이 남고, 키워드 트랙은 답안
+              사본 자체가 없어 채점 진입점이 사라졌던 회귀. 정리 노트 아래에 동일
+              4 버튼을 별도 카드로 노출 + 키보드 1/2/3/4 단축키 동작 보존. */}
+          {revealed && (
+            <Card className="mt-4 border-l-4 border-rule-strong border-y border-r border-rule bg-card">
+              <CardContent className="p-5">
+                <span className="block text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground mb-3">
+                  이 카드 자가 채점
+                </span>
+                <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                  {GRADES.map(({ key, label, hint, tone, Icon }, idx) => (
+                    <button
+                      key={key}
+                      type="button"
+                      disabled={pending}
+                      onClick={() => handleGrade(key)}
+                      aria-keyshortcuts={String(idx + 1)}
+                      aria-label={`${label} · ${hint}`}
+                      title={`${label} — ${hint}`}
+                      className={`inline-flex items-center justify-center gap-1.5 rounded-md border bg-card h-9 px-1.5 text-[12.5px] font-medium transition-[colors,transform] duration-100 active:scale-[0.96] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${tone}`}
+                    >
+                      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                      <span>{label}</span>
+                      <kbd className="hidden sm:inline-flex items-center justify-center h-4 min-w-[16px] rounded-[3px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[9.5px] font-bold leading-none tabular-nums px-1 font-sans">
+                        {idx + 1}
+                      </kbd>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           {/* 코드리뷰 C.H2 (2026-05-15, 시행규칙 33 §35) — 사용자 AI 답안 신고 채널.
               reveal 후에만 노출 (학습자가 모범답안을 확인한 뒤 오류 보고). */}
           {revealed && (
