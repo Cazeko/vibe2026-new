@@ -349,11 +349,57 @@ async function computePlan(userId: string): Promise<PlanItem[]> {
   ];
 }
 
-// v3.0 / D-S1.5 — questionType 기반 약점 분석은 cards.type / exam_items.format
-// 통합 후 D-S2에서 reimplement. 현재는 빈 배열 — 매개변수 미사용 경고 회피를
-// 위해 인자를 받지 아니한다 (D-S2 시 user_attempts JOIN으로 인자 부활).
-async function computeWeakTypes(): Promise<WeakType[]> {
-  return [];
+// 2026-05-16 — 데모용 약점 영역 산출 (D-S2 정식 구현 전 임시안).
+// user_card_log × cards × exam_items.domains LATERAL JOIN 으로 최근 60일 윈도우
+// 의 영역별 정답률 집계. `good`/`easy` = 정답, `again`/`hard` = 오답.
+// HAVING COUNT(*) >= 5 로 표본 너무 적은 도메인은 노이즈 회피.
+// 표시 라벨은 DB domain 값을 그대로 사용 (한글). exam-analysis/queries.ts:251
+// 의 LATERAL JOIN 패턴과 정합.
+// D-S2 정식 구현 시 user_attempts.selfGrade 와 user_card_log 양쪽을 통합한
+// 약점 산출로 교체 예정.
+const WEAK_WINDOW_DAYS = 60;
+const WEAK_MIN_SAMPLES = 5;
+const WEAK_LIMIT = 5;
+
+async function computeWeakTypes(userId: string): Promise<WeakType[]> {
+  return safeRun(
+    "dashboard computeWeakTypes",
+    async () => {
+      const db = getDb();
+      const since = new Date(Date.now() - WEAK_WINDOW_DAYS * DAY_MS);
+      const rows = await db.execute<{
+        domain: string;
+        total: number;
+        correct: number;
+      }>(sql`
+        select
+          d.value as domain,
+          count(*)::int as total,
+          sum(case when ucl.grade in ('good','easy') then 1 else 0 end)::int as correct
+        from user_card_log ucl
+        join cards c on c.id = ucl.card_id
+        join exam_items ei on ei.id = c.source_item_id
+        cross join lateral jsonb_array_elements_text(ei.domains) as d(value)
+        where ucl.user_id = ${userId}
+          and ucl.reviewed_at >= ${since}
+        group by d.value
+        having count(*) >= ${WEAK_MIN_SAMPLES}
+        order by (
+          sum(case when ucl.grade in ('good','easy') then 1 else 0 end)::float
+          / nullif(count(*), 0)
+        ) asc
+        limit ${WEAK_LIMIT}
+      `);
+
+      return rows.map((r, i) => ({
+        id: `weak-${i}-${encodeURIComponent(r.domain)}`,
+        label: r.domain,
+        accuracy: Math.round((Number(r.correct) / Number(r.total)) * 100),
+        total: Number(r.total),
+      }));
+    },
+    [] as WeakType[],
+  );
 }
 
 // 헌법 제37조 정합 — Dashboard·me·study-plan·study-analysis는 모두 본 함수를
@@ -366,7 +412,7 @@ export async function getDashboardSummary(
     safeRun("computeKpi", () => computeKpi(userId), EMPTY_KPI),
     safeRun("computeTrend", () => computeTrend(userId), [] as TrendPoint[]),
     safeRun("computePlan", () => computePlan(userId), [] as PlanItem[]),
-    computeWeakTypes(),
+    computeWeakTypes(userId),
   ]);
 
   const isEmpty =
