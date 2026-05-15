@@ -7,7 +7,6 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  FileText,
   GitCompare,
   History,
   KeyRound,
@@ -36,18 +35,19 @@ import { requestAiAnalysis } from "../actions";
 // 헌법 v3.5.3 §16 + 2026-05-14 brainstorming PR 1/3 — 워크스페이스 분석 패널.
 // PR 1 골격 + PR 3 OverviewTab 활성화.
 //
-// 5탭 구성
-// - overview     : AI 총평 [PR 3 활성] — 강점/보완점/누락 키워드 카드
-// - keywords     : 키워드 비교 [PR 4 대기]
-// - diff         : 답안 diff [PR 5 대기]
-// - reference    : 모범답안 — PR 1 활성
-// - explanation  : 해설 — PR 1 placeholder
+// 5탭 구성 (주인님 결정 2026-05-15: explanation 탭 제거 → 5탭. 해설은 모범답안에
+// 합산 보존, 분리 schema 컬럼 exam_items.explanationMd 는 시드 단계에서만 유지).
+// - overview     : AI 총평 — 강점/보완점/누락 키워드 카드
+// - keywords     : 키워드 비교
+// - diff         : 답안 비교 (diff)
+// - reference    : 모범답안 (해설 포함)
+// - history      : 이력 (백승환 #8) — 채점 무관 항상 노출
 //
 // 잠금 정책
 // - 채점 전(revealed === false) — 전체 잠금, 자물쇠 + "채점 후 활성화" 안내
 // - 채점 후 — overview 자동 활성. unlocked 가 false 인 탭은 "준비 중".
 
-type TabKey = "overview" | "keywords" | "diff" | "reference" | "explanation" | "history";
+type TabKey = "overview" | "keywords" | "diff" | "reference" | "history";
 
 type TabSpec = {
   key: TabKey;
@@ -63,7 +63,6 @@ const TABS: TabSpec[] = [
   { key: "keywords", label: "키워드 비교", Icon: KeyRound, unlocked: true },
   { key: "diff", label: "답안 비교", Icon: GitCompare, unlocked: true },
   { key: "reference", label: "모범답안", Icon: BookOpenCheck, unlocked: true },
-  { key: "explanation", label: "해설", Icon: FileText, unlocked: true },
   { key: "history", label: "이력", Icon: History, unlocked: true },
 ];
 
@@ -231,8 +230,6 @@ export function AnalysisPanel({
             blindMode={blindMode}
             onToggleBlind={onToggleBlind}
           />
-        ) : active === "explanation" ? (
-          <ExplanationPlaceholder />
         ) : (
           <ComingSoonPanel tab={active} />
         )}
@@ -887,26 +884,6 @@ function HighlightToolButton({
   );
 }
 
-function ExplanationPlaceholder() {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <span
-        aria-hidden
-        className="mb-3 grid h-11 w-11 place-items-center rounded-full bg-secondary/60 text-muted-foreground"
-      >
-        <FileText className="h-5 w-5" />
-      </span>
-      <p className="font-serif text-[14px] font-medium tracking-tight">
-        해설 시드 분리 예정
-      </p>
-      <p className="mt-2 max-w-sm text-[12px] leading-relaxed text-muted-foreground">
-        현재는 모범답안 탭에 풀이 흐름이 함께 포함되어 있습니다.
-        <br />
-        해설 전용 본문은 시드 파이프라인 분리 후 표시됩니다.
-      </p>
-    </div>
-  );
-}
 
 function ComingSoonPanel({ tab }: { tab: TabKey }) {
   const label = TABS.find((t) => t.key === tab)?.label ?? "분석";
