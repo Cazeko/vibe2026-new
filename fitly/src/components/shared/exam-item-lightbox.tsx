@@ -392,7 +392,7 @@ function TextPanel({ stemText }: { stemText: string }) {
   const cleaned = formatExamStem(stemText);
   return (
     <div className="h-full overflow-auto p-6 bg-paper/30">
-      <p className="font-serif text-[14px] leading-[1.8] text-foreground/90 whitespace-pre-wrap break-keep max-w-prose">
+      <p className="font-serif text-[14px] leading-[1.8] text-foreground/90 whitespace-pre-wrap break-keep max-w-prose mx-auto">
         {cleaned || "본문 텍스트가 없습니다."}
       </p>
     </div>
