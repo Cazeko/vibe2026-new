@@ -699,6 +699,27 @@ function PdfViewer({
     // F2 정합 — ZOOM_STEPS 는 모듈 상수라 dep 제외. hasImage 만 추적.
   }, [hasImage]);
 
+  // F10 (2026-05-15, 주인님 보고 #26) — iOS Safari 핀치투줌 정합.
+  // touch-action: none 만으로는 일부 iOS 버전에서 두-손가락 제스처가 페이지
+  // 단위 zoom 으로 흘러가 viewport 내부 이미지 핀치가 무력화되는 회귀.
+  // WebKit 의 비표준 gesturestart/gesturechange/gestureend 에 preventDefault
+  // 를 거는 것이 표준 우회. 다른 브라우저는 이 이벤트를 발화하지 않아 노옵.
+  useEffect(() => {
+    const vp = viewportRef.current;
+    if (!vp) return;
+    function block(e: Event) {
+      e.preventDefault();
+    }
+    vp.addEventListener("gesturestart", block as EventListener);
+    vp.addEventListener("gesturechange", block as EventListener);
+    vp.addEventListener("gestureend", block as EventListener);
+    return () => {
+      vp.removeEventListener("gesturestart", block as EventListener);
+      vp.removeEventListener("gesturechange", block as EventListener);
+      vp.removeEventListener("gestureend", block as EventListener);
+    };
+  }, [hasImage]);
+
   // F8 (2026-05-15) — 핀치 anchor 보정. 두 손가락 중심점 (viewport 기준) 을
   // anchor 로 잡고 줌 ratio 만큼 offset 도 함께 이동. 핀치 시 손가락이 모이는
   // 지점이 이미지 위에서 고정되는 자연스러운 인터랙션.
@@ -714,6 +735,27 @@ function PdfViewer({
     };
   }
 
+  // F11 (2026-05-15) — 핀치 base anchor 재계산을 별도 헬퍼로 추출. pointer
+  // down 시점뿐 아니라 3→2 손가락 전이(extra pointer 가 떨어진 직후)에도
+  // 사용하여 anchor 가 손가락 중심에 자연스럽게 lock 되도록 한다.
+  function rebasePinch(currentZoom: number, currentOffset: { x: number; y: number }) {
+    const pinch = pinchStateRef.current;
+    if (pinch.pointers.size !== 2) return;
+    const pts = [...pinch.pointers.values()];
+    const dx = pts[0].x - pts[1].x;
+    const dy = pts[0].y - pts[1].y;
+    pinch.initialDist = Math.hypot(dx, dy);
+    pinch.initialZoom = currentZoom;
+    const vp = viewportRef.current;
+    if (vp) {
+      const { cx, cy } = pinchCenter(pts, vp.getBoundingClientRect());
+      pinch.anchorX = cx;
+      pinch.anchorY = cy;
+      pinch.baseOffsetX = currentOffset.x;
+      pinch.baseOffsetY = currentOffset.y;
+    }
+  }
+
   // pointer-down — 단일 포인터면 drag pan 시작, 두 번째 포인터면 핀치 진입.
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (!hasImage) return;
@@ -724,20 +766,19 @@ function PdfViewer({
     pinch.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (pinch.pointers.size === 2) {
-      const pts = [...pinch.pointers.values()];
-      const dx = pts[0].x - pts[1].x;
-      const dy = pts[0].y - pts[1].y;
-      pinch.initialDist = Math.hypot(dx, dy);
-      pinch.initialZoom = zoom;
-      // F8 — anchor 좌표 + 그 시점의 offset 캡처.
-      const vp = viewportRef.current;
-      if (vp) {
-        const { cx, cy } = pinchCenter(pts, vp.getBoundingClientRect());
-        pinch.anchorX = cx;
-        pinch.anchorY = cy;
-        pinch.baseOffsetX = offset.x;
-        pinch.baseOffsetY = offset.y;
-      }
+      rebasePinch(zoom, offset);
+      dragStateRef.current = null;
+      setDragging(false);
+      return;
+    }
+
+    // F11 (2026-05-15) — 3 손가락 이상 진입 시 핀치 상태 무효화 + 드래그 차단.
+    // 종전 코드는 size > 2 면 단일 포인터 분기로 흘러가 마지막 손가락 좌표로
+    // dragState 가 덧씌워지는 회귀. 새 포인터를 무시하고 기존 핀치를 유지하되
+    // initialDist 를 다음 손가락 leave 까지 0 으로 잠가 점프 방지. dragState
+    // 도 명시 정리 — size===2 분기와 정합 (잔여 팬 끼어들기 차단).
+    if (pinch.pointers.size > 2) {
+      pinch.initialDist = 0;
       dragStateRef.current = null;
       setDragging(false);
       return;
@@ -759,29 +800,35 @@ function PdfViewer({
     if (pinch.pointers.has(e.pointerId)) {
       pinch.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     }
+    // F11 — 3+ 손가락 시 핀치 무시. size=2 로 복귀할 때 anchor 재계산 (pointerEnd 정합).
+    if (pinch.pointers.size > 2) return;
     if (pinch.pointers.size === 2) {
       const pts = [...pinch.pointers.values()];
       const dx = pts[0].x - pts[1].x;
       const dy = pts[0].y - pts[1].y;
       const dist = Math.hypot(dx, dy);
-      if (pinch.initialDist > 0) {
-        const ratio = dist / pinch.initialDist;
-        const target = Math.max(
-          MIN_ZOOM,
-          Math.min(MAX_ZOOM, pinch.initialZoom * ratio),
-        );
-        setZoom(target);
-        if (target <= 1.001) {
-          setOffset({ x: 0, y: 0 });
-        } else {
-          // F8 — anchor 기준 offset 갱신. (target / initialZoom) 비율로 base
-          // offset 을 anchor 쪽으로 끌어당겨 손가락 중심이 이미지 위에서 고정.
-          const r = target / pinch.initialZoom;
-          setOffset({
-            x: pinch.anchorX - (pinch.anchorX - pinch.baseOffsetX) * r,
-            y: pinch.anchorY - (pinch.anchorY - pinch.baseOffsetY) * r,
-          });
-        }
+      // F11 — initialDist 가 0 이면 (3→2 손가락 전이 직후 잠깐) 첫 frame 만 기록.
+      // 손가락 떨어지는 찰나의 좌표 jitter 가 ratio 폭주를 유발하지 않도록 한다.
+      if (pinch.initialDist <= 0) {
+        rebasePinch(zoom, offset);
+        return;
+      }
+      const ratio = dist / pinch.initialDist;
+      const target = Math.max(
+        MIN_ZOOM,
+        Math.min(MAX_ZOOM, pinch.initialZoom * ratio),
+      );
+      setZoom(target);
+      if (target <= 1.001) {
+        setOffset({ x: 0, y: 0 });
+      } else {
+        // F8 — anchor 기준 offset 갱신. (target / initialZoom) 비율로 base
+        // offset 을 anchor 쪽으로 끌어당겨 손가락 중심이 이미지 위에서 고정.
+        const r = target / pinch.initialZoom;
+        setOffset({
+          x: pinch.anchorX - (pinch.anchorX - pinch.baseOffsetX) * r,
+          y: pinch.anchorY - (pinch.anchorY - pinch.baseOffsetY) * r,
+        });
       }
       return;
     }
@@ -795,10 +842,21 @@ function PdfViewer({
 
   function onPointerEnd(e: React.PointerEvent<HTMLDivElement>) {
     const pinch = pinchStateRef.current;
-    const wasPinching = pinch.pointers.size === 2;
+    const sizeBefore = pinch.pointers.size;
+    const wasPinching = sizeBefore === 2;
     pinch.pointers.delete(e.pointerId);
     // F7 — capture 명시 release. 자동 해제와 별도로 안전망.
     viewportRef.current?.releasePointerCapture?.(e.pointerId);
+
+    // F11 (2026-05-15) — 3+ 손가락에서 한 손가락이 떨어져 size=2 가 되었을 때
+    // 핀치 재시작. 남은 두 손가락 좌표 + 현재 zoom/offset 으로 anchor 재계산
+    // 하지 않으면 점프 발생. rebasePinch 로 baseline 재설정.
+    if (sizeBefore > 2 && pinch.pointers.size === 2) {
+      rebasePinch(zoom, offset);
+      dragStateRef.current = null;
+      setDragging(false);
+      return;
+    }
 
     // F3 (2026-05-15) — 핀치 → 단일 손가락 팬 전환. 한 손가락이 떨어진 직후
     // 남은 손가락으로 자연스럽게 팬을 잇는다.

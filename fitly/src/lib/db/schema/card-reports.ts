@@ -17,6 +17,16 @@ export type CardReportCategory =
   | "irrelevant"
   | "other";
 
+// 카테고리 목록 — runtime 검증·UI iteration 양쪽에서 사용. 종전 `actions.ts` 에 두었으나
+// Next.js 15 `"use server"` 파일은 비함수 export 금지(E352 — flight-loader/action-validate)
+// 위반으로 학습 트랙 진입 시 error boundary 발동 회귀(2026-05-15). 타입과 동거하도록 schema 로 이전.
+export const CARD_REPORT_CATEGORIES: ReadonlyArray<CardReportCategory> = [
+  "answer_wrong",
+  "explanation_unclear",
+  "irrelevant",
+  "other",
+];
+
 export type CardReportStatus = "pending" | "reviewed" | "dismissed";
 
 export const cardReports = pgTable(

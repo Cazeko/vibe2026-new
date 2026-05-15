@@ -16,7 +16,10 @@ import {
   userCardState,
   userCardTags,
 } from "@/lib/db/schema";
-import type { CardReportCategory } from "@/lib/db/schema";
+import {
+  CARD_REPORT_CATEGORIES,
+  type CardReportCategory,
+} from "@/lib/db/schema/card-reports";
 import type { SrsState } from "@/types";
 import {
   analyzeEssay,
@@ -591,12 +594,10 @@ export async function chatWithTutor(input: {
 // 헌법 시행규칙 33 §35 백업 매트릭스 — 사용자 AI 답안 신고 server action.
 // 코드리뷰 C.H2 (2026-05-15) — 학습자가 모범답안·해설 오류를 직접 보고할 수 있게
 // 하여 정직성 §3의2 보강. 일일 캡으로 어뷰즈 방지.
-export const REPORT_CATEGORIES: ReadonlyArray<CardReportCategory> = [
-  "answer_wrong",
-  "explanation_unclear",
-  "irrelevant",
-  "other",
-];
+//
+// hotfix (2026-05-15) — 종전 본 파일에서 `REPORT_CATEGORIES` 를 그대로 export
+// 하여 Next.js 15 `"use server"` 규칙(비함수 export 금지) 위반 → E352 발동.
+// 카테고리 목록은 `schema/card-reports.ts` 로 옮기고 본 파일은 import 만 한다.
 const MAX_REPORT_DETAIL_LEN = 1000;
 const MAX_REPORTS_PER_DAY = 20;
 
@@ -615,7 +616,7 @@ export async function reportCardIssue(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Unauthorized" };
 
-  if (!REPORT_CATEGORIES.includes(input.category)) {
+  if (!CARD_REPORT_CATEGORIES.includes(input.category)) {
     return { ok: false, error: "InvalidCategory" };
   }
 
