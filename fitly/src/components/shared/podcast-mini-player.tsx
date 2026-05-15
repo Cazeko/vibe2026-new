@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pause, Play, X, Rewind, FastForward } from "lucide-react";
+import { Loader2, Pause, Play, X, Rewind, FastForward, Volume2, VolumeX } from "lucide-react";
 import { usePodcastPlayer } from "@/components/shared/podcast-player-provider";
 
 // Track 1.2 — sticky bottom 미니플레이어. 활성 에피소드가 있을 때만 노출.
@@ -31,8 +31,12 @@ export function PodcastMiniPlayer() {
     currentSec,
     durationSec,
     completed,
+    volume,
+    muted,
     togglePlay,
     seek,
+    setVolume,
+    toggleMute,
     close,
   } = usePodcastPlayer();
 
@@ -148,6 +152,54 @@ export function PodcastMiniPlayer() {
             }
           />
         </label>
+
+        {/* 2026-05-16 (주인님 명시 요청) — 볼륨 컨트롤. ui-ux-pro-max 자문 정합 —
+            데스크톱(sm+) 은 hover/focus-within 으로 슬라이더 펼침. 모바일(sm-)
+            은 아이콘만 노출(44×44 터치 타겟) + 음소거 토글만 제공 — "회의 들어갈
+            때 즉시 음소거" UX 보존. */}
+        <div className="group/vol relative shrink-0 flex items-center">
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={muted ? "음소거 해제" : "음소거"}
+            aria-pressed={muted}
+            className="grid h-11 w-11 sm:h-9 sm:w-9 place-items-center rounded-md text-muted-foreground hover:bg-secondary/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 transition-colors"
+          >
+            {muted || volume === 0 ? (
+              <VolumeX className="h-4 w-4" aria-hidden />
+            ) : (
+              <Volume2 className="h-4 w-4" aria-hidden />
+            )}
+          </button>
+          {/* 슬라이더 — 데스크톱에서만 노출. hover/focus-within 으로 펼침. */}
+          <div className="hidden sm:flex items-center overflow-hidden transition-[width,opacity,margin] duration-150 w-0 opacity-0 ml-0 group-hover/vol:w-24 group-hover/vol:opacity-100 group-hover/vol:ml-2 focus-within:w-24 focus-within:opacity-100 focus-within:ml-2">
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={muted ? 0 : Math.round(volume * 100)}
+              onChange={(e) => setVolume(Number(e.target.value) / 100)}
+              aria-label="볼륨"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={muted ? 0 : Math.round(volume * 100)}
+              aria-valuetext={`${muted ? 0 : Math.round(volume * 100)}%`}
+              title={`볼륨 ${muted ? 0 : Math.round(volume * 100)}%`}
+              className={`audio-range audio-range-bar w-24 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 rounded-full ${
+                muted ? "opacity-50" : ""
+              }`}
+              style={
+                {
+                  "--progress": `${muted ? 0 : Math.round(volume * 100)}%`,
+                  height: "4px",
+                  borderRadius: "999px",
+                  appearance: "none",
+                } as React.CSSProperties
+              }
+            />
+          </div>
+        </div>
 
         <button
           type="button"
