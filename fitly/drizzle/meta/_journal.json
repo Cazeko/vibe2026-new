@@ -8,6 +8,13 @@
       "when": 1778019173100,
       "tag": "0000_exotic_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778968800000,
+      "tag": "0001_add_user_card_state_mark",
+      "breakpoints": true
     }
   ]
 }
