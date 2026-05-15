@@ -16,6 +16,7 @@ import {
   getDueCardCounts,
   getCardHighlights,
   getCardTags,
+  getCardAttemptHistory,
 } from "@/lib/db/queries";
 import { StudyCardForm } from "./_components/study-card-form";
 import { TrackFilters } from "./_components/track-filters";
@@ -117,12 +118,14 @@ export default async function StudyTrackPage({
 
   // 헌법 v3.5.1 제16조 — 카드별 사용자 하이라이트/태그 hydrate.
   // 카드가 없으면 페치 skip (queries.ts safeRun 미호출).
-  const [highlights, tags] = card
+  // 백승환 #8 (2026-05-15) — 답안 시도 이력 동시 prefetch.
+  const [highlights, tags, attemptHistory] = card
     ? await Promise.all([
         getCardHighlights(user.id, card.id),
         getCardTags(user.id, card.id),
+        getCardAttemptHistory(user.id, card.id, 10),
       ])
-    : [[], []];
+    : [[], [], []];
 
   return (
     <div className="min-h-screen pb-12">
@@ -250,6 +253,12 @@ export default async function StudyTrackPage({
             }))}
             currentIndex={focusedIndex >= 0 ? focusedIndex : 0}
             markFilter={markFilter}
+            attemptHistory={attemptHistory.map((a) => ({
+              id: a.id,
+              answerMd: a.answerMd,
+              selfGrade: a.selfGrade,
+              attemptedAt: a.attemptedAt.toISOString(),
+            }))}
           />
         ) : (
           <EmptyQueue track={track} dueCounts={dueCounts} />

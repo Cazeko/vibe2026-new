@@ -72,6 +72,15 @@ type QueueItem = {
 
 type MarkKind = "bookmark" | "star" | "unsure";
 
+// 백승환 #8 (2026-05-15) — 답안 시도 이력. attemptedAt 은 ISO string 으로
+// serializable 하게 server → client 전달.
+export type AttemptRecord = {
+  id: string;
+  answerMd: string;
+  selfGrade: string | null;
+  attemptedAt: string;
+};
+
 type Grade = "again" | "hard" | "good" | "easy";
 
 const GRADES: {
@@ -122,6 +131,7 @@ export function StudyCardForm({
   sessionQueue = [],
   currentIndex = 0,
   markFilter = null,
+  attemptHistory = [],
 }: {
   card: CardData;
   highlights?: CardHighlight[];
@@ -130,6 +140,7 @@ export function StudyCardForm({
   sessionQueue?: QueueItem[];
   currentIndex?: number;
   markFilter?: "bookmark" | "star" | "unsure" | null;
+  attemptHistory?: AttemptRecord[];
 }) {
   const router = useRouter();
   const { recordCard } = useStudySession(card.type);
@@ -506,6 +517,7 @@ export function StudyCardForm({
             sessionCount={sessionCount}
             remainingCount={remainingCount}
             revealed={revealed}
+            cardId={card.id}
           />
 
           {/* SplitView — ProblemPane (좌) | (채점 전 답안 입력 / 채점 후 분석) (우).
@@ -529,6 +541,7 @@ export function StudyCardForm({
                     blindMode={blindMode}
                     onToggleBlind={toggleBlind}
                     userAnswer={answer}
+                    attemptHistory={attemptHistory}
                   />
                 )
               }

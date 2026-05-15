@@ -17,11 +17,13 @@ import {
   cards,
   examItems,
   examPapers,
+  userAttempts,
   userCardAiAnalysis,
   userCardHighlights,
   userCardState,
   userCardTags,
 } from "@/lib/db/schema";
+import { desc } from "drizzle-orm";
 import type {
   DiffJson,
   KeywordsJson,
@@ -706,5 +708,52 @@ export async function getAiAnalysis(
       return row ?? null;
     },
     null,
+  );
+}
+
+// 백승환 #8 (2026-05-15) — 카드별 답안 시도 이력 조회.
+// user_attempts 는 examItems(소문항) 기준 — cards.sourceItemId 로 join.
+// 가장 최근 시도부터 limit 만큼. 같은 카드 반복 풀이 시 변화 추적용.
+export type CardAttempt = {
+  id: string;
+  answerMd: string;
+  selfGrade: string | null;
+  attemptedAt: Date;
+};
+
+export async function getCardAttemptHistory(
+  userId: string,
+  cardId: string,
+  limit = 10,
+): Promise<CardAttempt[]> {
+  return safeRun(
+    "getCardAttemptHistory",
+    async () => {
+      const db = getDb();
+      const [card] = await db
+        .select({ sourceItemId: cards.sourceItemId })
+        .from(cards)
+        .where(eq(cards.id, cardId))
+        .limit(1);
+      if (!card?.sourceItemId) return [];
+      const rows = await db
+        .select({
+          id: userAttempts.id,
+          answerMd: userAttempts.answerMd,
+          selfGrade: userAttempts.selfGrade,
+          attemptedAt: userAttempts.attemptedAt,
+        })
+        .from(userAttempts)
+        .where(
+          and(
+            eq(userAttempts.userId, userId),
+            eq(userAttempts.itemId, card.sourceItemId),
+          ),
+        )
+        .orderBy(desc(userAttempts.attemptedAt))
+        .limit(limit);
+      return rows;
+    },
+    [],
   );
 }
