@@ -35,6 +35,7 @@ import { ExamItemLightbox } from "@/components/shared/exam-item-lightbox";
 import { useStudySession } from "@/lib/hooks/use-study-session";
 import { getExamPageUrl } from "@/lib/supabase/storage";
 import { formatExamStem } from "@/lib/exam/format-stem";
+import { parseAnswer } from "@/lib/exam/sub-questions";
 import type { AnswerSource, CardType } from "@/types";
 import type { CardHighlight, CardTag } from "@/lib/db/queries";
 import { submitAnswer, gradeCard, setCardMark } from "../actions";
@@ -45,6 +46,7 @@ import { WorkspaceTopbar } from "./workspace-topbar";
 import { AnalysisPanel } from "./analysis-panel";
 import { AssistantFab } from "./assistant-fab";
 import { ReportCardButton } from "./report-card-button";
+import { SubAnswerInput } from "./sub-answer-input";
 
 type CardData = {
   id: string;
@@ -416,45 +418,20 @@ export function StudyCardForm({
   );
 
   // 백승환 피드백 #3 (2026-05-15) — 답안 입력창을 우측 패널로 격상.
-  // 종전: 좌측에 본문 + 답안 입력 세로 stack → 위아래 스크롤 반복.
-  // 개선: 좌측 본문 / 우측 (채점 전 답안 입력 | 채점 후 분석) 좌우 동시 시야.
+  // 백승환 #6 (2026-05-15) — 소문항별 답안 입력 (SubAnswerInput).
+  //   단일/분리 모드 토글 + stem 자동 감지 라벨 제안. 합산 string 으로
+  //   server action 에 전달 (submitAnswer signature 호환).
   const answerInputCard = (
     <Card className="border-rule">
       <CardContent className="p-5">
-        <div className="flex items-baseline justify-between gap-2">
-          <label
-            htmlFor="answer-input"
-            className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground cursor-pointer"
-          >
-            내 답안
-          </label>
-          <span
-            className="inline-flex items-center gap-2 text-[10.5px] text-muted-foreground tabular-nums"
-            aria-live="polite"
-          >
-            {savedAt ? (
-              <span className="inline-flex items-center gap-1 text-evergreen/80">
-                <CheckCircle2 className="h-3 w-3" aria-hidden /> 자동 저장됨
-              </span>
-            ) : answer ? (
-              <span className="opacity-70">자동 저장 중…</span>
-            ) : null}
-            <span>{answer.length}자</span>
-          </span>
-        </div>
-        <textarea
-          id="answer-input"
+        <SubAnswerInput
           value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          rows={14}
-          className="mt-2 w-full rounded-md border border-rule-strong bg-background px-3.5 py-3 text-[13.5px] leading-[1.7] resize-y focus:border-evergreen focus:outline-none focus:ring-2 focus:ring-evergreen/40 transition-colors min-h-[320px]"
-          placeholder={"답안을 작성해 주세요.\n비워두고 채점도 가능합니다."}
+          onChange={setAnswer}
+          stemText={cleanedFrontText}
+          pending={pending}
+          onSubmit={handleReveal}
+          savedAt={savedAt}
         />
-        <div className="mt-4 flex justify-end">
-          <Button onClick={handleReveal} disabled={pending}>
-            {pending ? "처리 중…" : "채점하기 — 답안 보기"}
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
@@ -465,15 +442,16 @@ export function StudyCardForm({
       {stemCard}
 
       {/* 채점 후 — 사용자가 작성한 답안을 readonly 로 본문 아래에 보존.
-          채점 후에는 우측이 분석 패널로 전환되므로 좌측에 답안 사본을 둔다. */}
+          채점 후에는 우측이 분석 패널로 전환되므로 좌측에 답안 사본을 둔다.
+          백승환 #6 — 소문항이 분리되어 있으면 라벨 chip + 본문 분리 표기. */}
       {revealed && answer.trim().length > 0 && (
         <Card className="border-l-4 border-rule-strong border-y border-r border-rule bg-card">
           <CardContent className="p-5">
             <span className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
               내 답안
             </span>
-            <div className="mt-3 font-sans text-[13.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
-              {answer}
+            <div className="mt-3 space-y-3">
+              <ReadonlySubAnswers combined={answer} />
             </div>
           </CardContent>
         </Card>
@@ -884,6 +862,34 @@ function extractItemNo(paperLabel: string | null): number {
   if (!paperLabel) return 1;
   const m = paperLabel.match(/(\d+)\s*번\s*$/);
   return m ? Number(m[1]) : 1;
+}
+
+// 백승환 #6 (2026-05-15) — readonly 답안 표시. 합산 string → 소문항 분리 표기.
+function ReadonlySubAnswers({ combined }: { combined: string }) {
+  const subs = parseAnswer(combined);
+  if (subs.length <= 1 && !subs[0]?.label) {
+    return (
+      <div className="font-sans text-[13.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
+        {combined}
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      {subs.map((s, i) => (
+        <div key={i} className="space-y-1">
+          {s.label && (
+            <span className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded-full bg-evergreen/10 text-evergreen text-[10.5px] font-semibold tabular-nums">
+              {/^[가-힣]$/.test(s.label) ? `(${s.label})` : /^[1-6]$/.test(s.label) ? `${s.label})` : s.label}
+            </span>
+          )}
+          <div className="font-sans text-[13.5px] leading-[1.75] whitespace-pre-wrap text-foreground/90">
+            {s.text || <span className="text-muted-foreground italic">(빈 답안)</span>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function PdfViewer({
