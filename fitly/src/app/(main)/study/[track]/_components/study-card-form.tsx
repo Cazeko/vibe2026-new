@@ -657,7 +657,8 @@ function QueueNav({
   nextCard: QueueItem | null;
 }) {
   const router = useRouter();
-  // 키보드 단축키 J/K — 이전/다음. textarea/input 안에서는 무시.
+  // 키보드 단축키 J/K — 이전/다음 (주인님 #2 발화 2026-05-15: J=이전, K=다음 으로 스왑).
+  // textarea/input 안에서는 무시.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const tgt = e.target as HTMLElement | null;
@@ -665,12 +666,12 @@ function QueueNav({
       if (tag === "TEXTAREA" || tag === "INPUT" || tgt?.isContentEditable)
         return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "j" && nextCard) {
-        e.preventDefault();
-        router.push(buildUrl(nextCard.id));
-      } else if (e.key === "k" && prevCard) {
+      if (e.key === "j" && prevCard) {
         e.preventDefault();
         router.push(buildUrl(prevCard.id));
+      } else if (e.key === "k" && nextCard) {
+        e.preventDefault();
+        router.push(buildUrl(nextCard.id));
       }
     }
     window.addEventListener("keydown", onKey);
@@ -698,11 +699,11 @@ function QueueNav({
         className="px-2 h-7 text-[11.5px] disabled:opacity-40"
       >
         {prevCard ? (
-          <Link href={buildUrl(prevCard.id)} prefetch={false} aria-label="이전 문제 (K)">
+          <Link href={buildUrl(prevCard.id)} prefetch={false} aria-label="이전 문제 (J)">
             <ChevronLeft className="h-3.5 w-3.5 mr-0.5" aria-hidden />
             이전
             <kbd className="hidden sm:inline-flex ml-1.5 items-center justify-center h-4 min-w-[16px] rounded-[3px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[9.5px] font-bold leading-none tabular-nums px-1 font-sans">
-              K
+              J
             </kbd>
           </Link>
         ) : (
@@ -756,9 +757,9 @@ function QueueNav({
         className="px-2 h-7 text-[11.5px] disabled:opacity-40"
       >
         {nextCard ? (
-          <Link href={buildUrl(nextCard.id)} prefetch={false} aria-label="다음 문제 (J)">
+          <Link href={buildUrl(nextCard.id)} prefetch={false} aria-label="다음 문제 (K)">
             <kbd className="hidden sm:inline-flex mr-1.5 items-center justify-center h-4 min-w-[16px] rounded-[3px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[9.5px] font-bold leading-none tabular-nums px-1 font-sans">
-              J
+              K
             </kbd>
             다음
             <ChevronRight className="h-3.5 w-3.5 ml-0.5" aria-hidden />
