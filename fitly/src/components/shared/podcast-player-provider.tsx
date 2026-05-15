@@ -39,6 +39,10 @@ type Episode = {
 // 코드리뷰 M18 (2026-05-15) — audioRef 는 외부 소비자가 없어 context 인터페이스
 // 에서 제거. 외부에 ref 가 노출되면 캡슐화가 깨지고, audio 노드 직접 조작이
 // 가능해진다 → 미니플레이어·karaoke·audio-player 가 메서드만 사용하도록 정합.
+// 2026-05-16 (주인님 명시 요청) — 볼륨 컨트롤 추가.
+// volume: 0~1 float (audio.volume 정합). muted: 음소거 토글 — 슬라이더 값은
+// 보존하고 audio.volume 만 0 적용. ui-ux-pro-max 자문 정합 — 기본값 0.7,
+// localStorage key `fitly:podcast:volume` / `fitly:podcast:muted` 분리.
 type PlayerCtx = {
   episode: Episode | null;
   playing: boolean;
@@ -47,9 +51,13 @@ type PlayerCtx = {
   durationSec: number;
   completed: boolean;
   playError: string | null;
+  volume: number;
+  muted: boolean;
   setEpisode: (ep: Episode) => void;
   togglePlay: () => void;
   seek: (sec: number) => void;
+  setVolume: (v: number) => void;
+  toggleMute: () => void;
   close: () => void;
 };
 
@@ -74,6 +82,9 @@ export function PodcastPlayerProvider({ children }: { children: ReactNode }) {
   const [durationSec, setDurationSec] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [playError, setPlayError] = useState<string | null>(null);
+  // 볼륨 — SSR mismatch 회피 위해 default 0.7 로 초기화, mount 후 localStorage hydrate.
+  const [volume, setVolumeState] = useState(0.7);
+  const [muted, setMuted] = useState(false);
 
   // 진척 저장 throttle 상태.
   const lastSavedRef = useRef(0);
@@ -158,6 +169,67 @@ export function PodcastPlayerProvider({ children }: { children: ReactNode }) {
         pendingFrameRef.current = null;
       }
     };
+  }, []);
+
+  // 볼륨 hydrate — mount 후 localStorage 에서 복원. SSR mismatch 회피.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const savedVol = window.localStorage.getItem("fitly:podcast:volume");
+      const savedMute = window.localStorage.getItem("fitly:podcast:muted");
+      if (savedVol != null) {
+        const v = Number(savedVol);
+        if (Number.isFinite(v) && v >= 0 && v <= 1) setVolumeState(v);
+      }
+      if (savedMute === "1") setMuted(true);
+    } catch {
+      // localStorage 접근 불가(privacy 모드 등) — 기본값 사용
+    }
+  }, []);
+
+  // audio element 의 .volume / .muted 와 sync.
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.volume = volume;
+    el.muted = muted;
+  }, [volume, muted]);
+
+  const setVolume = useCallback((v: number) => {
+    const clamped = Math.max(0, Math.min(1, v));
+    setVolumeState(clamped);
+    // 사용자가 슬라이더로 값을 올리면 음소거 자동 해제 (유튜브 동작).
+    if (clamped > 0) setMuted(false);
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "fitly:podcast:volume",
+          String(clamped),
+        );
+        if (clamped > 0) {
+          window.localStorage.removeItem("fitly:podcast:muted");
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setMuted((prev) => {
+      const next = !prev;
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem(
+            "fitly:podcast:muted",
+            next ? "1" : "0",
+          );
+        }
+      } catch {
+        // ignore
+      }
+      return next;
+    });
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -259,9 +331,13 @@ export function PodcastPlayerProvider({ children }: { children: ReactNode }) {
     durationSec,
     completed,
     playError,
+    volume,
+    muted,
     setEpisode,
     togglePlay,
     seek,
+    setVolume,
+    toggleMute,
     close,
   };
 

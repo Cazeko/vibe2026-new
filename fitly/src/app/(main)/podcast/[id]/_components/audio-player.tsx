@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Play, Pause, Volume2, Loader2 } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { usePodcastPlayer } from "@/components/shared/podcast-player-provider";
 
 // 헌법 v3.0 §13의3 4항 — 청취 진척 저장 (재개 가능).
@@ -41,9 +41,13 @@ export function AudioPlayer({
     durationSec: ctxDuration,
     completed,
     playError,
+    volume,
+    muted,
     setEpisode,
     togglePlay,
     seek,
+    setVolume,
+    toggleMute,
   } = usePodcastPlayer();
 
   // 페이지 진입 시 컨텍스트에 등록. 같은 id 이면 Provider 가 no-op.
@@ -141,10 +145,49 @@ export function AudioPlayer({
             />
           </div>
         </div>
-        <Volume2
-          className="h-4 w-4 text-muted-foreground shrink-0"
-          aria-hidden
-        />
+        {/* 2026-05-16 (주인님 명시 요청) — 볼륨 컨트롤. ui-ux-pro-max 자문 정합 —
+            큰 플레이어는 always-visible 슬라이더. 아이콘 클릭 = 음소거 토글
+            (이전 볼륨 보존, 슬라이더 값은 그대로 두고 audio.muted 만 전환). */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={muted ? "음소거 해제" : "음소거"}
+            aria-pressed={muted}
+            className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-secondary/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 transition-colors"
+          >
+            {muted || volume === 0 ? (
+              <VolumeX className="h-4 w-4" aria-hidden />
+            ) : (
+              <Volume2 className="h-4 w-4" aria-hidden />
+            )}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={muted ? 0 : Math.round(volume * 100)}
+            onChange={(e) => setVolume(Number(e.target.value) / 100)}
+            aria-label="볼륨"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={muted ? 0 : Math.round(volume * 100)}
+            aria-valuetext={`${muted ? 0 : Math.round(volume * 100)}%`}
+            title={`볼륨 ${muted ? 0 : Math.round(volume * 100)}%`}
+            className={`audio-range audio-range-bar w-24 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 rounded-full ${
+              muted ? "opacity-50" : ""
+            }`}
+            style={
+              {
+                "--progress": `${muted ? 0 : Math.round(volume * 100)}%`,
+                height: "4px",
+                borderRadius: "999px",
+                appearance: "none",
+              } as React.CSSProperties
+            }
+          />
+        </div>
       </div>
       <p className="sr-only" aria-live="polite">
         {isLoading
