@@ -441,17 +441,53 @@ export function StudyCardForm({
     <div className="space-y-4">
       {stemCard}
 
-      {/* 채점 후 — 사용자가 작성한 답안을 readonly 로 본문 아래에 보존.
-          채점 후에는 우측이 분석 패널로 전환되므로 좌측에 답안 사본을 둔다.
-          백승환 #6 — 소문항이 분리되어 있으면 라벨 chip + 본문 분리 표기. */}
-      {revealed && answer.trim().length > 0 && (
+      {/* 채점 후 — 답안 사본 + 자가 채점 4 버튼 통합 (2026-05-15 주인님 발화).
+          종전 화면 하단 sticky Card 가 시각 부담이라 좌측 답안 사본 카드 안으로
+          통합. 답안 본문 검토 → 그 자리에서 등급 결정 시선 흐름 정합.
+          소문항이 분리되어 있으면 라벨 chip + 본문 분리 표기 (#6).
+          답안이 비어 있어도 채점 가능 — 사본 영역에 placeholder 노출. */}
+      {revealed && (
         <Card className="border-l-4 border-rule-strong border-y border-r border-rule bg-card">
           <CardContent className="p-5">
             <span className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
               내 답안
             </span>
             <div className="mt-3 space-y-3">
-              <ReadonlySubAnswers combined={answer} />
+              {answer.trim().length > 0 ? (
+                <ReadonlySubAnswers combined={answer} />
+              ) : (
+                <p className="font-sans text-[13px] italic text-muted-foreground">
+                  (빈 답안으로 채점)
+                </p>
+              )}
+            </div>
+
+            {/* 자가 채점 — 답안 검토 후 등급 결정. 본문과 시각 분리 위해
+                얇은 구분선 + 라벨 헤더. 키보드 1/2/3/4 단축키 유지. */}
+            <div className="mt-5 pt-4 border-t border-rule/60">
+              <span className="block text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground mb-3">
+                이 답안 자가 채점
+              </span>
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                {GRADES.map(({ key, label, hint, tone, Icon }, idx) => (
+                  <button
+                    key={key}
+                    type="button"
+                    disabled={pending}
+                    onClick={() => handleGrade(key)}
+                    aria-keyshortcuts={String(idx + 1)}
+                    aria-label={`${label} · ${hint}`}
+                    title={`${label} — ${hint}`}
+                    className={`inline-flex items-center justify-center gap-1.5 rounded-md border bg-card h-9 px-1.5 text-[12.5px] font-medium transition-[colors,transform] duration-100 active:scale-[0.96] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${tone}`}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                    <span>{label}</span>
+                    <kbd className="hidden sm:inline-flex items-center justify-center h-4 min-w-[16px] rounded-[3px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[9.5px] font-bold leading-none tabular-nums px-1 font-sans">
+                      {idx + 1}
+                    </kbd>
+                  </button>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -594,38 +630,10 @@ export function StudyCardForm({
         </div>
       )}
 
-      {/* v3.5.2 (2026-05-14) — 자가 채점 sticky 슬림화 (PR #36). */}
-      {revealed && (
-        <Card
-          className="sticky z-20 border-rule shadow-[0_-4px_12px_rgba(26,32,39,0.05)] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90"
-          style={{ bottom: "calc(var(--mini-player-h, 0px) + 8px)" }}
-        >
-          <CardContent className="px-2.5 py-2">
-            <div className="grid grid-cols-4 gap-1.5">
-              {GRADES.map(({ key, label, hint, tone, Icon }, idx) => (
-                <button
-                  key={key}
-                  type="button"
-                  disabled={pending}
-                  onClick={() => handleGrade(key)}
-                  aria-keyshortcuts={String(idx + 1)}
-                  aria-label={`${label} · ${hint}`}
-                  title={`${label} — ${hint}`}
-                  className={`inline-flex items-center justify-center gap-1.5 rounded-md border bg-card h-9 px-1.5 text-[12.5px] font-medium transition-[colors,transform] duration-100 active:scale-[0.96] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-evergreen/40 ${tone}`}
-                >
-                  <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                  <span>{label}</span>
-                  <kbd className="hidden sm:inline-flex items-center justify-center h-4 min-w-[16px] rounded-[3px] border border-muted-foreground/30 bg-card/80 text-muted-foreground text-[9.5px] font-bold leading-none tabular-nums px-1 font-sans">
-                    {idx + 1}
-                  </kbd>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* 자가 채점 sticky Card 는 답안 사본 카드 안 통합 위치로 이전 (2026-05-15).
+          좌측 답안 본문 검토 → 그 자리에서 등급 결정 시선 흐름 정합. */}
 
-      {/* 헌법 v3.6.1 §16 단서 — 학습 본업(풀이 트랙) 한정 AI 학습 도우미.
+      {/* 학습 본업(풀이 트랙) 한정 AI 학습 도우미.
           fixed 진입점이라 SplitView 외부, 페이지 우측 하단 floating. */}
       {isWorkspaceTrack && (
         <AssistantFab cardId={card.id} userAnswer={answer} />
