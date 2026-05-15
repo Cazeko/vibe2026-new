@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { Flag, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { reportCardIssue, REPORT_CATEGORIES } from "../actions";
-import type { CardReportCategory } from "@/lib/db/schema";
+import { reportCardIssue } from "../actions";
+import {
+  CARD_REPORT_CATEGORIES,
+  type CardReportCategory,
+} from "@/lib/db/schema/card-reports";
 
 // 헌법 시행규칙 33 §35 백업 매트릭스 — 사용자 AI 답안 신고 버튼.
 // 코드리뷰 C.H2 (2026-05-15). 학습자가 모범답안·해설 오류를 즉시 보고.
@@ -118,7 +121,7 @@ export function ReportCardButton({ cardId }: { cardId: string }) {
             </p>
             <fieldset className="mb-3 space-y-2">
               <legend className="sr-only">신고 항목</legend>
-              {REPORT_CATEGORIES.map((cat) => (
+              {CARD_REPORT_CATEGORIES.map((cat) => (
                 <label
                   key={cat}
                   className="flex cursor-pointer items-center gap-2 text-[13px]"
