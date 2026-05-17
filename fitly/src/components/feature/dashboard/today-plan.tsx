@@ -22,7 +22,11 @@ export function TodayPlan({ items }: { items: PlanItem[] }) {
         3개 트랙 · 오늘 마감
       </p>
 
-      <ul className="grid gap-2.5 lg:gap-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+      {/* 2026-05-18 — lg:min-h-0 만 두면 빈/적은 plan 에서 article 이 옆 카드
+          (LearningTrend) 의 빈 상태 floor 240px 와 mismatch 되어 그리드 row
+          높이 불일치. min-h-[200px] floor 로 정합. 2xl viewport-fit 활성 시는
+          flex 분배 위해 min-h-0 으로 해제. */}
+      <ul className="grid gap-2.5 lg:gap-2 lg:flex-1 lg:min-h-[200px] 2xl:min-h-0 lg:overflow-y-auto">
         {items.map((item) => {
           const completed = item.state === "completed";
           const locked = item.state === "locked";

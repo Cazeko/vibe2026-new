@@ -69,7 +69,12 @@ export function LearningTrendChart({ data }: { data: TrendPoint[] }) {
         최근 14일간의 일일 진척도와 정답률 흐름.
       </p>
 
-      <div className="h-[180px] md:h-[240px] lg:h-auto lg:flex-1 lg:min-h-0">
+      {/* 2026-05-18 — 빈 상태에서 lg:h-auto lg:flex-1 lg:min-h-0 가 viewport-fit
+          미활성 구간(1280~1399)에서 부모 flex 컨텍스트 부재로 chart-div 가 거의
+          0 으로 수축, 옆 카드(TodayPlan) 높이만큼 article h-full 이 확장되며
+          빈 placeholder 가 카드 하단에 붙어 인접 섹션과 겹쳐 보이는 회귀.
+          min-h floor 240px 추가, 2xl 부터는 viewport-fit 정합으로 min-h-0 해제. */}
+      <div className="h-[180px] md:h-[240px] lg:flex-1 lg:min-h-[240px] 2xl:min-h-0">
         {hasData ? (
           <LazyMount minHeight="180px" rootMargin="240px 0px" className="h-full">
             <ResponsiveContainer width="100%" height="100%">
