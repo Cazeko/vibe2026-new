@@ -253,17 +253,18 @@ export default async function MePage() {
   return (
     // 사용자 보고 2026-05-12 — 마이페이지 viewport fit. 학습 활동 히트맵 카드는
     // 마이페이지에서 제거 (학습 분석 페이지에서 1년 단위로 확인 가능 — 중복 회피).
-    // P0-12 (외부 평가 2026-05-12) — viewport-fit 임계점 lg → xl 상향.
-    // 1024~1279 좁은 데스크톱에서 flex-1 분배 잔여공간 부족으로 카드 겹침 발생.
-    // xl+(≥1280) 에서만 viewport fit, 좁은 화면은 자연 스크롤 fallback.
-    <div className="min-h-screen pb-12 xl:h-screen xl:pb-0 xl:overflow-hidden xl:flex xl:flex-col">
+    // P0-12 (외부 평가 2026-05-12) — viewport-fit 임계점 lg → xl 1차 상향.
+    // 2026-05-17 (팀원 1366×768 노트북 보고) — xl(1280) 도 1178×704 콘텐츠 영역
+    // 에서 flex-1 섹션이 카드 자연 높이를 클리핑·겹침 회귀. 2xl(1400) 추가 상향.
+    // 1440×900 이상 모니터에서만 viewport-fit, 그 미만은 자연 스크롤 fallback.
+    <div className="min-h-screen pb-12 2xl:h-screen 2xl:pb-0 2xl:overflow-hidden 2xl:flex 2xl:flex-col">
       <PageHeader
         title="마이 페이지"
         subtitle="프로필과 학습 기록을 한 페이지에 모았습니다."
       />
-      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 xl:flex xl:flex-col xl:gap-3 xl:px-8 xl:py-4 xl:flex-1 xl:min-h-0">
+      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 2xl:flex 2xl:flex-col 2xl:gap-3 2xl:px-8 2xl:py-4 2xl:flex-1 2xl:min-h-0">
         {/* ─ 프로필 카드 ─ */}
-        <article className="rounded-card border border-rule bg-cream-soft px-6 py-[22px] xl:px-5 xl:py-3 flex items-center gap-5 xl:gap-4 flex-wrap shrink-0">
+        <article className="rounded-card border border-rule bg-cream-soft px-6 py-[22px] 2xl:px-5 2xl:py-3 flex items-center gap-5 2xl:gap-4 flex-wrap shrink-0">
           <span
             aria-hidden
             className="grid h-16 w-16 shrink-0 place-items-center rounded-[14px] bg-evergreen text-gold"
@@ -325,7 +326,7 @@ export default async function MePage() {
           {features.map((f) => (
             <article
               key={f.title}
-              className="rounded-card border border-rule bg-cream-soft px-[22px] py-5 xl:px-4 xl:py-3"
+              className="rounded-card border border-rule bg-cream-soft px-[22px] py-5 2xl:px-4 2xl:py-3"
             >
               <div className="flex items-center justify-between mb-3.5">
                 <span className="inline-flex items-center gap-2 text-[14.5px] font-bold tracking-[-0.02em] text-foreground">
@@ -374,8 +375,8 @@ export default async function MePage() {
             P0-12 (외부 평가 2026-05-12) — 컬럼 분할 임계도 xl 로 통일 (lg 1024
             ~ 1279 사이에서 좌우 분할 시 콘텐츠가 좌측 ~430·우측 ~600px 컬럼에
             압축되어 배지 grid 가 한 줄 안에 못 들어가는 문제). */}
-        <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.4fr] gap-3 xl:flex-1 xl:min-h-0">
-          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 xl:px-5 xl:pt-4 xl:pb-3 flex flex-col">
+        <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.4fr] gap-3 2xl:flex-1 2xl:min-h-0">
+          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 2xl:px-5 2xl:pt-4 2xl:pb-3 flex flex-col">
             <div className="flex items-center gap-2.5 shrink-0">
               <h2 className="font-sans text-[15px] font-bold tracking-[-0.02em] text-foreground">
                 최근 활동
@@ -436,7 +437,7 @@ export default async function MePage() {
           </article>
 
           {/* ─ 학습 배지 ─ 최근 활동 옆 (xl+ 좌우 grid 두번째 셀) */}
-          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 xl:px-5 xl:pt-4 xl:pb-3 flex flex-col">
+          <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 2xl:px-5 2xl:pt-4 2xl:pb-3 flex flex-col">
             <div className="flex items-center gap-2.5 shrink-0">
               <h2 className="font-sans text-[15px] font-bold tracking-[-0.02em] text-foreground">
                 학습 배지
@@ -501,7 +502,7 @@ export default async function MePage() {
         </section>
 
         {/* K1 (헌법 제4조의3·제3조의2 정합) — 정직성 안내, 한 줄로 컴팩트 */}
-        <p className="text-[10.5px] text-muted-foreground leading-[1.4] break-keep shrink-0 xl:pt-0">
+        <p className="text-[10.5px] text-muted-foreground leading-[1.4] break-keep shrink-0 2xl:pt-0">
           본 마이 페이지의 통계·배지·활동 기록은{" "}
           <strong className="font-semibold text-muted2-deep">
             본인 계정의 실제 학습 데이터

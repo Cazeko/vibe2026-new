@@ -146,16 +146,18 @@ export default async function StudyPlanPage() {
     summary.kpi.daysToExam,
   );
 
+  // 2026-05-17 (팀원 1366×768 노트북 보고) — viewport-fit 임계 xl→2xl 추가 상향.
+  // 1366 콘텐츠 영역(1178×704)에서 flex-1 카드 클리핑·겹침 회귀 회피.
   return (
-    <div className="min-h-screen pb-6 xl:h-screen xl:pb-0 xl:overflow-hidden xl:flex xl:flex-col">
+    <div className="min-h-screen pb-6 2xl:h-screen 2xl:pb-0 2xl:overflow-hidden 2xl:flex 2xl:flex-col">
       <PageHeader
         title="학습 계획"
         subtitle="시험일 기준으로 오늘 해야 할 양을 자동 계산해 드립니다."
       />
-      <div className="px-4 sm:px-6 mx-auto max-w-7xl w-full space-y-3 xl:flex-1 xl:min-h-0 xl:flex xl:flex-col xl:gap-3 xl:space-y-0">
+      <div className="px-4 sm:px-6 mx-auto max-w-7xl w-full space-y-3 2xl:flex-1 2xl:min-h-0 2xl:flex 2xl:flex-col 2xl:gap-3 2xl:space-y-0">
         {/* 시험일 역산 일일 목표 */}
         <Card className="border-rule shrink-0">
-          <CardContent className="p-4 xl:p-3">
+          <CardContent className="p-4 2xl:p-3">
             <div className="flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden />
               <h2 className="font-serif text-lg font-medium tracking-tight">
@@ -223,7 +225,7 @@ export default async function StudyPlanPage() {
             한 줄로 통합. 동일 크기, 핸드폰/태블릿/PC 반응형.
             주인님 발화 (2026-05-15) — 카드 세로 절반 축소. padding/icon/spacing 모두
             컴팩트화 (p-4 → p-3, icon h-10 → h-8, mt-3 → mt-2, mt-auto pt-3 → pt-2). */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 xl:shrink-0">
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 2xl:shrink-0">
           {/* 오늘의 복습 대기 — 가장 좌측에 배치, evergreen 강조 보존 */}
           <Card className="border-evergreen bg-evergreen/[0.06] flex flex-col">
             <CardContent className="p-3 flex flex-col flex-1 min-h-0">
@@ -291,11 +293,11 @@ export default async function StudyPlanPage() {
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
           {/* 오늘의 플랜 진행도 */}
           <Card className="border-rule">
-            <CardContent className="p-4 xl:p-3">
+            <CardContent className="p-4 2xl:p-3">
               <h2 className="font-serif text-base font-medium tracking-tight">
                 오늘의 플랜 진행도
               </h2>
-              <ul className="mt-2 -mx-4 xl:-mx-3 divide-y divide-rule border-y border-rule">
+              <ul className="mt-2 -mx-4 2xl:-mx-3 divide-y divide-rule border-y border-rule">
                 {summary.plan.map((item) => {
                   const Icon = STATE_ICON[item.state];
                   const tone = STATE_TONE[item.state];
@@ -350,7 +352,7 @@ export default async function StudyPlanPage() {
           {/* 학습 가이드 — 주인님 보고 #9 (2026-05-14): 팟캐스트 단어의 밑줄·색을
               제거하고 형광펜 칠로 변경. 색은 검정 유지. */}
           <Card className="border-rule">
-            <CardContent className="p-4 xl:p-3">
+            <CardContent className="p-4 2xl:p-3">
               <h2 className="font-serif text-base font-medium tracking-tight">
                 학습 가이드
               </h2>

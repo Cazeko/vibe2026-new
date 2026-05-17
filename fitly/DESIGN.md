@@ -441,7 +441,14 @@ Primary hover → `--color-accent-strong`. Secondary/Ghost hover → `--color-su
 | Mobile (v3.5.3 1차 격상) | <768px | 햄버거 + drawer 사이드바, 단일 컬럼, sticky 상단바 |
 | Tablet 세로 | 768~1023px | 햄버거 + drawer, 2 컬럼 일부 (md:grid-cols-2) |
 | Tablet 가로 (기본) | 1024~1279px | 사이드바 240px 고정 + 콘텐츠 (lg:) |
-| Desktop | 1280px+ | 사이드바 + viewport-fit 한 화면 (xl:h-screen overflow-hidden) |
+| Desktop (좁은·구형 노트북) | 1280~1399px | 사이드바 + 자연 스크롤 (콘텐츠 우선) |
+| Desktop (넓은) | 1400px+ | 사이드바 + viewport-fit 한 화면 (2xl:h-screen overflow-hidden) |
+
+> 2026-05-17 — viewport-fit 임계점은 lg(1024) → xl(1280) → **2xl(1400)** 의
+> 두 차례 상향을 거쳤다. 1366×768 등 구형 노트북에서 콘텐츠 영역(1178×704)이
+> 두 flex-1 섹션의 자연 높이보다 작아 카드끼리 시각적 겹침이 보고됨에 따라,
+> 1440×900 이상 모니터에서만 viewport-fit 을 활성화하고 그 미만은 자연 스크롤로
+> fallback 한다. tailwind.config.ts 의 `2xl: 1400px` 토큰과 정합.
 
 ### 10.2 접근성
 

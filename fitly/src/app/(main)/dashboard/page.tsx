@@ -34,15 +34,18 @@ export default async function DashboardPage() {
 
   return (
     // 헌법 제24조의2 정합 — viewport fit:
-    // - 모바일·태블릿·좁은 데스크톱(<xl): 자연 스크롤 (콘텐츠 우선)
-    // - xl+(≥1280px): h-screen + overflow-hidden + flex column 으로 한 화면 분배
-    // P0-12 (외부 평가 2026-05-12) — 종전 lg(1024) 임계는 1024~1279 좁은 데스크톱
-    // 에서 flex-1 분배 잔여 공간이 카드 내부 콘텐츠 최소 높이보다 작아 카드끼리
-    // 시각적 겹침 발생. xl 로 상향하여 좁은 화면은 자연 스크롤로 회피.
-    <div className="min-h-screen pb-12 xl:h-screen xl:pb-0 xl:overflow-hidden xl:flex xl:flex-col">
+    // - 모바일·태블릿·좁은 데스크톱·구형 노트북(<2xl): 자연 스크롤 (콘텐츠 우선)
+    // - 2xl+(≥1400px): h-screen + overflow-hidden + flex column 으로 한 화면 분배
+    // P0-12 (외부 평가 2026-05-12) — 종전 lg(1024) 임계 → xl(1280) 1차 상향.
+    // 2026-05-17 (팀원 1366×768 노트북 보고) — xl 도 1178×704 콘텐츠 영역에서
+    // flex-1 분배 잔여 공간 부족으로 차트·약점 카드가 클리핑되어 카드끼리
+    // 시각적 겹침 회귀. 2xl(1400) 로 추가 상향 — 1440×900 이상 모니터에서만
+    // viewport-fit 활성, 그 미만은 자연 스크롤. 수평 그리드(xl:grid-cols-4)는
+    // 폭 결정이므로 유지 (alignment 보존).
+    <div className="min-h-screen pb-12 2xl:h-screen 2xl:pb-0 2xl:overflow-hidden 2xl:flex 2xl:flex-col">
       <DashboardHeader />
 
-      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 xl:flex xl:flex-col xl:gap-3 xl:px-8 xl:py-4 xl:flex-1 xl:min-h-0">
+      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 2xl:flex 2xl:flex-col 2xl:gap-3 2xl:px-8 2xl:py-4 2xl:flex-1 2xl:min-h-0">
         {summary.isEmpty && <OnboardingBanner />}
 
         <KpiCards kpi={summary.kpi} />
@@ -52,7 +55,7 @@ export default async function DashboardPage() {
             xl 이상에서 동일 4 col grid 사용 + col-span 분배 (3:1).
             학습성과추이 ↔ KPI 1~3번째(목표/학습진척도/최근7일) 폭 정합.
             오늘의 학습 플랜 ↔ KPI 4번째(연속학습) 폭 정합. */}
-        <section className="grid grid-cols-1 xl:grid-cols-4 gap-[22px] xl:gap-3 xl:flex-1 xl:min-h-0">
+        <section className="grid grid-cols-1 xl:grid-cols-4 gap-[22px] xl:gap-3 2xl:flex-1 2xl:min-h-0">
           <div className="xl:col-span-3 min-w-0">
             <LearningTrend data={summary.trend} />
           </div>
@@ -61,20 +64,20 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.05fr] gap-[22px] xl:gap-3 xl:flex-1 xl:min-h-0">
+        <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.05fr] gap-[22px] xl:gap-3 2xl:flex-1 2xl:min-h-0">
           <WeakTypes items={summary.weakTypes} />
           <AiRecommend weakest={weakest} />
         </section>
 
         {/* K1 (헌법 제4조의3 정합) — 한글 줄바꿈 의미 단위 br.
-            xl+ viewport fit 에서는 disclaimer 1줄로 압축. */}
-        <p className="pt-2 xl:pt-0 max-w-[920px] text-[11.5px] xl:text-[10.5px] text-muted-foreground leading-[1.6] xl:leading-[1.4] shrink-0">
+            2xl+ viewport fit 에서는 disclaimer 1줄로 압축. */}
+        <p className="pt-2 2xl:pt-0 max-w-[920px] text-[11.5px] 2xl:text-[10.5px] text-muted-foreground leading-[1.6] 2xl:leading-[1.4] shrink-0">
           본 대시보드의 KPI·차트·플랜은{" "}
           <strong className="font-semibold text-muted2-deep">
             본인 계정의 실제 학습 기록
           </strong>
           만으로 산출됩니다.
-          <br className="hidden sm:inline xl:hidden" />
+          <br className="hidden sm:inline 2xl:hidden" />
           지역 교육청별 합격 컷·평균은 비공개이므로 Fitly가 보유하지 않습니다.
         </p>
       </div>
