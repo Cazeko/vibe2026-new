@@ -5,8 +5,11 @@
 // 데스크톱: login 좌측 → hero 우측 (md:order-1/2 로 시각 순서 스왑, DOM 순서는 유지)
 // 펀치라인은 헌법 제4조 v3.5.1 개정본 사용 + 한글 줄바꿈은 제4조의3 정합.
 // 2026-05-12 추가 다듬기 (헌법 v3.5.1 정합) — placeholder 75% / focus transition
-// 150ms / kakao hover secondary 정합 / error·message 시각 구분 + 아이콘 / 클라
-// 이언트 이메일·비번 검증 / aria-live polite / signup hint·\n 줄바꿈.
+// 150ms / error·message 시각 구분 + 아이콘 / 클라이언트 이메일·비번 검증 /
+// aria-live polite / signup hint·\n 줄바꿈.
+// 2026-05-18 (주인님 발화) — 카카오 OAuth 버튼·심볼·핸들러 제거 (이메일만 운영).
+//   Supabase auth 에러 메시지 한글화 (translateAuthError) — 영문 "Invalid login
+//   credentials" 류가 사용자에게 노출되지 않도록 매핑.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -55,6 +58,39 @@ function validateInputs(
   return { ok: true };
 }
 
+// 2026-05-18 — Supabase auth 에러 메시지 한글 매핑.
+// Supabase 가 영문 메시지를 반환하므로 (locale 옵션 미지원) 클라이언트에서 명시
+// 매핑. 본문 일치 없으면 일반 폴백. 헌법 §0 (존댓말) + §3의2 (정직성: 어느 필드가
+// 틀렸는지 정확히 노출하지 않아 계정 enumeration 방어) 정합.
+function translateAuthError(raw: string): string {
+  const m = raw.toLowerCase();
+  if (m.includes("invalid login credentials") || m.includes("invalid_credentials")) {
+    return "이메일 또는 비밀번호가 올바르지 않습니다.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "이메일 인증이 완료되지 않았습니다. 가입 시 발송된 인증 메일을 확인해 주세요.";
+  }
+  if (m.includes("user already registered") || m.includes("already been registered")) {
+    return "이미 가입된 이메일입니다. 로그인해 주세요.";
+  }
+  if (m.includes("email rate limit") || m.includes("too many requests")) {
+    return "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.";
+  }
+  if (m.includes("password should be at least")) {
+    return "비밀번호는 6자 이상이어야 합니다.";
+  }
+  if (m.includes("unable to validate email") || m.includes("invalid format")) {
+    return "이메일 형식이 올바르지 않습니다.";
+  }
+  if (m.includes("signup requires a valid password")) {
+    return "비밀번호를 입력해 주세요.";
+  }
+  if (m.includes("network") || m.includes("failed to fetch")) {
+    return "네트워크 연결을 확인해 주세요.";
+  }
+  return "요청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+}
+
 // 종이그레인 — globals.css body 와 동일한 1% 노이즈 (로그인 섹션이 body bg 를
 // 덮으므로 동일 패턴을 명시 적용한다)
 const PAPER_GRAIN_STYLE: React.CSSProperties = {
@@ -62,26 +98,6 @@ const PAPER_GRAIN_STYLE: React.CSSProperties = {
     "radial-gradient(circle at 1px 1px, hsl(var(--color-text) / 0.018) 1px, transparent 0)",
   backgroundSize: "4px 4px",
 };
-
-// 카카오 브랜드 가이드 정합 (developers.kakao.com/docs/latest/ko/kakaologin/design-guide).
-// 배경 #FEE500, 텍스트 rgba(0,0,0,0.85), 검은 말풍선 심볼. 외부 평가 P0-02
-// (2026-05-12) — 일반 outlined 버튼은 카카오 인지성 부족.
-function KakaoSymbol({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 18 18"
-      width="18"
-      height="18"
-      aria-hidden="true"
-      className={className}
-    >
-      <path
-        fill="currentColor"
-        d="M9 1C4.58 1 1 3.86 1 7.39c0 2.27 1.49 4.27 3.74 5.41-.17.62-.6 2.2-.69 2.55-.11.43.16.43.34.31.14-.09 2.2-1.5 3.09-2.1.5.07 1 .1 1.52.1 4.42 0 8-2.86 8-6.39S13.42 1 9 1z"
-      />
-    </svg>
-  );
-}
 
 // C-2 (외부 리뷰 2026-05-12) — "로그인 상태 유지" UI 체크박스 (login 모드 한정).
 // Supabase 는 기본적으로 localStorage session persistence 사용 → 체크박스는 사용자에게
@@ -143,7 +159,7 @@ export function FitlySignIn({ mode }: Props) {
 
     setStatus("idle");
     if (err) {
-      setError(err.message);
+      setError(translateAuthError(err.message));
       return;
     }
 
@@ -165,24 +181,7 @@ export function FitlySignIn({ mode }: Props) {
     router.refresh();
   }
 
-  async function handleKakao() {
-    setStatus("loading");
-    setError(null);
-    const origin = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
-    const { error: err } = await supabase.auth.signInWithOAuth({
-      provider: "kakao",
-      options: {
-        redirectTo: `${origin}/auth/callback?next=/dashboard`,
-      },
-    });
-    if (err) {
-      setStatus("idle");
-      setError(err.message);
-    }
-  }
-
-  // P0-05 (2026-05-12 외부 평가) — 이메일·비번 양쪽 유효성 통과해야만
-  // submit 활성. 카카오는 input 의존성 없으므로 별도 비활성 조건 없음.
+  // P0-05 (2026-05-12 외부 평가) — 이메일·비번 양쪽 유효성 통과해야만 submit 활성.
   const isFormValid = EMAIL_RE.test(email) && password.length >= 6;
   const isLoading = status === "loading";
 
@@ -414,19 +413,8 @@ export function FitlySignIn({ mode }: Props) {
               )}
             </button>
 
-            {/* P0-02 (외부 평가, 카카오 브랜드 가이드 정합) — #FEE500 배경 +
-                심볼 + rgba(0,0,0,0.85) 텍스트.
-                v3.6 외부 평가 #1.2·1.3 — font-bold (semibold→bold) + flex
-                items-center 명시로 아이콘 세로 중앙 정렬 보정. */}
-            <button
-              type="button"
-              onClick={handleKakao}
-              disabled={isLoading}
-              className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-[#FEE500] text-[15px] font-bold text-[rgba(0,0,0,0.85)] hover:brightness-[0.96] active:translate-y-px transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FEE500] focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60 disabled:cursor-not-allowed disabled:active:translate-y-0"
-            >
-              <KakaoSymbol className="text-[rgba(0,0,0,0.9)] shrink-0" />
-              <span className="leading-none">카카오로 계속하기</span>
-            </button>
+            {/* 2026-05-18 (주인님 발화) — 카카오 OAuth 버튼 제거. 이메일 단일
+                인증 채널로 운영. KakaoSymbol·handleKakao 도 함께 제거. */}
           </form>
 
           {/* ─ 시즌 안내 카드 ─
