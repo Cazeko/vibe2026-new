@@ -55,7 +55,12 @@ export function LearningTrendChart({ data }: { data: TrendPoint[] }) {
   const isAnimationActive = !reducedMotion;
 
   return (
-    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 h-full flex flex-col">
+    // 2026-05-18 — overflow-hidden 추가. F11 fullscreen toggle 시 Recharts
+    // ResponsiveContainer 가 측정한 SVG 크기를 캐시한 채 부모 컨테이너가 줄어도
+    // SVG 가 같은 크기를 유지 → 차트 X-axis 날짜 라벨이 카드 경계를 뚫고 아래
+    // 섹션 영역으로 시각적 overlap (4444.png 회귀). article + chart-div 양쪽에
+    // overflow-hidden 으로 어떤 경우에도 SVG 가 카드 밖으로 못 나가게 차단.
+    <article className="rounded-card border border-rule bg-cream-soft px-[22px] pt-[22px] pb-5 lg:px-5 lg:pt-4 lg:pb-3 h-full flex flex-col overflow-hidden">
       <div className="flex items-center gap-2.5 flex-wrap shrink-0">
         <h2 className="font-sans text-[17px] lg:text-[15px] font-bold tracking-[-0.02em] text-foreground">
           학습 성과 추이
@@ -74,7 +79,7 @@ export function LearningTrendChart({ data }: { data: TrendPoint[] }) {
           0 으로 수축, 옆 카드(TodayPlan) 높이만큼 article h-full 이 확장되며
           빈 placeholder 가 카드 하단에 붙어 인접 섹션과 겹쳐 보이는 회귀.
           min-h floor 240px 추가, 2xl 부터는 viewport-fit 정합으로 min-h-0 해제. */}
-      <div className="h-[180px] md:h-[240px] lg:flex-1 lg:min-h-[240px] 2xl:min-h-0">
+      <div className="h-[180px] md:h-[240px] lg:flex-1 lg:min-h-[240px] 2xl:min-h-0 overflow-hidden">
         {hasData ? (
           <LazyMount minHeight="180px" rootMargin="240px 0px" className="h-full">
             <ResponsiveContainer width="100%" height="100%">
