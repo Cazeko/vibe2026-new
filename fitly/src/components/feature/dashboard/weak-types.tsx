@@ -51,7 +51,11 @@ export function WeakTypes({ items }: { items: WeakType[] }) {
         // SearchX 원형 토큰 + 블러 더미 차트 배경 (v3.6 신설) — "잠금 해제 욕구"
         // 자극. dummy bar 들은 opacity 25% + blur(2px) 로 *데이터가 곧 채워질 것
         // 같은* 시각 단서. §4.3 evergreen 보호 — bar 색은 muted-foreground 단조.
-        <div className="relative flex-1 min-h-0 rounded-[10px] border border-dashed border-rule-strong bg-cream-deep/40 px-4 py-4 flex flex-col items-center justify-center text-center gap-1.5 overflow-hidden">
+        // 2026-05-18 — 빈 상태 dashed placeholder 가 flex-1 + min-h-0 으로
+        // viewport-fit 미활성 구간에서 거의 0 으로 수축, AiRecommend 옆 카드
+        // 높이에 종속되며 위치가 들쑥날쑥. min-h floor 200px 으로 안정화,
+        // 2xl viewport-fit 활성 시 min-h-0 으로 해제하여 flex 분배 정합.
+        <div className="relative flex-1 min-h-[200px] 2xl:min-h-0 rounded-[10px] border border-dashed border-rule-strong bg-cream-deep/40 px-4 py-4 flex flex-col items-center justify-center text-center gap-1.5 overflow-hidden">
           {/* 블러 처리된 더미 bar 차트 — 데이터 들어찰 자리 시각화 */}
           <div
             aria-hidden
