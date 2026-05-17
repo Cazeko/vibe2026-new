@@ -185,9 +185,14 @@ export function FitlySignIn({ mode }: Props) {
     }
 
     if (mode === "signup") {
-      // 2026-05-18 (주인님 발화) — 회원가입 성공 시 /login 으로 자동 이동.
-      // 안내 메시지(이메일 인증 + 테스트 안내)는 로그인 페이지에서 query param
-      // signup=success 감지하여 노출 (위 useEffect 분기).
+      // 2026-05-18 (주인님 발화) — 회원가입 성공 시 /login 으로 이동.
+      // 주의: Supabase signUp 은 이메일 인증 OFF 인 환경에서 자동으로 세션을
+      // 발급하여 사용자가 사실상 로그인된 상태가 됨. 이 경우 /login 으로 redirect
+      // 해도 인증 가드에 의해 /dashboard 로 다시 튕길 수 있다.
+      // 주인님 명시 요구: "회원가입 후 바로 로그인 적용 X, 로그인 페이지로 가게".
+      // → 자동 발급된 세션을 signOut 으로 명시 비운 뒤 /login 으로 이동.
+      // 사용자는 안내 메시지를 본 뒤 직접 비밀번호 재입력해 로그인한다.
+      await supabase.auth.signOut();
       router.replace("/login?signup=success");
       return;
     }
