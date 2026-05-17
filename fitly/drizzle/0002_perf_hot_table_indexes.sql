@@ -8,18 +8,23 @@
 --      reviewed_at 을 prefix 2번째로 배치.
 --
 -- 운영자 적용 노트:
---   CREATE INDEX CONCURRENTLY 는 트랜잭션 안에서 실행 불가. drizzle-kit migrate
---   는 트랜잭션 wrap 하므로 본 마이그레이션은 **supabase SQL editor 또는 psql 에서
---   수동 실행** 필요. concurrently 옵션으로 production 테이블 lock 없이 적용.
---   적용 후 drizzle journal 에 0002 entry 추가 (meta/0002_snapshot.json + journal).
+--   Supabase SQL Editor 또는 psql 에서 그대로 실행하시면 됩니다.
 --
--- ANALYZE 는 인덱스 생성 직후 자동 실행되지만 통계 갱신을 명시적으로 보장.
+--   ▼ CONCURRENTLY 미사용 사유 ▼
+--   Supabase SQL Editor 는 statements 를 단일 트랜잭션으로 wrap 하는데,
+--   CREATE INDEX CONCURRENTLY 는 트랜잭션 밖에서만 실행 가능 (PG 25001 에러).
+--   현재 운영 데이터 규모(소수 사용자 + 데모 시드 수백~수천 행)에서는 일반
+--   CREATE INDEX 의 lock 시간이 ms 단위라 무해. 운영 데이터가 10k+ 사용자로
+--   확장된 후 본 인덱스를 재생성할 일이 생기면 psql 에서 CONCURRENTLY 변형을
+--   별도로 실행하세요 (해당 SQL 은 본 파일 하단 주석 참고).
+--
+-- ANALYZE 로 통계 즉시 갱신해 옵티마이저가 새 인덱스 바로 활용.
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS "study_sessions_user_started_idx"
+CREATE INDEX IF NOT EXISTS "study_sessions_user_started_idx"
   ON "study_sessions" USING btree ("user_id", "started_at" DESC);
 --> statement-breakpoint
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS "user_card_log_user_time_idx"
+CREATE INDEX IF NOT EXISTS "user_card_log_user_time_idx"
   ON "user_card_log" USING btree ("user_id", "reviewed_at" DESC);
 --> statement-breakpoint
 
@@ -27,3 +32,18 @@ ANALYZE "study_sessions";
 --> statement-breakpoint
 
 ANALYZE "user_card_log";
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- (참고) 운영 10k+ 사용자 확장 후 lock-free 재생성이 필요한 경우 — psql 직접 접속:
+--
+--   psql $DATABASE_URL <<SQL
+--   DROP INDEX IF EXISTS study_sessions_user_started_idx;
+--   CREATE INDEX CONCURRENTLY study_sessions_user_started_idx
+--     ON study_sessions USING btree (user_id, started_at DESC);
+--   DROP INDEX IF EXISTS user_card_log_user_time_idx;
+--   CREATE INDEX CONCURRENTLY user_card_log_user_time_idx
+--     ON user_card_log USING btree (user_id, reviewed_at DESC);
+--   ANALYZE study_sessions;
+--   ANALYZE user_card_log;
+--   SQL
+-- ─────────────────────────────────────────────────────────────────────────
