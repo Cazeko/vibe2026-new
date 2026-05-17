@@ -28,6 +28,14 @@ export const userCardLog = pgTable(
       t.cardId,
       t.reviewedAt
     ),
+    // 2026-05-17 — 마이그레이션 0002 정합. computeWeakTypes 의 60d window
+    // 쿼리는 user_id + reviewed_at range scan 이라 (user_id, card_id, reviewed_at)
+    // 인덱스는 card_id 가 prefix 중간이라 비효율. (user_id, reviewed_at) 단독
+    // 인덱스로 range scan 정합.
+    userTimeIdx: index("user_card_log_user_time_idx").on(
+      t.userId,
+      t.reviewedAt,
+    ),
   })
 );
 
