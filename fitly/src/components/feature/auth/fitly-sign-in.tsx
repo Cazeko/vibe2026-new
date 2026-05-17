@@ -139,6 +139,18 @@ export function FitlySignIn({ mode }: Props) {
     }
   }, [searchParams]);
 
+  // 2026-05-18 (주인님 발화) — 회원가입 완료 후 /login?signup=success 로 redirect.
+  // 로그인 페이지에서 query param 감지 → 이메일 인증 안내 + 테스트 안내 메시지 노출.
+  // login 모드에서만 동작 (signup 페이지에서 self-redirect 시 무한 깜빡임 방지).
+  useEffect(() => {
+    if (mode !== "login") return;
+    if (searchParams.get("signup") === "success") {
+      setMessage(
+        "확인 메일을 발송했습니다.\n메일함에서 인증 후 로그인해 주세요.\n\n(테스트 중에는 이메일 인증을 하지 않아도 됩니다)",
+      );
+    }
+  }, [mode, searchParams]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -173,8 +185,10 @@ export function FitlySignIn({ mode }: Props) {
     }
 
     if (mode === "signup") {
-      // B1 — 명시 줄바꿈으로 의미 단위 절단 방지 (제4조의3)
-      setMessage("확인 메일을 발송했습니다.\n메일함에서 인증 후 로그인해 주세요.");
+      // 2026-05-18 (주인님 발화) — 회원가입 성공 시 /login 으로 자동 이동.
+      // 안내 메시지(이메일 인증 + 테스트 안내)는 로그인 페이지에서 query param
+      // signup=success 감지하여 노출 (위 useEffect 분기).
+      router.replace("/login?signup=success");
       return;
     }
     router.replace("/dashboard");
