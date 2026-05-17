@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
 import {
   UserCircle,
   Settings,
@@ -22,14 +21,16 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { createClient } from "@/lib/supabase/server";
-import { getDb } from "@/lib/db";
-import { userProfiles } from "@/lib/db/schema";
 import { getDashboardSummary } from "@/lib/dashboard/queries";
 import {
   getSessionStats,
   getLibraryCounts,
   getRecentActivity,
 } from "@/lib/dashboard/analytics";
+
+// 2026-05-17 — profile 쿼리 중복 제거. computeKpi 가 이미 userProfiles 를
+// 한 번 조회해 summary.kpi.targetRegion(Short) 으로 반환하므로 여기서 또 select
+// 하지 않는다. 마이페이지 N+1 회귀 1건 해소.
 
 export const dynamic = "force-dynamic";
 
@@ -38,13 +39,6 @@ export const metadata: Metadata = {
   title: "마이 페이지 · Fitly",
   description:
     "프로필·3 트랙 통계·학습 활동 히트맵·배지 등 본인 학습 기록을 한 페이지에 모았습니다.",
-};
-
-const REGION_SHORT: Record<string, string> = {
-  서울: "서울", 경기: "경기", 인천: "인천", 부산: "부산", 대구: "대구",
-  광주: "광주", 대전: "대전", 울산: "울산", 세종: "세종", 강원: "강원",
-  충북: "충북", 충남: "충남", 전북: "전북", 전남: "전남", 경북: "경북",
-  경남: "경남", 제주: "제주",
 };
 
 const MODE_LABEL: Record<string, string> = {
@@ -167,24 +161,18 @@ export default async function MePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // O2 (헌법 제24조의2 정합) — 프로필 + 분석 4종 병렬 fetch.
-  // 사용자 보고 2026-05-12 — heatmap 카드 제거로 getActivityHeatmap fetch 도 제거.
-  const db = getDb();
-  const [profileRows, summary, stats, lib, recent] = await Promise.all([
-    db
-      .select()
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, user.id))
-      .limit(1),
+  // O2 (헌법 제24조의2 정합) — 분석 4종 병렬 fetch.
+  // 2026-05-17 — 종전 5번째 profile select 는 computeKpi 내부 조회와 중복이라 제거.
+  // summary.kpi.targetRegion(Short) 로 동일 값을 얻는다.
+  const [summary, stats, lib, recent] = await Promise.all([
     getDashboardSummary(user.id),
     getSessionStats(user.id),
     getLibraryCounts(user.id),
     getRecentActivity(user.id, 5),
   ]);
-  const profileRow = profileRows[0];
 
-  const target = profileRow?.targetUniversity ?? null;
-  const targetShort = target ? (REGION_SHORT[target] ?? target) : null;
+  const target = summary.kpi.targetRegion;
+  const targetShort = summary.kpi.targetRegionShort;
   const daysToExam = summary.kpi.daysToExam;
   const joinedAt = user.created_at
     ? new Date(user.created_at).toLocaleDateString("ko-KR", {
