@@ -45,7 +45,14 @@ export default async function DashboardPage() {
     <div className="min-h-screen pb-12 2xl:h-screen 2xl:pb-0 2xl:overflow-hidden 2xl:flex 2xl:flex-col">
       <DashboardHeader />
 
-      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 2xl:flex 2xl:flex-col 2xl:gap-3 2xl:px-8 2xl:py-4 2xl:flex-1 2xl:min-h-0">
+      {/* 2026-05-18 — 부모 컨테이너를 `grid` → `flex flex-col` 로 전환.
+          종전 `grid` 단일 implicit column 동작이 일부 viewport·hydration 타이밍
+          에서 row 높이 계산 회귀를 일으켜 Section 2(WeakTypes+AiRecommend)가
+          Section 1(LearningTrend+TodayPlan) 위로 시각적으로 겹쳐 보이는 사고
+          (333.png). flex column 으로 전환하면 row 개념이 사라져 단순 수직
+          스택으로 동작, 겹침 회피. 2xl 의 viewport-fit 시 `2xl:flex-1 2xl:min-h-0`
+          는 그대로 활성. */}
+      <div className="flex flex-col gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 2xl:gap-3 2xl:px-8 2xl:py-4 2xl:flex-1 2xl:min-h-0">
         {summary.isEmpty && <OnboardingBanner />}
 
         <KpiCards kpi={summary.kpi} />

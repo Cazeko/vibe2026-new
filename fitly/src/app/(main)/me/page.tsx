@@ -250,7 +250,11 @@ export default async function MePage() {
         title="마이 페이지"
         subtitle="프로필과 학습 기록을 한 페이지에 모았습니다."
       />
-      <div className="grid gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 2xl:flex 2xl:flex-col 2xl:gap-3 2xl:px-8 2xl:py-4 2xl:flex-1 2xl:min-h-0">
+      {/* 2026-05-18 (dashboard 와 동일 패턴) — grid → flex flex-col 전환.
+          implicit single column grid 가 일부 viewport·hydration 타이밍에서
+          row 높이 계산 회귀로 인접 section 시각 겹침 위험. flex column 으로
+          수직 스택 단순화. 2xl 의 viewport-fit 분배는 그대로 활성. */}
+      <div className="flex flex-col gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7 2xl:gap-3 2xl:px-8 2xl:py-4 2xl:flex-1 2xl:min-h-0">
         {/* ─ 프로필 카드 ─ */}
         <article className="rounded-card border border-rule bg-cream-soft px-6 py-[22px] 2xl:px-5 2xl:py-3 flex items-center gap-5 2xl:gap-4 flex-wrap shrink-0">
           <span
