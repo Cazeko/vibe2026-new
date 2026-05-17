@@ -43,7 +43,7 @@ export default async function DashboardPage() {
       <DashboardHeader />
 
       <div className="flex flex-col gap-[18px] sm:gap-[22px] px-4 sm:px-6 lg:px-10 py-5 lg:py-7">
-        <OnboardingBanner isEmpty={summary.isEmpty} />
+        <OnboardingBanner isEmpty={summary.isEmpty} userId={user.id} />
 
         <KpiCards kpi={summary.kpi} />
 

@@ -5,12 +5,23 @@ import Link from "next/link";
 import { Sparkles, ArrowRight, X } from "lucide-react";
 
 // 2026-05-18 (주인님 발화) — 첫 대시보드 진입 시 노출되는 안내 카드. X 닫기 버튼
-// 으로 영구 dismiss 가능. localStorage 키로 dismiss 상태 보존 — 한 번 닫으면
-// 같은 브라우저에서 다시 노출되지 않는다. isEmpty=false 인 사용자에게는 그
-// 자체로 노출되지 않으므로, dismiss 는 isEmpty 상태에서만 의미가 있다.
-const DISMISS_KEY = "fitly:onboarding-dismissed";
+// 으로 영구 dismiss 가능. localStorage 키에 user.id 포함 → **계정별** dismiss 상태
+// 보존. 같은 브라우저에서 새 계정 로그인 시 안내 카드가 다시 노출된다 (테스트
+// 시나리오 정합).
+//
+// 2026-05-18 (주인님 발화 v2) — 종전 글로벌 키 `fitly:onboarding-dismissed` 는
+// 한 계정에서 닫으면 다른 새 계정에서도 안 뜨던 회귀. user.id 별로 분리.
+function dismissKeyFor(userId: string): string {
+  return `fitly:onboarding-dismissed:${userId}`;
+}
 
-export function OnboardingBanner({ isEmpty }: { isEmpty: boolean }) {
+export function OnboardingBanner({
+  isEmpty,
+  userId,
+}: {
+  isEmpty: boolean;
+  userId: string;
+}) {
   // SSR 시점: 일단 noscript 폴백 위해 dismissed=false (콘텐츠 있는 사용자에게
   // 보였다가 안 보이는 깜빡임을 피하려면 isEmpty 게이트가 우선). client mount
   // 후 localStorage 확인하여 setDismissed.
@@ -18,14 +29,14 @@ export function OnboardingBanner({ isEmpty }: { isEmpty: boolean }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.localStorage.getItem(DISMISS_KEY) === "1") {
+    if (window.localStorage.getItem(dismissKeyFor(userId)) === "1") {
       setDismissed(true);
     }
-  }, []);
+  }, [userId]);
 
   function handleDismiss() {
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(DISMISS_KEY, "1");
+      window.localStorage.setItem(dismissKeyFor(userId), "1");
     }
     setDismissed(true);
   }
