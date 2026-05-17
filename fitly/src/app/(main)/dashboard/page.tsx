@@ -57,13 +57,17 @@ export default async function DashboardPage() {
 
         <KpiCards kpi={summary.kpi} />
 
-        {/* 주인님 발화 (2026-05-15) — 대시보드 오와열 정렬.
-            상단 KpiCards 4 col grid 와 아래 LearningTrend/TodayPlan 폭이 정합되도록
-            xl 이상에서 동일 4 col grid 사용 + col-span 분배 (3:1).
-            학습성과추이 ↔ KPI 1~3번째(목표/학습진척도/최근7일) 폭 정합.
-            오늘의 학습 플랜 ↔ KPI 4번째(연속학습) 폭 정합. */}
-        <section className="grid grid-cols-1 xl:grid-cols-4 gap-[22px] xl:gap-3 2xl:flex-1 2xl:min-h-0">
-          <div className="xl:col-span-3 min-w-0">
+        {/* 2026-05-18 — Section 1·2 컬럼 경계 정렬 회귀 fix.
+            종전: Section 1 = xl:grid-cols-4 col-span 3:1 (75% 분할),
+                  Section 2 = xl:grid-cols-[1fr_1.05fr] (49% 분할).
+            두 row 의 분할점이 75% vs 49% 로 어긋나 AiRecommend 가 TodayPlan
+            왼쪽으로 290px 튀어나오는 misalignment → 사용자에게 "Section 2 가
+            Section 1 앞으로 겹쳐 보임" 회귀. 90% 줌(2xl viewport-fit)에서는
+            flex 분배로 흡수되어 안 보이던 것이 100% 줌(xl)에서 두드러짐.
+            해결: 두 row 모두 xl:grid-cols-3 + col-span 2:1 (67% 분할) 로 통일.
+            LT↔WT 폭 일치, TP↔AR 폭 일치. 모든 vertical 경계 정렬. */}
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-[22px] xl:gap-3 2xl:flex-1 2xl:min-h-0">
+          <div className="xl:col-span-2 min-w-0">
             <LearningTrend data={summary.trend} />
           </div>
           <div className="xl:col-span-1 min-w-0">
@@ -71,9 +75,13 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.05fr] gap-[22px] xl:gap-3 2xl:flex-1 2xl:min-h-0">
-          <WeakTypes items={summary.weakTypes} />
-          <AiRecommend weakest={weakest} />
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-[22px] xl:gap-3 2xl:flex-1 2xl:min-h-0">
+          <div className="xl:col-span-2 min-w-0">
+            <WeakTypes items={summary.weakTypes} />
+          </div>
+          <div className="xl:col-span-1 min-w-0">
+            <AiRecommend weakest={weakest} />
+          </div>
         </section>
 
         {/* K1 (헌법 제4조의3 정합) — 한글 줄바꿈 의미 단위 br.
