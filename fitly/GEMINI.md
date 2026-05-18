@@ -1217,6 +1217,10 @@ KeywordCard 본문 표준 구조 (헌법 v3.2 정합):
 | #102 | 05-18 | **viewport-fit 전면 제거** (dashboard) + OnboardingBanner X 닫기 |
 | #103 | 05-18 | 회원가입 후 signOut → 로그인 페이지 강제 (자동 로그인 방지) |
 | #104 | 05-18 | OnboardingBanner dismiss 키를 user.id 별로 분리 |
+| #105 | 05-18 | GEMINI.md 인수인계서 신설 (Gemini CLI 환경) |
+| #106 | 05-18 | root 파일 카테고리 정리 + GEMINI.md 부록 B 갱신 |
+| #107 | 05-18 | **/cso + /review CRITICAL 5 + HIGH 10 일괄 해소** — gradeCard ts-fsrs 통합 + userCardLog INSERT + transaction 4건 + TOCTOU 3건 + Zod + essay 50/day cap + podcast per-line validation + disclaimer 서버 검증 + AbortController + queries.ts React.cache + seed §25의2 cap + 사이드바 풀이/학습 + §31 D-day 4 페이지 정정 |
+| #108 | 05-18 | hotfix — /study redirect /study-plan → /study/quiz + 사이드바 active longest-prefix-match + 시험 카운트다운 칩 2단 (지역·시험일 / D-N) |
 
 ---
 
@@ -1320,6 +1324,33 @@ SENTRY_DSN=
 #### 9.5.8 디자인 작업 시 ui-ux-pro-max 스킬 (Claude) / DESIGN.md 우선 (Gemini)
 - UI/UX 컴포넌트 배치·시각 위계·인터랙션 결정 시 매번 호출 (Claude)
 - Gemini 환경 = 본 §6 + 원본 `fitly/DESIGN.md` 우선 참조 (§10.1 매핑)
+
+### 9.5.9 보안 상태 (2026-05-18 /cso + /review 결과)
+
+**보안 보고서**: `fitly/.gstack/security-reports/` (gitignored, 로컬 보존)
+- `2026-05-18-170100.json` — /cso 보고서. CRITICAL 1·HIGH 1·권고 5
+- `2026-05-18-171310-code-review.md` — /review 코드 리뷰 (5 specialist 종합)
+
+**해소 완료** (PR #107·#108):
+- §13 사이드바 풀이/학습 nav 정합 + active longest-prefix-match
+- §19 ts-fsrs 통합 — `lib/srs/index.ts` 활성화 (placeholder 3 곳 제거)
+- §25의2 시드 태그 cap 100% 위반 해소 — `scripts/seed/lib/system-prompts.mjs` 신설 + load 시점 cap
+- §28 비용 가드 강화 — essay 50/day cap + podcast TOCTOU + transaction 4건 + AbortController
+- §31 D-day 4 페이지 정정 (사이드바는 D-N 운영 예외)
+- §3의2 정직성 — podcast disclaimer 서버 검증
+- 학습 코어: `gradeCard` 가 `userCardLog` INSERT 시작 → 대시보드 plan progress 정상 작동
+- React.cache, Zod schema, `requireUser` helper 신설
+
+**미해소 / 후속 액션 필요** (주인님):
+1. **🚨 CRITICAL — GitHub PAT 가 `.git/config` 평문 노출** (`/home/jovyan/work/.git/config`)
+   - `git remote -v` 1줄로 추출 가능. fine-grained PAT (`github_pat_11...`).
+   - 조치: GitHub Settings → Developer settings → PAT revoke → 새 PAT 발급 → `git remote set-url origin https://github.com/Cazeko/vibe2026-new.git` + credential helper 도입.
+2. **`.github/workflows/ci.yml` push 보류** — 현재 PAT 에 `workflow` scope 없어 push 차단. 파일은 `/home/jovyan/work/.github/workflows/ci.yml` 보존. 새 PAT 발급 시 `Workflows: read+write` 권한 포함 → 별도 PR.
+3. **GitHub Settings → Security → Dependabot alerts 활성** (UI 클릭 1회, 30초). CodeQL 은 private personal repo 라 불가 — skip.
+4. **tutor chat per-user daily cap** — 새 `user_ai_calls` 테이블 + schema migration 필요. essay 만 50/day 적용된 상태.
+5. **§13 부분 도입 발의** — 학습 분석 (Phase 2) 운영 중 → `docs/proposals/v3.7-sidebar-phase2-partial.md` 발의 후 주인님 명시 승인.
+6. **`requireUser` helper 32곳 마이그레이션** — 신설했지만 기존 32곳 auth boilerplate 는 점진 migration.
+7. **step03 LLM system prompt** — `SEED_TAG_CAP_RULE` 인용 갱신 (현재는 `load-db.mjs` 만 cap 강제).
 
 ### 9.6 알려진 함정 (회귀 패턴)
 
@@ -1591,8 +1622,20 @@ QuizCard (서술형 2014~) · KeywordCard (개념 노트, 객관식 흡수) · M
 
 ### B.7 백업 (backups/)
 - 사전 cut 보존: `fitly/backups/2026-05-06-pre-drop/`
-- env 백업: `fitly/backups/env-backup.zip`
+- ~~env 백업: `fitly/backups/env-backup.zip`~~ → /cso 권고로 `/tmp/fitly-trash-2026-05-18/env-backup.zip` 이동 (2026-05-18)
 - 시드 PDF 백업: `fitly/backups/kice_pdfs.backup-2026-05-06/`
+
+### B.9 신규 파일 (2026-05-18 PR #107·#108 머지)
+
+| 경로 | 역할 | 헌법 근거 |
+|---|---|---|
+| `fitly/src/lib/auth/require-user.ts` | 사용자 인증 헬퍼 (32곳 boilerplate 마이그레이션 기반) | §28 |
+| `fitly/scripts/seed/lib/system-prompts.mjs` | 시드 §25의2 태그 cap 5개 강제 + 헌법 근거 명시 인용 (`SEED_TAG_CAP_RULE`) | §24의2 + §25의2 |
+| `fitly/.gstack/security-reports/2026-05-18-170100.json` | /cso 보안 감사 보고서 (gitignored) | — |
+| `fitly/.gstack/security-reports/2026-05-18-171310-code-review.md` | /review 종합 보고서 (gitignored) | — |
+| `/home/jovyan/work/.github/workflows/ci.yml` | CI workflow (lint + tsc + vitest) — **PAT workflow scope 없어 push 보류** | — |
+| `/tmp/fitly-trash-2026-05-18/env-backup.zip` | 직전 fitly/backups/env-backup.zip mv 보관 (/cso R2 권고) | — |
+| `/home/jovyan/work/fitly-2026-05-18-final*.tar.gz` | fitly 전체 압축본 (.env 포함, 외부 전송 절대 금지) | — |
 
 ### B.8 root 유지 파일 (이동 금지)
 
