@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   ClipboardList,
   ScrollText,
+  Pencil,
+  GraduationCap,
   Headphones,
   LineChart,
   UserCircle,
@@ -27,16 +29,23 @@ type Item = {
   Icon: LucideIcon;
 };
 
+// 헌법 §13 (laws/12) Phase 1 7+1 정합: 풀이(/study/quiz) + 학습(/study) 추가.
+// 학습 분석(/study-analysis)은 Phase 2이지만 운영 중이라 유지
+// (별도 헌법 §13 부분 도입 발의 — docs/proposals/v3.7-sidebar-phase2-partial.md).
 const MAIN: Item[] = [
   { href: "/dashboard", label: "대시보드", Icon: LayoutDashboard },
-  { href: "/study-plan", label: "학습 계획", Icon: ClipboardList },
   { href: "/exam-analysis", label: "기출 분석", Icon: ScrollText },
+  { href: "/study/quiz", label: "풀이", Icon: Pencil },
+  { href: "/study", label: "학습", Icon: GraduationCap },
   { href: "/podcast", label: "팟캐스트", Icon: Headphones },
+  { href: "/study-plan", label: "학습 계획", Icon: ClipboardList },
   { href: "/study-analysis", label: "학습 분석", Icon: LineChart },
   { href: "/me", label: "마이 페이지", Icon: UserCircle },
 ];
 
-function dDayLabel(examDate: string | null): string | null {
+// 헌법 §31 (rules/32) 촌스러운 작명 금지 정합 — D-day/D−N 글자 표현 제거.
+// "시험까지 N일" 직설 표현으로 §31 + §3의2 정직성 동시 정합.
+function examCountdownLabel(examDate: string | null): string | null {
   if (!examDate) return null;
   const t = new Date(examDate);
   if (Number.isNaN(t.getTime())) return null;
@@ -44,9 +53,9 @@ function dDayLabel(examDate: string | null): string | null {
   const a = Date.UTC(t.getFullYear(), t.getMonth(), t.getDate());
   const b = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
   const days = Math.round((a - b) / 86_400_000);
-  if (days > 0) return `D−${days}`;
-  if (days === 0) return "D-DAY";
-  return `D+${Math.abs(days)}`;
+  if (days > 0) return `시험까지 ${days}일`;
+  if (days === 0) return "시험 당일";
+  return `시험 후 ${Math.abs(days)}일`;
 }
 
 export function AppSidebar() {
@@ -148,7 +157,7 @@ export function AppSidebar() {
     return () => window.removeEventListener("storage", onStorage);
   }, [router]);
 
-  const dDay = dDayLabel(target.examDate);
+  const examCountdown = examCountdownLabel(target.examDate);
   const examDateLabel = target.examDate
     ? new Date(target.examDate).toLocaleDateString("ko-KR", {
         month: "long",
@@ -241,15 +250,16 @@ export function AppSidebar() {
           })}
         </ul>
 
-        {/* ─ D-day 칩 (시험 카운트다운) ─
-            주인님 보고 #6 (2026-05-14) — 좁은 188px 사이드바에서 D-day/지역/시험일
+        {/* ─ 시험 카운트다운 칩 ─
+            주인님 보고 #6 (2026-05-14) — 좁은 188px 사이드바에서 카운트다운/지역/시험일
             세 정보가 두 줄로 깨지던 회귀. 칩을 위·아래 2단으로 재구성 + 명도 위계로
-            정갈하게 한 카드 안에 정합. 1행: D-day, 2행: 지역 · 시험일. */}
-        {dDay && (
+            정갈하게 한 카드 안에 정합. 1행: 카운트다운, 2행: 지역 · 시험일.
+            헌법 §31 정합 (2026-05-18) — D−N → "시험까지 N일". */}
+        {examCountdown && (
           <div className="mt-4 mx-3 rounded-md bg-secondary/60 px-2.5 py-1.5">
             <div className="flex items-baseline gap-1.5">
               <span className="font-bold text-foreground tabular-nums tracking-tight text-[13px] leading-none">
-                {dDay}
+                {examCountdown}
               </span>
               {examDateLabel && (
                 <span className="ml-auto text-[10.5px] text-muted-foreground tabular-nums leading-none">

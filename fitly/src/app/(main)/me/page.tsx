@@ -288,7 +288,7 @@ export default async function MePage() {
               {daysToExam != null && (
                 <>
                   <span className="inline-block w-[3px] h-[3px] mx-2 align-middle rounded-full bg-rule-strong" />
-                  D−{daysToExam}
+                  시험까지 {daysToExam}일
                 </>
               )}
             </p>
