@@ -39,7 +39,7 @@ const TRACKS = [
   {
     href: "/study/mistake",
     label: "오답",
-    desc: "again/hard 자동 합류 — 다시 풀어보기",
+    desc: "다시/어려움 자동 합류 — 다시 풀어보기",
     Icon: AlertCircle,
     key: "mistake" as const,
   },
