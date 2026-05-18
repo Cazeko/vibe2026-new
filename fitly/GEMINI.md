@@ -1221,6 +1221,9 @@ KeywordCard 본문 표준 구조 (헌법 v3.2 정합):
 | #106 | 05-18 | root 파일 카테고리 정리 + GEMINI.md 부록 B 갱신 |
 | #107 | 05-18 | **/cso + /review CRITICAL 5 + HIGH 10 일괄 해소** — gradeCard ts-fsrs 통합 + userCardLog INSERT + transaction 4건 + TOCTOU 3건 + Zod + essay 50/day cap + podcast per-line validation + disclaimer 서버 검증 + AbortController + queries.ts React.cache + seed §25의2 cap + 사이드바 풀이/학습 + §31 D-day 4 페이지 정정 |
 | #108 | 05-18 | hotfix — /study redirect /study-plan → /study/quiz + 사이드바 active longest-prefix-match + 시험 카운트다운 칩 2단 (지역·시험일 / D-N) |
+| #109 | 05-18 | GEMINI.md 인수인계서 PR #107·#108 동기화 + §9.5.9 보안 상태 신설 + 부록 B.9 신규 파일 인덱스 |
+| #110 | 05-18 | **/study 를 3 트랙 hub 페이지로** — 종전 redirect 폐지. 풀이/키워드/오답 카드 3개 + getReviewDueCardCounts() 로 오늘 due 노출. 헌법 §13 본문 정합 ("/study = 3 트랙 SRS 큐 hub") |
+| #111 | 05-18 | 학습 hub 오답 카드 desc 한글화 — `again/hard` → `다시/어려움` (헌법 §22 한국어 우선) |
 
 ---
 
@@ -1331,15 +1334,24 @@ SENTRY_DSN=
 - `2026-05-18-170100.json` — /cso 보고서. CRITICAL 1·HIGH 1·권고 5
 - `2026-05-18-171310-code-review.md` — /review 코드 리뷰 (5 specialist 종합)
 
-**해소 완료** (PR #107·#108):
+**해소 완료** (PR #107·#108·#110·#111):
 - §13 사이드바 풀이/학습 nav 정합 + active longest-prefix-match
+- §13 **/study 3 트랙 hub 페이지** (PR #110) — 풀이·키워드·오답 카드 + 오늘 due 카운트. 종전 임시 redirect 폐지.
 - §19 ts-fsrs 통합 — `lib/srs/index.ts` 활성화 (placeholder 3 곳 제거)
+- §22 한국어 우선 (PR #111) — 학습 hub 오답 카드 `again/hard` → `다시/어려움`
 - §25의2 시드 태그 cap 100% 위반 해소 — `scripts/seed/lib/system-prompts.mjs` 신설 + load 시점 cap
 - §28 비용 가드 강화 — essay 50/day cap + podcast TOCTOU + transaction 4건 + AbortController
 - §31 D-day 4 페이지 정정 (사이드바는 D-N 운영 예외)
 - §3의2 정직성 — podcast disclaimer 서버 검증
 - 학습 코어: `gradeCard` 가 `userCardLog` INSERT 시작 → 대시보드 plan progress 정상 작동
 - React.cache, Zod schema, `requireUser` helper 신설
+
+**사이드바 동작 정합 (PR #108·#110·#111 합산)**:
+- 사이드바 **학습** → `/study` (3 트랙 hub 페이지)
+- 사이드바 **풀이** → `/study/quiz` (직접 풀이)
+- hub 트랙 카드 클릭 → 해당 트랙 진입 (`/study/quiz` · `/study/keyword` · `/study/mistake`)
+- active 판정: longest-prefix-match (더 긴 prefix 매칭 시 짧은 prefix 양보)
+- 시험 카운트다운 칩: 1행 `지역   시험일` / 2행 `D-N` (협소 공간 §31 운영 예외)
 
 **미해소 / 후속 액션 필요** (주인님):
 1. **🚨 CRITICAL — GitHub PAT 가 `.git/config` 평문 노출** (`/home/jovyan/work/.git/config`)
