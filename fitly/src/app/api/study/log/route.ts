@@ -57,40 +57,59 @@ export async function POST(req: Request) {
 
   try {
     const db = getDb();
-
-    await db.insert(studySessions).values({
-      userId: user.id,
-      mode,
-      endedAt: new Date(),
-      durationSeconds,
-      cardsReviewed,
-      correctCount,
-      totalCount,
-    });
-
-    // 일자별 학습 로그 upsert
     const today = new Date().toISOString().slice(0, 10);
     const accuracy =
-      totalCount > 0 ? Number(((correctCount / totalCount) * 100).toFixed(2)) : null;
+      totalCount > 0
+        ? Number(((correctCount / totalCount) * 100).toFixed(2))
+        : null;
     const studyMinutes = Math.round(durationSeconds / 60);
 
-    await db
-      .insert(learningLogs)
-      .values({
+    // 트랜잭션 (/review C2 + H3) — studySessions INSERT + learningLogs UPSERT
+    // 두 write 원자화. 또한 H3: accuracy 가중 평균 (last-writer-wins clobber 방지).
+    await db.transaction(async (tx) => {
+      await tx.insert(studySessions).values({
         userId: user.id,
-        logDate: today,
-        accuracy: accuracy != null ? String(accuracy) : null,
-        studyMinutes,
+        mode,
+        endedAt: new Date(),
+        durationSeconds,
         cardsReviewed,
-      })
-      .onConflictDoUpdate({
-        target: [learningLogs.userId, learningLogs.logDate],
-        set: {
-          studyMinutes: sql`${learningLogs.studyMinutes} + ${studyMinutes}`,
-          cardsReviewed: sql`${learningLogs.cardsReviewed} + ${cardsReviewed}`,
-          accuracy: accuracy != null ? String(accuracy) : learningLogs.accuracy,
-        },
+        correctCount,
+        totalCount,
       });
+
+      // accuracy 가중 평균 — weight = cardsReviewed (totalCount column 부재로
+      // cardsReviewed proxy 사용. 정확한 weighted 위해 추후 accuracy_count 컬럼
+      // 도입 가능). 신규 accuracy=null 시 기존 값 보존.
+      await tx
+        .insert(learningLogs)
+        .values({
+          userId: user.id,
+          logDate: today,
+          accuracy: accuracy != null ? String(accuracy) : null,
+          studyMinutes,
+          cardsReviewed,
+        })
+        .onConflictDoUpdate({
+          target: [learningLogs.userId, learningLogs.logDate],
+          set: {
+            studyMinutes: sql`${learningLogs.studyMinutes} + ${studyMinutes}`,
+            cardsReviewed: sql`${learningLogs.cardsReviewed} + ${cardsReviewed}`,
+            accuracy:
+              accuracy != null
+                ? sql`CASE
+                    WHEN (${learningLogs.cardsReviewed} + ${cardsReviewed}) > 0
+                    THEN ROUND(
+                      (COALESCE(${learningLogs.accuracy}::numeric, 0) * ${learningLogs.cardsReviewed}
+                       + ${accuracy} * ${cardsReviewed})
+                      / NULLIF((${learningLogs.cardsReviewed} + ${cardsReviewed}), 0)::numeric,
+                      2
+                    )::text
+                    ELSE ${learningLogs.accuracy}
+                  END`
+                : learningLogs.accuracy,
+          },
+        });
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

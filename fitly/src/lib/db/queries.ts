@@ -337,72 +337,37 @@ export type DueCard = {
 // 배열을 반환 → 풀이/키워드/오답 전 트랙 빈 상태 회귀. 컬럼 존재 여부를 모듈
 // 단위로 캐시하여 컬럼이 없으면 단일 path 만 select 한다.
 //
-// F5 사후 리뷰 (2026-05-15) — *주의*: 본 캐시는 인스턴스 수명 동안 유지된다.
-// 운영자가 0017 마이그레이션을 production 에 *런타임 중* 적용하더라도, 이미
-// warm 된 Vercel/Node 인스턴스는 false 캐시를 유지하여 multi-page 가 그 인스턴스
-// 에서만 비활성 상태가 된다. Vercel function 의 자연 cold start 또는 재배포
-// 시점에 자동 해소된다. 즉시 활성화가 필요하면 배포를 한 번 트리거해 주세요.
-// 코드리뷰 L4 (2026-05-15) — 캐시에 TTL 추가. 마이그레이션 0017 을 런타임 적용한
-// 경우에도 5분 안에 자동 재탐지되도록 한다. true 응답은 영구 캐시 (컬럼이 사라지는
-// 회귀는 매우 드물고, false 응답만 갱신이 필요).
-let _multiPagePathsAvailable: boolean | null = null;
-let _multiPagePathsProbedAt = 0;
-const PROBE_TTL_MS = 5 * 60 * 1000;
-
-async function probeMultiPagePaths(): Promise<boolean> {
-  const now = Date.now();
-  if (
-    _multiPagePathsAvailable === true ||
-    (_multiPagePathsAvailable === false &&
-      now - _multiPagePathsProbedAt < PROBE_TTL_MS)
-  ) {
-    return _multiPagePathsAvailable;
-  }
+// /review H9 fix (2026-05-18) — module-level mutable cache 를 React `cache()` 로
+// 교체하여 request 단위 dedup. 종전 인스턴스 수명 캐시는 testability 와
+// concurrency 측면에서 약하고 warm Vercel 인스턴스에서 stale 가능성이 있었음.
+// React.cache 는 매 SSR request 첫 호출만 query 실행 (~5ms) — 운영 비용 미미하고
+// 마이그레이션 직후 stale 윈도우도 사라진다.
+const probeMultiPagePaths = cache(async (): Promise<boolean> => {
   try {
     const db = getDb();
     await db.execute(sql`select front_image_paths from cards limit 1`);
-    _multiPagePathsAvailable = true;
-    _multiPagePathsProbedAt = now;
+    return true;
   } catch {
-    if (_multiPagePathsAvailable !== false) {
-      console.warn(
-        "[db.queries] cards.front_image_paths 미존재 — 단일 path fallback. 0017 마이그레이션을 적용하면 multi-page PDF 가 활성화됩니다.",
-      );
-    }
-    _multiPagePathsAvailable = false;
-    _multiPagePathsProbedAt = now;
+    console.warn(
+      "[db.queries] cards.front_image_paths 미존재 — 단일 path fallback. 0017 마이그레이션을 적용하면 multi-page PDF 가 활성화됩니다.",
+    );
+    return false;
   }
-  return _multiPagePathsAvailable;
-}
+});
 
 // 백승환 #9 (2026-05-15) — mark 필터 + mark probe (마이그레이션 0001 미적용 환경 폴백).
-let _markColumnAvailable: boolean | null = null;
-let _markColumnProbedAt = 0;
-async function probeMarkColumn(): Promise<boolean> {
-  const now = Date.now();
-  if (
-    _markColumnAvailable === true ||
-    (_markColumnAvailable === false &&
-      now - _markColumnProbedAt < PROBE_TTL_MS)
-  ) {
-    return _markColumnAvailable;
-  }
+const probeMarkColumn = cache(async (): Promise<boolean> => {
   try {
     const db = getDb();
     await db.execute(sql`select mark from user_card_state limit 1`);
-    _markColumnAvailable = true;
-    _markColumnProbedAt = now;
+    return true;
   } catch {
-    if (_markColumnAvailable !== false) {
-      console.warn(
-        "[db.queries] user_card_state.mark 미존재 — null fallback. 0001 마이그레이션을 적용하면 마크 필터/표식이 활성화됩니다.",
-      );
-    }
-    _markColumnAvailable = false;
-    _markColumnProbedAt = now;
+    console.warn(
+      "[db.queries] user_card_state.mark 미존재 — null fallback. 0001 마이그레이션을 적용하면 마크 필터/표식이 활성화됩니다.",
+    );
+    return false;
   }
-  return _markColumnAvailable;
-}
+});
 
 export async function getDueCards(
   userId: string,

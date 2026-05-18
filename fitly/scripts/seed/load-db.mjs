@@ -1,11 +1,18 @@
 // scripts/seed/load-db.mjs
 // items.json (60 papers) + keywords.json → DB 적재
 // 헌법 v3.3 정합: stem_text는 unpdf 슬라이스, verified_text/verified_answer 분리
+// 헌법 §25의2 (rules/35) 정합 (2026-05-18) — 시드 태그 상한 5개. load 시점에
+// keywords slice(0, 2) 로 cap 적용 + 위반 시 경고 로그.
 import postgres from "postgres";
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import {
+  capSeedKeywords,
+  validateSeedTags,
+  MAX_TAGS_PER_ITEM,
+} from "./lib/system-prompts.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const papersBase = join(__dirname, "data", "papers");
@@ -36,6 +43,8 @@ let papers_inserted = 0;
 let items_inserted = 0;
 let cards_quiz_inserted = 0;
 let cards_keyword_inserted = 0;
+let tag_cap_applied = 0; // §25의2 — keywords slice(0,2) 적용 횟수
+let tag_cap_violations = 0; // 원본 items.json 이 5개 초과로 슬라이스 필요했던 항목 수
 const errors = [];
 
 // 코드리뷰 M6 (2026-05-15) — 헌법 제18조의3 5항: 2002 학년도 이전 PDF 는
@@ -81,6 +90,29 @@ for (const dir of dirs) {
       const verifiedText = item.verified_text === false ? false : true;
       const verifiedAnswer = item.verified_answer === true;
 
+      // 헌법 §25의2 (rules/35) — 시드 태그 상한 5개. keywords 만 cap 대상
+      // (domain/bloom/format 은 필수 슬롯). 원본 items.json 보존 + load 시점
+      // slice 로 강제. tag_cap_violations 는 원본이 cap 초과한 항목 수.
+      const cappedKeywords = capSeedKeywords(item.keywords);
+      const tagAudit = validateSeedTags(item);
+      if (!tagAudit.ok) {
+        tag_cap_violations++;
+      }
+      const cappedItem = { ...item, keywords: cappedKeywords };
+      const cappedAudit = validateSeedTags(cappedItem);
+      if (!cappedAudit.ok) {
+        // domain/bloom/format 자체가 많은 경우 (드물지만) — 경고만, ingest 계속.
+        console.warn(
+          `[seed/load-db] ${dir} item_no=${item.item_no} cap 적용 후도 ${cappedAudit.count}/${MAX_TAGS_PER_ITEM} (domains=${cappedAudit.breakdown.domains}). 검토 필요.`,
+        );
+      }
+      if (
+        Array.isArray(item.keywords) &&
+        item.keywords.length > cappedKeywords.length
+      ) {
+        tag_cap_applied++;
+      }
+
       const [itemRow] = await sql`
         INSERT INTO exam_items (
           paper_id, item_no, stem_text, stem_image_path, stem_image_paths,
@@ -94,7 +126,7 @@ for (const dir of dirs) {
           ${item.points != null ? Math.round(item.points) : null}, ${item.format ?? null},
           ${JSON.stringify(item.domains || [])}::jsonb,
           ${item.bloom ?? null},
-          ${JSON.stringify(item.keywords || [])}::jsonb,
+          ${JSON.stringify(cappedKeywords)}::jsonb,
           ${item.answer_md ?? null}, ${item.explanation_md ?? null},
           ${verifiedText}, ${verifiedAnswer}
         )
@@ -163,6 +195,9 @@ console.log("exam_papers:        " + papers_inserted);
 console.log("exam_items:         " + items_inserted);
 console.log("cards (quiz):       " + cards_quiz_inserted);
 console.log("cards (keyword):    " + cards_keyword_inserted);
+console.log(
+  `§25의2 tag cap:     원본 ${tag_cap_violations}건 cap 초과 → ${tag_cap_applied}건 keywords slice(0,${MAX_TAGS_PER_ITEM})`,
+);
 if (skipped_pre2002.length > 0) {
   console.log(
     `skipped (pre-${MIN_SEED_YEAR}): ${skipped_pre2002.length} — ${skipped_pre2002.join(", ")}`,

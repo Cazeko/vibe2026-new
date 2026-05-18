@@ -279,6 +279,9 @@ export const HighlightLayer = forwardRef<
   }
 
   // 저장된 하이라이트 wrap.
+  // /review C4 fix (2026-05-18) — 종전 빈 dep array 누락으로 매 parent render마다
+  // DOM TreeWalker 전체 순회 + Range surgery 가 재실행되던 perf bug. items 변경
+  // 시에만 재적용.
   useEffect(() => {
     const root = containerRef.current;
     if (!root) return;
@@ -286,7 +289,7 @@ export const HighlightLayer = forwardRef<
     unwrapAllMarks(root);
     // 2) 각 항목 적용.
     for (const h of items) applyHighlight(root, h);
-  });
+  }, [items]);
 
   // 외부 클릭 시 메뉴 닫기.
   useEffect(() => {

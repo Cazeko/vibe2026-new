@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { and, count, eq, gte, isNull } from "drizzle-orm";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { sql } from "drizzle-orm";
@@ -13,6 +14,7 @@ import {
   userAttempts,
   userCardAiAnalysis,
   userCardHighlights,
+  userCardLog,
   userCardState,
   userCardTags,
 } from "@/lib/db/schema";
@@ -24,6 +26,13 @@ import {
   CARD_REPORT_CATEGORIES,
   type CardReportCategory,
 } from "@/lib/db/schema/card-reports";
+import {
+  reviewCard,
+  fsrsCardFromState,
+  fsrsCardToState,
+  newCard,
+  type ReviewGrade,
+} from "@/lib/srs";
 import type { SrsState } from "@/types";
 import {
   analyzeEssay,
@@ -42,49 +51,59 @@ import {
 } from "@/lib/db/queries";
 
 // 헌법 v3.0 제13조의2 — 학습 활동 server actions.
-// 답안 저장 + 자가 채점 등급 처리 (현 시점은 단순 spaced repetition,
-// ts-fsrs 본격 통합은 D-S2 이후 reimplement — 헌법 제19조 정합).
+// 2026-05-18 — gradeCard ts-fsrs 통합 + userCardLog 적재 + transaction 원자화
+//   * 헌법 §19 (ts-fsrs SRS 큐) 약속 활성화 — lib/srs/index.ts 사용
+//   * 헌법 §13의2 6항 (등급 이력 user_card_log append-only) 본 commit 부터 작동
+//   * /review CRITICAL C1 (userCardLog INSERT 누락) + C2 (multi-write tx 부재) +
+//     H8 (ts-fsrs 미사용) 동시 해소
+//
+// 입력 검증 (헌법 §28 + /review H4):
+//   * UUID 형식 + Grade enum 서버 단 검증 — server action runtime-erasure 의존 차단.
 
-type Grade = "again" | "hard" | "good" | "easy";
+type Grade = ReviewGrade;
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// FSRS state 갱신은 ts-fsrs 라이브러리 통합 후 본격 reimplement.
-// 현 단계는 grade에 따른 단순 인터벌만 적용 (impl placeholder).
-const GRADE_INTERVAL_MS: Record<Grade, number> = {
-  again: 60 * 1000,
-  hard: 10 * 60 * 1000,
-  good: 1 * DAY_MS,
-  easy: 3 * DAY_MS,
-};
+const CardIdSchema = z.string().regex(UUID_RE, "InvalidCardId");
+const GradeSchema = z.enum(["again", "hard", "good", "easy"]);
+const AnswerTextSchema = z.string().max(MAX_ANSWER_LEN);
 
 export async function submitAnswer(
   cardId: string,
   answerText: string,
 ): Promise<void> {
+  // 헌법 §28 + /review H4 — Zod 입력 검증 (server action runtime-erasure 차단).
+  const cid = CardIdSchema.parse(cardId);
+  const text = AnswerTextSchema.parse(answerText);
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
-  if (answerText.trim().length === 0) return;
+  if (text.trim().length === 0) return;
 
   const db = getDb();
   const [card] = await db
     .select({ sourceItemId: cards.sourceItemId })
     .from(cards)
-    .where(eq(cards.id, cardId))
+    .where(eq(cards.id, cid))
     .limit(1);
   if (!card?.sourceItemId) return;
 
   await db.insert(userAttempts).values({
     userId: user.id,
     itemId: card.sourceItemId,
-    answerMd: answerText,
+    answerMd: text,
   });
 }
 
 export async function gradeCard(cardId: string, grade: Grade): Promise<void> {
+  // 헌법 §28 + /review H4 — Zod 입력 검증 (UUID + Grade enum).
+  const cid = CardIdSchema.parse(cardId);
+  const g = GradeSchema.parse(grade);
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -93,151 +112,152 @@ export async function gradeCard(cardId: string, grade: Grade): Promise<void> {
 
   const db = getDb();
   const now = new Date();
-  const intervalMs = GRADE_INTERVAL_MS[grade];
-  const dueAt = new Date(now.getTime() + intervalMs);
 
-  // ts-fsrs state placeholder — 라이브러리 통합 시 src/lib/srs/index.ts를 통해 갱신.
-  const fsrsState: SrsState = {
-    due: dueAt.toISOString(),
-    stability: grade === "easy" ? 3 : grade === "good" ? 1 : 0.5,
-    difficulty: grade === "easy" ? 3 : grade === "again" ? 8 : 5,
-    elapsed_days: 0,
-    scheduled_days: intervalMs / DAY_MS,
-    reps: 1,
-    lapses: grade === "again" ? 1 : 0,
-    state: grade === "again" ? 1 : 2,
-    last_review: now.toISOString(),
-  };
-
-  // 원본 카드 정보 조회 — type / sourceItemId / 본문은 mistake 합류 시 사용.
-  const [origCard] = await db
-    .select({
-      type: cards.type,
-      sourceItemId: cards.sourceItemId,
-      frontText: cards.frontText,
-      frontImagePath: cards.frontImagePath,
-      backMd: cards.backMd,
-      verifiedText: cards.verifiedText,
-      verifiedAnswer: cards.verifiedAnswer,
-    })
-    .from(cards)
-    .where(eq(cards.id, cardId))
-    .limit(1);
-
-  // 원본 카드 user_card_state 갱신.
-  await db
-    .insert(userCardState)
-    .values({
-      userId: user.id,
-      cardId,
-      fsrsState,
-      dueAt,
-      lastReviewedAt: now,
-    })
-    .onConflictDoUpdate({
-      target: [userCardState.userId, userCardState.cardId],
-      set: {
-        fsrsState,
-        dueAt,
-        lastReviewedAt: now,
-        updatedAt: now,
-      },
-    });
-
-  // 헌법 v3.3 제13조의2 5항 — again/hard 평가 시 mistake 트랙 자동 합류.
-  // 정책:
-  //   1) origCard.type 이 quiz/keyword + grade 가 again/hard 일 때만 합류
-  //   2) origCard.type === "mistake" 는 이미 합류된 카드라 skip
-  //   3) origCard.sourceItemId 가 NULL 이면 시드 outlier 라 skip
-  //   4) 동일 (userId, sourceItemId, type=mistake) 가 이미 있으면 중복 생성 X
-  //   5) keyword 원본은 정리 노트(LLM) 이므로 mistake 본문으로 부적합 →
-  //      동일 sourceItemId 의 shared quiz 카드(PDF 원본 본문) 찾아 사용.
-  //      shared quiz 없으면 keyword 본문 그대로 fallback.
-  //   6) 생성된 mistake 카드는 user_card_state 에 dueAt=now 로 추가 (즉시 풀이 대상).
-  if (
-    origCard?.sourceItemId &&
-    (grade === "again" || grade === "hard") &&
-    (origCard.type === "quiz" || origCard.type === "keyword")
-  ) {
-    const [existingMistake] = await db
-      .select({ id: cards.id })
+  // 트랜잭션 (/review C2 — multi-write atomic). 4-단계 sequential write를
+  // 원자화하여 중간 실패 시 orphan/중복 mistake 카드 방지.
+  await db.transaction(async (tx) => {
+    // 원본 카드 + prev fsrs state 조회 (mistake 합류 + ts-fsrs 입력).
+    const [origCard] = await tx
+      .select({
+        type: cards.type,
+        sourceItemId: cards.sourceItemId,
+        frontText: cards.frontText,
+        frontImagePath: cards.frontImagePath,
+        backMd: cards.backMd,
+        verifiedText: cards.verifiedText,
+        verifiedAnswer: cards.verifiedAnswer,
+      })
       .from(cards)
+      .where(eq(cards.id, cid))
+      .limit(1);
+    if (!origCard) throw new Error("CardNotFound");
+
+    const [prevState] = await tx
+      .select({ fsrsState: userCardState.fsrsState })
+      .from(userCardState)
       .where(
         and(
-          eq(cards.sourceItemId, origCard.sourceItemId),
-          eq(cards.type, "mistake"),
-          eq(cards.userId, user.id),
+          eq(userCardState.userId, user.id),
+          eq(userCardState.cardId, cid),
         ),
       )
       .limit(1);
 
-    if (!existingMistake) {
-      // mistake 본문 — quiz 는 원본 그대로, keyword 는 sibling quiz 우선
-      let mistakeBody = {
-        frontText: origCard.frontText,
-        frontImagePath: origCard.frontImagePath,
-        backMd: origCard.backMd,
-        verifiedText: origCard.verifiedText,
-        verifiedAnswer: origCard.verifiedAnswer,
-      };
+    // 헌법 §19 ts-fsrs 통합 — 이전 placeholder (grade별 하드코딩 interval)
+    // 제거하고 scheduler.next() 결과를 그대로 사용.
+    const prevCard = prevState?.fsrsState
+      ? fsrsCardFromState(prevState.fsrsState, now)
+      : newCard(now);
+    const { card: nextCard } = reviewCard(prevCard, g, now);
+    const fsrsState: SrsState = fsrsCardToState(nextCard);
+    const dueAt = nextCard.due;
 
-      if (origCard.type === "keyword") {
-        const [siblingQuiz] = await db
-          .select({
-            frontText: cards.frontText,
-            frontImagePath: cards.frontImagePath,
-            backMd: cards.backMd,
-            verifiedText: cards.verifiedText,
-            verifiedAnswer: cards.verifiedAnswer,
-          })
-          .from(cards)
-          .where(
-            and(
-              eq(cards.sourceItemId, origCard.sourceItemId),
-              eq(cards.type, "quiz"),
-              isNull(cards.userId),
-            ),
-          )
-          .limit(1);
-        if (siblingQuiz) mistakeBody = siblingQuiz;
-      }
+    // 1) user_card_state upsert (ts-fsrs 산출 next state).
+    await tx
+      .insert(userCardState)
+      .values({
+        userId: user.id,
+        cardId: cid,
+        fsrsState,
+        dueAt,
+        lastReviewedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: [userCardState.userId, userCardState.cardId],
+        set: {
+          fsrsState,
+          dueAt,
+          lastReviewedAt: now,
+          updatedAt: now,
+        },
+      });
 
-      const [created] = await db
-        .insert(cards)
-        .values({
-          type: "mistake",
-          sourceItemId: origCard.sourceItemId,
-          userId: user.id,
-          ...mistakeBody,
-        })
-        .returning({ id: cards.id });
+    // 2) user_card_log append (헌법 §13의2 6항). /review C1 fix —
+    //    종전 INSERT 누락으로 대시보드 plan progress 영구 0%·weak-types 비어있던 회귀 해소.
+    await tx.insert(userCardLog).values({
+      userId: user.id,
+      cardId: cid,
+      grade: g,
+      reviewedAt: now,
+    });
 
-      if (created?.id) {
-        await db
-          .insert(userCardState)
+    // 3) 헌법 v3.3 §13의2 5항 — again/hard + quiz/keyword 시 mistake 자동 합류.
+    if (
+      origCard.sourceItemId &&
+      (g === "again" || g === "hard") &&
+      (origCard.type === "quiz" || origCard.type === "keyword")
+    ) {
+      const [existingMistake] = await tx
+        .select({ id: cards.id })
+        .from(cards)
+        .where(
+          and(
+            eq(cards.sourceItemId, origCard.sourceItemId),
+            eq(cards.type, "mistake"),
+            eq(cards.userId, user.id),
+          ),
+        )
+        .limit(1);
+
+      if (!existingMistake) {
+        let mistakeBody = {
+          frontText: origCard.frontText,
+          frontImagePath: origCard.frontImagePath,
+          backMd: origCard.backMd,
+          verifiedText: origCard.verifiedText,
+          verifiedAnswer: origCard.verifiedAnswer,
+        };
+
+        if (origCard.type === "keyword") {
+          const [siblingQuiz] = await tx
+            .select({
+              frontText: cards.frontText,
+              frontImagePath: cards.frontImagePath,
+              backMd: cards.backMd,
+              verifiedText: cards.verifiedText,
+              verifiedAnswer: cards.verifiedAnswer,
+            })
+            .from(cards)
+            .where(
+              and(
+                eq(cards.sourceItemId, origCard.sourceItemId),
+                eq(cards.type, "quiz"),
+                isNull(cards.userId),
+              ),
+            )
+            .limit(1);
+          if (siblingQuiz) mistakeBody = siblingQuiz;
+        }
+
+        const [created] = await tx
+          .insert(cards)
           .values({
+            type: "mistake",
+            sourceItemId: origCard.sourceItemId,
             userId: user.id,
-            cardId: created.id,
-            fsrsState: {
-              due: now.toISOString(),
-              stability: 0.5,
-              difficulty: 6,
-              elapsed_days: 0,
-              scheduled_days: 0,
-              reps: 0,
-              lapses: 0,
-              state: 0,
-              last_review: now.toISOString(),
-            },
-            dueAt: now,
-            lastReviewedAt: null,
+            ...mistakeBody,
           })
-          .onConflictDoNothing({
-            target: [userCardState.userId, userCardState.cardId],
-          });
+          .returning({ id: cards.id });
+
+        if (created?.id) {
+          // mistake 카드는 즉시 풀이 대상 (dueAt=now + 새 fsrs card state).
+          const initialMistakeCard = newCard(now);
+          await tx
+            .insert(userCardState)
+            .values({
+              userId: user.id,
+              cardId: created.id,
+              fsrsState: fsrsCardToState(initialMistakeCard),
+              dueAt: now,
+              lastReviewedAt: null,
+            })
+            .onConflictDoNothing({
+              target: [userCardState.userId, userCardState.cardId],
+            });
+        }
       }
     }
-  }
+  });
 
   revalidatePath("/study/quiz");
   revalidatePath("/study/keyword");
@@ -493,6 +513,28 @@ export type RequestAiAnalysisResult =
     }
   | { ok: false; error: string };
 
+// /review H5 — essay LLM 호출 per-user daily cap.
+// 헌법 §28 비용 가드 정합. cache hit 은 비용 0 이라 count 대상 외 — cache miss
+// 시점에 user_card_ai_analysis.created_at 기준 오늘 INSERT 수를 검사.
+// (podcast 5/day 와 분리된 별도 quota — essay 는 학습 본업이므로 상대적 여유.)
+const ESSAY_AI_DAILY_LIMIT = 50;
+
+async function essayAiDailyCount(userId: string): Promise<number> {
+  const db = getDb();
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const [row] = await db
+    .select({ n: count() })
+    .from(userCardAiAnalysis)
+    .where(
+      and(
+        eq(userCardAiAnalysis.userId, userId),
+        gte(userCardAiAnalysis.createdAt, startOfDay),
+      ),
+    );
+  return Number(row?.n ?? 0);
+}
+
 export async function requestAiAnalysis(
   cardId: string,
   answerText: string,
@@ -512,11 +554,16 @@ export async function requestAiAnalysis(
     return { ok: false, error: "AnswerTooLong" };
   }
 
+  // /review H4 — UUID 형식 검증 (server action runtime-erasure 차단).
+  const cidResult = CardIdSchema.safeParse(cardId);
+  if (!cidResult.success) return { ok: false, error: "InvalidCardId" };
+  const cid = cidResult.data;
+
   const db = getDb();
   const [card] = await db
     .select({ id: cards.id, backMd: cards.backMd, type: cards.type })
     .from(cards)
-    .where(eq(cards.id, cardId))
+    .where(eq(cards.id, cid))
     .limit(1);
   if (!card) return { ok: false, error: "CardNotFound" };
   if (!card.backMd) return { ok: false, error: "NoReference" };
@@ -525,8 +572,8 @@ export async function requestAiAnalysis(
   // 모범답안도 포함.
   const attemptHash = computeAttemptHash(answerText, card.backMd);
 
-  // 캐시 hit?
-  const cached = await getAiAnalysis(user.id, cardId, attemptHash);
+  // 캐시 hit? — cap 검사 전 우선 적용 (재제출 무료).
+  const cached = await getAiAnalysis(user.id, cid, attemptHash);
   if (cached) {
     return {
       ok: true,
@@ -537,6 +584,12 @@ export async function requestAiAnalysis(
       diff: cached.diff,
       model: cached.model,
     };
+  }
+
+  // /review H5 — cache miss 직전 daily cap. cache hit 은 count 대상 외.
+  const todayCount = await essayAiDailyCount(user.id);
+  if (todayCount >= ESSAY_AI_DAILY_LIMIT) {
+    return { ok: false, error: "DailyLimitExceeded" };
   }
 
   // miss → LLM 호출.
@@ -550,7 +603,7 @@ export async function requestAiAnalysis(
       .insert(userCardAiAnalysis)
       .values({
         userId: user.id,
-        cardId,
+        cardId: cid,
         attemptHash,
         overviewJson: result.overview,
         keywordsJson: result.keywords,
