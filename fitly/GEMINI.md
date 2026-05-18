@@ -1569,12 +1569,43 @@ QuizCard (서술형 2014~) · KeywordCard (개념 노트, 객관식 흡수) · M
 
 ### B.4 시드 데이터
 - KICE 공식 기출 PDF: `fitly/kice_pdfs/` (2002~2026)
-- 백업: `fitly/kice_pdfs.backup-2026-05-06/`
+- 백업: `fitly/backups/kice_pdfs.backup-2026-05-06/`
 
-### B.5 발표
+### B.5 발표 + 가이드
 - PPT 제작 계획서: `fitly/docs/PPT_제작_계획서.md`
 - 시연 영상 가이드: `fitly/docs/시연영상_제작_가이드.md`
-- 발표 본문 (PDF): `fitly/5 백승환 Fitly 발표 .pdf`
+- 발표 본문 (PDF): `fitly/assets/references/5 백승환 Fitly 발표 .pdf`
+- 발표 파일 (PPTX): `fitly/assets/presentations/발표.pptx`
+
+### B.6 자산 분류 (assets/) — 2026-05-18 정리
+
+> 종전 root 에 흩어져 있던 스크린샷·PDF·예시·연구노트를 카테고리별로 분류.
+
+| 폴더 | 내용 | 비고 |
+|---|---|---|
+| `fitly/assets/screenshots/` | 모든 PNG·JPEG (디버그·예시·페이지 캡처 등 15장) | `333.png`·`4444.png` 등 디버그 자료 포함 |
+| `fitly/assets/references/` | 외부 참고 PDF (백승환 발표·피드백·오답노트 인쇄 등 3건) | |
+| `fitly/assets/examples/` | 예시 자료 폴더 (신규 디자인·예시pptx·임용고시 레이아웃) | 디자인 참조용 |
+| `fitly/assets/presentations/` | 발표 산출물 (`발표.pptx` 21MB 등) | |
+| `fitly/assets/research/` | 연구 노트 (.md — 프롬프트 엔지니어링·하네스) | 메타 연구 자료 |
+
+### B.7 백업 (backups/)
+- 사전 cut 보존: `fitly/backups/2026-05-06-pre-drop/`
+- env 백업: `fitly/backups/env-backup.zip`
+- 시드 PDF 백업: `fitly/backups/kice_pdfs.backup-2026-05-06/`
+
+### B.8 root 유지 파일 (이동 금지)
+
+다음은 자동 도구·표준 컨벤션상 root 에 위치해야 한다:
+
+- **AI 인덱스**: `CLAUDE.md`, `GEMINI.md`, `DESIGN.md`
+- **AI 설정**: `.claude/` (Claude Code 위계 본문)
+- **빌드 config**: `package.json`, `package-lock.json`, `tsconfig.json`, `tailwind.config.ts`, `next.config.mjs`, `postcss.config.mjs`, `drizzle.config.ts`, `vitest.config.ts`, `vercel.json`, `next-env.d.ts`, `tsconfig.tsbuildinfo`
+- **env**: `.env`, `.env.local`, `.env.example`
+- **lint·git**: `.eslintrc.json`, `.gitignore`, `.npmrc`
+- **소스·자산**: `src/`, `public/`, `scripts/`, `node_modules/`, `.next/`, `.vercel/`, `image/`
+- **인프라**: `drizzle/`, `supabase/`, **`kice_pdfs/`** (시드 코드가 직접 참조 — 이동 금지), `backups/`
+- **문서**: `docs/` (계획·발의·하네스·audit)
 
 ---
 
