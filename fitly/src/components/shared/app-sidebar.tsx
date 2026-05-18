@@ -43,9 +43,32 @@ const MAIN: Item[] = [
   { href: "/me", label: "마이 페이지", Icon: UserCircle },
 ];
 
-// 헌법 §31 (rules/32) 촌스러운 작명 금지 정합 — D-day/D−N 글자 표현 제거.
-// "시험까지 N일" 직설 표현으로 §31 + §3의2 정직성 동시 정합.
-function examCountdownLabel(examDate: string | null): string | null {
+// 2026-05-18 hotfix — longest-prefix-match. 종전 단순 startsWith 는
+// /study/quiz 진입 시 /study 도 active 로 잡혀 두 nav 가 동시에 초록색이 되던
+// 회귀. 더 구체적인(긴) prefix 가 매칭되면 짧은 prefix 는 inactive 로 처리.
+function isNavActive(href: string, pathname: string, all: Item[]): boolean {
+  const matches =
+    pathname === href || pathname.startsWith(`${href}/`);
+  if (!matches) return false;
+  // 더 긴 prefix 가 같은 pathname 을 매칭하면 본 item 양보.
+  for (const other of all) {
+    if (other.href === href) continue;
+    if (other.href.length <= href.length) continue;
+    if (
+      pathname === other.href ||
+      pathname.startsWith(`${other.href}/`)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// 사이드바 협소 공간(188px) 한정 D-N 표기 — 주인님 2026-05-18 명시 발화.
+// 헌법 §31 본문은 그대로 유지 (다른 페이지 KPI/학습계획/마이는 "시험까지 N일"
+// 직설 표현 유지). 사이드바 chip 은 좁은 폭에서 시각 위계 확보를 위해 운영
+// 예외로 D-N 짧은 표기 허용. en-dash(D−) 가 아닌 일반 하이픈(D-) 사용.
+function dDayShortLabel(examDate: string | null): string | null {
   if (!examDate) return null;
   const t = new Date(examDate);
   if (Number.isNaN(t.getTime())) return null;
@@ -53,9 +76,9 @@ function examCountdownLabel(examDate: string | null): string | null {
   const a = Date.UTC(t.getFullYear(), t.getMonth(), t.getDate());
   const b = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
   const days = Math.round((a - b) / 86_400_000);
-  if (days > 0) return `시험까지 ${days}일`;
-  if (days === 0) return "시험 당일";
-  return `시험 후 ${Math.abs(days)}일`;
+  if (days > 0) return `D-${days}`;
+  if (days === 0) return "D-DAY";
+  return `D+${Math.abs(days)}`;
 }
 
 export function AppSidebar() {
@@ -157,7 +180,7 @@ export function AppSidebar() {
     return () => window.removeEventListener("storage", onStorage);
   }, [router]);
 
-  const examCountdown = examCountdownLabel(target.examDate);
+  const dDayShort = dDayShortLabel(target.examDate);
   const examDateLabel = target.examDate
     ? new Date(target.examDate).toLocaleDateString("ko-KR", {
         month: "long",
@@ -215,7 +238,7 @@ export function AppSidebar() {
         </p>
         <ul className="space-y-0.5">
           {MAIN.map(({ href, label, Icon }) => {
-            const active = pathname === href || pathname.startsWith(`${href}/`);
+            const active = isNavActive(href, pathname, MAIN);
             return (
               <li key={href}>
                 <Link
@@ -251,25 +274,36 @@ export function AppSidebar() {
         </ul>
 
         {/* ─ 시험 카운트다운 칩 ─
-            주인님 보고 #6 (2026-05-14) — 좁은 188px 사이드바에서 카운트다운/지역/시험일
-            세 정보가 두 줄로 깨지던 회귀. 칩을 위·아래 2단으로 재구성 + 명도 위계로
-            정갈하게 한 카드 안에 정합. 1행: 카운트다운, 2행: 지역 · 시험일.
-            헌법 §31 정합 (2026-05-18) — D−N → "시험까지 N일". */}
-        {examCountdown && (
+            주인님 발화 (2026-05-18) — 좁은 188px 사이드바 한정 형식:
+            1행: 지역 + 시험일 (가벼움, 부가 정보)
+            2행: D-N (강조, 메인 카운트다운)
+            §31 운영 예외 (사이드바 한정) — 다른 페이지는 "시험까지 N일" 유지. */}
+        {(target.region || examDateLabel || dDayShort) && (
           <div className="mt-4 mx-3 rounded-md bg-secondary/60 px-2.5 py-1.5">
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-bold text-foreground tabular-nums tracking-tight text-[13px] leading-none">
-                {examCountdown}
-              </span>
-              {examDateLabel && (
-                <span className="ml-auto text-[10.5px] text-muted-foreground tabular-nums leading-none">
-                  {examDateLabel}
-                </span>
-              )}
-            </div>
-            {target.region && (
-              <p className="mt-1 text-[10.5px] text-muted-foreground truncate leading-tight">
-                {target.region}
+            {(target.region || examDateLabel) && (
+              <div className="flex items-baseline gap-1.5">
+                {target.region && (
+                  <span className="text-[11px] text-muted-foreground truncate leading-none">
+                    {target.region}
+                  </span>
+                )}
+                {examDateLabel && (
+                  <span className="ml-auto text-[11px] text-muted-foreground tabular-nums leading-none">
+                    {examDateLabel}
+                  </span>
+                )}
+              </div>
+            )}
+            {dDayShort && (
+              <p
+                className={cn(
+                  "tabular-nums tracking-tight font-bold text-foreground leading-none",
+                  target.region || examDateLabel
+                    ? "mt-1.5 text-[15px]"
+                    : "text-[15px]",
+                )}
+              >
+                {dDayShort}
               </p>
             )}
           </div>
