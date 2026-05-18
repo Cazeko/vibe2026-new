@@ -38,7 +38,8 @@ export async function generatePodcastAudio(script: PodcastScript): Promise<{
   }));
 
   const ttsModel = process.env.GEMINI_MODEL_TTS ?? DEFAULT_TTS_MODEL;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${apiKey}`;
+  // /review L2 — API key 헤더 전송 (URL query 노출 제거).
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent`;
   const body = JSON.stringify({
     contents: [{ parts: [{ text: dialogueText }] }],
     generationConfig: {
@@ -46,21 +47,23 @@ export async function generatePodcastAudio(script: PodcastScript): Promise<{
       speechConfig: { multiSpeakerVoiceConfig: { speakerVoiceConfigs } },
     },
   });
+  const fetchInit = {
+    method: "POST" as const,
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
+    body,
+    // /review M5 — TTS 35초 timeout (script 20초 + TTS 35초 + 여유 5초 = 60초 Vercel 한도).
+    signal: AbortSignal.timeout(35_000),
+  };
 
   // 헌법 §35 백업 — TTS preview 모델 503/429 일시 과부하 시 2초 후 1회 재시도.
-  let response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body,
-  });
+  let response = await fetch(url, fetchInit);
   if (!response.ok && (response.status === 503 || response.status === 429)) {
     console.warn(`[podcast/tts] ${ttsModel} ${response.status} — retrying once after 2s`);
     await new Promise((r) => setTimeout(r, 2000));
-    response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-    });
+    response = await fetch(url, fetchInit);
   }
   if (!response.ok) {
     const errBody = await response.text();

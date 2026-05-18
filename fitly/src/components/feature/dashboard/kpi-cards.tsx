@@ -25,13 +25,13 @@ type Card = {
 };
 
 export function KpiCards({ kpi }: { kpi: DashboardKpi }) {
-  // v3.6 외부 평가 #2.2 — D-Day 폰트 강조 (심리적 압박감 = 동기부여).
-  // sub 영역의 D-XX 부분만 별도 노드로 분리하여 굵게 + 큰 폰트 사이즈.
+  // v3.6 외부 평가 #2.2 — 시험 카운트다운 폰트 강조 (학습 페이스 동기부여).
+  // 헌법 §31 (2026-05-18) — D−N → "시험까지 N일" 직설 표현.
   const goalSub: React.ReactNode =
     kpi.daysToExam != null ? (
       <span className="inline-flex items-baseline gap-1.5">
         <span className="font-extrabold text-[15px] tabular-nums tracking-[-0.02em] text-gold">
-          D−{kpi.daysToExam}
+          시험까지 {kpi.daysToExam}일
         </span>
         <span className="text-cream/70">· 2026학년도 1차</span>
       </span>
